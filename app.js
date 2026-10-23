@@ -2,6 +2,8 @@
   'use strict';
 
   var DATA_URL = 'data/closures.json';
+  var PROTECTED_AREAS_URL =
+  'data/protected_areas_alps.geojson';
   var LINE_LIMIT = 150;   // bis zu dieser Anzahl im Ausschnitt werden Linien gezeichnet, darüber nur Punkte
   var LIST_LIMIT = 100;   // maximale Länge der Liste
 
@@ -43,9 +45,24 @@
     maxZoom: 17, subdomains: 'abc',
     attribution: 'Kartendaten © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, SRTM | Darstellung © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
   });
-  L.control.layers({ 'OpenStreetMap': osm, 'Topo mit Höhenlinien': topo }, null, { position: 'topright', collapsed: true }).addTo(map);
-
+ 
   var layerGroup = L.layerGroup().addTo(map);
+  var protectedAreasLayer =
+    L.layerGroup().addTo(map);
+    L.control.layers(
+  {
+    'OpenStreetMap': osm,
+    'Topo mit Höhenlinien': topo
+  },
+  {
+    'Sperrungen & Hinweise': layerGroup,
+    'Schutzgebiete': protectedAreasLayer
+  },
+  {
+    position: 'topright',
+    collapsed: true
+  }
+).addTo(map);
   var wxMarker = null;
   var records = new Map();     // uuid -> Datensatz
   var layers = new Map();      // uuid -> L.featureGroup
@@ -317,7 +334,67 @@
       el.wx.innerHTML = '<span class="muted">Wetterdaten sind gerade nicht abrufbar.</span>';
     }
   }
+async function loadProtectedAreas() {
 
+  try {
+
+    const res =
+      await fetch(
+        PROTECTED_AREAS_URL
+      );
+
+    const geojson =
+      await res.json();
+
+    L.geoJSON(
+      geojson,
+      {
+        style: function () {
+
+          return {
+            color: "#2f8f2f",
+            weight: 2,
+            fillColor: "#5fb85f",
+            fillOpacity: 0.20
+          };
+        },
+
+        onEachFeature:
+          function (
+            feature,
+            layer
+          ) {
+
+            const p =
+              feature.properties || {};
+
+            layer.bindPopup(
+              "<b>" +
+              (p.name || "") +
+              "</b><br>" +
+              (p.summary || "")
+            );
+          }
+      }
+    ).addTo(
+      protectedAreasLayer
+    );
+
+    console.log(
+      "Schutzgebiete geladen:",
+      geojson.features.length
+    );
+
+  } catch (err) {
+
+    console.error(
+      "Fehler beim Laden der Schutzgebiete",
+      err
+    );
+
+  }
+
+}
   // ---------- Ereignisse ----------
   map.on('moveend', scheduleRender);
   map.on('click', function (ev) { loadWeather(ev.latlng.lat, ev.latlng.lng); });
@@ -333,5 +410,9 @@
 
   var c0 = map.getCenter();
   loadWeather(c0.lat, c0.lng);
-  loadData();
+
+loadProtectedAreas();
+
+loadData();
+
 })();
