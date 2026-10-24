@@ -18,6 +18,26 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 
 | Datei | Inhalt |
 | --- | --- |
-| `index.html`, `style.css`, `app.js` | die Seite |
+| `index.html`, `style.css` | die Seite |
+| `js/` | der Programmcode der Seite, siehe unten |
 | `scripts/fetch_closures.py` | Datenabruf aus der Digitize API |
 | `data/closures.json` | abgerufene Sperrungen und Hinweise |
+
+## Aufbau des Programmcodes (`js/`)
+
+Die Seite lädt `js/app.js` als ES-Modul (`<script type="module">`). Leaflet wird davor klassisch
+geladen und steht als globales `L` zur Verfügung.
+
+| Datei | Zuständig für |
+| --- | --- |
+| `js/app.js` | Einstieg: Ereignisse verbinden (Kartenbewegung, Klick, Suche, Filter, Wetterknöpfe) und das Laden starten (Wetter, Schutzgebiete, Sperrungen) |
+| `js/map.js` | Leaflet-Karte, Kachelebenen (OpenStreetMap, OpenTopoMap), Ebenengruppen, Ebenenauswahl, Warnhinweise sowie gemeinsame Hilfen (`el`, `esc`, `setStatus`) |
+| `js/closures.js` | Sperrungen und Hinweise: `data/closures.json` laden, filtern, auf der Karte und in der Liste darstellen, Popups, Sprung zu einem Eintrag |
+| `js/weather.js` | Wetterwidget mit Open-Meteo und Standortmarker |
+| `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene |
+
+Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` und
+`protected_areas.js` → `map.js`. `map.js` hängt von keiner anderen Datei ab.
+
+Hinweis: Wegen der Module muss die Seite über einen Webserver (zum Beispiel GitHub Pages) geöffnet
+werden, nicht per Doppelklick als lokale Datei. Das galt für Karte und Daten schon vorher.
