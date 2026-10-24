@@ -158,7 +158,9 @@ export function render() {
     var c = centroidOf(r);
     if (detailed && r.geometry) {
       try {
-        L.geoJSON(r.geometry, { style: { color: colorOf(cls), weight: 5, opacity: .85 } }).addTo(fg);
+        // Punktgeometrien nicht als Standard-Marker zeichnen (Leaflet würde marker-icon.png laden,
+        // die nicht mitgeliefert wird). Die Stelle markiert bereits der Pin am Mittelpunkt.
+        L.geoJSON(r.geometry, { style: { color: colorOf(cls), weight: 5, opacity: .85 }, pointToLayer: function () { return null; } }).addTo(fg);
       } catch (e) { /* ungültige Geometrie überspringen */ }
     }
     if (c) {
