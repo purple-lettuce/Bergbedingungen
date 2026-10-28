@@ -124,6 +124,8 @@ footer a { color: var(--accent); }
 .pa-legend .pa-toggle[aria-expanded="false"]::after { content: "▸"; }
 .pa-legend .pa-list { list-style: none; margin: 0; padding: 0 10px 8px; max-height: min(260px, 40vh); overflow-y: auto; }
 .pa-legend .pa-list li { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
-.pa-legend .pa-sw { flex: none; position: relative; width: 18px; height: 12px; border: 2px solid; border-radius: 2px; overflow: hidden; }
-.pa-legend .pa-sw i { position: absolute; inset: 0; }
+.pa-sw { flex: none; display: inline-block; vertical-align: -2px; margin-right: 4px; position: relative; width: 18px; height: 12px; border: 2px solid; border-radius: 2px; overflow: hidden; }
+.pa-sw i { position: absolute; inset: 0; }
+.pa-legend .pa-sw { margin-right: 0; vertical-align: baseline; }
 .pa-legend .pa-label { min-width: 0; overflow-wrap: anywhere; }
+.leaflet-control-layers .pa-count { color: var(--muted); }

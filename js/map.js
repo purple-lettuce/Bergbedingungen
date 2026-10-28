@@ -63,7 +63,7 @@ export var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
 // ---------- Ebenengruppen und Ebenenauswahl ----------
 export var layerGroup = L.layerGroup().addTo(map);
 export var protectedAreasLayer = L.layerGroup().addTo(map);
-L.control.layers(
+export var layersControl = L.control.layers(
   {
     'OpenStreetMap': osm,
     'Topo mit Höhenlinien': topo

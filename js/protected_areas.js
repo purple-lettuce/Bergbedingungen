@@ -2,6 +2,7 @@
 
 import { protectedAreasLayer, esc } from './map.js';
 import { addProtectedAreasLegend } from './protected_areas_legend.js';
+import { addCategoryFilter } from './protected_areas_filter.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
 const CATEGORY_NAMES = {
@@ -136,11 +137,16 @@ export async function loadProtectedAreas() {
     const res = await fetch(PROTECTED_AREAS_URL);
     const geojson = await res.json();
 
-    L.geoJSON(geojson, {
+    const layersByCategory = {};   // Kategorie-ID -> Flächen-Ebenen (für den Kategorienfilter)
+
+    const geoLayer = L.geoJSON(geojson, {
 style: function (feature) {
   return categoryStyle(feature.properties.category_id);
 },
 onEachFeature: function (feature, layer) {
+
+  const cat = feature.properties && feature.properties.category_id;
+  (layersByCategory[cat] = layersByCategory[cat] || []).push(layer);
 
   const p = feature.properties || {};
 
@@ -169,7 +175,9 @@ const categoryName =
 }
     }).addTo(protectedAreasLayer);
 
-    addProtectedAreasLegend(legendEntries(geojson));
+    const entries = legendEntries(geojson);
+    addProtectedAreasLegend(entries);
+    addCategoryFilter(geoLayer, layersByCategory, entries);
 
     console.log("Schutzgebiete geladen:", geojson.features.length);
   } catch (err) {
