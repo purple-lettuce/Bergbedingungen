@@ -4,17 +4,70 @@ ALPINE RISK INTELLIGENCE
 
 Know before you go.
 
-Mountain Radar ist der öffentliche Produktname des Projekts.
+Mountain Radar ist der öffentliche Produktname des Projekts. Der interne Repository-Name lautet derzeit weiterhin "Bergbedingungen".
 
-Der interne Repository-Name lautet derzeit weiterhin "Bergbedingungen".
+## Projektvision
 
-## Bergbedingungen
+Mountain Radar soll Bergsportlern eine klare, verständliche Lagebild-Übersicht für den Alpenraum liefern: Wetter, Schutzgebiete, Sperrungen, Risiken und relevante Hinweise an einem Ort.
 
-Kartenseite mit Sperrungen und Hinweisen im Gebirge, dazu ein Wetterwidget.
+Die Vision ist ein digitaler Tourenassistent, der vor einer Tour sofort beantwortet:
 
-- **Karte:** OpenStreetMap und OpenTopoMap, dargestellt mit Leaflet (liegt unter `vendor/leaflet`).
-- **Sperrungen und Hinweise:** Daten von [Digitize the Planet e.V.](https://platform.digitizetheplanet.org/en/api/docs/) (Lizenz CC0).
-- **Wetter:** [Open-Meteo](https://open-meteo.com/), ohne Schlüssel.
+> "Wenn ich diese Tour morgen gehe, worauf muss ich achten?"
+
+Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Karten oder Informationsquellen manuell zusammenführen müssen. Die Plattform soll dabei besonders für alpine Touren, Wanderungen und Bergaktivitäten im Alltag und im Vorfeld einer Tour relevant sein.
+
+## Features
+
+- Karte mit relevanten Inhalten für alpine Regionen
+- Anzeige von Sperrungen und Hinweisen aus aktuellen Daten
+- Wetterinformationen mit lokaler Lage- und Umfeldsicht
+- Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen
+- Layer-basierte Darstellung für schnellere Orientierung auf der Karte
+- Zukunftsfähige Erweiterung um Lawinenlage, Risiken und Tourenanalysen
+
+## Screenshots
+
+Derzeit noch kein Final-Design. Der Platz für Screenshots ist hier reserviert:
+
+```text
+[ Screenshot 1: Kartenansicht mit Sperrungen und Wetter ]
+[ Screenshot 2: Schutzgebiete mit Popup-Informationen ]
+[ Screenshot 3: Filter- und Lageansicht auf der Karte ]
+```
+
+## Roadmap-Verweis
+
+Die langfristige Produkt- und Entwicklungsplanung findet sich in [docs/ROADMAP.md](docs/ROADMAP.md).
+
+Dort werden Vision, Priorisierung, Phasen und geplante Erweiterungen beschrieben, etwa:
+
+- Schutzgebiete und Kartenlayer
+- Alpine Risiken
+- Lawinenlage
+- Unfall- und Sicherheitsdaten
+- Tourenanalyse, Routing und KI-gestützte Hilfen
+
+## Dokumentationsübersicht
+
+Die Dokumentation des Projekts liegt im Ordner [docs/](docs/):
+
+- [docs/ROADMAP.md](docs/ROADMAP.md) — Produktvision, Phasen, Prioritäten und langfristige Planung
+- [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) — Überblick über Datenquellen, APIs und Integrationen
+- [docs/IDEENSAMMLUNG.md](docs/IDEENSAMMLUNG.md) — Ideen, Konzepte und mögliche Erweiterungen
+- [docs/RECHERCHE_LAWINEN.md](docs/RECHERCHE_LAWINEN.md) — Recherche zu Lawinen- und Risikodaten
+- [docs/STYLEGUIDE.md](docs/STYLEGUIDE.md) — visuelle und inhaltliche Richtlinien
+- [docs/WORKFLOW.md](docs/WORKFLOW.md) — Arbeitsabläufe und Projektprozesse
+
+## Produktüberblick
+
+Mountain Radar kombiniert eine interaktive Kartenoberfläche mit relevanten Berg- und Sicherheitsinformationen. Die Anwendung nutzt OpenStreetMap-, OpenTopoMap- und Leaflet-Technologien und verarbeitet strukturierte Geodaten für die Karte.
+
+### Kernbereiche
+
+- **Karte:** OpenStreetMap und OpenTopoMap, dargestellt mit Leaflet (im Ordner `vendor/leaflet`)
+- **Sperrungen und Hinweise:** Daten von [Digitize the Planet e.V.](https://platform.digitizetheplanet.org/en/api/docs/) (Lizenz CC0)
+- **Wetter:** [Open-Meteo](https://open-meteo.com/), ohne Schlüssel
+- **Schutzgebiete:** regionale Informationen aus GeoJSON- und API-Daten mit Wildlife- und Regeltexten
 
 ## So kommen die Daten auf die Seite
 
@@ -24,16 +77,16 @@ und speichert sie in `data/closures.json`. Die Seite liest nur diese Datei.
 
 Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **Run workflow**.
 
-## Dateien
+## Projektstruktur
 
-| Datei | Inhalt |
+| Datei / Ordner | Inhalt |
 | --- | --- |
-| `index.html`, `style.css` | die Seite |
-| `js/` | der Programmcode der Seite, siehe unten |
-| `scripts/fetch_closures.py` | Datenabruf aus der Digitize API |
-| `data/closures.json` | abgerufene Sperrungen und Hinweise |
-| `scripts/fetch_protected_areas.py`, `scripts/fetch_protected_area_details_v2.py`, `scripts/fetch_wildlife.py`, `scripts/build_geojson.py` | Schutzgebiets-Pipeline, siehe unten |
-| `data/protected_areas_alps.geojson` | Schutzgebiete für die Karte (kompakt, inklusive Wildlife und Regeln) |
+| `index.html`, `style.css` | Einstieg und Styling der Oberfläche |
+| `js/` | Frontend-Programmcode der Map-Anwendung |
+| `scripts/fetch_closures.py` | Abruf von Sperrungen und Hinweisen |
+| `data/closures.json` | aktuelle Sperrungen und Hinweise |
+| `scripts/fetch_protected_areas.py`, `scripts/fetch_protected_area_details_v2.py`, `scripts/fetch_wildlife.py`, `scripts/build_geojson.py` | Schutzgebiets-Pipeline |
+| `data/protected_areas_alps.geojson` | kompaktes GeoJSON für Schutzgebiete auf der Karte |
 | `data/wildlife.json` | Wildlife-Referenzliste der Digitize API (IDs → Namen) |
 
 ## Aufbau des Programmcodes (`js/`)
@@ -77,7 +130,7 @@ Skripts die nicht aufgelösten Beispiele. Dann das Feld mit `--wildlife-key <Fel
 
 **Regeln** werden mit dem ausgeschriebenen Text der API übernommen (`text_de`, sonst `text`, sonst
 `text_en`), wichtige Regeln (`is_important`) zuerst, ohne Doppelte, höchstens 8 je Gebiet,
-saisonale Regeln mit Zeitraum (z. B. „01.12.–30.04."). Regeln ohne Text werden ausgelassen, weil sich
+saisonale Regeln mit Zeitraum (z. B. „01.12.–30.04.\"). Regeln ohne Text werden ausgelassen, weil sich
 aus Aktivität und Bedingungen allein nicht sicher ableiten lässt, ob etwas erlaubt oder verboten ist.
 
 **Kompakte Datei:** Namen und Regeltexte stehen einmal in Tabellen am Ende der GeoJSON-Datei
@@ -89,3 +142,11 @@ zeigt die Einträge maskiert im Popup an; bei Gebieten ohne Angaben bleibt das P
 (`.github/workflows/update-protected-areas.yml`, dauert länger, weil jedes Gebiet einzeln abgefragt
 wird). Das Ergebnis wird als Commit gespeichert. Lokal: die Skripte in der oben stehenden
 Reihenfolge ausführen. Tests des Bauskripts: `python3 scripts/test_build_geojson.py`.
+
+## Status
+
+Das Projekt befindet sich in einer Übergangsphase vor einem möglichen Rebranding und einer weiteren Produktreife. Die Kernfunktionalitäten sind bereits in der Kartenanwendung sichtbar, während die langfristige Ausrichtung in der Roadmap und Dokumentation beschrieben wird.
+
+## Lizenz und Hinweise
+
+Die Anwendung und die enthaltenen Projektdateien werden gemäß den jeweiligen Datenquellen und Repository-Regeln gepflegt. Für externe Datenquellen gelten die jeweiligen Lizenz- und Nutzungsbedingungen, insbesondere bei Digitize the Planet sowie Open-Meteo.

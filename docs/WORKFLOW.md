@@ -75,7 +75,22 @@ Falls ja:
 
 ---
 
-## 5. Pull Request Abschlusskontrolle
+## 5. Dokumente mit Repository synchron halten
+
+Jede Änderung an:
+
+- `ROADMAP.md`
+- `DATENQUELLEN.md`
+- `STYLEGUIDE.md`
+- `README.md`
+
+soll möglichst zeitnah in das Repository übertragen werden.
+
+Die Dokumentation dient als gemeinsame Wissensbasis für Entwickler und Agenten. Änderungen an diesen Dateien sind daher kein Nebenprodukt, sondern ein integraler Teil der Projektpflege und sollten konsequent mit dem Code bzw. den Ergebnissen zusammen committed werden.
+
+---
+
+## 6. Pull Request Abschlusskontrolle
 
 Vor dem Merge prüfen:
 
