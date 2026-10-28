@@ -3,7 +3,7 @@
 import { protectedAreasLayer, esc } from './map.js';
 import { addProtectedAreasLegend } from './protected_areas_legend.js';
 import { addCategoryFilter } from './protected_areas_filter.js';
-import { wildlifeIcon } from './popup_icons.js';
+import { wildlifeIcon, ruleInfo, splitSeason } from './popup_icons.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
 const CATEGORY_NAMES = {
@@ -30,11 +30,18 @@ const CATEGORY_NAMES = {
 };
 const WILDLIFE_SHOWN = 12;   // so viele Tiere im Popup, der Rest als "und n weitere"
 
-// Überschrift mit Aufzählung für das Popup. Texte stammen aus der Datenquelle und werden maskiert.
-function popupList(title, entries) {
-  return "<p style=\"margin:6px 0 2px\"><b>" + title + ":</b></p>" +
-    "<ul style=\"margin:0 0 4px;padding-left:18px\">" +
-    entries.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") +
+// Regeln als Liste mit Themensymbol und farbigem Rand (Verbot, eingeschränkt, erlaubt). Der Regeltext bleibt
+// unverändert; ein Zeitraum am Ende steht in einer eigenen Zeile. Texte stammen aus der Datenquelle und werden maskiert.
+function rulesHtml(rules) {
+  return "<p style=\"margin:6px 0 4px\"><b>Regeln:</b></p>" +
+    "<ul class=\"pa-rules\">" +
+    rules.map(function (t) {
+      const info = ruleInfo(t);
+      const parts = splitSeason(t);
+      return "<li class=\"pa-rule " + info.kind + "\"><span class=\"pa-ico\" aria-hidden=\"true\">" + info.icon + "</span>" +
+        "<span class=\"pa-rule-text\">" + esc(parts.main) +
+        (parts.season ? " <span class=\"pa-season\">" + esc(parts.season) + "</span>" : "") + "</span></li>";
+    }).join("") +
     "</ul>";
 }
 
@@ -64,7 +71,7 @@ function extraPopupHtml(p, geojson) {
   const rules = (p.r || [])
     .map(function (i) { return (geojson.rule_texts || [])[i]; })
     .filter(Boolean);
-  if (rules.length) html += popupList("Regeln", rules);
+  if (rules.length) html += rulesHtml(rules);
 
   return html;
 }
