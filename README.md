@@ -87,7 +87,8 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/closures.json` | aktuelle Sperrungen und Hinweise |
 | `scripts/fetch_protected_areas.py`, `scripts/fetch_protected_area_details_v2.py`, `scripts/fetch_wildlife.py`, `scripts/build_geojson.py` | Schutzgebiets-Pipeline |
 | `data/protected_areas_alps.geojson` | kompaktes GeoJSON für Schutzgebiete auf der Karte |
-| `data/wildlife.json` | Wildlife-Referenzliste der Digitize API (IDs → Namen) |
+| `data/wildlife_entities.json` | aufgelöste Namen der Schutzgüter (Kennung → Name), nur aus der Digitize API |
+| `data/wildlife_probe.json` | Diagnosebericht der Wildlife-Auflösung (was die API geliefert hat, was fehlt) |
 
 ## Aufbau des Programmcodes (`js/`)
 
@@ -117,16 +118,19 @@ Die Popups der Schutzgebiete zeigen Kategorie, Beschreibung, **Wildlife** und **
 fetch_protected_areas.py            Liste aller Schutzgebiete -> data/protected_areas.json
 fetch_protected_area_details_v2.py  Details je Gebiet (fields=all, mit "wildlife" und "rules")
                                     -> data/protected_areas_alps.json (nicht im Repo, groß)
-fetch_wildlife.py                   Wildlife-Referenzliste (GET /wildlife) -> data/wildlife.json
+fetch_wildlife.py                   Wildlife-Namen aus der API -> data/wildlife_entities.json, data/wildlife_probe.json
 build_geojson.py                    alles zusammenführen -> data/protected_areas_alps.geojson
 ```
 
-**Woher kommen die Tiernamen?** Ein Schutzgebiet enthält bei `wildlife` nur Verweise (IDs), keine
-Namen. Die lesbaren Namen stehen in der Referenzliste `GET /api/v2/wildlife`. `build_geojson.py` löst
-die Verweise damit auf. Die `id` des Eintrags selbst wird dabei nie verwendet, weil sie bei einer
-Verknüpfung nicht die Tierart bezeichnen muss und sonst falsche Tiernamen entstehen könnten.
-Steht der Verweis in einem Feld, das die automatische Erkennung nicht findet, nennt das Protokoll des
-Skripts die nicht aufgelösten Beispiele. Dann das Feld mit `--wildlife-key <Feld>` angeben.
+**Woher kommen die Tiernamen?** Ein Schutzgebiet verweist bei `wildlife` nur auf Verknüpfungseinträge
+(`id`, `protected_area_uuid`, `protected_entity_id`), auch `GET /api/v2/wildlife` liefert in der
+Grundeinstellung nur diese Verknüpfungen, keine Namen. `fetch_wildlife.py` sucht die Namen deshalb
+ausschließlich in offiziellen DTP-Quellen: `GET /wildlife?fields=all`, danach Endpunkte für Schutzgüter,
+die das offizielle OpenAPI-Schema (`/schema/`) deklariert, danach `GET /protected-areas/{uuid}/wildlife`.
+`build_geojson.py` löst `protected_entity_id` damit auf. Es gibt keine eigenen Zuordnungstabellen, und
+was die API nicht liefert, wird nicht angezeigt (das Wildlife-Feld im Popup bleibt dann weg). Ob und wie
+weit die Auflösung gelingt, steht im Protokoll des Workflows und in `data/wildlife_probe.json`.
+Ausführliche Analyse, offene Punkte und Lösungswege: [docs/WILDLIFE_ANALYSE.md](docs/WILDLIFE_ANALYSE.md).
 
 **Regeln** werden mit dem ausgeschriebenen Text der API übernommen (`text_de`, sonst `text`, sonst
 `text_en`), wichtige Regeln (`is_important`) zuerst, ohne Doppelte, höchstens 8 je Gebiet,
@@ -141,7 +145,7 @@ zeigt die Einträge maskiert im Popup an; bei Gebieten ohne Angaben bleibt das P
 **Daten erzeugen:** Reiter **Actions** → **Schutzgebiete aktualisieren** → **Run workflow**
 (`.github/workflows/update-protected-areas.yml`, dauert länger, weil jedes Gebiet einzeln abgefragt
 wird). Das Ergebnis wird als Commit gespeichert. Lokal: die Skripte in der oben stehenden
-Reihenfolge ausführen. Tests des Bauskripts: `python3 scripts/test_build_geojson.py`.
+Reihenfolge ausführen. Tests: `python3 scripts/test_build_geojson.py` und `python3 scripts/test_fetch_wildlife.py`.
 
 ## Status
 

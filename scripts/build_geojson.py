@@ -3,8 +3,9 @@
 Neben Geometrie, Name, Kategorie und Beschreibung werden lesbare Informationen zu
 Wildlife und Regeln übernommen (nur das, was das Frontend im Popup anzeigt):
 
-- Wildlife: Die Schutzgebiete verweisen nur per ID auf Wildlife-Einträge. Die Namen
-  werden über data/wildlife.json (scripts/fetch_wildlife.py) aufgelöst.
+- Wildlife: Die Schutzgebiete verweisen nur per ID auf Verknüpfungseinträge (mit protected_entity_id).
+  Die Namen werden über data/wildlife_entities.json aufgelöst (scripts/fetch_wildlife.py, nur Daten aus der
+  Digitize API). Was dort nicht steht, wird nicht angezeigt; es gibt keine eigenen Zuordnungstabellen.
 - Regeln: Es wird der ausgeschriebene Regeltext der API übernommen (text_de, sonst
   text, sonst text_en). Regeln ohne Text werden bewusst weggelassen: Aus Aktivität
   und Bedingungen allein lässt sich nicht sicher ableiten, ob etwas erlaubt oder
@@ -26,6 +27,9 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(__file__))
+from wildlife_lookup import entity_pairs  # noqa: E402
+
 DATA_DIR = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -33,14 +37,14 @@ DATA_DIR = os.path.join(
 )
 
 INPUT_FILE = os.path.join(DATA_DIR, "protected_areas_alps.json")
-WILDLIFE_FILE = os.path.join(DATA_DIR, "wildlife.json")
+WILDLIFE_FILE = os.path.join(DATA_DIR, "wildlife_entities.json")
 OUTPUT_FILE = os.path.join(DATA_DIR, "protected_areas_alps.geojson")
 
 NAME_KEYS = ("name_de", "name", "name_en")
 TEXT_KEYS = ("text_de", "text", "text_en")
 
 # Felder, in denen ein Verweis auf die Wildlife-Referenzliste stehen kann (in dieser Reihenfolge).
-REF_KEYS = ("wildlife_id", "wildlife", "wildlife_species_id", "species_id", "species")
+REF_KEYS = ("protected_entity_id", "wildlife_id", "wildlife", "wildlife_species_id", "species_id", "species")
 # Felder mit "_id", die sicher etwas anderes bezeichnen.
 NOT_REF_KEYS = {"protected_area_id", "area_id", "parent_id", "category_id", "organization_id",
                 "source_id", "activity_id", "state_id", "country_id"}
@@ -71,18 +75,16 @@ def as_key(v):
 
 
 def load_wildlife_lookup(path):
-    """id -> lesbarer Name aus data/wildlife.json."""
+    """Kennung des Schutzguts -> lesbarer Name aus data/wildlife_entities.json."""
     if not os.path.exists(path):
         return {}
     with open(path, encoding="utf-8") as f:
         doc = json.load(f)
-    rows = doc.get("results", doc) if isinstance(doc, dict) else doc
     lookup = {}
-    for row in rows:
-        key = as_key(row.get("id")) if isinstance(row, dict) else None
-        name = pick_text(row, NAME_KEYS)
-        if key is not None and name:
-            lookup[key] = name
+    for key, name in (doc.get("entities") or {}).items():
+        ident = as_key(key)
+        if ident is not None and isinstance(name, str) and name.strip():
+            lookup[ident] = name.strip()
     return lookup
 
 
@@ -102,7 +104,11 @@ def resolve_wildlife(item, lookup, forced_key=None):
     if name:
         return name, "name"
 
-    # 2. Verweis auf die Referenzliste
+    # 2. Verschachteltes Wildlife-/Schutzgut-Objekt mit Namen
+    for _, nested_name in entity_pairs(item):
+        return nested_name, "verschachtelt"
+
+    # 3. Verweis auf die Referenzliste
     keys = [forced_key] if forced_key else list(REF_KEYS) + sorted(
         k for k in item
         if (k.endswith("_id") or k.endswith("_uuid")) and k not in REF_KEYS and k not in NOT_REF_KEYS and k != "id"
@@ -229,8 +235,8 @@ def main():
 
     lookup = load_wildlife_lookup(WILDLIFE_FILE)
     if not lookup:
-        print("Hinweis: data/wildlife.json fehlt oder ist leer (scripts/fetch_wildlife.py ausführen). "
-              "Wildlife wird nur übernommen, wenn der Name direkt im Eintrag steht.")
+        print("Hinweis: data/wildlife_entities.json fehlt oder ist leer (scripts/fetch_wildlife.py ausführen, "
+              "siehe docs/WILDLIFE_ANALYSE.md). Wildlife wird nur übernommen, wenn der Name direkt im Eintrag steht.")
 
     geojson, st = build(areas, lookup, args.wildlife_key)
 

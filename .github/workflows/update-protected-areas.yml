@@ -1,7 +1,8 @@
 name: Schutzgebiete aktualisieren
 
 # Nur manuell startbar (Reiter "Actions" -> "Schutzgebiete aktualisieren" -> "Run workflow").
-# Holt die Wildlife-Referenzliste und die Details aller Schutzgebiete aus der Digitize API
+# Löst die Wildlife-Verweise zu Tiernamen auf (nur Daten aus der Digitize API, siehe docs/WILDLIFE_ANALYSE.md),
+# holt die Details aller Schutzgebiete aus der Digitize API
 # und baut data/protected_areas_alps.geojson neu (inklusive Wildlife und Regeln für die Popups).
 # Der Lauf dauert, weil jedes Schutzgebiet einzeln abgefragt wird.
 
@@ -27,8 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Wildlife-Referenzliste abrufen
-        run: python3 scripts/fetch_wildlife.py
+      - name: Wildlife-Namen auflösen
+        run: |
+          python3 scripts/fetch_wildlife.py | tee wildlife.log
+          { echo '### Wildlife-Auflösung'; echo '```'; cat wildlife.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Details der Schutzgebiete abrufen
         run: python3 scripts/fetch_protected_area_details_v2.py
@@ -52,7 +55,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/wildlife.json data/protected_areas_alps.geojson
+          git add data/wildlife_entities.json data/wildlife_probe.json data/protected_areas_alps.geojson
           git commit -m "Schutzgebiete mit Wildlife und Regeln aktualisiert"
           git pull --rebase
           git push

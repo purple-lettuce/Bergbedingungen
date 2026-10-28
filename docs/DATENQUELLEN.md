@@ -126,8 +126,8 @@ Run workflow
 
 ### Wildlife
 
-- Tierarten
-- Schutzgüter
+- Verknüpfungen Schutzgebiet → Schutzgut (`protected_entity_id`) über `/wildlife` und `/protected-areas/{uuid}/wildlife`
+- Namen der Schutzgüter: Quelle noch zu bestätigen, Details und Lösungswege in [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md)
 
 ### Regeln
 
@@ -143,7 +143,11 @@ data/protected_areas_alps.geojson
 ```
 
 ```text
-data/wildlife.json
+data/wildlife_entities.json
+```
+
+```text
+data/wildlife_probe.json
 ```
 
 ---

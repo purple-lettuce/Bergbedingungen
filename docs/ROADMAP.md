@@ -130,6 +130,7 @@ Fortschritt: ca. 90 %
 - [x] Wildlife im Popup
 - [x] Regeln im Popup
 - [x] Wildlife-Datenpipeline
+- [ ] Tiernamen im Popup: Auflösung von `protected_entity_id` in Arbeit, Stand und Lösungswege in [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md)
 - [x] GitHub Workflow zur Aktualisierung
 - [x] Automatische GeoJSON-Erzeugung
 
