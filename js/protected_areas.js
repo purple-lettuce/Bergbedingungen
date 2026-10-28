@@ -1,6 +1,6 @@
 // Schutzgebiete (Naturschutzgebiete, Naturparks, Schongebiete ...) als GeoJSON-Ebene.
 
-import { protectedAreasLayer } from './map.js';
+import { protectedAreasLayer, esc } from './map.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
 const CATEGORY_NAMES = {
@@ -25,6 +25,40 @@ const CATEGORY_NAMES = {
 
   55: "Ruhegebiet"
 };
+const WILDLIFE_SHOWN = 12;   // so viele Tiere im Popup, der Rest als "und n weitere"
+
+// Überschrift mit Aufzählung für das Popup. Texte stammen aus der Datenquelle und werden maskiert.
+function popupList(title, entries) {
+  return "<p style=\"margin:6px 0 2px\"><b>" + title + ":</b></p>" +
+    "<ul style=\"margin:0 0 4px;padding-left:18px\">" +
+    entries.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") +
+    "</ul>";
+}
+
+// Wildlife und Regeln aus den Index-Tabellen der GeoJSON-Datei (siehe scripts/build_geojson.py).
+// Ältere Dateien ohne diese Felder liefern einen leeren Text, das Popup bleibt dann wie bisher.
+function extraPopupHtml(p, geojson) {
+  let html = "";
+
+  const animals = (p.w || [])
+    .map(function (i) { return (geojson.wildlife_names || [])[i]; })
+    .filter(Boolean);
+  if (animals.length) {
+    const shown = animals.slice(0, WILDLIFE_SHOWN);
+    if (animals.length > shown.length) {
+      shown.push("und " + (animals.length - shown.length) + " weitere");
+    }
+    html += popupList("Wildlife", shown);
+  }
+
+  const rules = (p.r || [])
+    .map(function (i) { return (geojson.rule_texts || [])[i]; })
+    .filter(Boolean);
+  if (rules.length) html += popupList("Regeln", rules);
+
+  return html;
+}
+
 export async function loadProtectedAreas() {
   try {
     const res = await fetch(PROTECTED_AREAS_URL);
@@ -97,6 +131,8 @@ const categoryName =
     p.category_id
   ] || "Schutzgebiet";
 
+  const extra = extraPopupHtml(p, geojson);
+
   layer.bindPopup(
     "<h3>" + (p.name || "") + "</h3>" +
     "<p><b>Kategorie:</b> " +
@@ -106,7 +142,10 @@ const categoryName =
       p.summary
         ? "<p>" + p.summary + "</p>"
         : ""
-    )
+    ) +
+    extra,
+    // lange Listen im Popup scrollen lassen; ohne Zusatzinfos bleibt das Popup unverändert
+    extra ? { maxHeight: 340 } : undefined
   );
 
 }
