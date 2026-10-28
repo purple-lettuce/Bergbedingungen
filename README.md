@@ -38,6 +38,7 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/closures.js` | Sperrungen und Hinweise: `data/closures.json` laden, filtern, auf der Karte und in der Liste darstellen, Popups, Sprung zu einem Eintrag |
 | `js/weather.js` | Wetterwidget mit Open-Meteo und Standortmarker |
 | `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene |
+| `js/protected_areas_legend.js` | Legende der Schutzgebiete (Kartenelement unten links): Farben der Kategorien, die in den Daten vorkommen; folgt der Ebene „Schutzgebiete“ |
 
 Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` und
 `protected_areas.js` → `map.js`. `map.js` hängt von keiner anderen Datei ab.

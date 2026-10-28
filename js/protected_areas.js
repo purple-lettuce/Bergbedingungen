@@ -1,6 +1,7 @@
 // Schutzgebiete (Naturschutzgebiete, Naturparks, Schongebiete ...) als GeoJSON-Ebene.
 
 import { protectedAreasLayer, esc } from './map.js';
+import { addProtectedAreasLegend } from './protected_areas_legend.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
 const CATEGORY_NAMES = {
@@ -59,16 +60,8 @@ function extraPopupHtml(p, geojson) {
   return html;
 }
 
-export async function loadProtectedAreas() {
-  try {
-    const res = await fetch(PROTECTED_AREAS_URL);
-    const geojson = await res.json();
-
-    L.geoJSON(geojson, {
-style: function (feature) {
-
-  const category =
-    feature.properties.category_id;
+// Farben der Kategorien (Karte und Legende nutzen dieselbe Funktion).
+function categoryStyle(category) {
 
   if (category === 1) {
     return {
@@ -121,6 +114,31 @@ style: function (feature) {
     fillColor: "#5fb85f",
     fillOpacity: 0.20
   };
+}
+
+// Legendeneinträge aus den geladenen Daten: nur Kategorien, die tatsächlich vorkommen.
+function legendEntries(geojson) {
+  const counts = {};
+  geojson.features.forEach(function (f) {
+    const id = f.properties && f.properties.category_id;
+    counts[id] = (counts[id] || 0) + 1;
+  });
+  return Object.keys(counts)
+    .map(Number)
+    .sort(function (a, b) { return a - b; })
+    .map(function (id) {
+      return { id: id, label: CATEGORY_NAMES[id] || "Schutzgebiet", count: counts[id], style: categoryStyle(id) };
+    });
+}
+
+export async function loadProtectedAreas() {
+  try {
+    const res = await fetch(PROTECTED_AREAS_URL);
+    const geojson = await res.json();
+
+    L.geoJSON(geojson, {
+style: function (feature) {
+  return categoryStyle(feature.properties.category_id);
 },
 onEachFeature: function (feature, layer) {
 
@@ -150,6 +168,8 @@ const categoryName =
 
 }
     }).addTo(protectedAreasLayer);
+
+    addProtectedAreasLegend(legendEntries(geojson));
 
     console.log("Schutzgebiete geladen:", geojson.features.length);
   } catch (err) {
