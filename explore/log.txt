@@ -1,0 +1,54 @@
+fertig, 59 Abfragen
+200 application/json 1989 https://platform.digitizetheplanet.org/api/v2/
+200 application/json 1989 https://platform.digitizetheplanet.org/api/v2
+200 application/json 372039 https://platform.digitizetheplanet.org/api/v2/schema/
+200 application/json 372039 https://platform.digitizetheplanet.org/api/v2/schema
+404 application/json 126 https://platform.digitizetheplanet.org/api/v2/openapi.json
+404 application/json 126 https://platform.digitizetheplanet.org/api/v2/openapi.yaml
+404 application/json 126 https://platform.digitizetheplanet.org/api/v2/swagger.json
+404 application/json 118 https://platform.digitizetheplanet.org/api/v2/docs/
+404 text/html; charset=utf-8 12244 https://platform.digitizetheplanet.org/api/schema/
+200 application/json 372039 https://platform.digitizetheplanet.org/api/v2/schema/?format=json
+404 text/html; charset=utf-8 12289 https://platform.digitizetheplanet.org/api/openapi.json
+404 text/html; charset=utf-8 12289 https://platform.digitizetheplanet.org/api/swagger.json
+404 text/html; charset=utf-8 12253 https://platform.digitizetheplanet.org/openapi.json
+404 application/json 121 https://platform.digitizetheplanet.org/api/v2/openapi/
+200 text/html; charset=utf-8 14873 https://platform.digitizetheplanet.org/en/api/docs/v2/
+200 text/html; charset=utf-8 17164 https://platform.digitizetheplanet.org/api/docs/
+404 text/html; charset=utf-8 12181 https://platform.digitizetheplanet.org/api/
+200 application/json 9313 https://platform.digitizetheplanet.org/api/v2/wildlife
+400 application/json 277 https://platform.digitizetheplanet.org/api/v2/wildlife?page_size=3
+400 application/json 273 https://platform.digitizetheplanet.org/api/v2/wildlife?limit=3
+400 application/json 274 https://platform.digitizetheplanet.org/api/v2/wildlife?fields=all
+200 application/json 1218 https://platform.digitizetheplanet.org/api/v2/wildlife/14
+400 application/json 158 https://platform.digitizetheplanet.org/api/v2/wildlife/14?fields=all
+200 application/json 7693 https://platform.digitizetheplanet.org/api/v2/protected-entities
+200 application/json 750 https://platform.digitizetheplanet.org/api/v2/protected-entities/4626
+404 application/json 130 https://platform.digitizetheplanet.org/api/v2/protected-entity
+404 application/json 132 https://platform.digitizetheplanet.org/api/v2/protected_entities
+404 application/json 136 https://platform.digitizetheplanet.org/api/v2/protected-entity-types
+404 application/json 122 https://platform.digitizetheplanet.org/api/v2/entities
+404 application/json 127 https://platform.digitizetheplanet.org/api/v2/entities/4626
+404 application/json 121 https://platform.digitizetheplanet.org/api/v2/species
+404 application/json 130 https://platform.digitizetheplanet.org/api/v2/wildlife-species
+404 application/json 128 https://platform.digitizetheplanet.org/api/v2/wildlife-types
+404 application/json 133 https://platform.digitizetheplanet.org/api/v2/wildlife-categories
+404 application/json 118 https://platform.digitizetheplanet.org/api/v2/taxa
+404 application/json 120 https://platform.digitizetheplanet.org/api/v2/taxons
+404 application/json 121 https://platform.digitizetheplanet.org/api/v2/animals
+404 application/json 137 https://platform.digitizetheplanet.org/api/v2/protected-area-wildlife
+404 application/json 137 https://platform.digitizetheplanet.org/api/v2/protected-area-entities
+404 application/json 132 https://platform.digitizetheplanet.org/api/v2/protection-objects
+404 application/json 137 https://platform.digitizetheplanet.org/api/v2/conservation-objectives
+404 application/json 134 https://platform.digitizetheplanet.org/api/v2/conservation-targets
+404 application/json 131 https://platform.digitizetheplanet.org/api/v2/protected-objects
+404 application/json 124 https://platform.digitizetheplanet.org/api/v2/categories
+400 application/json 176 https://platform.digitizetheplanet.org/api/v2/activities?limit=2
+200 application/json 27752 https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828?fields=all
+200 application/json 1169 https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828/wildlife
+400 application/json 158 https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828/wildlife?fields=all
+400 application/json 157 https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828/rules?limit=3
+200 application/json 4807 https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828
+200 application/json 1182 https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828?fields=wildlife
+400 application/json 848 https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828?fields=wildlife,conservation_objectives
+200  None OPTIONS /wildlife

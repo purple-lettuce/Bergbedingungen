@@ -1,0 +1,3067 @@
+{
+ "https://platform.digitizetheplanet.org/api/v2/": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 1989,
+  "body": "{\"protected-areas\":\"https://platform.digitizetheplanet.org/api/v2/protected-areas\",\"protected-area-categories\":\"https://platform.digitizetheplanet.org/api/v2/protected-area-categories\",\"geometry-sources\":\"https://platform.digitizetheplanet.org/api/v2/geometry-sources\",\"licenses\":\"https://platform.digitizetheplanet.org/api/v2/licenses\",\"protected-area-rules\":\"https://platform.digitizetheplanet.org/api/v2/protected-area-rules\",\"reason-categories\":\"https://platform.digitizetheplanet.org/api/v2/reason-categories\",\"reasons\":\"https://platform.digitizetheplanet.org/api/v2/reasons\",\"closures-and-notices-sources\":\"https://platform.digitizetheplanet.org/api/v2/closures-and-notices-sources\",\"closures-and-notices\":\"https://platform.digitizetheplanet.org/api/v2/closures-and-notices\",\"legal-documents\":\"https://platform.digitizetheplanet.org/api/v2/legal-documents\",\"pictures\":\"https://platform.digitizetheplanet.org/api/v2/pictures\",\"wildlife\":\"https://platform.digitizetheplanet.org/api/v2/wildlife\",\"protected-entities\":\"https://platform.digitizetheplanet.org/api/v2/protected-entities\",\"activities\":\"https://platform.digitizetheplanet.org/api/v2/activities\",\"activity-categories\":\"https://platform.digitizetheplanet.org/api/v2/activity-categories\",\"activity-permissions\":\"https://platform.digitizetheplanet.org/api/v2/activity-permissions\",\"activity-places\":\"https://platform.digitizetheplanet.org/api/v2/activity-places\",\"weather-conditions\":\"https://platform.digitizetheplanet.org/api/v2/weather-conditions\",\"seasons\":\"https://platform.digitizetheplanet.org/api/v2/seasons\",\"daytimes\":\"https://platform.digitizetheplanet.org/api/v2/daytimes\",\"countries\":\"https://platform.digitizetheplanet.org/api/v2/countries\",\"states\":\"https://platform.digitizetheplanet.org/api/v2/states\",\"districts\":\"https://platform.digitizetheplanet.org/api/v2/districts\",\"organizations\":\"https://platform.digitizetheplanet.org/api/v2/organizations\",\"icons\":\"https://platform.digitizetheplanet.org/api/v2/icons\"}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 1989,
+  "body": "{\"protected-areas\":\"https://platform.digitizetheplanet.org/api/v2/protected-areas\",\"protected-area-categories\":\"https://platform.digitizetheplanet.org/api/v2/protected-area-categories\",\"geometry-sources\":\"https://platform.digitizetheplanet.org/api/v2/geometry-sources\",\"licenses\":\"https://platform.digitizetheplanet.org/api/v2/licenses\",\"protected-area-rules\":\"https://platform.digitizetheplanet.org/api/v2/protected-area-rules\",\"reason-categories\":\"https://platform.digitizetheplanet.org/api/v2/reason-categories\",\"reasons\":\"https://platform.digitizetheplanet.org/api/v2/reasons\",\"closures-and-notices-sources\":\"https://platform.digitizetheplanet.org/api/v2/closures-and-notices-sources\",\"closures-and-notices\":\"https://platform.digitizetheplanet.org/api/v2/closures-and-notices\",\"legal-documents\":\"https://platform.digitizetheplanet.org/api/v2/legal-documents\",\"pictures\":\"https://platform.digitizetheplanet.org/api/v2/pictures\",\"wildlife\":\"https://platform.digitizetheplanet.org/api/v2/wildlife\",\"protected-entities\":\"https://platform.digitizetheplanet.org/api/v2/protected-entities\",\"activities\":\"https://platform.digitizetheplanet.org/api/v2/activities\",\"activity-categories\":\"https://platform.digitizetheplanet.org/api/v2/activity-categories\",\"activity-permissions\":\"https://platform.digitizetheplanet.org/api/v2/activity-permissions\",\"activity-places\":\"https://platform.digitizetheplanet.org/api/v2/activity-places\",\"weather-conditions\":\"https://platform.digitizetheplanet.org/api/v2/weather-conditions\",\"seasons\":\"https://platform.digitizetheplanet.org/api/v2/seasons\",\"daytimes\":\"https://platform.digitizetheplanet.org/api/v2/daytimes\",\"countries\":\"https://platform.digitizetheplanet.org/api/v2/countries\",\"states\":\"https://platform.digitizetheplanet.org/api/v2/states\",\"districts\":\"https://platform.digitizetheplanet.org/api/v2/districts\",\"organizations\":\"https://platform.digitizetheplanet.org/api/v2/organizations\",\"icons\":\"https://platform.digitizetheplanet.org/api/v2/icons\"}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/schema/": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 372039,
+  "body": "{\n    \"openapi\": \"3.1.1\",\n    \"info\": {\n        \"title\": \"DtP API v2\",\n        \"version\": \"2.2.0\",\n        \"x-rate-limit\": {\n            \"limit\": \"unlimited\",\n            \"window\": \"N/A\",\n            \"description\": \"Fair use policy applies, no throttling enforced.\"\n        },\n        \"x-logo\": {\n            \"url\": \"https://platform.digitizetheplanet.org/static/images/logo/logo.svg\"\n        },\n        \"x-audience\": \"public\",\n        \"x-api-lifecycle\": \"stable\",\n        \"x-api-changelog\": \"https://platform.digitizetheplanet.org/en/api/docs/changelog\",\n        \"x-api-version-strategy\": \"This API uses semantic versioning (SemVer). The v2.x line is stable and will only receive backwards-compatible changes.\\n\\nBreaking changes will be introduced in a new major version (v3.0.0) with appropriate deprecation notices and migration period.\",\n        \"description\": \"# Digitize The Planet API v2\\n\\n## Overview\\n\\nThe Digitize API offers authoritative data about protected areas, outdoor recreation rules, legal mandates, and wildlife sensitivities. This OpenAPI description powers the interactive documentation on our site—use it to inspect every endpoint and understand the usable parameters.\\n\\nThe API is read-only and available to everyone.\\n\\nRegular maintenance window: Tuesdays, 09:00-11:00 (CET/CEST). Service interruptions may occur during this time.\\n\\n**Base URL:** `/api/v2`\\n**Status:** Stable\\n\\n## Hostname Migration Notice\\n\\nThe API is now available under `https://platform.digitizetheplanet.org/api/v2`. The previous `https://content.digitizetheplanet.org/api/v2` path remains supported for a transition period.\\n\\n## Data and Licensing\\n\\nUnless a payload states otherwise, data is released under **[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)**. While the data is free to use we appreciate being cited as the source. Geospatial responses expose `license` and `source`. Images expose `license` and `copyright_holder`. Legal documents and rule records come directly from protected-area authorities.\\n\\nAll geometries use **EPSG:4326** (WGS84). Geometry coordinates are rounded to 7 decimal places to keep payloads compact and avoid precision that exceeds practical GPS and WGS84 accuracy (see the GeoJSON spec guidance on coordinate precision: [https://datatracker.ietf.org/doc/html/rfc7946#section-11.2](https://datatracker.ietf.org/doc/html/rfc7946#section-11.2)).\\n\\n## Usage Guidelines\\n\\nWe follow a fair-use policy. There is no enforced rate limit, yet we ask clients to stay within reasonable request volumes, cache responses, and use the `fields` selector to avoid over-fetching. Honor attribution whenever a dataset’s `license` requires it. No personal data flows through this API.\\n\\n## Technical Notes\\n\\n### Time semantics\\n\\nSystem and audit timestamps in API responses are expressed in **UTC**. Date-based filters over those timestamps also use **UTC** day boundaries.\\n\\nProtected-area-related rule values and temporary closure or notice date/time v"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/schema": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 372039,
+  "body": "{\n    \"openapi\": \"3.1.1\",\n    \"info\": {\n        \"title\": \"DtP API v2\",\n        \"version\": \"2.2.0\",\n        \"x-rate-limit\": {\n            \"limit\": \"unlimited\",\n            \"window\": \"N/A\",\n            \"description\": \"Fair use policy applies, no throttling enforced.\"\n        },\n        \"x-logo\": {\n            \"url\": \"https://platform.digitizetheplanet.org/static/images/logo/logo.svg\"\n        },\n        \"x-audience\": \"public\",\n        \"x-api-lifecycle\": \"stable\",\n        \"x-api-changelog\": \"https://platform.digitizetheplanet.org/en/api/docs/changelog\",\n        \"x-api-version-strategy\": \"This API uses semantic versioning (SemVer). The v2.x line is stable and will only receive backwards-compatible changes.\\n\\nBreaking changes will be introduced in a new major version (v3.0.0) with appropriate deprecation notices and migration period.\",\n        \"description\": \"# Digitize The Planet API v2\\n\\n## Overview\\n\\nThe Digitize API offers authoritative data about protected areas, outdoor recreation rules, legal mandates, and wildlife sensitivities. This OpenAPI description powers the interactive documentation on our site—use it to inspect every endpoint and understand the usable parameters.\\n\\nThe API is read-only and available to everyone.\\n\\nRegular maintenance window: Tuesdays, 09:00-11:00 (CET/CEST). Service interruptions may occur during this time.\\n\\n**Base URL:** `/api/v2`\\n**Status:** Stable\\n\\n## Hostname Migration Notice\\n\\nThe API is now available under `https://platform.digitizetheplanet.org/api/v2`. The previous `https://content.digitizetheplanet.org/api/v2` path remains supported for a transition period.\\n\\n## Data and Licensing\\n\\nUnless a payload states otherwise, data is released under **[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)**. While the data is free to use we appreciate being cited as the source. Geospatial responses expose `license` and `source`. Images expose `license` and `copyright_holder`. Legal documents and rule records come directly from protected-area authorities.\\n\\nAll geometries use **EPSG:4326** (WGS84). Geometry coordinates are rounded to 7 decimal places to keep payloads compact and avoid precision that exceeds practical GPS and WGS84 accuracy (see the GeoJSON spec guidance on coordinate precision: [https://datatracker.ietf.org/doc/html/rfc7946#section-11.2](https://datatracker.ietf.org/doc/html/rfc7946#section-11.2)).\\n\\n## Usage Guidelines\\n\\nWe follow a fair-use policy. There is no enforced rate limit, yet we ask clients to stay within reasonable request volumes, cache responses, and use the `fields` selector to avoid over-fetching. Honor attribution whenever a dataset’s `license` requires it. No personal data flows through this API.\\n\\n## Technical Notes\\n\\n### Time semantics\\n\\nSystem and audit timestamps in API responses are expressed in **UTC**. Date-based filters over those timestamps also use **UTC** day boundaries.\\n\\nProtected-area-related rule values and temporary closure or notice date/time v"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/openapi.json": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 126,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/openapi.json' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/openapi.yaml": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 126,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/openapi.yaml' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/swagger.json": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 126,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/swagger.json' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/docs/": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 118,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/docs' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/schema/": {
+  "status": 404,
+  "ctype": "text/html; charset=utf-8",
+  "len": 12244,
+  "body": "<!-- templates/common/layouts/site.html -->\n\n\n<!DOCTYPE html>\n\n<html lang=\"en\" data-theme=\"light\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>\n      \n  Page does not exist\n\n      | Digitize Platform\n    </title>\n    \n      <meta name=\"robots\" content=\"index, follow\" />\n    \n    <meta property=\"og:site_name\" content=\"Digitize Platform\" />\n    <meta property=\"og:locale\"\n          content=\"en_US\" />\n    \n    \n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"de_DE\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"fr_FR\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"cs_CZ\" />\n      \n    \n    \n    \n    \n    <link rel=\"canonical\" href=\"https://platform.digitizetheplanet.org/api/schema/\" />\n    \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"en\"\n              href=\"https://platform.digitizetheplanet.org/api/schema/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"de\"\n              href=\"https://platform.digitizetheplanet.org/api/schema/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"fr\"\n              href=\"https://platform.digitizetheplanet.org/api/schema/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"cs\"\n              href=\"https"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/schema/?format=json": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 372039,
+  "body": "{\n    \"openapi\": \"3.1.1\",\n    \"info\": {\n        \"title\": \"DtP API v2\",\n        \"version\": \"2.2.0\",\n        \"x-rate-limit\": {\n            \"limit\": \"unlimited\",\n            \"window\": \"N/A\",\n            \"description\": \"Fair use policy applies, no throttling enforced.\"\n        },\n        \"x-logo\": {\n            \"url\": \"https://platform.digitizetheplanet.org/static/images/logo/logo.svg\"\n        },\n        \"x-audience\": \"public\",\n        \"x-api-lifecycle\": \"stable\",\n        \"x-api-changelog\": \"https://platform.digitizetheplanet.org/en/api/docs/changelog\",\n        \"x-api-version-strategy\": \"This API uses semantic versioning (SemVer). The v2.x line is stable and will only receive backwards-compatible changes.\\n\\nBreaking changes will be introduced in a new major version (v3.0.0) with appropriate deprecation notices and migration period.\",\n        \"description\": \"# Digitize The Planet API v2\\n\\n## Overview\\n\\nThe Digitize API offers authoritative data about protected areas, outdoor recreation rules, legal mandates, and wildlife sensitivities. This OpenAPI description powers the interactive documentation on our site—use it to inspect every endpoint and understand the usable parameters.\\n\\nThe API is read-only and available to everyone.\\n\\nRegular maintenance window: Tuesdays, 09:00-11:00 (CET/CEST). Service interruptions may occur during this time.\\n\\n**Base URL:** `/api/v2`\\n**Status:** Stable\\n\\n## Hostname Migration Notice\\n\\nThe API is now available under `https://platform.digitizetheplanet.org/api/v2`. The previous `https://content.digitizetheplanet.org/api/v2` path remains supported for a transition period.\\n\\n## Data and Licensing\\n\\nUnless a payload states otherwise, data is released under **[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)**. While the data is free to use we appreciate being cited as the source. Geospatial responses expose `license` and `source`. Images expose `license` and `copyright_holder`. Legal documents and rule records come directly from protected-area authorities.\\n\\nAll geometries use **EPSG:4326** (WGS84). Geometry coordinates are rounded to 7 decimal places to keep payloads compact and avoid precision that exceeds practical GPS and WGS84 accuracy (see the GeoJSON spec guidance on coordinate precision: [https://datatracker.ietf.org/doc/html/rfc7946#section-11.2](https://datatracker.ietf.org/doc/html/rfc7946#section-11.2)).\\n\\n## Usage Guidelines\\n\\nWe follow a fair-use policy. There is no enforced rate limit, yet we ask clients to stay within reasonable request volumes, cache responses, and use the `fields` selector to avoid over-fetching. Honor attribution whenever a dataset’s `license` requires it. No personal data flows through this API.\\n\\n## Technical Notes\\n\\n### Time semantics\\n\\nSystem and audit timestamps in API responses are expressed in **UTC**. Date-based filters over those timestamps also use **UTC** day boundaries.\\n\\nProtected-area-related rule values and temporary closure or notice date/time v"
+ },
+ "https://platform.digitizetheplanet.org/api/openapi.json": {
+  "status": 404,
+  "ctype": "text/html; charset=utf-8",
+  "len": 12289,
+  "body": "<!-- templates/common/layouts/site.html -->\n\n\n<!DOCTYPE html>\n\n<html lang=\"en\" data-theme=\"light\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>\n      \n  Page does not exist\n\n      | Digitize Platform\n    </title>\n    \n      <meta name=\"robots\" content=\"index, follow\" />\n    \n    <meta property=\"og:site_name\" content=\"Digitize Platform\" />\n    <meta property=\"og:locale\"\n          content=\"en_US\" />\n    \n    \n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"de_DE\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"fr_FR\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"cs_CZ\" />\n      \n    \n    \n    \n    \n    <link rel=\"canonical\" href=\"https://platform.digitizetheplanet.org/api/openapi.json\" />\n    \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"en\"\n              href=\"https://platform.digitizetheplanet.org/api/openapi.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"de\"\n              href=\"https://platform.digitizetheplanet.org/api/openapi.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"fr\"\n              href=\"https://platform.digitizetheplanet.org/api/openapi.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"cs\"\n     "
+ },
+ "https://platform.digitizetheplanet.org/api/swagger.json": {
+  "status": 404,
+  "ctype": "text/html; charset=utf-8",
+  "len": 12289,
+  "body": "<!-- templates/common/layouts/site.html -->\n\n\n<!DOCTYPE html>\n\n<html lang=\"en\" data-theme=\"light\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>\n      \n  Page does not exist\n\n      | Digitize Platform\n    </title>\n    \n      <meta name=\"robots\" content=\"index, follow\" />\n    \n    <meta property=\"og:site_name\" content=\"Digitize Platform\" />\n    <meta property=\"og:locale\"\n          content=\"en_US\" />\n    \n    \n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"de_DE\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"fr_FR\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"cs_CZ\" />\n      \n    \n    \n    \n    \n    <link rel=\"canonical\" href=\"https://platform.digitizetheplanet.org/api/swagger.json\" />\n    \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"en\"\n              href=\"https://platform.digitizetheplanet.org/api/swagger.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"de\"\n              href=\"https://platform.digitizetheplanet.org/api/swagger.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"fr\"\n              href=\"https://platform.digitizetheplanet.org/api/swagger.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"cs\"\n     "
+ },
+ "https://platform.digitizetheplanet.org/openapi.json": {
+  "status": 404,
+  "ctype": "text/html; charset=utf-8",
+  "len": 12253,
+  "body": "<!-- templates/common/layouts/site.html -->\n\n\n<!DOCTYPE html>\n\n<html lang=\"en\" data-theme=\"light\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>\n      \n  Page does not exist\n\n      | Digitize Platform\n    </title>\n    \n      <meta name=\"robots\" content=\"index, follow\" />\n    \n    <meta property=\"og:site_name\" content=\"Digitize Platform\" />\n    <meta property=\"og:locale\"\n          content=\"en_US\" />\n    \n    \n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"de_DE\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"fr_FR\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"cs_CZ\" />\n      \n    \n    \n    \n    \n    <link rel=\"canonical\" href=\"https://platform.digitizetheplanet.org/openapi.json\" />\n    \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"en\"\n              href=\"https://platform.digitizetheplanet.org/openapi.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"de\"\n              href=\"https://platform.digitizetheplanet.org/openapi.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"fr\"\n              href=\"https://platform.digitizetheplanet.org/openapi.json\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"cs\"\n              href=\"h"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/openapi/": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 121,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/openapi' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/en/api/docs/v2/": {
+  "status": 200,
+  "ctype": "text/html; charset=utf-8",
+  "len": 14873,
+  "body": "<!-- templates/common/layouts/site.html -->\n\n\n<!DOCTYPE html>\n\n<html lang=\"en\" data-theme=\"light\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>\n      \n  API v2 Documentation\n\n      | Digitize Platform\n    </title>\n    \n      <meta name=\"robots\" content=\"index, follow\" />\n    \n    <meta property=\"og:site_name\" content=\"Digitize Platform\" />\n    <meta property=\"og:locale\"\n          content=\"en_US\" />\n    \n    \n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"de_DE\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"fr_FR\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"cs_CZ\" />\n      \n    \n    \n  <meta name=\"description\"\n        content=\"Explore the Digitize API version 2 documentation with interactive Swagger UI. Access the latest nature conservation data and features.\" />\n  <!-- Open Graph Tags -->\n  <meta property=\"og:title\"\n        content=\"API v2 Documentation – Digitize API\" />\n  <meta property=\"og:description\"\n        content=\"Explore the Digitize API version 2 documentation with interactive Swagger UI. Access the latest nature conservation data and features.\" />\n  <meta property=\"og:image\"\n        content=\"https://platform.digitizetheplanet.org/static/images/social/og-default-1200x630.7573e8739095.jpg\" />\n  <meta property=\"og:image:width\" content=\"1200\" />\n  <meta property=\"og:image:height\" content=\"630\" />\n  <meta property=\"og:image:alt\" content=\"Digitize the Planet logo\" />\n  <meta property=\"og:url\" content=\"https://platform.digitizetheplanet.org/en/api/docs/v2/\" />\n  <meta property=\"og:type\" content=\"website\" />\n  <!-- Twitter Card Tags -->\n  <meta name=\"twitter:card\" content=\"summary_large_image\" />\n  <meta name=\"twitter:title\"\n        content=\"API v2 Documentation – Digitize API\" />\n  <meta name=\"twitter:description\"\n        content=\"Explore the Digitize API version 2 documentation with interactive Swagger UI. Access the latest nature conservation data and features.\" />\n  <meta name=\"twitter:image\"\n        content=\"https://platform.digitizetheplanet.org/static/images/social/og-default-1200x630.7573e8739095.jpg\" />\n  <meta name=\"twitter:image:alt\" content=\"Digitize the Planet logo\" />\n  <meta name=\"twitter:url\" content=\"https://platform.digitizetheplanet.org/en/api/docs/v2/\" />\n\n    \n    <link rel=\"canonical\" href=\"https://platform.digitizetheplanet.org/en/api/docs/v2/\" />\n    \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"en\"\n              href=\"https://platform.digitizetheplanet.org/en/api/docs/v2/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"de\"\n              href=\"https://platform.digitizetheplanet.org/de/api/dokumentation/v2/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"fr\"\n              href=\"https://platform.di"
+ },
+ "https://platform.digitizetheplanet.org/api/docs/": {
+  "status": 200,
+  "ctype": "text/html; charset=utf-8",
+  "len": 17164,
+  "body": "<!-- templates/common/layouts/site.html -->\n\n\n<!DOCTYPE html>\n\n<html lang=\"en\" data-theme=\"light\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>\n      \n  Digitize API\n\n      | Digitize Platform\n    </title>\n    \n      <meta name=\"robots\" content=\"index, follow\" />\n    \n    <meta property=\"og:site_name\" content=\"Digitize Platform\" />\n    <meta property=\"og:locale\"\n          content=\"en_US\" />\n    \n    \n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"de_DE\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"fr_FR\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"cs_CZ\" />\n      \n    \n    \n  <meta name=\"description\"\n        content=\"Explore the Digitize API: versions, endpoints, and comprehensive documentation to integrate nature conservation data seamlessly.\" />\n  <!-- Open Graph Tags -->\n  <meta property=\"og:title\"\n        content=\"API Overview – Digitize API\" />\n  <meta property=\"og:description\"\n        content=\"Explore the Digitize API: versions, endpoints, and comprehensive documentation to integrate nature conservation data seamlessly.\" />\n  <meta property=\"og:image\"\n        content=\"https://platform.digitizetheplanet.org/static/images/social/og-default-1200x630.7573e8739095.jpg\" />\n  <meta property=\"og:image:width\" content=\"1200\" />\n  <meta property=\"og:image:height\" content=\"630\" />\n  <meta property=\"og:image:alt\" content=\"Digitize the Planet logo\" />\n  <meta property=\"og:url\" content=\"https://platform.digitizetheplanet.org/en/api/docs/\" />\n  <meta property=\"og:type\" content=\"website\" />\n  <!-- Twitter Card Tags -->\n  <meta name=\"twitter:card\" content=\"summary_large_image\" />\n  <meta name=\"twitter:title\"\n        content=\"API Overview – Digitize API\" />\n  <meta name=\"twitter:description\"\n        content=\"Explore the Digitize API: versions, endpoints, and comprehensive documentation to integrate nature conservation data seamlessly.\" />\n  <meta name=\"twitter:image\"\n        content=\"https://platform.digitizetheplanet.org/static/images/social/og-default-1200x630.7573e8739095.jpg\" />\n  <meta name=\"twitter:image:alt\" content=\"Digitize the Planet logo\" />\n  <meta name=\"twitter:url\" content=\"https://platform.digitizetheplanet.org/en/api/docs/\" />\n\n    \n    <link rel=\"canonical\" href=\"https://platform.digitizetheplanet.org/en/api/docs/\" />\n    \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"en\"\n              href=\"https://platform.digitizetheplanet.org/en/api/docs/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"de\"\n              href=\"https://platform.digitizetheplanet.org/de/api/dokumentation/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"fr\"\n              href=\"https://platform.digitizetheplanet.org/fr/api/docs/\" />\n      \n    \n      \n "
+ },
+ "https://platform.digitizetheplanet.org/api/": {
+  "status": 404,
+  "ctype": "text/html; charset=utf-8",
+  "len": 12181,
+  "body": "<!-- templates/common/layouts/site.html -->\n\n\n<!DOCTYPE html>\n\n<html lang=\"en\" data-theme=\"light\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>\n      \n  Page does not exist\n\n      | Digitize Platform\n    </title>\n    \n      <meta name=\"robots\" content=\"index, follow\" />\n    \n    <meta property=\"og:site_name\" content=\"Digitize Platform\" />\n    <meta property=\"og:locale\"\n          content=\"en_US\" />\n    \n    \n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"de_DE\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"fr_FR\" />\n      \n    \n      \n        <meta property=\"og:locale:alternate\" content=\"cs_CZ\" />\n      \n    \n    \n    \n    \n    <link rel=\"canonical\" href=\"https://platform.digitizetheplanet.org/api/\" />\n    \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"en\"\n              href=\"https://platform.digitizetheplanet.org/api/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"de\"\n              href=\"https://platform.digitizetheplanet.org/api/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"fr\"\n              href=\"https://platform.digitizetheplanet.org/api/\" />\n      \n    \n      \n      \n        <link rel=\"alternate\"\n              hreflang=\"cs\"\n              href=\"https://platform.digitizetheplane"
+ },
+ "__spec__:https://platform.digitizetheplanet.org/api/v2/schema/": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 372039,
+  "body": ""
+ },
+ "__spec_url__": "https://platform.digitizetheplanet.org/api/v2/schema/",
+ "__spec_paths__": [
+  "/activities",
+  "/activity-categories",
+  "/activity-permissions",
+  "/activity-places",
+  "/closures-and-notices",
+  "/closures-and-notices-sources",
+  "/closures-and-notices/deleted",
+  "/closures-and-notices/{uuid}",
+  "/countries",
+  "/daytimes",
+  "/districts",
+  "/geometry-sources",
+  "/icons",
+  "/icons/{id}",
+  "/legal-documents",
+  "/legal-documents/{id}",
+  "/licenses",
+  "/organizations",
+  "/organizations/{id}",
+  "/pictures",
+  "/pictures/{id}",
+  "/protected-area-categories",
+  "/protected-area-rules",
+  "/protected-area-rules/{id}",
+  "/protected-areas",
+  "/protected-areas/deleted",
+  "/protected-areas/{uuid}",
+  "/protected-areas/{uuid}/legal-documents",
+  "/protected-areas/{uuid}/pictures",
+  "/protected-areas/{uuid}/rules",
+  "/protected-areas/{uuid}/wildlife",
+  "/protected-entities",
+  "/protected-entities/{id}",
+  "/reason-categories",
+  "/reasons",
+  "/seasons",
+  "/states",
+  "/weather-conditions",
+  "/wildlife",
+  "/wildlife/{id}"
+ ],
+ "__spec_schema_names__": [
+  "Activity",
+  "ActivityCategory",
+  "ActivityPermission",
+  "ActivityPlace",
+  "AdminCountry",
+  "AdminDistrict",
+  "AdminState",
+  "BlankEnum",
+  "ClosureAndNotice",
+  "ClosureAndNoticeDeletedLite",
+  "ClosureAndNoticeDetour",
+  "ClosureAndNoticeLite",
+  "ClosureAndNoticeReason",
+  "ClosureAndNoticeReasonCategory",
+  "ClosureAndNoticeResponsibleOrganization",
+  "ClosureAndNoticeSource",
+  "ClosureAndNoticeSourceKindEnum",
+  "ClosureAndNoticeTypeEnum",
+  "CountryEnum",
+  "DayTime",
+  "DtpOrganization",
+  "DtpOrganizationLite",
+  "ExternalReference",
+  "GenericValidationErrorItem",
+  "GenericValidationErrorResponse",
+  "Geodata",
+  "GeometrySource",
+  "Icon",
+  "IconNested",
+  "IucnCategoryEnum",
+  "LegalDocument",
+  "LegalDocumentLite",
+  "License",
+  "MonthEnum",
+  "NameEnum",
+  "NullEnum",
+  "PaginatedAdminCountryList",
+  "PaginatedAdminDistrictList",
+  "PaginatedAdminStateList",
+  "PaginatedClosureAndNoticeDeletedLiteList",
+  "PaginatedClosureAndNoticeLiteList",
+  "PaginatedDtpOrganizationLiteList",
+  "PaginatedIconList",
+  "PaginatedLegalDocumentLiteList",
+  "PaginatedProtectedAreaDeletedLiteList",
+  "PaginatedProtectedAreaLiteList",
+  "PaginatedProtectedAreaPicturesList",
+  "PaginatedProtectedAreaRuleLiteList",
+  "PaginatedProtectedEntityLiteList",
+  "PaginatedWildlifeLiteList",
+  "ProtectedArea",
+  "ProtectedAreaCategory",
+  "ProtectedAreaDeletedLite",
+  "ProtectedAreaLite",
+  "ProtectedAreaPictures",
+  "ProtectedAreaPicturesNested",
+  "ProtectedAreaRule",
+  "ProtectedAreaRuleLite",
+  "ProtectedAreaRuleNested",
+  "ProtectedEntity",
+  "ProtectedEntityLite",
+  "ProtectedEntityPicture",
+  "ProtectedEntityTypeEnum",
+  "ProtectionLandscapeEnum",
+  "ProtectionTimePeriodEnum",
+  "RedListCategoryEnum",
+  "Season",
+  "StyleEnum",
+  "ValidationErrorEnum",
+  "WeatherCondition",
+  "Wildlife",
+  "WildlifeLite",
+  "WildlifeNested"
+ ],
+ "__spec_schemas_wildlife__": {
+  "PaginatedProtectedAreaDeletedLiteList": {
+   "type": "object",
+   "properties": {
+    "count": {
+     "type": "integer",
+     "example": 123
+    },
+    "next": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-areas/deleted?page=4",
+     "nullable": true
+    },
+    "previous": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-areas/deleted?page=2",
+     "nullable": true
+    },
+    "results": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ProtectedAreaDeletedLite"
+     }
+    }
+   },
+   "required": [
+    "count",
+    "next",
+    "previous",
+    "results"
+   ]
+  },
+  "PaginatedProtectedAreaLiteList": {
+   "type": "object",
+   "properties": {
+    "count": {
+     "type": "integer",
+     "example": 123
+    },
+    "next": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-areas?page=4",
+     "nullable": true
+    },
+    "previous": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-areas?page=2",
+     "nullable": true
+    },
+    "results": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ProtectedAreaLite"
+     }
+    }
+   },
+   "required": [
+    "count",
+    "next",
+    "previous",
+    "results"
+   ]
+  },
+  "PaginatedProtectedAreaPicturesList": {
+   "type": "object",
+   "properties": {
+    "count": {
+     "type": "integer",
+     "example": 123
+    },
+    "next": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/pictures?page=4",
+     "nullable": true
+    },
+    "previous": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/pictures?page=2",
+     "nullable": true
+    },
+    "results": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ProtectedAreaPictures"
+     }
+    }
+   },
+   "required": [
+    "count",
+    "next",
+    "previous",
+    "results"
+   ]
+  },
+  "PaginatedProtectedAreaRuleLiteList": {
+   "type": "object",
+   "properties": {
+    "count": {
+     "type": "integer",
+     "example": 123
+    },
+    "next": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-area-rules?page=4",
+     "nullable": true
+    },
+    "previous": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-area-rules?page=2",
+     "nullable": true
+    },
+    "results": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ProtectedAreaRuleLite"
+     }
+    }
+   },
+   "required": [
+    "count",
+    "next",
+    "previous",
+    "results"
+   ]
+  },
+  "PaginatedProtectedEntityLiteList": {
+   "type": "object",
+   "properties": {
+    "count": {
+     "type": "integer",
+     "example": 123
+    },
+    "next": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-entities?page=4",
+     "nullable": true
+    },
+    "previous": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/protected-entities?page=2",
+     "nullable": true
+    },
+    "results": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ProtectedEntityLite"
+     }
+    }
+   },
+   "required": [
+    "count",
+    "next",
+    "previous",
+    "results"
+   ]
+  },
+  "PaginatedWildlifeLiteList": {
+   "type": "object",
+   "properties": {
+    "count": {
+     "type": "integer",
+     "example": 123
+    },
+    "next": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/wildlife?page=4",
+     "nullable": true
+    },
+    "previous": {
+     "type": "string",
+     "format": "uri",
+     "example": "https://platform.digitizetheplanet.org/api/v2/wildlife?page=2",
+     "nullable": true
+    },
+    "results": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/WildlifeLite"
+     }
+    }
+   },
+   "required": [
+    "count",
+    "next",
+    "previous",
+    "results"
+   ]
+  },
+  "ProtectedArea": {
+   "type": "object",
+   "properties": {
+    "description": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_de": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_en": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_de": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_en": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "area_in_km2": {
+     "type": "number",
+     "format": "double",
+     "description": "Area in square kilometers"
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "title": "Date created",
+     "description": "Timestamp when the protected area record was created."
+    },
+    "dtp_api_url": {
+     "type": "string",
+     "format": "uri",
+     "readOnly": true,
+     "description": "Full URL to the protected area v2 API endpoint"
+    },
+    "dtp_url": {
+     "type": "string",
+     "format": "uri",
+     "readOnly": true,
+     "description": "Full URL to the protected area detail page"
+    },
+    "dtp_widget_url": {
+     "type": "string",
+     "format": "uri",
+     "readOnly": true,
+     "description": "Full URL to the protected area widget"
+    },
+    "external_references": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ExternalReference"
+     },
+     "readOnly": true,
+     "description": "List of external references"
+    },
+    "geodata": {
+     "allOf": [
+      {
+       "$ref": "#/components/schemas/Geodata"
+      }
+     ],
+     "description": "Geospatial data of the protected area"
+    },
+    "iucn_category": {
+     "description": "IUCN protected area category (Ia, Ib, II, III, IV, V, VI).\n\n* `Ia` - Ia\n* `Ib` - Ib\n* `II` - II\n* `III` - III\n* `IV` - IV\n* `V` - V\n* `VI` - VI",
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/IucnCategoryEnum"
+      },
+      {
+       "$ref": "#/components/schemas/BlankEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "logo_url": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uri",
+     "description": "URL of the protected area logo image"
+    },
+    "name": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_de": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [de]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_en": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [en]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_sl": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [sl]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "parent_uuid": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uuid",
+     "readOnly": true,
+     "description": "UUID of the parent protected area, if any"
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "title": "Date modified",
+     "description": "Timestamp when the protected area record was last updated."
+    },
+    "url": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uri",
+     "title": "Website",
+     "description": "Official website URL of the protected area.",
+     "maxLength": 200
+    },
+    "year_of_foundation": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "maximum": 2100,
+     "minimum": 1800
+    },
+    "description_fi": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_fr": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_cs": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_hu": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_it": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_pt": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_ro": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description_sl": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_fi": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_fr": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_cs": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_hu": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_it": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_pt": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_ro": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_sl": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "category_id": {
+     "type": "integer",
+     "description": "Reference to the category of the protected area (e.g. 'National Park')."
+    },
+    "country_ids": {
+     "type": "array",
+     "items": {
+      "type": "integer"
+     },
+     "description": "Countries in which the protected area is located."
+    },
+    "district_ids": {
+     "type": "array",
+     "items": {
+      "type": "integer"
+     },
+     "description": "Districts in which the protected area is located."
+    },
+    "legal_documents": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/LegalDocument"
+     },
+     "readOnly": true,
+     "description": "List of legal documents associated with the protected area"
+    },
+    "name_fi": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [fi]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_fr": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [fr]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_cs": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [cs]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_hu": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [hu]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_it": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [it]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_pt": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [pt]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_ro": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [ro]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "pictures": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ProtectedAreaPicturesNested"
+     },
+     "readOnly": true,
+     "description": "List of pictures associated with the protected area"
+    },
+    "rules": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ProtectedAreaRuleNested"
+     },
+     "readOnly": true,
+     "description": "List of rules associated with the protected area"
+    },
+    "state_ids": {
+     "type": "array",
+     "items": {
+      "type": "integer"
+     },
+     "description": "States or provinces in which the protected area is located."
+    },
+    "wildlife": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/WildlifeNested"
+     },
+     "readOnly": true,
+     "description": "List of wildlife associated with the protected area"
+    },
+    "responsible_organization_ids": {
+     "type": "array",
+     "items": {
+      "type": "integer"
+     },
+     "description": "List of responsible organization IDs.",
+     "readOnly": true
+    }
+   }
+  },
+  "ProtectedAreaCategory": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "name": {
+     "type": "string",
+     "description": "Name of the protected area category, e.g. 'National Park' or 'Nature Reserve'.",
+     "maxLength": 255
+    },
+    "name_de": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Name [de]",
+     "description": "Name of the protected area category, e.g. 'National Park' or 'Nature Reserve'.",
+     "maxLength": 255
+    },
+    "name_en": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Name [en]",
+     "description": "Name of the protected area category, e.g. 'National Park' or 'Nature Reserve'.",
+     "maxLength": 255
+    },
+    "code": {
+     "type": "integer",
+     "maximum": 2147483647,
+     "minimum": 0,
+     "description": "Unique numeric identifier for the category. Must be 0 or greater and is mainly used for sorting."
+    }
+   },
+   "required": [
+    "code",
+    "id",
+    "name"
+   ]
+  },
+  "ProtectedAreaDeletedLite": {
+   "type": "object",
+   "properties": {
+    "uuid": {
+     "type": "string",
+     "format": "uuid",
+     "description": "Globally unique identifier for the protected area."
+    },
+    "name": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "deleted_at": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date-time"
+    }
+   }
+  },
+  "ProtectedAreaLite": {
+   "type": "object",
+   "properties": {
+    "uuid": {
+     "type": "string",
+     "format": "uuid",
+     "description": "Globally unique identifier for the protected area."
+    },
+    "name": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_de": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [de]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_en": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [en]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "name_sl": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Protected Area Name [sl]",
+     "description": "Official name of the protected area.",
+     "maxLength": 300
+    },
+    "category_id": {
+     "type": "integer",
+     "description": "Reference to the category of the protected area (e.g. 'National Park')."
+    },
+    "dtp_url": {
+     "type": "string",
+     "format": "uri",
+     "readOnly": true,
+     "description": "Full URL to the protected area detail page"
+    },
+    "dtp_api_url": {
+     "type": "string",
+     "format": "uri",
+     "readOnly": true,
+     "description": "Full URL to the protected area v2 API endpoint"
+    },
+    "dtp_widget_url": {
+     "type": "string",
+     "format": "uri",
+     "readOnly": true,
+     "description": "Full URL to the protected area widget"
+    },
+    "external_references": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/ExternalReference"
+     },
+     "readOnly": true,
+     "description": "List of external references"
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "title": "Date created",
+     "description": "Timestamp when the protected area record was created."
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "title": "Date modified",
+     "description": "Timestamp when the protected area record was last updated."
+    },
+    "parent_uuid": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uuid",
+     "readOnly": true,
+     "description": "UUID of the parent protected area, if any"
+    },
+    "area_in_km2": {
+     "type": "number",
+     "format": "double",
+     "description": "Area in square kilometers"
+    }
+   }
+  },
+  "ProtectedAreaPictures": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "protected_area_uuid": {
+     "type": "string",
+     "format": "uuid"
+    },
+    "url": {
+     "type": "string",
+     "format": "uri"
+    },
+    "caption": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "copyright_holder": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "license": {
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/License"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   },
+   "required": [
+    "id",
+    "protected_area_uuid",
+    "url"
+   ]
+  },
+  "ProtectedAreaPicturesNested": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "url": {
+     "type": "string",
+     "format": "uri"
+    },
+    "caption": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "description": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "copyright_holder": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "license": {
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/License"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   },
+   "required": [
+    "id",
+    "url"
+   ]
+  },
+  "ProtectedAreaRule": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "is_important": {
+     "type": "boolean",
+     "readOnly": true,
+     "description": "Whether area editors have selected this rule for prominent display to visitors."
+    },
+    "minimum_path_width": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "format": "double",
+     "maximum": 5.0,
+     "minimum": 0.5,
+     "description": "Minimum required width of the path or trail (in meters) for this activity. Must be between 0.5 and 5.0 meters."
+    },
+    "season_start": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date",
+     "description": "\nStart date of the seasonal restriction (format: YYYY-MM-DD).\n\nThe year is normalized to `2000` in API responses.\n\nFor example, a winter season from November to February is represented as:\n- `season_start`: '2000-11-01'\n- `season_end`: '2000-02-28'\n\nTo determine whether a date falls within the season, compare the month and day values while accounting for year boundaries.\n"
+    },
+    "season_end": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date",
+     "description": "\nEnd date of the seasonal restriction (format: YYYY-MM-DD).\n\nThe year is normalized to `2000` in API responses.\n"
+    },
+    "daytime_start": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "time",
+     "description": "Local start time of day for the rule in the protected area's wall-clock time (`HH:MM:SS`). This value is not converted based on the API client timezone."
+    },
+    "daytime_end": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "time",
+     "description": "Local end time of day for the rule in the protected area's wall-clock time (`HH:MM:SS`). This value is not converted based on the API client timezone."
+    },
+    "text": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable rule sentence in the request language. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the requested translation is incomplete."
+    },
+    "text_en": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable English rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted."
+    },
+    "text_de": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable German rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the German wording is incomplete."
+    },
+    "text_fr": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable French rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the French wording is incomplete."
+    },
+    "text_cs": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable Czech rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the Czech wording is incomplete."
+    },
+    "comment": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_en": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [en]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_de": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [de]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_sl": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [sl]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_fr": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [fr]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_cs": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [cs]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_it": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [it]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_hu": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [hu]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_ro": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [ro]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_fi": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [fi]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_pt": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [pt]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this rule was created. Automatically set by the system."
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this rule was last modified. Automatically updated by the system."
+    },
+    "protected_area_uuid": {
+     "type": "string",
+     "format": "uuid"
+    },
+    "activity_id": {
+     "type": "integer",
+     "description": "The specific activity this rule governs (e.g. hiking, camping, fishing).",
+     "readOnly": true
+    },
+    "activityplace_id": {
+     "type": "integer",
+     "title": "Activity Place",
+     "description": "Designated area or location within the park where the activity may occur.",
+     "readOnly": true
+    },
+    "activitypermission_id": {
+     "type": "integer",
+     "title": "Activity Permission",
+     "description": "Type of permission or authorization required to perform the activity.",
+     "readOnly": true
+    },
+    "weathercondition_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "title": "Weather Condition",
+     "description": "Weather conditions under which this rule applies (e.g. only allowed in clear weather).",
+     "readOnly": true
+    },
+    "season_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Predefined season object representing when this rule is active.",
+     "readOnly": true
+    },
+    "daytime_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Predefined daytime period for when this rule applies (e.g. daytime, nighttime).",
+     "readOnly": true
+    },
+    "icons": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/IconNested"
+     },
+     "readOnly": true
+    }
+   },
+   "required": [
+    "activity_id",
+    "activitypermission_id",
+    "activityplace_id",
+    "created_at",
+    "daytime_id",
+    "icons",
+    "id",
+    "is_important",
+    "protected_area_uuid",
+    "season_end",
+    "season_id",
+    "season_start",
+    "text",
+    "text_cs",
+    "text_de",
+    "text_en",
+    "text_fr",
+    "updated_at",
+    "weathercondition_id"
+   ]
+  },
+  "ProtectedAreaRuleLite": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "is_important": {
+     "type": "boolean",
+     "readOnly": true,
+     "description": "Whether area editors have selected this rule for prominent display to visitors."
+    },
+    "minimum_path_width": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "format": "double",
+     "maximum": 5.0,
+     "minimum": 0.5,
+     "description": "Minimum required width of the path or trail (in meters) for this activity. Must be between 0.5 and 5.0 meters."
+    },
+    "season_start": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date",
+     "description": "\nStart date of the seasonal restriction (format: YYYY-MM-DD).\n\nThe year is normalized to `2000` in API responses.\n\nFor example, a winter season from November to February is represented as:\n- `season_start`: '2000-11-01'\n- `season_end`: '2000-02-28'\n\nTo determine whether a date falls within the season, compare the month and day values while accounting for year boundaries.\n"
+    },
+    "season_end": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date",
+     "description": "\nEnd date of the seasonal restriction (format: YYYY-MM-DD).\n\nThe year is normalized to `2000` in API responses.\n"
+    },
+    "daytime_start": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "time",
+     "description": "Local start time of day for the rule in the protected area's wall-clock time (`HH:MM:SS`). This value is not converted based on the API client timezone."
+    },
+    "daytime_end": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "time",
+     "description": "Local end time of day for the rule in the protected area's wall-clock time (`HH:MM:SS`). This value is not converted based on the API client timezone."
+    },
+    "text": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable rule sentence in the request language. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the requested translation is incomplete."
+    },
+    "text_en": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable English rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted."
+    },
+    "text_de": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable German rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the German wording is incomplete."
+    },
+    "text_fr": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable French rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the French wording is incomplete."
+    },
+    "text_cs": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable Czech rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the Czech wording is incomplete."
+    },
+    "comment": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_en": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [en]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_de": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [de]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this rule was created. Automatically set by the system."
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this rule was last modified. Automatically updated by the system."
+    },
+    "protected_area_uuid": {
+     "type": "string",
+     "format": "uuid"
+    },
+    "activity_id": {
+     "type": "integer",
+     "description": "The specific activity this rule governs (e.g. hiking, camping, fishing)."
+    },
+    "activityplace_id": {
+     "type": "integer",
+     "title": "Activity Place",
+     "description": "Designated area or location within the park where the activity may occur."
+    },
+    "activitypermission_id": {
+     "type": "integer",
+     "title": "Activity Permission",
+     "description": "Type of permission or authorization required to perform the activity."
+    },
+    "weathercondition_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "title": "Weather Condition",
+     "description": "Weather conditions under which this rule applies (e.g. only allowed in clear weather)."
+    },
+    "season_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Predefined season object representing when this rule is active."
+    },
+    "daytime_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Predefined daytime period for when this rule applies (e.g. daytime, nighttime)."
+    }
+   },
+   "required": [
+    "activity_id",
+    "activitypermission_id",
+    "activityplace_id",
+    "created_at",
+    "id",
+    "is_important",
+    "protected_area_uuid",
+    "season_end",
+    "season_start",
+    "text",
+    "text_cs",
+    "text_de",
+    "text_en",
+    "text_fr",
+    "updated_at"
+   ]
+  },
+  "ProtectedAreaRuleNested": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "is_important": {
+     "type": "boolean",
+     "readOnly": true,
+     "description": "Whether area editors have selected this rule for prominent display to visitors."
+    },
+    "minimum_path_width": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "format": "double",
+     "maximum": 5.0,
+     "minimum": 0.5,
+     "description": "Minimum required width of the path or trail (in meters) for this activity. Must be between 0.5 and 5.0 meters."
+    },
+    "season_start": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date",
+     "description": "\nStart date of the seasonal restriction (format: YYYY-MM-DD).\n\nThe year is normalized to `2000` in API responses.\n\nFor example, a winter season from November to February is represented as:\n- `season_start`: '2000-11-01'\n- `season_end`: '2000-02-28'\n\nTo determine whether a date falls within the season, compare the month and day values while accounting for year boundaries.\n"
+    },
+    "season_end": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date",
+     "description": "\nEnd date of the seasonal restriction (format: YYYY-MM-DD).\n\nThe year is normalized to `2000` in API responses.\n"
+    },
+    "daytime_start": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "time",
+     "description": "Local start time of day for the rule in the protected area's wall-clock time (`HH:MM:SS`). This value is not converted based on the API client timezone."
+    },
+    "daytime_end": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "time",
+     "description": "Local end time of day for the rule in the protected area's wall-clock time (`HH:MM:SS`). This value is not converted based on the API client timezone."
+    },
+    "text": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable rule sentence in the request language. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the requested translation is incomplete."
+    },
+    "text_en": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable English rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted."
+    },
+    "text_de": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable German rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the German wording is incomplete."
+    },
+    "text_fr": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable French rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the French wording is incomplete."
+    },
+    "text_cs": {
+     "type": "string",
+     "readOnly": true,
+     "description": "Natural, human-readable Czech rule sentence. The wording makes deliberate linguistic choices to form a clear, natural sentence, so structured components can use activity-appropriate terms; for example, `Designated paths/places` can be expressed as paths for way-bound activities or as places, areas, routes, or locations for other activities. Use the structured fields when individual components are needed. Whole-area applicability is implicit and omitted. Falls back to English when the Czech wording is incomplete."
+    },
+    "comment": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_en": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [en]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_de": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [de]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_sl": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [sl]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_fr": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [fr]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_cs": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [cs]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_it": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [it]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_hu": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [hu]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_ro": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [ro]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_fi": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [fi]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "comment_pt": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Comment [pt]",
+     "description": "Additional notes or clarifications about this rule.",
+     "maxLength": 1000
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this rule was created. Automatically set by the system."
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this rule was last modified. Automatically updated by the system."
+    },
+    "activity_id": {
+     "type": "integer",
+     "description": "The specific activity this rule governs (e.g. hiking, camping, fishing).",
+     "readOnly": true
+    },
+    "activityplace_id": {
+     "type": "integer",
+     "title": "Activity Place",
+     "description": "Designated area or location within the park where the activity may occur.",
+     "readOnly": true
+    },
+    "activitypermission_id": {
+     "type": "integer",
+     "title": "Activity Permission",
+     "description": "Type of permission or authorization required to perform the activity.",
+     "readOnly": true
+    },
+    "weathercondition_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "title": "Weather Condition",
+     "description": "Weather conditions under which this rule applies (e.g. only allowed in clear weather).",
+     "readOnly": true
+    },
+    "season_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Predefined season object representing when this rule is active.",
+     "readOnly": true
+    },
+    "daytime_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Predefined daytime period for when this rule applies (e.g. daytime, nighttime).",
+     "readOnly": true
+    },
+    "icons": {
+     "type": "array",
+     "items": {
+      "$ref": "#/components/schemas/IconNested"
+     },
+     "readOnly": true
+    }
+   },
+   "required": [
+    "activity_id",
+    "activitypermission_id",
+    "activityplace_id",
+    "created_at",
+    "daytime_id",
+    "icons",
+    "id",
+    "is_important",
+    "season_end",
+    "season_id",
+    "season_start",
+    "text",
+    "text_cs",
+    "text_de",
+    "text_en",
+    "text_fr",
+    "updated_at",
+    "weathercondition_id"
+   ]
+  },
+  "ProtectedEntity": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "name": {
+     "type": "string",
+     "description": "Common or local name of the protected entity (e.g. 'Brown Bear').",
+     "maxLength": 300
+    },
+    "name_scientific": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Scientific Name",
+     "description": "Scientific (Latin) name of the species or habitat (e.g. 'Ursus arctos').",
+     "maxLength": 300
+    },
+    "species_description": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Description",
+     "description": "Brief description or notes about the species or habitat characteristics.",
+     "maxLength": 2000
+    },
+    "red_list_category": {
+     "description": "The official red list category code as published by the relevant authority. This indicates the conservation status of the species.\n\n* `0` - Extinct or Lost\n* `1` - Critically Endangered\n* `2` - Endangered\n* `3` - Vulnerable\n* `G` - Extent of Danger Unknown\n* `R` - Extremely Rare\n* `V` - Near Threatened\n* `*` - Least Concern\n* `D` - Data Deficient",
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/RedListCategoryEnum"
+      },
+      {
+       "$ref": "#/components/schemas/BlankEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "type": {
+     "allOf": [
+      {
+       "$ref": "#/components/schemas/ProtectedEntityTypeEnum"
+      }
+     ],
+     "description": "Classification of the protected entity: flora, fauna, or habitat.\n\n* `FLORA` - Flora\n* `FAUNA` - Fauna\n* `HABITAT` - Habitat"
+    },
+    "picture": {
+     "$ref": "#/components/schemas/ProtectedEntityPicture"
+    },
+    "red_list_uuid": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uuid",
+     "description": "Unique identifier linking this entity to an external Red List database."
+    }
+   },
+   "required": [
+    "id",
+    "name",
+    "picture",
+    "red_list_category",
+    "type"
+   ]
+  },
+  "ProtectedEntityLite": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "name": {
+     "type": "string",
+     "description": "Common or local name of the protected entity (e.g. 'Brown Bear').",
+     "maxLength": 300
+    },
+    "name_scientific": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Scientific Name",
+     "description": "Scientific (Latin) name of the species or habitat (e.g. 'Ursus arctos').",
+     "maxLength": 300
+    },
+    "species_description": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Description",
+     "description": "Brief description or notes about the species or habitat characteristics.",
+     "maxLength": 2000
+    },
+    "red_list_category": {
+     "description": "The official red list category code as published by the relevant authority. This indicates the conservation status of the species.\n\n* `0` - Extinct or Lost\n* `1` - Critically Endangered\n* `2` - Endangered\n* `3` - Vulnerable\n* `G` - Extent of Danger Unknown\n* `R` - Extremely Rare\n* `V` - Near Threatened\n* `*` - Least Concern\n* `D` - Data Deficient",
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/RedListCategoryEnum"
+      },
+      {
+       "$ref": "#/components/schemas/BlankEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "type": {
+     "allOf": [
+      {
+       "$ref": "#/components/schemas/ProtectedEntityTypeEnum"
+      }
+     ],
+     "description": "Classification of the protected entity: flora, fauna, or habitat.\n\n* `FLORA` - Flora\n* `FAUNA` - Fauna\n* `HABITAT` - Habitat"
+    }
+   },
+   "required": [
+    "id",
+    "name",
+    "red_list_category",
+    "type"
+   ]
+  },
+  "ProtectedEntityPicture": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uri"
+    },
+    "copyright_holder": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "license": {
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/License"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   },
+   "required": [
+    "copyright_holder",
+    "license",
+    "url"
+   ]
+  },
+  "ProtectedEntityTypeEnum": {
+   "enum": [
+    "FLORA",
+    "FAUNA",
+    "HABITAT"
+   ],
+   "type": "string",
+   "description": "* `FLORA` - Flora\n* `FAUNA` - Fauna\n* `HABITAT` - Habitat"
+  },
+  "Wildlife": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "protected_area_uuid": {
+     "type": "string",
+     "format": "uuid"
+    },
+    "protected_entity": {
+     "$ref": "#/components/schemas/ProtectedEntity"
+    },
+    "presence_from": {
+     "description": "Starting month (1–12) when the species is typically present.\n\n* `1` - January\n* `2` - February\n* `3` - March\n* `4` - April\n* `5` - May\n* `6` - June\n* `7` - July\n* `8` - August\n* `9` - September\n* `10` - October\n* `11` - November\n* `12` - December",
+     "minimum": 1,
+     "maximum": 12,
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/MonthEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "presence_to": {
+     "description": "Ending month (1–12) when the species is typically present.\n\n* `1` - January\n* `2` - February\n* `3` - March\n* `4` - April\n* `5` - May\n* `6` - June\n* `7` - July\n* `8` - August\n* `9` - September\n* `10` - October\n* `11` - November\n* `12` - December",
+     "minimum": 1,
+     "maximum": 12,
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/MonthEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "protection_time_period": {
+     "description": "Time period when special protection applies to the species.\n\n* `BREEDING_TIMES` - Breeding times\n* `MATING_TIMES` - Mating times\n* `GENERAL_OCCURENCE` - General occurrence\n* `HIBERNATION` - Hibernation\n* `SENSITIVE_TIMES` - Sensitive times\n* `SENSITIVE_WINTER` - Sensitive during winter",
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/ProtectionTimePeriodEnum"
+      },
+      {
+       "$ref": "#/components/schemas/BlankEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "protection_landscape": {
+     "description": "Landscape type where this protection rule applies.\n\n* `OPEN_LAND` - Open land\n* `FOREST` - Forest\n* `BODIES_OF_WATER` - Bodies of water\n* `HIGH_MOUNTAIN_RANGES` - High mountain ranges\n* `TREELINE` - Treeline\n* `ROCKS` - Rocks\n* `CAVES` - Caves\n* `RIVERS` - Rivers\n* `LAKE_LANDSCAPES` - Lake landscapes (areas with multiple lakes)\n* `AIRSPACE` - Airspace",
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/ProtectionLandscapeEnum"
+      },
+      {
+       "$ref": "#/components/schemas/BlankEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "behavior_recommendation": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Recommended human behavior to minimize disturbance to this species.",
+     "maxLength": 2000
+    },
+    "sensitive_to": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Factor or activity the species is sensitive to (e.g. noise, light).",
+     "maxLength": 200
+    },
+    "habitat_demands": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Demands for habitat",
+     "description": "Main habitat requirements for flora and fauna (e.g. wetlands, open grasslands). Null for habitats.",
+     "maxLength": 200
+    },
+    "link_name": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Label for an external reference or information link.",
+     "maxLength": 200
+    },
+    "link_url": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uri",
+     "title": "Link",
+     "description": "URL pointing to an external resource or data source.",
+     "maxLength": 200
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this record was created. Automatically set by the system."
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this record was last updated. Automatically maintained by the system."
+    },
+    "connected_rule_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Reference to the rule related to this observation or species protection."
+    },
+    "season_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Season when this record or observation applies."
+    },
+    "daytime_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Daytime period associated with this wildlife record (e.g. daytime, nighttime)."
+    },
+    "weathercondition_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "title": "Weather Condition",
+     "description": "Weather conditions relevant to the observation or activity."
+    }
+   },
+   "required": [
+    "created_at",
+    "id",
+    "protected_area_uuid",
+    "protected_entity",
+    "updated_at"
+   ]
+  },
+  "WildlifeLite": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "protected_area_uuid": {
+     "type": "string",
+     "format": "uuid"
+    },
+    "protected_entity_id": {
+     "type": "integer",
+     "description": "The species or habitat that this record refers to."
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this record was created. Automatically set by the system."
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this record was last updated. Automatically maintained by the system."
+    }
+   },
+   "required": [
+    "created_at",
+    "id",
+    "protected_area_uuid",
+    "protected_entity_id",
+    "updated_at"
+   ]
+  },
+  "WildlifeNested": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "integer",
+     "readOnly": true
+    },
+    "presence_from": {
+     "description": "Starting month (1–12) when the species is typically present.\n\n* `1` - January\n* `2` - February\n* `3` - March\n* `4` - April\n* `5` - May\n* `6` - June\n* `7` - July\n* `8` - August\n* `9` - September\n* `10` - October\n* `11` - November\n* `12` - December",
+     "minimum": 1,
+     "maximum": 12,
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/MonthEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "presence_to": {
+     "description": "Ending month (1–12) when the species is typically present.\n\n* `1` - January\n* `2` - February\n* `3` - March\n* `4` - April\n* `5` - May\n* `6` - June\n* `7` - July\n* `8` - August\n* `9` - September\n* `10` - October\n* `11` - November\n* `12` - December",
+     "minimum": 1,
+     "maximum": 12,
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/MonthEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "protection_time_period": {
+     "description": "Time period when special protection applies to the species.\n\n* `BREEDING_TIMES` - Breeding times\n* `MATING_TIMES` - Mating times\n* `GENERAL_OCCURENCE` - General occurrence\n* `HIBERNATION` - Hibernation\n* `SENSITIVE_TIMES` - Sensitive times\n* `SENSITIVE_WINTER` - Sensitive during winter",
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/ProtectionTimePeriodEnum"
+      },
+      {
+       "$ref": "#/components/schemas/BlankEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "protection_landscape": {
+     "description": "Landscape type where this protection rule applies.\n\n* `OPEN_LAND` - Open land\n* `FOREST` - Forest\n* `BODIES_OF_WATER` - Bodies of water\n* `HIGH_MOUNTAIN_RANGES` - High mountain ranges\n* `TREELINE` - Treeline\n* `ROCKS` - Rocks\n* `CAVES` - Caves\n* `RIVERS` - Rivers\n* `LAKE_LANDSCAPES` - Lake landscapes (areas with multiple lakes)\n* `AIRSPACE` - Airspace",
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/ProtectionLandscapeEnum"
+      },
+      {
+       "$ref": "#/components/schemas/BlankEnum"
+      },
+      {
+       "$ref": "#/components/schemas/NullEnum"
+      }
+     ]
+    },
+    "behavior_recommendation": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Recommended human behavior to minimize disturbance to this species.",
+     "maxLength": 2000
+    },
+    "sensitive_to": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Factor or activity the species is sensitive to (e.g. noise, light).",
+     "maxLength": 200
+    },
+    "habitat_demands": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "title": "Demands for habitat",
+     "description": "Main habitat requirements for flora and fauna (e.g. wetlands, open grasslands). Null for habitats.",
+     "maxLength": 200
+    },
+    "link_name": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Label for an external reference or information link.",
+     "maxLength": 200
+    },
+    "link_url": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "uri",
+     "title": "Link",
+     "description": "URL pointing to an external resource or data source.",
+     "maxLength": 200
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this record was created. Automatically set by the system."
+    },
+    "updated_at": {
+     "type": "string",
+     "format": "date-time",
+     "readOnly": true,
+     "description": "Timestamp when this record was last updated. Automatically maintained by the system."
+    },
+    "connected_rule_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Reference to the rule related to this observation or species protection."
+    },
+    "season_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Season when this record or observation applies."
+    },
+    "daytime_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "description": "Daytime period associated with this wildlife record (e.g. daytime, nighttime)."
+    },
+    "weathercondition_id": {
+     "type": [
+      "integer",
+      "null"
+     ],
+     "title": "Weather Condition",
+     "description": "Weather conditions relevant to the observation or activity."
+    }
+   },
+   "required": [
+    "created_at",
+    "id",
+    "updated_at"
+   ]
+  }
+ },
+ "__spec_paths_wildlife__": {
+  "/protected-areas/{uuid}/rules": {
+   "get": {
+    "operationId": "protected_areas_rules_retrieve",
+    "description": "Returns all rules for a specific protected area",
+    "summary": "Get protected area rules",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "uuid",
+      "schema": {
+       "type": "string",
+       "pattern": "^[^/]+$"
+      },
+      "required": true
+     }
+    ],
+    "tags": [
+     "Protected Areas"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/ProtectedAreaRuleNested"
+         }
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  },
+  "/protected-areas/{uuid}/wildlife": {
+   "get": {
+    "operationId": "protected_areas_wildlife_retrieve",
+    "description": "Returns all wildlife associated with a specific protected area",
+    "summary": "Get protected area wildlife",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "uuid",
+      "schema": {
+       "type": "string",
+       "pattern": "^[^/]+$"
+      },
+      "required": true
+     }
+    ],
+    "tags": [
+     "Protected Areas"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/WildlifeNested"
+         }
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  },
+  "/protected-area-rules": {
+   "get": {
+    "operationId": "protected_area_rules_list",
+    "description": "Returns a list of rules for protected areas",
+    "summary": "List protected area rules",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "activity_id",
+      "schema": {
+       "type": "integer"
+      },
+      "description": "Filter by activity ID. _Use GET /api/v2/activities to get available IDs._\n\n**Example:** `5` - for *Cycling*"
+     },
+     {
+      "in": "query",
+      "name": "daytime_id",
+      "schema": {
+       "type": "integer"
+      },
+      "description": "Filter by daytime ID. _Use GET /api/v2/daytimes to get available IDs._\n\n**Example:** `2` - for *Nighttime*"
+     },
+     {
+      "in": "query",
+      "name": "include_parent_activity",
+      "schema": {
+       "type": "boolean"
+      },
+      "description": "Include rules for the selected activity's parent. Default false; requires activity_id. Returns original rules and conditions. Does not expand a parent into children."
+     },
+     {
+      "name": "page",
+      "required": false,
+      "in": "query",
+      "description": "Page number (1-indexed). Use this to navigate through paginated results.\n\nDefaults to **1** if not provided.\n\n**Example:** `2` - to get the *second page of results*",
+      "schema": {
+       "type": "integer",
+       "minimum": 1
+      }
+     },
+     {
+      "in": "query",
+      "name": "protected_area_uuid",
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "Filter by protected area UUID. _Use GET /api/v2/protected-areas to get available UUIDs._\n\n**Example:** `412e67c8-7541-4118-98a3-e02738843ceb` - for *National Park Bayerischer Wald*"
+     },
+     {
+      "in": "query",
+      "name": "season_id",
+      "schema": {
+       "type": "integer"
+      },
+      "description": "Filter by season ID. _Use GET /api/v2/seasons to get available IDs._\n\n**Example:** `4` - for *Winter*"
+     },
+     {
+      "in": "query",
+      "name": "weather_condition_id",
+      "schema": {
+       "type": "integer"
+      },
+      "description": "Filter by weather condition ID. _Use GET /api/v2/weather-conditions to get available IDs._\n\n**Example:** `1` - for *Snow*"
+     }
+    ],
+    "tags": [
+     "Rules"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PaginatedProtectedAreaRuleLiteList"
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  },
+  "/protected-area-rules/{id}": {
+   "get": {
+    "operationId": "protected_area_rules_retrieve",
+    "description": "Returns details of a specific rule",
+    "summary": "Get protected area rule details",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "id",
+      "schema": {
+       "type": "integer",
+       "example": 5
+      },
+      "description": "A unique integer value identifying this protected area rule.",
+      "required": true
+     }
+    ],
+    "tags": [
+     "Rules"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProtectedAreaRule"
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  },
+  "/wildlife": {
+   "get": {
+    "operationId": "wildlife_list",
+    "description": "Returns a list of wildlife entities",
+    "summary": "List wildlife",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "created_after",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items created at or after this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *created on or after January 15, 2025*"
+     },
+     {
+      "in": "query",
+      "name": "created_before",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items created at or before this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *created on or before January 15, 2025*"
+     },
+     {
+      "name": "page",
+      "required": false,
+      "in": "query",
+      "description": "Page number (1-indexed). Use this to navigate through paginated results.\n\nDefaults to **1** if not provided.\n\n**Example:** `2` - to get the *second page of results*",
+      "schema": {
+       "type": "integer",
+       "minimum": 1
+      }
+     },
+     {
+      "in": "query",
+      "name": "protected_area_uuid",
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "Filter by protected area UUID. _Use GET /api/v2/protected-areas to get available UUIDs._\n\n**Example:** `412e67c8-7541-4118-98a3-e02738843ceb` - for *National Park Bayerischer Wald*"
+     },
+     {
+      "in": "query",
+      "name": "protected_entity_id",
+      "schema": {
+       "type": "integer"
+      },
+      "description": "Filter by protected entity ID. _Use GET /api/v2/protected-entities to get available IDs._\n\n**Example:** `4642` - for *Golden Eagle (Aquila chrysaetos)*"
+     },
+     {
+      "in": "query",
+      "name": "type",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "FAUNA",
+        "FLORA",
+        "HABITAT"
+       ]
+      },
+      "description": "Filter by protected entity type.\n\n* `FLORA` - Flora\n* `FAUNA` - Fauna\n* `HABITAT` - Habitat"
+     },
+     {
+      "in": "query",
+      "name": "updated_after",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items updated at or after this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *updated on or after January 15, 2025*"
+     },
+     {
+      "in": "query",
+      "name": "updated_before",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items updated at or before this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *updated on or before January 15, 2025*"
+     }
+    ],
+    "tags": [
+     "Wildlife"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PaginatedWildlifeLiteList"
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  },
+  "/wildlife/{id}": {
+   "get": {
+    "operationId": "wildlife_retrieve",
+    "description": "Returns details of a specific wildlife entity",
+    "summary": "Get wildlife details",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "id",
+      "schema": {
+       "type": "integer",
+       "example": 14
+      },
+      "description": "A unique integer value identifying this wildlife entity.",
+      "required": true
+     }
+    ],
+    "tags": [
+     "Wildlife"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Wildlife"
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  },
+  "/protected-entities": {
+   "get": {
+    "operationId": "protected_entities_list",
+    "description": "Returns a list of protected entities",
+    "summary": "List protected entities",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "created_after",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items created at or after this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *created on or after January 15, 2025*"
+     },
+     {
+      "in": "query",
+      "name": "created_before",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items created at or before this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *created on or before January 15, 2025*"
+     },
+     {
+      "in": "query",
+      "name": "name",
+      "schema": {
+       "type": "string",
+       "minLength": 1
+      }
+     },
+     {
+      "name": "page",
+      "required": false,
+      "in": "query",
+      "description": "Page number (1-indexed). Use this to navigate through paginated results.\n\nDefaults to **1** if not provided.\n\n**Example:** `2` - to get the *second page of results*",
+      "schema": {
+       "type": "integer",
+       "minimum": 1
+      }
+     },
+     {
+      "in": "query",
+      "name": "type",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "FAUNA",
+        "FLORA",
+        "HABITAT"
+       ]
+      },
+      "description": "Protected Entity Type\n\n* `FLORA` - Flora\n* `FAUNA` - Fauna\n* `HABITAT` - Habitat"
+     },
+     {
+      "in": "query",
+      "name": "updated_after",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items updated at or after this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *updated on or after January 15, 2025*"
+     },
+     {
+      "in": "query",
+      "name": "updated_before",
+      "schema": {
+       "type": "string",
+       "format": "date"
+      },
+      "description": "Filter items updated at or before this date (_format: YYYY-MM-DD_).\n\n**Example:** `2025-01-15` - for all items *updated on or before January 15, 2025*"
+     }
+    ],
+    "tags": [
+     "Wildlife"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PaginatedProtectedEntityLiteList"
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  },
+  "/protected-entities/{id}": {
+   "get": {
+    "operationId": "protected_entities_retrieve",
+    "description": "Returns details of a specific protected entity",
+    "summary": "Get protected entity details",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "id",
+      "schema": {
+       "type": "integer",
+       "example": 1
+      },
+      "description": "A unique integer value identifying this protected entity.",
+      "required": true
+     }
+    ],
+    "tags": [
+     "Wildlife"
+    ],
+    "responses": {
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GenericValidationErrorResponse"
+        }
+       }
+      },
+      "description": ""
+     },
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProtectedEntity"
+        }
+       }
+      },
+      "description": ""
+     }
+    }
+   }
+  }
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 9313,
+  "body": "{\"count\":2923,\"next\":\"https://platform.digitizetheplanet.org/api/v2/wildlife?page=2\",\"previous\":null,\"results\":[{\"id\":14,\"protected_area_uuid\":\"afc76604-4f04-41d5-bcab-421818dee828\",\"protected_entity_id\":4626,\"created_at\":\"2024-08-21T10:14:03.799467Z\",\"updated_at\":\"2024-08-21T10:14:03.799495Z\"},{\"id\":16,\"protected_area_uuid\":\"6367f14d-3410-4373-a679-8b141e6f7ded\",\"protected_entity_id\":4688,\"created_at\":\"2024-08-29T06:28:40.606196Z\",\"updated_at\":\"2026-09-29T08:28:33.512629Z\"},{\"id\":20,\"protected_area_uuid\":\"515e918f-4fdd-4f08-b39e-24e0d34397f3\",\"protected_entity_id\":4466,\"created_at\":\"2024-09-04T07:26:30.362234Z\",\"updated_at\":\"2024-10-14T11:26:05.476528Z\"},{\"id\":24,\"protected_area_uuid\":\"42def55b-0970-4e68-bf8b-eee8de528e2b\",\"protected_entity_id\":4439,\"created_at\":\"2024-09-04T11:24:38.122317Z\",\"updated_at\":\"2025-11-18T08:35:54.469477Z\"},{\"id\":25,\"protected_area_uuid\":\"42def55b-0970-4e68-bf8b-eee8de528e2b\",\"protected_entity_id\":4457,\"created_at\":\"2024-09-04T11:27:51.673819Z\",\"updated_at\":\"2025-11-18T08:34:35.611809Z\"},{\"id\":26,\"protected_area_uuid\":\"42def55b-0970-4e68-bf8b-eee8de528e2b\",\"protected_entity_id\":4830,\"created_at\":\"2024-09-04T11:35:33.520606Z\",\"updated_at\":\"2025-11-18T08:33:31.623079Z\"},{\"id\":27,\"protected_area_uuid\":\"42def55b-0970-4e68-bf8b-eee8de528e2b\",\"protected_entity_id\":4676,\"created_at\":\"2024-09-04T11:59:49.896211Z\",\"updated_at\":\"2025-11-18T08:33:16.647824Z\"},{\"id\":30,\"protected_area_uuid\":\"515e918f-4fdd-4f08-b39e-24e0d34397f3\",\"protected_entity_id\":4679,\"created_at\":\"2024-09-05T07:39:05.081962Z\",\"updated_at\":\"2025-12-15T11:56:27.640873Z\"},{\"id\":31,\"protected_area_uuid\":\"fa65e40e-fdf1-43a8-ba2e-8491db5fcda8\",\"protected_entity_id\":1111,\"created_at\":\"2024-09-05T12:35:49.296913Z\",\"updated_at\":\"2024-09-18T07:21:22.388177Z\"},{\"id\":32,\"protected_area_uuid\":\"fa65e40e-fdf1-43a8-ba2e-8491db5fcda8\",\"protected_entity_id\":7957,\"created_at\":\"2024-09-05T13:12:49.982089Z\",\"updated_at\":\"2025-12-15T16:28:03.724180Z\"},{\"id\":33,\"protected_area_uuid\":\"fa65e40e-fdf1-43a8-ba2e-8491db5fcda8\",\"protected_entity_id\":5036,\"created_at\":\"2024-09-05T13:23:40.064118Z\",\"updated_at\":\"2025-12-15T16:28:10.969105Z\"},{\"id\":34,\"protected_area_uuid\":\"06c95f7f-d9ca-4049-a352-e3c35381ea64\",\"protected_entity_id\":4457,\"created_at\":\"2024-09-05T13:57:34.995332Z\",\"updated_at\":\"2024-09-05T14:07:44.262839Z\"},{\"id\":35,\"protected_area_uuid\":\"42def55b-0970-4e68-bf8b-eee8de528e2b\",\"protected_entity_id\":4443,\"created_at\":\"2024-09-10T10:44:41.131146Z\",\"updated_at\":\"2025-11-18T08:35:40.274576"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife?page_size=3": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 277,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"unknown_query_parameter\",\"detail\":\"Unknown query parameter(s): page_size. Allowed parameters: created_after, created_before, format, page, protected_area_uuid, protected_entity_id, type, updated_after, updated_before.\",\"attr\":\"\"}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife?limit=3": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 273,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"unknown_query_parameter\",\"detail\":\"Unknown query parameter(s): limit. Allowed parameters: created_after, created_before, format, page, protected_area_uuid, protected_entity_id, type, updated_after, updated_before.\",\"attr\":\"\"}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife?fields=all": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 274,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"unknown_query_parameter\",\"detail\":\"Unknown query parameter(s): fields. Allowed parameters: created_after, created_before, format, page, protected_area_uuid, protected_entity_id, type, updated_after, updated_before.\",\"attr\":\"\"}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife/14": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 1218,
+  "body": "{\"id\":14,\"protected_area_uuid\":\"afc76604-4f04-41d5-bcab-421818dee828\",\"protected_entity\":{\"id\":4626,\"name\":\"Schwarzspecht\",\"name_scientific\":\"Dryocopus martius (Linnaeus, 1758)\",\"species_description\":\"Als Pionier des Waldes erschließt der Schwarzspecht vielen anderen Höhlenbewohnern den Wald und insbesondere das Altholz. Deshalb profitieren neben dem Schwarzspecht noch viele andere Arten von den Kernzonen des Biosphärengebiets, weil die Bäume hier nicht gefällt werden, sondern stehen dürfen bis sie von selbst umfallen.\",\"red_list_category\":null,\"type\":\"FAUNA\",\"picture\":{\"url\":\"https://platform.digitizetheplanet.org/archives/images/Schwarzspecht.jpg\",\"copyright_holder\":\"Steffen Hannert\",\"license\":{\"name\":\"CC0 1.0\",\"uri\":\"https://creativecommons.org/publicdomain/zero/1.0/\"}},\"red_list_uuid\":\"a146d4d1-b96c-4042-b14b-e07a24f1185a\"},\"presence_from\":null,\"presence_to\":null,\"protection_time_period\":null,\"protection_landscape\":null,\"behavior_recommendation\":null,\"sensitive_to\":null,\"habitat_demands\":null,\"link_name\":null,\"link_url\":null,\"created_at\":\"2024-08-21T10:14:03.799467Z\",\"updated_at\":\"2024-08-21T10:14:03.799495Z\",\"connected_rule_id\":null,\"season_id\":null,\"daytime_id\":null,\"weathercondition_id\":null}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife/14?fields=all": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 158,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"unknown_query_parameter\",\"detail\":\"Unknown query parameter(s): fields. Allowed parameters: format.\",\"attr\":\"\"}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-entities": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 7693,
+  "body": "{\"count\":8079,\"next\":\"https://platform.digitizetheplanet.org/api/v2/protected-entities?page=2\",\"previous\":null,\"results\":[{\"id\":1,\"name\":\"Weiß-Tanne\",\"name_scientific\":\"Abies alba Mill.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":2,\"name\":\"Samtpappel\",\"name_scientific\":\"Abutilon theophrasti Medik.\",\"species_description\":null,\"red_list_category\":null,\"type\":\"FLORA\"},{\"id\":3,\"name\":\"Feld-Ahorn\",\"name_scientific\":\"Acer campestre L.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":4,\"name\":\"Französischer Ahorn\",\"name_scientific\":\"Acer monspessulanum L.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":5,\"name\":\"Eschen-Ahorn\",\"name_scientific\":\"Acer negundo L.\",\"species_description\":null,\"red_list_category\":null,\"type\":\"FLORA\"},{\"id\":6,\"name\":\"Schweizer Ahorn\",\"name_scientific\":\"Acer opalus Mill.\",\"species_description\":null,\"red_list_category\":\"R\",\"type\":\"FLORA\"},{\"id\":7,\"name\":\"Spitz-Ahorn\",\"name_scientific\":\"Acer platanoides L.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":8,\"name\":\"Berg-Ahorn\",\"name_scientific\":\"Acer pseudoplatanus L.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":9,\"name\":\"Schwarzrandige Schafgarbe\",\"name_scientific\":\"Achillea atrata L.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":10,\"name\":\"Bittere Schafgarbe\",\"name_scientific\":\"Achillea clavenae L.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":11,\"name\":\"Meerfenchelblättrige Schafgarbe\",\"name_scientific\":\"Achillea crithmifolia Waldst. & Kit.\",\"species_description\":null,\"red_list_category\":null,\"type\":\"FLORA\"},{\"id\":12,\"name\":\"Großblättrige Schafgarbe\",\"name_scientific\":\"Achillea macrophylla L.\",\"species_description\":null,\"red_list_category\":\"R\",\"type\":\"FLORA\"},{\"id\":13,\"name\":\"Gewöhnliche Schafgarbe (Artengruppe)\",\"name_scientific\":\"Achillea millefolium agg.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":14,\"name\":\"Hügel-Schafgarbe\",\"name_scientific\":\"Achillea collina (Wirtg.) Heimerl\",\"species_description\":null,\"red_list_category\":\"D\",\"type\":\"FLORA\"},{\"id\":15,\"name\":\"Gewöhnliche Schafgarbe\",\"name_scientific\":\"Achillea millefolium L.\",\"species_description\":null,\"red_list_category\":\"*\",\"type\":\"FLORA\"},{\"id\":16,\"name\":\"Gebirgs-Wiesen-Schafgarbe\",\"name_scientific\":\"Achillea millefolium subsp. sudetica (Opiz) Oborny\",\"species_description\":null,\"red_list_category\":\"D\",\"type\":\"FLO"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-entities/4626": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 750,
+  "body": "{\"id\":4626,\"name\":\"Schwarzspecht\",\"name_scientific\":\"Dryocopus martius (Linnaeus, 1758)\",\"species_description\":\"Als Pionier des Waldes erschließt der Schwarzspecht vielen anderen Höhlenbewohnern den Wald und insbesondere das Altholz. Deshalb profitieren neben dem Schwarzspecht noch viele andere Arten von den Kernzonen des Biosphärengebiets, weil die Bäume hier nicht gefällt werden, sondern stehen dürfen bis sie von selbst umfallen.\",\"red_list_category\":null,\"type\":\"FAUNA\",\"picture\":{\"url\":\"https://platform.digitizetheplanet.org/archives/images/Schwarzspecht.jpg\",\"copyright_holder\":\"Steffen Hannert\",\"license\":{\"name\":\"CC0 1.0\",\"uri\":\"https://creativecommons.org/publicdomain/zero/1.0/\"}},\"red_list_uuid\":\"a146d4d1-b96c-4042-b14b-e07a24f1185a\"}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-entity": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 130,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/protected-entity' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected_entities": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 132,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/protected_entities' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-entity-types": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 136,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/protected-entity-types' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/entities": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 122,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/entities' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/entities/4626": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 127,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/entities/4626' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/species": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 121,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/species' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife-species": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 130,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/wildlife-species' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife-types": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 128,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/wildlife-types' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/wildlife-categories": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 133,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/wildlife-categories' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/taxa": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 118,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/taxa' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/taxons": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 120,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/taxons' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/animals": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 121,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/animals' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-area-wildlife": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 137,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/protected-area-wildlife' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-area-entities": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 137,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/protected-area-entities' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protection-objects": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 132,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/protection-objects' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/conservation-objectives": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 137,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/conservation-objectives' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/conservation-targets": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 134,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/conservation-targets' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-objects": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 131,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/protected-objects' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/categories": {
+  "status": 404,
+  "ctype": "application/json",
+  "len": 124,
+  "body": "{\"type\":\"client_error\",\"errors\":[{\"code\":\"not_found\",\"detail\":\"Endpoint '/api/v2/categories' does not exist.\",\"attr\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/activities?limit=2": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 176,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"unknown_query_parameter\",\"detail\":\"Unknown query parameter(s): limit. Allowed parameters: category_id, format, page.\",\"attr\":\"\"}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828?fields=all": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 27752,
+  "body": "{\"description\":\"\",\"description_de\":\"\",\"description_en\":\"\",\"summary\":\"Nature reserves constitute one of the most important conservation categories in Germany and Austria. The exact definitions vary, but together they combine the conservation of natural landscape, the protection of endangered species and the preservation for scientific interests.\",\"summary_de\":\"Ein Naturschutzgebiet ist die stärkste großräumige Schutzkategorie. In Deutschland basiert es auf Bundes- und in Österreich auf Landesrecht. Die verbindenden Ziele sind der Erhalt einer ursprünglichen Landschaft, Schutz von seltenen, gefährdeten oder charakteristischen Tieren und Pflanzen und die Bewahrung von Räumen mit besonderem wissenschaftlich-ökologischem Interesse.\",\"summary_en\":\"Nature reserves constitute one of the most important conservation categories in Germany and Austria. The exact definitions vary, but together they combine the conservation of natural landscape, the protection of endangered species and the preservation for scientific interests.\",\"area_in_km2\":0.1375,\"created_at\":\"2023-11-15T11:04:17.998017Z\",\"dtp_api_url\":\"https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828\",\"dtp_url\":\"https://platform.digitizetheplanet.org/en/protected_area/schlosspark-falkenstein/\",\"dtp_widget_url\":\"https://platform.digitizetheplanet.org/en/protected_area_widget/afc76604-4f04-41d5-bcab-421818dee828/\",\"external_references\":[{\"name\":\"wdpa\",\"id\":\"319077\",\"url\":\"https://www.protectedplanet.net/319077\"},{\"name\":\"wikidata\",\"id\":\"Q28910527\",\"url\":\"https://www.wikidata.org/wiki/Q28910527\"},{\"name\":\"osm\",\"id\":\"relation/3900663\",\"url\":\"https://www.openstreetmap.org/relation/3900663\"},{\"name\":\"source_id\",\"id\":\"by_NSG-00139.01\",\"url\":null},{\"name\":\"outdooractive\",\"id\":\"9020935\",\"url\":\"https://www.outdooractive.com/de/protected-area/9020935\"}],\"geodata\":{\"geometry\":{\"type\":\"MultiPolygon\",\"coordinates\":[[[[12.486164,49.10257],[12.486169,49.102547],[12.486208,49.102401],[12.486396,49.102242],[12.486405,49.102234],[12.486439,49.102203],[12.48664,49.102078],[12.486647,49.102074],[12.486809,49.101973],[12.487007,49.101779],[12.487072,49.101715],[12.48708,49.101707],[12.487239,49.101597],[12.487421,49.101472],[12.487419,49.101438],[12.487407,49.101188],[12.487234,49.100956],[12.487274,49.100633],[12.487199,49.100597],[12.487028,49.100459],[12.486928,49.100473],[12.486765,49.100459],[12.486632,49.100447],[12.48587,49.100134],[12.485871,49.10013],[12.485906,49.099827],[12.485902,49.099821],[12.485867,49.099812],[12.485882,49.099724],[12.485754,49.099726],[12.485716,49.099727],[12.485744,49.099602],[12.485571,49.099512],[12.485554,49.099503],[12.485505,49.099439],[12.485447,49.099362],[12.485281,49.099175],[12.485177,49.099067],[12.485073,49.098957],[12.485051,49.098929],[12.484984,49.098807],[12.485059,49.098712],[12.484922,49.09856],[12.4848,49.098484],[12.484569,49.098434],[12.484352,49.09871],[12.483963,49.09883],[12.483646,49.099033],[12.483585,49.099024],[12.483353,49.098989],[12.483245,49.099127],[12.483168,49.099239],[12.483114,49.099412],[12.482906,49.099522],[12.4829,49.099521],[12.48287,49.099516],[12.482869,49.099516],[12.482676,49.099584],[12.482414,49.099515],[12.482123,49.099386],[12.48211,49.09942],[12.482024,49.099647],[12.481968,49.099796],[12.481811,49.09975],[12.481806,49.099751],[12.481699,49.099791],[12.481565,49.099677],[12.481503,49.099787],[12.48137,49.100019],[12.481282,49.100242],[12.481191,49.100354],[12.48106,49.100529],[12.48105,49.100528],[12.480966,49.100521],[12.480982,49.100552],[12.481022,49.100632],[12.481058,49.100702],[12.481069,49.100723],[12.48111,49.100804],[12.481135,49.100853],[12.48156,49.101242],[12.481722,49.101479],[12.481723,49.101481],[12.481817,49.101477],[12.48182,49.101476],[12.481925,49.101474],[12.482229,49.101535],[12.482597,49.101598],[12.482785,49.101844],[12.482976,49.102128],[12.483351,49.102379],[12.483881,49.102703],[12.483916,49.102718],[12.484325,49.102891],[12.484836,49.10302],[12.485077,49.103119],[12.485874,49.103028],[12.486001,49.102976],[12.486138,49.102831],[12.486164,49.10257]]]]},\"centroid\":{\"type\":\"Point\",\"coordinates\":[12.4843337,49.1009034]},\"source\":{\"id\":79,\"name\":\"Bayerisches Landesamt für Umwelt\",\"acronym\":\"LFU-BY\",\"url\":\"https://www.lfu.bayern.de/\"},\"license\":{\"name\":\"CC BY 4.0\",\"uri\":\"https://creativecommons.org/licenses/by/4.0/\"}},\"iucn_category\":\"IV\",\"logo_url\":\"https://platform.digitizetheplanet.org/archives/logos/NSG_Schild_hHtss8E.webp\",\"name\":\"Schloßpark Falkenstein\",\"name_de\":\"Schloßpark Falkenstein\",\"name_en\":\"Schloßpark Falkenstein\",\"name_sl\":null,\"parent_uuid\":null,\"updated_at\":\"2026-09-29T08:28:33.512629Z\",\"url\":null,\"year_of_foundation\":null,\"description_fi\":\"\",\"description_fr\":\"\",\"description_cs\":null,\"description_hu\":\"\",\"description_it\":\"\",\"description_pt\":\"\",\"description_ro\":\"\",\"description_sl\":null,\"summary_fi\":\"\",\"summary_fr\":\"\",\"summary_cs\":null,\"summary_hu\":\"\",\"summary_it\":\"\",\"summary_pt\":\"\",\"summary_ro\":\"\",\"summary_sl\":null,\"category_id\":2,\"country_ids\":[1],\"district_ids\":[63],\"legal_documents\":[{\"id\":2532,\"name\":\"Verordnung über das Naturschutzgebiet \\\"Schloßpark Falkenstein\\\"\",\"name_en\":\"Verordnung über das Naturschutzgebiet \\\"Schloßpark Falkenstein\\\"\",\"name_de\":\"Verordnung über das Naturschutzgebiet \\\"Schloßpark Falkenstein\\\"\",\"name_sl\":null,\"name_fr\":null,\"name_cs\":null,\"name_it\":null,\"name_hu\":null,\"name_ro\":null,\"name_fi\":null,\"name_pt\":null,\"short_name\":null,\"short_name_en\":null,\"short_name_de\":null,\"short_name_sl\":null,\"short_name_fr\":null,\"short_name_cs\":null,\"short_name_it\":null,\"short_name_hu\":null,\"short_name_ro\":null,\"short_name_fi\":null,\"short_name_pt\":null,\"type\":null,\"type_en\":null,\"type_de\":null,\"type_sl\":null,\"type_fr\":null,\"type_cs\":null,\"type_it\":null,\"type_hu\":null,\"type_ro\":null,\"type_fi\":null,\"type_pt\":null,\"author\":\"Bayerisches Staatsministerium für Landesentwicklung und Umweltfragen\",\"date_enacted\":\"1981-02-02\",\"url\":null,\"file_url\":\"https://platform.digitizetheplanet.org/archives/legaldocs/NSG-00139.01_Schlo%C3%9Fpark_Falkenstein.pdf\",\"created_at\":\"2024-08-21T10:02:12.587247Z\",\"updated_at\":\"2024-08-21T10:02:12.587268Z\",\"protected_area_uuids\":[\"afc76604-4f04-41d5-bcab-421818dee828\"]}],\"name_fi\":null,\"name_fr\":null,\"name_cs\":null,\"name_hu\":null,\"name_it\":null,\"name_pt\":null,\"name_ro\":null,\"pictures\":[{\"id\":1235,\"url\":\"https://platform.digitizetheplanet.org/archives/images/2023.04.04.FalkensteinerSchlosspark_7.JPG\",\"caption\":\"NSG Schlosspark Falkenstein\",\"description\":null,\"copyright_holder\":\"Naturpark Oberer Bayerischer Wald\",\"license\":{\"name\":\"CC BY 4.0\",\"uri\":\"https://creativecommons.org/licenses/by/4.0/\"}},{\"id\":1236,\"url\":\"https://platform.digitizetheplanet.org/archives/images/2023.04.04.FalkensteinerSchlosspark_6.JPG\",\"caption\":\"NSG Schlosspark Falkenstein\",\"description\":null,\"copyright_holder\":\"Naturpark Oberer Bayerischer Wald\",\"license\":{\"name\":\"CC BY 4.0\",\"uri\":\"https://creativecommons.org/licenses/by/4.0/\"}},{\"id\":1234,\"url\":\"https://platform.digitizetheplanet.org/archives/images/2023.04.04.FalkensteinerSchlosspark_3.JPG\",\"caption\":\"NSG Schlosspark Falkenstein\",\"description\":null,\"copyright_holder\":\"Naturpark Oberer Bayerischer Wald\",\"license\":{\"name\":\"CC BY 4.0\",\"uri\":\"https://creativecommons.org/licenses/by/4.0/\"}}],\"rules\":[{\"id\":90369,\"is_important\":false,\"minimum_path_width\":null,\"season_start\":null,\"season_end\":null,\"daytime_start\":null,\"daytime_end\":null,\"text\":\"Entering is only allowed on paths and tracks.\",\"text_en\":\"Entering is only allowed on paths and tracks.\",\"text_de\":\"Betreten ist nur auf Wegen erlaubt.\",\"text_fr\":\"Entrer est uniquement autorisé sur les chemins et sentiers.\",\"text_cs\":\"Vstupování je povoleno pouze na cestách a stezkách.\",\"comment\":null,\"comment_en\":null,\"comment_de\":null,\"comment_sl\":null,\"comment_fr\":null,\"comment_cs\":null,\"comment_it\":null,\"comment_hu\":null,\"comment_ro\":null,\"comment_fi\":null,\"comment_pt\":null,\"created_at\":\"2024-01-24T12:19:32.165764Z\",\"updated_at\":\"2026-09-29T08:28:33.512629Z\",\"activit"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828/wildlife": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 1169,
+  "body": "[{\"id\":14,\"presence_from\":null,\"presence_to\":null,\"protection_time_period\":null,\"protection_landscape\":null,\"behavior_recommendation\":null,\"sensitive_to\":null,\"habitat_demands\":null,\"link_name\":null,\"link_url\":null,\"created_at\":\"2024-08-21T10:14:03.799467Z\",\"updated_at\":\"2024-08-21T10:14:03.799495Z\",\"connected_rule_id\":null,\"season_id\":null,\"daytime_id\":null,\"weathercondition_id\":null},{\"id\":1826,\"presence_from\":null,\"presence_to\":null,\"protection_time_period\":null,\"protection_landscape\":null,\"behavior_recommendation\":null,\"sensitive_to\":null,\"habitat_demands\":null,\"link_name\":null,\"link_url\":null,\"created_at\":\"2025-11-06T14:38:04.204667Z\",\"updated_at\":\"2025-11-06T14:38:04.204685Z\",\"connected_rule_id\":null,\"season_id\":null,\"daytime_id\":null,\"weathercondition_id\":null},{\"id\":1827,\"presence_from\":null,\"presence_to\":null,\"protection_time_period\":null,\"protection_landscape\":null,\"behavior_recommendation\":null,\"sensitive_to\":null,\"habitat_demands\":null,\"link_name\":null,\"link_url\":null,\"created_at\":\"2025-11-06T14:38:59.270819Z\",\"updated_at\":\"2025-11-06T14:38:59.270835Z\",\"connected_rule_id\":null,\"season_id\":null,\"daytime_id\":null,\"weathercondition_id\":null}]"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828/wildlife?fields=all": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 158,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"unknown_query_parameter\",\"detail\":\"Unknown query parameter(s): fields. Allowed parameters: format.\",\"attr\":\"\"}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828/rules?limit=3": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 157,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"unknown_query_parameter\",\"detail\":\"Unknown query parameter(s): limit. Allowed parameters: format.\",\"attr\":\"\"}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 4807,
+  "body": "{\"description\":\"\",\"description_de\":\"\",\"description_en\":\"\",\"summary\":\"Nature reserves constitute one of the most important conservation categories in Germany and Austria. The exact definitions vary, but together they combine the conservation of natural landscape, the protection of endangered species and the preservation for scientific interests.\",\"summary_de\":\"Ein Naturschutzgebiet ist die stärkste großräumige Schutzkategorie. In Deutschland basiert es auf Bundes- und in Österreich auf Landesrecht. Die verbindenden Ziele sind der Erhalt einer ursprünglichen Landschaft, Schutz von seltenen, gefährdeten oder charakteristischen Tieren und Pflanzen und die Bewahrung von Räumen mit besonderem wissenschaftlich-ökologischem Interesse.\",\"summary_en\":\"Nature reserves constitute one of the most important conservation categories in Germany and Austria. The exact definitions vary, but together they combine the conservation of natural landscape, the protection of endangered species and the preservation for scientific interests.\",\"area_in_km2\":0.1375,\"created_at\":\"2023-11-15T11:04:17.998017Z\",\"dtp_api_url\":\"https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828\",\"dtp_url\":\"https://platform.digitizetheplanet.org/en/protected_area/schlosspark-falkenstein/\",\"dtp_widget_url\":\"https://platform.digitizetheplanet.org/en/protected_area_widget/afc76604-4f04-41d5-bcab-421818dee828/\",\"external_references\":[{\"name\":\"wdpa\",\"id\":\"319077\",\"url\":\"https://www.protectedplanet.net/319077\"},{\"name\":\"wikidata\",\"id\":\"Q28910527\",\"url\":\"https://www.wikidata.org/wiki/Q28910527\"},{\"name\":\"osm\",\"id\":\"relation/3900663\",\"url\":\"https://www.openstreetmap.org/relation/3900663\"},{\"name\":\"source_id\",\"id\":\"by_NSG-00139.01\",\"url\":null},{\"name\":\"outdooractive\",\"id\":\"9020935\",\"url\":\"https://www.outdooractive.com/de/protected-area/9020935\"}],\"geodata\":{\"geometry\":{\"type\":\"MultiPolygon\",\"coordinates\":[[[[12.486164,49.10257],[12.486169,49.102547],[12.486208,49.102401],[12.486396,49.102242],[12.486405,49.102234],[12.486439,49.102203],[12.48664,49.102078],[12.486647,49.102074],[12.486809,49.101973],[12.487007,49.101779],[12.487072,49.101715],[12.48708,49.101707],[12.487239,49.101597],[12.487421,49.101472],[12.487419,49.101438],[12.487407,49.101188],[12.487234,49.100956],[12.487274,49.100633],[12.487199,49.100597],[12.487028,49.100459],[12.486928,49.100473],[12.486765,49.100459],[12.486632,49.100447],[12.48587,49.100134],[12.485871,49.10013],[12.485906,49.099827],[12.485902,49.099821],[12.485867,49.099812],[12.485882,49.099724],[12.485754,49.099726],[12.485716,49.099727],[12.485744,49.099602],[12.485571,49.099512],[12.485554,49.099503],[12.485505,49.099439],[12.485447,49.099362],[12.485281,49.099175],[12.485177,49.099067],[12.485073,49.098957],[12.485051,49.098929],[12.484984,49.098807],[12.485059,49.098712],[12.484922,49.09856],[12.4848,49.098484],[12.484569,49.098434],[12.484352,49.09871],[12.483963,49.09883],[12.483646,49.099033],[12.483585,49.099024],[12.483353,49.098989],[12.483245,49.099127],[12.483168,49.099239],[12.483114,49.099412],[12.482906,49.099522],[12.4829,49.099521],[12.48287,49.099516],[12.482869,49.099516],[12.482676,49.099584],[12.482414,49.099515],[12.482123,49.099386],[12.48211,49.09942],[12.482024,49.099647],[12.481968,49.099796],[12.481811,49.09975],[12.481806,49.099751],[12.481699,49.099791],[12.481565,49.099677],[12.481503,49.099787],[12.48137,49.100019],[12.481282,49.100242],[12.481191,49.100354],[12.48106,49.100529],[12.48105,49.100528],[12.480966,49.100521],[12.480982,49.100552],[12.481022,49.100632],[12.481058,49.100702],[12.481069,49.100723],[12.48111,49.100804],[12.481135,49.100853],[12.48156,49.101242],[12.481722,49.101479],[12.481723,49.101481],[12.481817,49.101477],[12.48182,49.101476],[12.481925,49.101474],[12.482229,49.101535],[12.482597,49.101598],[12.482785,49.101844],[12.482976,49.102128],[12.483351,49.102379],[12.483881,49.102703],[12.483916,49.102718],[12.484325,49.102891],[12.484836,49.10302],[12.485077,49.103119],[12.485874,49.103028],[12.486001,49.102976],[12.486138,49.102831],[12.486164,49.10257]]]]},\"centroid\":{\"type\":\"Point\",\"coordinates\":[12.4843337,49.1009034]},\"source\":{\"id\":79,\"name\":\"Bayerisches Landesamt für Umwelt\",\"acronym\":\"LFU-BY\",\"url\":\"https://www.lfu.bayern.de/\"},\"license\":{\"name\":\"CC BY 4.0\",\"uri\":\"https://creativecommons.org/licenses/by/4.0/\"}},\"iucn_category\":\"IV\",\"logo_url\":\"https://platform.digitizetheplanet.org/archives/logos/NSG_Schild_hHtss8E.webp\",\"name\":\"Schloßpark Falkenstein\",\"name_de\":\"Schloßpark Falkenstein\",\"name_en\":\"Schloßpark Falkenstein\",\"name_sl\":null,\"parent_uuid\":null,\"updated_at\":\"2026-09-29T08:28:33.512629Z\",\"url\":null,\"year_of_foundation\":null,\"category_id\":2,\"country_ids\":[1],\"district_ids\":[63],\"state_ids\":[2],\"responsible_organization_ids\":[129]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828?fields=wildlife": {
+  "status": 200,
+  "ctype": "application/json",
+  "len": 1182,
+  "body": "{\"wildlife\":[{\"id\":14,\"presence_from\":null,\"presence_to\":null,\"protection_time_period\":null,\"protection_landscape\":null,\"behavior_recommendation\":null,\"sensitive_to\":null,\"habitat_demands\":null,\"link_name\":null,\"link_url\":null,\"created_at\":\"2024-08-21T10:14:03.799467Z\",\"updated_at\":\"2024-08-21T10:14:03.799495Z\",\"connected_rule_id\":null,\"season_id\":null,\"daytime_id\":null,\"weathercondition_id\":null},{\"id\":1826,\"presence_from\":null,\"presence_to\":null,\"protection_time_period\":null,\"protection_landscape\":null,\"behavior_recommendation\":null,\"sensitive_to\":null,\"habitat_demands\":null,\"link_name\":null,\"link_url\":null,\"created_at\":\"2025-11-06T14:38:04.204667Z\",\"updated_at\":\"2025-11-06T14:38:04.204685Z\",\"connected_rule_id\":null,\"season_id\":null,\"daytime_id\":null,\"weathercondition_id\":null},{\"id\":1827,\"presence_from\":null,\"presence_to\":null,\"protection_time_period\":null,\"protection_landscape\":null,\"behavior_recommendation\":null,\"sensitive_to\":null,\"habitat_demands\":null,\"link_name\":null,\"link_url\":null,\"created_at\":\"2025-11-06T14:38:59.270819Z\",\"updated_at\":\"2025-11-06T14:38:59.270835Z\",\"connected_rule_id\":null,\"season_id\":null,\"daytime_id\":null,\"weathercondition_id\":null}]}"
+ },
+ "https://platform.digitizetheplanet.org/api/v2/protected-areas/afc76604-4f04-41d5-bcab-421818dee828?fields=wildlife,conservation_objectives": {
+  "status": 400,
+  "ctype": "application/json",
+  "len": 848,
+  "body": "{\"type\":\"validation_error\",\"errors\":[{\"code\":\"invalid_field_names\",\"detail\":\"Invalid field names: conservation_objectives. Available fields are: area_in_km2, category_id, country_ids, created_at, description, description_cs, description_de, description_en, description_fi, description_fr, description_hu, description_it, description_pt, description_ro, description_sl, district_ids, dtp_api_url, dtp_url, dtp_widget_url, external_references, geodata, iucn_category, legal_documents, logo_url, name, name_cs, name_de, name_en, name_fi, name_fr, name_hu, name_it, name_pt, name_ro, name_sl, parent_uuid, pictures, responsible_organization_ids, rules, state_ids, summary, summary_cs, summary_de, summary_en, summary_fi, summary_fr, summary_hu, summary_it, summary_pt, summary_ro, summary_sl, updated_at, url, wildlife, year_of_foundation\",\"attr\":\"\"}]}"
+ },
+ "OPTIONS /wildlife": {
+  "status": 200,
+  "body": "{\"name\":\"Wildlife List\",\"description\":\"\",\"renders\":[\"application/json\",\"text/html\"],\"parses\":[\"application/json\",\"application/x-www-form-urlencoded\",\"multipart/form-data\"]}"
+ }
+}
