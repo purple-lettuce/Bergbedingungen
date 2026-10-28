@@ -1,0 +1,58 @@
+name: Schutzgebiete aktualisieren
+
+# Nur manuell startbar (Reiter "Actions" -> "Schutzgebiete aktualisieren" -> "Run workflow").
+# Holt die Wildlife-Referenzliste und die Details aller Schutzgebiete aus der Digitize API
+# und baut data/protected_areas_alps.geojson neu (inklusive Wildlife und Regeln für die Popups).
+# Der Lauf dauert, weil jedes Schutzgebiet einzeln abgefragt wird.
+
+on:
+  workflow_dispatch:
+    inputs:
+      wildlife_key:
+        description: "Nur falls im Protokoll Wildlife-Einträge nicht aufgelöst werden: Feld mit dem Verweis (siehe README)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-protected-areas
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wildlife-Referenzliste abrufen
+        run: python3 scripts/fetch_wildlife.py
+
+      - name: Details der Schutzgebiete abrufen
+        run: python3 scripts/fetch_protected_area_details_v2.py
+
+      - name: GeoJSON bauen
+        env:
+          WILDLIFE_KEY: ${{ inputs.wildlife_key }}
+        run: |
+          if [ -n "$WILDLIFE_KEY" ]; then
+            python3 scripts/build_geojson.py --wildlife-key "$WILDLIFE_KEY" | tee build.log
+          else
+            python3 scripts/build_geojson.py | tee build.log
+          fi
+          { echo '### GeoJSON gebaut'; echo '```'; cat build.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Änderungen speichern
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "Keine Änderungen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/wildlife.json data/protected_areas_alps.geojson
+          git commit -m "Schutzgebiete mit Wildlife und Regeln aktualisiert"
+          git pull --rebase
+          git push
