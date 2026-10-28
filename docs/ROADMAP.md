@@ -1,3 +1,15 @@
+# Mountain Radar
+
+ALPINE RISK INTELLIGENCE
+
+Know before you go.
+
+Repository:
+Bergbedingungen
+
+Status:
+Übergangsphase vor möglichem Rebranding.
+
 # 🏔️ Bergbedingungen Roadmap
 
 > Version: 1.0
@@ -7,6 +19,18 @@
 > Dieses Dokument beschreibt die langfristige Vision, die strategische Ausrichtung und die Priorisierung der Entwicklung von Bergbedingungen.
 >
 > Technische Details, Datenquellen, APIs und Implementierungsinformationen werden in separaten Dokumenten dokumentiert.
+
+---
+
+## Dokumentationsregel
+
+Nach Abschluss eines Arbeitspakets müssen folgende Dokumente geprüft werden:
+
+- ROADMAP.md
+- DATENQUELLEN.md
+- IDEENSAMMLUNG.md
+
+Die Dokumentation ist die maßgebliche Quelle für den Projektstatus.
 
 ---
 
@@ -62,7 +86,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 |------------|------------|------------|
 | 1 | Legende für Schutzgebiete | Offen |
 | 2 | Filter nach Schutzgebietstyp | Offen |
-| 3 | Lawinenlage | Recherche |
+| 3 | Lawinenlage | offen |
 | 4 | Unfalllayer | Recherche |
 | 5 | Unfall-Heatmap | Konzept |
 | 6 | Digiway Absturzrisiko | Konzept |
@@ -152,7 +176,9 @@ Fortschritt: 0 %
 
 ## Ziel
 
-Aktuelle Lawinenlage direkt auf der Karte visualisieren.
+Aktuelle Lawinenlage direkt auf der Karte visualisieren. Schaffung der Datengrundlage
+für spätere Tourenanalysen.
+
 
 ### Regionen
 
@@ -166,7 +192,7 @@ Aktuelle Lawinenlage direkt auf der Karte visualisieren.
 
 - [ ] Lawinenregionen
 - [ ] Gefahrenstufen
-- [ ] Farbige Darstellung
+- [ ] Farbige Darstellung nach Höhenstufe
 - [ ] Popup-Informationen
 - [ ] Verlinkung auf Lageberichte
 

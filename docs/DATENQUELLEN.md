@@ -1,3 +1,9 @@
+Projekt:
+Mountain Radar
+
+Interner Repositoryname:
+Bergbedingungen
+
 # 📚 Datenquellen
 
 > Version: 0.1

@@ -1,4 +1,14 @@
-# Bergbedingungen
+# Mountain Radar
+
+ALPINE RISK INTELLIGENCE
+
+Know before you go.
+
+Mountain Radar ist der öffentliche Produktname des Projekts.
+
+Der interne Repository-Name lautet derzeit weiterhin "Bergbedingungen".
+
+## Bergbedingungen
 
 Kartenseite mit Sperrungen und Hinweisen im Gebirge, dazu ein Wetterwidget.
 

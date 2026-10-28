@@ -1,3 +1,15 @@
+# Branding
+
+Produktname: Mountain Radar
+
+Claim: ALPINE RISK INTELLIGENCE
+
+Slogan: Know before you go.
+
+Status: Aktueller Favorit
+
+Repositoryname: Bergbedingungen
+
 # 💡 Ideensammlung
 
 > Version: 1.1
@@ -336,6 +348,8 @@ Empfehlungen basierend auf:
 - Wetter
 - Lawinenlage
 - Schutzgebieten
+- Hangneigungslayer z.B. Open Slope Map
+- Schneelage z.B. exolabs
 
 ---
 
