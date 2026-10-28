@@ -128,4 +128,4 @@ footer a { color: var(--accent); }
 .pa-sw i { position: absolute; inset: 0; }
 .pa-legend .pa-sw { margin-right: 0; vertical-align: baseline; }
 .pa-legend .pa-label { min-width: 0; overflow-wrap: anywhere; }
-.leaflet-control-layers .pa-count { color: var(--muted); }
+.leaflet-control-layers .pa-count { color: #5d6a65; }   /* Ebenenauswahl bleibt auch im Dunkelmodus hell */
