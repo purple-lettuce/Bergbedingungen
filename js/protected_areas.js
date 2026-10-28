@@ -3,6 +3,7 @@
 import { protectedAreasLayer, esc } from './map.js';
 import { addProtectedAreasLegend } from './protected_areas_legend.js';
 import { addCategoryFilter } from './protected_areas_filter.js';
+import { wildlifeIcon } from './popup_icons.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
 const CATEGORY_NAMES = {
@@ -37,6 +38,17 @@ function popupList(title, entries) {
     "</ul>";
 }
 
+// Wildlife als Reihe kleiner Schilder mit Symbol und Name. Namen stammen aus der Datenquelle und werden maskiert.
+function wildlifeHtml(names, more) {
+  return "<p style=\"margin:6px 0 4px\"><b>Wildlife:</b></p>" +
+    "<ul class=\"pa-chips\">" +
+    names.map(function (n) {
+      return "<li><span class=\"pa-ico\" aria-hidden=\"true\">" + wildlifeIcon(n) + "</span>" + esc(n) + "</li>";
+    }).join("") +
+    (more ? "<li class=\"pa-more\">und " + more + " weitere</li>" : "") +
+    "</ul>";
+}
+
 // Wildlife und Regeln aus den Index-Tabellen der GeoJSON-Datei (siehe scripts/build_geojson.py).
 // Ältere Dateien ohne diese Felder liefern einen leeren Text, das Popup bleibt dann wie bisher.
 function extraPopupHtml(p, geojson) {
@@ -46,11 +58,7 @@ function extraPopupHtml(p, geojson) {
     .map(function (i) { return (geojson.wildlife_names || [])[i]; })
     .filter(Boolean);
   if (animals.length) {
-    const shown = animals.slice(0, WILDLIFE_SHOWN);
-    if (animals.length > shown.length) {
-      shown.push("und " + (animals.length - shown.length) + " weitere");
-    }
-    html += popupList("Wildlife", shown);
+    html += wildlifeHtml(animals.slice(0, WILDLIFE_SHOWN), Math.max(0, animals.length - WILDLIFE_SHOWN));
   }
 
   const rules = (p.r || [])

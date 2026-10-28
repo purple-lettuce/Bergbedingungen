@@ -40,6 +40,7 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene |
 | `js/protected_areas_legend.js` | Legende der Schutzgebiete (Kartenelement unten links): Farben der Kategorien, die in den Daten vorkommen; folgt der Ebene „Schutzgebiete“ |
 | `js/protected_areas_filter.js` | Filter nach Schutzgebietskategorie: je Kategorie ein Eintrag in der Ebenenauswahl (mit Farbfeld und Anzahl); blendet die vorhandenen Flächen ein und aus, ohne neu zu laden |
+| `js/popup_icons.js` | Symbole für die Schutzgebiets-Popups (Wildlife nach Stichwörtern im Tiernamen; unbekannte Namen bekommen ein neutrales Pfotensymbol) |
 
 Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` und
 `protected_areas.js` → `map.js`. `map.js` hängt von keiner anderen Datei ab.
