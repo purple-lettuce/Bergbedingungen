@@ -1,0 +1,19 @@
+name: DTP-API erkunden
+on:
+  push:
+    branches: [explore/dtp-api]
+permissions:
+  contents: write
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 explore/explore_dtp.py | tee explore/log.txt
+      - name: Ergebnis speichern
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add explore/result.json explore/log.txt
+          git commit -m "Erkundungsergebnis" && git push || echo "nichts zu speichern"
