@@ -5,6 +5,12 @@ import { map, protectedAreasLayer, esc } from './map.js';
 
 var MOBILE_QUERY = '(max-width: 820px)';   // wie im Stylesheet: Seitenleiste unter der Karte
 
+// Farbfeld einer Kategorie (Rand- und Füllfarbe wie auf der Karte); auch in der Ebenenauswahl verwendet.
+export function swatchHtml(style) {
+  return '<span class="pa-sw" style="border-color:' + esc(style.color) + '">' +
+    '<i style="background:' + esc(style.fillColor) + ';opacity:' + esc(Math.min(1, style.fillOpacity * 2.5)) + '"></i></span>';
+}
+
 // entries: [{ id, label, count, style }] in der Reihenfolge der Anzeige, style = Leaflet-Pfadstil der Kategorie.
 export function addProtectedAreasLegend(entries) {
   if (!entries.length) return;
@@ -15,9 +21,7 @@ export function addProtectedAreasLegend(entries) {
     var open = !window.matchMedia(MOBILE_QUERY).matches;   // am Handy zunächst eingeklappt, damit die Karte frei bleibt
 
     var rows = entries.map(function (e) {
-      return '<li><span class="pa-sw" style="border-color:' + esc(e.style.color) + '">' +
-        '<i style="background:' + esc(e.style.fillColor) + ';opacity:' + esc(Math.min(1, e.style.fillOpacity * 2.5)) + '"></i></span>' +
-        '<span class="pa-label">' + esc(e.label) + '</span></li>';
+      return '<li>' + swatchHtml(e.style) + '<span class="pa-label">' + esc(e.label) + '</span></li>';
     }).join('');
     box.innerHTML =
       '<button type="button" class="pa-toggle" aria-expanded="' + open + '" aria-controls="pa-legend-list">Legende Schutzgebiete</button>' +
