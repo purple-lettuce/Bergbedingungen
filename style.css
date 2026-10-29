@@ -182,5 +182,14 @@ footer a { color: var(--accent); }
 .av-patterns { margin: 4px 0; padding-left: 18px; }
 .av-foot { margin: 12px 0 0; font-size: 12px; color: #5d6a65; }
 .av-foot a { color: #1f5c4a; }
-@media (max-width: 820px) { .kl-body { max-height: calc(60vh - 100px); } }
+.av-marker { background: none; border: 0; }
+.av-marker .av-chip { width: auto; min-width: 28px; padding: 0 5px; box-shadow: 0 1px 3px rgba(0,0,0,.5); cursor: pointer; }
+.av-marker .av-chip.av-uncertain { border-style: dashed; border-width: 2px; }
+.av-sources { list-style: none; margin: 0 0 8px; padding: 0; }
+.av-sources li { margin: 0 0 6px; font-size: 13px; }
+.av-sources li:not(.av-warn) { padding: 0 2px; }
+.av-pop .av-h { margin: 8px 0 2px; font-size: 13px; font-weight: 600; }
+.av-pop .av-list { margin: 4px 0; padding-left: 18px; }
+.av-pop .av-note { margin: 6px 0 0; font-size: 12px; color: #5d6a65; }
+.av-pop .av-core { margin: 4px 0 0; font-size: 12px; font-style: italic; color: #5d6a65; }@media (max-width: 820px) { .kl-body { max-height: calc(60vh - 100px); } }
 @media (pointer: coarse) { .kl-head, .kl-toggle { min-height: 44px; } .kl-opt { min-height: 44px; } }

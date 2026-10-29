@@ -86,7 +86,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 |------------|------------|------------|
 | 1 | Legende für Schutzgebiete | Erledigt |
 | 2 | Filter nach Schutzgebietstyp | Offen |
-| 3 | Lawinenlage | In Arbeit (Euregio umgesetzt, Test ab Saisonstart) |
+| 3 | Lawinenlage | In Arbeit (Euregio und Schweiz umgesetzt, Test mit aktuellen Berichten ab Saisonstart) |
 | 4 | Unfalllayer | Recherche |
 | 5 | Unfall-Heatmap | Konzept |
 | 6 | Digiway Absturzrisiko | Konzept |
@@ -170,7 +170,7 @@ Zusätzliche Risikoinformationen für den Alpenraum sichtbar machen.
 
 🟡 In Arbeit
 
-Fortschritt: ca. 10 % (2.1 Lawinenlage Euregio umgesetzt, übrige Punkte offen)
+Fortschritt: ca. 15 % (2.1 Lawinenlage Euregio und Schweiz umgesetzt, übrige Punkte offen)
 
 ---
 
@@ -185,29 +185,34 @@ für spätere Tourenanalysen.
 ### Regionen
 
 - [x] Euregio Tirol, Südtirol und Trentino (ALBINA, 90 Mikroregionen)
+- [x] Schweiz (SLF, 149 Warnregionen)
 - [ ] Österreich (übrige Bundesländer; die EUREGIO-Datei enthält teils Kärnten, bewusst nicht übernommen)
-- [ ] Schweiz
-- [ ] Frankreich
-- [ ] Italien (außerhalb der Euregio)
-- [ ] Slowenien
+- [ ] Frankreich (Empfehlung und Quellenlage: Analyse, Abschnitt 9)
+- [ ] Italien (außerhalb der Euregio, siehe Analyse, Abschnitt 9)
+- [ ] Slowenien (siehe Analyse, Abschnitt 9)
 
-### Umgesetzt (Euregio)
+### Umgesetzt (Euregio und Schweiz)
 
 Details, Entscheidungen und Datenmodell: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md)
 
+- [x] Gemeinsames Datenmodell und Pipeline für mehrere Länder: je Quelle ein Eintrag in der Registry, ein Normalisierer für CAAML v6, gemeinsame Geometrie aus eaws-regions
 - [x] Lawinenregionen als Polygone
-- [x] Gefahrenstufen in den offiziellen Farben, Stufe 5 als rot-schwarzes Schachbrett
-- [x] Darstellung nach Höhenstufe: Färbung nach höchster Stufe (wie ALBINA), Höhenaufteilung im Popup mit offiziellem Piktogramm, Höhenwahl in der Legende. Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich (Begründung in der Analyse)
-- [x] Popup mit Gültigkeit, Lawinenproblemen (Höhenbereich, Expositionen), Zusammenfassung und Bulletintext, offizielle Symbole
-- [x] Verlinkung auf den Lagebericht (Link aus dem Routing der ALBINA-Website abgeleitet, noch nicht geprüft)
-- [x] Automatische Aktualisierung über GitHub Actions (zweimal täglich)
-- [x] Abgelaufene Berichte werden nicht als Gefahrenstufe dargestellt
+- [x] Gefahrenstufen in den offiziellen Farben, Stufe 5 als rot-schwarzes Schachbrett; Teilstufen der Schweiz (3-, 3=, 3+)
+- [x] Zentrales anklickbares Symbol je Region (Position als Pol der Unzugänglichkeit in der Pipeline berechnet)
+- [x] Darstellung nach Höhenstufe: Färbung nach höchster Stufe (wie ALBINA und SLF), Höhenaufteilung im Popup (Euregio aus den Gefahrenstufen, Schweiz aus den Lawinenproblemen, weil der SLF keine Höhe bei den Gefahrenstufen angibt), Höhenwahl in der Legende. Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich (Begründung in der Analyse)
+- [x] Popup mit Veröffentlichung, Gültigkeit, Lawinenproblemen (Höhenbereich, Expositionen), Zusammenfassung (wo die Quelle sie liefert), Bulletintext, offizielle Symbole
+- [x] Verlinkung auf den Lagebericht (Links aus der ALBINA-Website abgeleitet bzw. SLF-Seite, Deep Links nicht geprüft)
+- [x] Automatische Aktualisierung über GitHub Actions (zweimal täglich, eine Action für alle Quellen)
+- [x] Abgelaufene Berichte und Quellen ohne aktives Bulletin werden nicht als Gefahrenstufe dargestellt
+- [x] Tests: Python (38), JavaScript-Logik im Headless-Browser (12), Frontend mit archivierten Berichten vom 15.03.2026 in einem Headless-Browser geprüft
 
-### Offen (Euregio)
+### Offen (Lawinenlage)
 
-- [ ] **Browser-Test mit echten, gültigen Berichten:** erst nach dem Saisonstart des Lawinenwarndienstes möglich (der aktuelle Bericht ist der letzte des Winters 2025/26). Das Frontend ist bisher nicht im Browser geprüft
-- [ ] Lizenz der ALBINA-Grafiken in `vendor/albina/` klären (siehe Analyse, Abschnitt 7)
+- [ ] **Test mit aktuellen, gültigen Berichten** im Winter 2026/27 (erst nach dem Saisonstart der Lawinenwarndienste möglich); Prüfung auf echten Mobilgeräten
+- [ ] Lizenz der ALBINA-Grafiken in `vendor/albina/` klären, SLF nach eigenen Icons fragen (siehe Analyse, Abschnitt 10)
+- [ ] Mailingliste des SLF abonnieren (data@slf.ch), Hinweise zu Änderungen und Unterbrüchen
 - [ ] Ebene standardmäßig einblenden, sobald Berichte aktuell sind (Entscheidung nach dem Praxistest)
+- [ ] Weitere Länder anbinden (Reihenfolge und Vorgehen: Analyse, Abschnitt 9)
 
 ### Langfristig
 

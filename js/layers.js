@@ -14,7 +14,7 @@ panel.addBaseLayer('Topo mit Höhenlinien', topo);
 // Ebenen
 panel.addOverlay('Sperrungen & Hinweise', layerGroup);
 panel.addOverlay('Schutzgebiete', protectedAreasLayer);
-panel.addOverlay('Lawinenlage (Euregio)', avalancheLayer);
+panel.addOverlay('Lawinenlage', avalancheLayer);
 
 // Legenden
 export var legends = {

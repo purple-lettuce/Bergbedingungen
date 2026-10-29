@@ -1,8 +1,8 @@
-# Lawinenlage Euregio (ALBINA): Analyse, Entscheidungen und Datenmodell
+# Lawinenlage (Euregio, Schweiz): Analyse, Entscheidungen und gemeinsames Datenmodell
 
 > Stand: Oktober 2026
 >
-> Dieses Dokument hält fest, was die Datenquellen tatsächlich liefern, welche Darstellungsentscheidungen daraus folgen und wie die Daten im Projekt fließen. Aussagen sind als **verifiziert** (an echten Daten geprüft), **abgeleitet** (aus dem Quelltext der ALBINA-Projekte) oder **offen** gekennzeichnet.
+> Dieses Dokument hält fest, was die Datenquellen tatsächlich liefern, welche Entscheidungen daraus folgen und wie die Daten im Projekt fließen. Aussagen sind als **verifiziert** (an echten Daten geprüft), **abgeleitet** (aus dem Quelltext oder der Dokumentation der Anbieter) oder **offen** gekennzeichnet.
 >
 > Zugehörige Dokumente: [DATENQUELLEN.md](DATENQUELLEN.md) (Quellen, Lizenzen), [ROADMAP.md](ROADMAP.md) (Status).
 
@@ -10,204 +10,340 @@
 
 # Ergebnis in Kürze
 
-- Umfang: Euregio Tirol, Südtirol und Trentino, 90 Mikroregionen (`AT-07`, `IT-32-BZ`, `IT-32-TN`).
-- Gefahrenstufen, Höhen, Lawinenprobleme, Expositionen und Texte kommen unverändert aus dem offiziellen CAAML-v6-Bulletin. Abgeleitet wird nur die höchste Gefahrenstufe je Bulletin.
-- **Eine echte Höhenaufteilung der Polygone ist mit den offenen Daten nicht möglich** (Begründung in Abschnitt 3). Umgesetzt ist die Darstellungslogik der ALBINA-Website (Färbung nach höchster Stufe) plus die offiziellen Höhen-Piktogramme, Höhenangaben im Popup und eine Höhenwahl in der Legende.
-- Abgelaufene Berichte werden **nicht** als Gefahrenstufe dargestellt. Der aktuell veröffentlichte Bericht ist der letzte des Winters 2025/26 (gültig bis 03.05.2026).
+- Umfang: **Euregio** (Tirol, Südtirol, Trentino, 90 Regionen) und **Schweiz** (SLF, 149 Warnregionen, davon 119 bis 135 mit Bericht je nach Tag).
+- Beide Dienste liefern CAAML v6 nach dem EAWS-Schema. Alle Quellen werden auf **ein gemeinsames Datenmodell** abgebildet, Frontend und Pipeline kennen nur dieses Modell. Ein neues Land ist ein Eintrag in `scripts/avalanche_sources.py`.
+- Die Geometrie kommt für alle Länder aus [eaws-regions](https://gitlab.com/eaws/eaws-regions). Die Polygone der Schweiz dort sind **identisch** mit der Warnregion-API des SLF (149 von 149 Polygonen, gleiche Kennungen `CH-<sector_id>`).
+- **Höhe:** Euregio nennt Höhengrenzen bei den Gefahrenstufen, **SLF nicht** (in 71 von 71 Stufen keine Höhe). Beim SLF steht die Höhe nur bei den Lawinenproblemen, jedes Problem hat dort eine eigene Gefahrenstufe. Eine echte Teilung der Polygone ist bei keiner Quelle möglich. Die Karte färbt nach der **höchsten Stufe**, das Popup zeigt die höhenabhängigen Stufen (Euregio: aus den Gefahrenstufen, Schweiz: aus den Lawinenproblemen, jeweils mit Herkunftshinweis).
+- Abgelaufene Berichte werden nicht als Gefahrenstufe dargestellt. Aktuell ist der Euregio-Bericht der letzte des Winters 2025/26, der SLF-Dienst liefert keinen aktiven Bericht (Saisonpause).
 
 ---
 
-# 1. Verwendete Quellen
+# 1. Quellen und API-Endpunkte
 
-| Quelle | Inhalt | Lizenz | Verwendung |
-|---|---|---|---|
-| `https://static.avalanche.report/bulletins/latest/EUREGIO_de_CAAMLv6.json` | aktuelles Bulletin, CAAML v6, deutsch | CC BY 4.0 | Gefahrenstufen, Probleme, Texte |
-| `https://gitlab.com/eaws/eaws-regions` (`public/micro-regions/{AT-07,IT-32-BZ,IT-32-TN}_micro-regions.geojson.json`) | Polygone der Mikroregionen mit Gültigkeitszeitraum | CC0 1.0 | Geometrie |
-| `https://gitlab.com/albina-euregio/albina-website` (`public/images/pro/...`, `app/i18n/caaml/de.json`, `app/css/scss/abstracts/_variables.scss`) | offizielle Symbole, deutsche Bezeichnungen, Farben | AGPL-3.0 (Repository), Grafiklizenz **offen** | Symbole, Beschriftung, Farben |
-| `https://gitlab.com/albina-euregio/avalanche-warning-maps` | Geodaten für ALBINAs Gefahrenstufenkarten | GPL-3.0-or-later | nur Referenz für die offizielle Darstellungslogik, keine Daten übernommen |
-| `https://gitlab.com/albina-euregio/base-map` | Grundkarte | nicht geprüft | nicht verwendet (Projekt nutzt OpenStreetMap/OpenTopoMap) |
+## 1.1 Euregio (ALBINA)
 
-Lizenzhinweis der Open-Data-Seite (`lawinen.report/more/open-data`, Quelltext in `albina-website/public/content/more/open-data/de.html`): „Sämtliche Daten, wie der Lawinen.report, Wetterstationsdaten, etc., stehen unter der Lizenz CC BY 4.0.“ Die Namensnennung steht in der Legende, im Popup, in der Kartenquellenangabe und im Seitenfuß.
+| Zweck | URL | Lizenz |
+|---|---|---|
+| aktuelles Bulletin, CAAML v6, deutsch | `https://static.avalanche.report/bulletins/latest/EUREGIO_de_CAAMLv6.json` | CC BY 4.0 |
+| Archiv | `https://static.avalanche.report/bulletins/{Datum}/{Datum}_EUREGIO_de_CAAMLv6.json` | CC BY 4.0 |
+| Open-Data-Übersicht | https://lawinen.report/more/open-data | |
+| Symbole, Bezeichnungen, Farben | https://gitlab.com/albina-euregio/albina-website (`public/images/pro/`, `app/i18n/caaml/de.json`, `app/css/scss/abstracts/_variables.scss`) | AGPL-3.0, Grafiklizenz offen |
 
 Ansprechpartner laut ALBINA-README: lawine@tirol.gv.at.
+
+## 1.2 Schweiz (SLF)
+
+| Zweck | URL | Status |
+|---|---|---|
+| Bulletin, CAAML v6, **V4** (verwendet) | `https://aws.slf.ch/api/bulletin/caaml/v4/{lang}/json` | verifiziert |
+| Bulletin V3 (Standardversion) | `https://aws.slf.ch/api/bulletin/caaml/{lang}/json` | verifiziert |
+| Bulletin als GeoJSON (Polygone mit Bulletin je Feature) | `.../caaml/{lang}/geojson`, `.../caaml/v4/{lang}/geojson` | abgeleitet (OpenAPI) |
+| frühere Bulletins | Parameter `?activeAt=<ISO-Zeitpunkt>` an den Bulletin-Endpunkten | verifiziert (Daten ab März 2025 abgerufen) |
+| Liste veröffentlichter Bulletins | `/api/bulletin-list/caaml/{lang}/json` | abgeleitet |
+| Vorschau unveröffentlichter Bulletins | `/api/bulletin-preview/...` | nicht verwendet |
+| API-Dokumentation (OpenAPI 4.0, in der Seite eingebettet) | https://aws.slf.ch/api/bulletin/caaml | verifiziert |
+| Warnregionen (verwendet für Namen) | `https://aws.slf.ch/api/warningregion/warnregionDefinition/current` | verifiziert |
+| Warnregionen als GeoJSON / KML | `.../warnregionDefinition/current/geojson`, `.../current/kml`, `.../findByDate/geojson`, `.../{id}/geojson` | verifiziert (`current/geojson`), übrige abgeleitet |
+| Warnregion-API-Dokumentation | https://aws.slf.ch/api/warningregion/ (Swagger UI) | verifiziert |
+| Bedingungen / Datenservice | https://www.slf.ch/en/services-and-products/slf-data-service/ | verifiziert |
+| Veröffentlichungszeiten | https://www.slf.ch/en/avalanche-bulletin-and-snow-situation/about-the-avalanche-bulletin/publication-times-and-validity/ | verifiziert |
+
+Sprachen: `de`, `fr`, `it`, `en` (existiert eine Sprache nicht, liefert der Dienst deutsch). Ohne Anmeldung nutzbar. Kontakt: data@slf.ch.
+
+**V3 gegen V4** (laut OpenAPI-Beschreibung): In V4 sind Höhengrenzen Texte statt Zahlen (wie im CAAML-Standard und bei ALBINA), der ganze Berg ist ein leeres Objekt `"elevation": {}`, und alle leeren Werte (`null`, `""`, `{}`) sind entfernt. Verwendet wird V4.
+
+## 1.3 Geometrie
+
+| Quelle | Inhalt | Lizenz |
+|---|---|---|
+| `https://gitlab.com/eaws/eaws-regions/-/raw/master/public/micro-regions/{AT-07,IT-32-BZ,IT-32-TN,CH}_micro-regions.geojson.json` | Polygone mit `id` und optional `start_date` / `end_date` | CC0 1.0 |
+| SLF-Warnregion-API (s. o.) | dieselben Schweizer Polygone, dazu Namen in 4 Sprachen | CC BY 4.0 |
 
 ---
 
 # 2. Befunde zu den Daten
 
-Stichprobe: das aktuelle `latest`-Bulletin sowie die archivierten Bulletins von 2025-03-10, 2025-12-20, 2026-01-15, 2026-02-10, 2026-03-05, 2026-03-25, 2026-04-15 und 2026-05-02 (zusammen 53 Bulletins).
+## 2.1 Euregio
+
+Stichprobe: das `latest`-Bulletin und archivierte Bulletins von 2025-03-10, 2025-12-20, 2026-01-15, 2026-02-10, 2026-03-05, 2026-03-25, 2026-04-15 und 2026-05-02 (53 Bulletins).
 
 | Befund | Status |
 |---|---|
-| Archiv-URL: `https://static.avalanche.report/bulletins/{Datum}/{Datum}_EUREGIO_de_CAAMLv6.json`; für Tage ohne Bericht (z. B. Sommer) HTTP 404 | verifiziert |
 | `latest` ist derzeit das letzte Bulletin des Winters (Text: „Dies ist die letzte Gefahrenkarte des Winters 2025/26“), `Last-Modified` 02.05.2026 | verifiziert |
-| Die EUREGIO-Datei enthält teils auch Kärnten (`AT-02-...`). Diese Regionen werden bewusst nicht übernommen (Umfang: Tirol, Südtirol, Trentino) | verifiziert |
-| Jedes Bulletin gilt für mehrere Regionen (5 bis 10 Bulletins je Tag, 2 bis 61 Regionen je Bulletin, einschließlich Kärnten) | verifiziert |
-| Alle Regionen im Bulletin haben genau ein gültiges Polygon und umgekehrt (86 bis 90 Regionen an den 8 archivierten Stichtagen, 90 im aktuellen Bulletin) | verifiziert |
-| Polygon-Gültigkeit steht in `start_date` / `end_date` (das README von eaws-regions nennt `valid_from` / `valid_until`, die Daten verwenden aber `start_date` / `end_date`). Auswahl wie in der ALBINA-Website: `start_date <= Datum < end_date`, fehlende Grenzen sind offen | verifiziert |
-| Polygonkoordinaten sind WGS84 (`urn:ogc:def:crs:OGC:1.3:CRS84`), Typ `MultiPolygon` | verifiziert |
-| Regionsnamen stehen nur im Bulletin (`regions[].name`), nicht in den Polygondateien | verifiziert |
-| Regelbericht: veröffentlicht um 17:00 Ortszeit des Vortags (16:00Z Winterzeit, 15:00Z Sommerzeit), gültig 24 Stunden | verifiziert |
-| Außerplanmäßige Berichte kommen vor (`unscheduled: true`, 15.04.2026, veröffentlicht um 06:00Z) | verifiziert |
-| Beobachtete Gefahrenstufen in der Stichprobe: `low`, `moderate`, `considerable`. Stufen 4 und 5 (`high`, `very_high`) wurden nicht beobachtet, die Darstellung folgt der Gefahrenskala | verifiziert / nicht beobachtet |
-| Beobachtete Lawinenprobleme: `wet_snow`, `wind_slab`, `persistent_weak_layers`. Die übrigen Typen (`new_snow`, `gliding_snow`, `cornices`, `favourable_situation`, `no_distinct_avalanche_problem`) stammen aus der ALBINA-Übersetzungsdatei | verifiziert / abgeleitet |
-| In Texten kommt als HTML nur `<br/>` vor (Absatztrenner) | verifiziert |
-| `weatherForecast` und `travelAdvisory` waren in der Stichprobe in allen 6 Fällen leere Objekte; werden angezeigt, sobald sie Text enthalten (mit echtem Inhalt nicht geprüft) | offen |
-| Top-Level-Feld `highlights` (Kernaussage, 4 von 53 Bulletins) und `customData.LWD_Tyrol.dangerPatterns` (Gefahrenmuster, z. B. `DP10`) kommen vor | verifiziert |
+| Die EUREGIO-Datei enthält teils auch Kärnten (`AT-02-...`), diese Regionen werden nicht übernommen | verifiziert |
+| Alle Regionen im Bulletin haben genau ein gültiges Polygon und umgekehrt (86 bis 90 Regionen an 8 Stichtagen, 90 im aktuellen Bulletin) | verifiziert |
+| Polygon-Gültigkeit steht in `start_date` / `end_date` (das README von eaws-regions nennt `valid_from` / `valid_until`). Auswahl wie in der ALBINA-Website: `start_date <= Datum < end_date` | verifiziert |
+| Regionsnamen stehen nur im Bulletin (`regions[].name`) | verifiziert |
+| Regelbericht um 17:00 Ortszeit des Vortags, gültig 24 Stunden. Außerplanmäßige Berichte kommen vor (`unscheduled: true`, 15.04.2026, 06:00Z) | verifiziert |
+| Gefahrenstufen tragen Höhengrenzen (`lowerBound` / `upperBound`, Meter oder `treeline`) und Tageszeit (`all_day`, `earlier`, `later`). 70 von 98 Stufen haben eine Höhengrenze, 14 davon `treeline` | verifiziert |
+| Beobachtet: `low`, `moderate`, `considerable`; Stufen 4 und 5 nicht (Darstellung folgt der Skala) | verifiziert / nicht beobachtet |
+| Texte enthalten als HTML nur `<br/>`; `weatherForecast` / `travelAdvisory` waren immer leer; Kernaussage `highlights` und Gefahrenmuster (`customData.LWD_Tyrol.dangerPatterns`) kommen vor | verifiziert |
+
+## 2.2 Schweiz (SLF)
+
+Stichprobe: V4-Bulletins zu 7 Zeitpunkten (15.03.2025, 20.12.2025, 15.01., 10.02., 15.03., 20.04. und 10.05.2026), zusammen 62 Bulletins. Das aktuelle Bulletin (29.10.2026) ist leer.
+
+| Befund | Status |
+|---|---|
+| Ohne aktives Bulletin liefert der Dienst `{"bulletins":[]}` (Saisonpause). Das aktuelle Bulletin war am 29.10.2026 leer | verifiziert |
+| Regel-Ausgabe täglich 17 Uhr, gültig bis 17 Uhr des Folgetags; Update um 8 Uhr vor allem im Winter (bei Stufe 3 oder höher irgendwo in der Schweiz, sonst nach Lage); im Sommer und Herbst nur bei starkem Schneefall (Angabe des SLF). Beobachtet: Veröffentlichung 07:00Z (Morgen-Update, Winter), 16:00Z (Winter) bzw. 15:00Z (Sommerzeit, Abendausgabe); `nextUpdate` entspricht dem Ende der Gültigkeit | verifiziert |
+| `regionID` ist `CH-<sector_id>` (z. B. `CH-1111`). Alle Regionen aller 7 Stichtage haben ein Polygon (149 Sektoren). 119 bis 135 Regionen haben je Tag einen Bericht, 13 Sektoren hatten nie einen (Jura, Mittelland) | verifiziert |
+| Eine Gefahrenstufe je Region und Tageszeit (`all_day`, teils zusätzlich `later`), **in keiner der 71 Stufen eine Höhengrenze** | verifiziert |
+| Teilstufen in `customData.CH.subdivision`: `minus`, `neutral`, `plus` (Schreibweise 3-, 3=, 3+). Bei 51 von 71 Stufen vorhanden, nicht bei Nassschnee. Bedeutung laut SLF: unteres Ende, Mitte, oberes Ende der Stufe, bei Trockenschneelawinen ab Stufe 2 | verifiziert |
+| Lawinenprobleme tragen Höhe (`lowerBound` / `upperBound`), Expositionen, eigene Gefahrenstufe (`dangerRatingValue`, mit Teilstufe), `comment` (Beschreibung) und `customData.CH.coreZoneText` (z. B. „Gefahrenstufe „erheblich“ (3+) an West- über Nordost- bis Südosthängen über 2000m.“). 93 von 109 Problemen haben Höhe und Expositionen | verifiziert |
+| Keine Lawinengröße, Stabilität oder Häufigkeit bei den Problemen | verifiziert |
+| Beobachtete Problemtypen: `new_snow`, `persistent_weak_layers`, `wet_snow`, `wind_slab`, `no_distinct_avalanche_problem`, `gliding_snow` | verifiziert |
+| `customData.CH.aggregation` fasst Probleme mit gleichem Inhalt zusammen (z. B. „Trockene Lawinen“: Neuschnee, Altschnee) | verifiziert |
+| Texte nur als `comment` in `weatherForecast`, `weatherReview`, `snowpackStructure`, `tendency`, als **HTML** (`h1`, `h2`, `p`, `ul`, `li`, `span`, `br`). Keine Felder `avalancheActivity`, `highlights`, `travelAdvisory`, keine Zusammenfassung | verifiziert |
+| `unscheduled` war in allen 62 Bulletins `false` | verifiziert |
+| Das Schema nennt für das GeoJSON-Produkt ein Feld `fill` mit den Farben `#CCFF66`, `#FFFF00`, `#FF9900`, `#FF0000` und `#800000` (Stufe 5) | abgeleitet (OpenAPI) |
+
+## 2.3 Geometrie der Schweiz
+
+eaws-regions `CH_micro-regions` und die SLF-Warnregion-API (`current/geojson`) enthalten dieselben 149 Polygone mit denselben Kennungen (`CH-1111`, ...). Die Punktmengen sind bei 4 Nachkommastellen für alle 149 Regionen gleich (verifiziert). Die SLF-Definition ist `id` 21, gültig 01.10.2019 bis 01.10.2071. Weil dadurch alle Länder dieselbe Geometrie-Pipeline nutzen können, kommt die Geometrie aus eaws-regions, die SLF-API liefert nur die **Namen** (`sector_names.de`) für Regionen ohne Bericht.
 
 ---
 
-# 3. Höhenabhängige Gefahrenstufen
+# 3. Unterschiede SLF und Euregio
 
-## 3.1 Was ALBINA tatsächlich liefert
-
-Im Bulletin steht je Gefahrenstufe (`dangerRatings[]`) **eine** Höhenangabe:
-
-```json
-{ "mainValue": "low",      "elevation": { "upperBound": "2600" }, "validTimePeriod": "later" }
-{ "mainValue": "moderate", "elevation": { "lowerBound": "2600" }, "validTimePeriod": "later" }
-```
-
-- `upperBound` = „unter“, `lowerBound` = „über“ dieser Höhe.
-- Der Wert ist eine Zahl in Metern **oder** der Text `treeline` (Waldgrenze). Für die Waldgrenze enthalten die Daten keinen Zahlenwert.
-- Die Schwelle ändert sich von Bericht zu Bericht (beobachtet z. B. 2000, 2600, 2800 m und `treeline`).
-- Zusätzlich gibt es die Tageszeit `validTimePeriod`: `all_day`, `earlier` (früher am Tag), `later` (später am Tag). Beobachtet: 76 / 10 / 12 Einträge.
-- Auch Lawinenprobleme tragen eigene Höhenangaben (`lowerBound` / `upperBound`, ebenfalls mit `treeline`).
-- Die Polygone sind rein zweidimensional und enthalten keine Höhen.
-
-## 3.2 Optionen
-
-| Option | Machbar? | Bewertung |
+| Thema | Euregio (ALBINA) | Schweiz (SLF) |
 |---|---|---|
-| A. ALBINAs vorberechnete Höhen-Polygone (`eaws-regions/public/micro-regions_elevation`) verwenden | nein | Je Region gibt es genau ein Paar `low`/`high` mit **einer festen** Schwelle (`threshold`, `elevation line_visualization`), nicht die täglich wechselnde Schwelle des Berichts. Die Bedeutung der beiden Felder ist nicht dokumentiert. ALBINA selbst führt die zugehörigen Layer im README von `avalanche-warning-maps` als **obsolet** („no longer used by albina-server“). Eine Verwendung würde Höhengrenzen vortäuschen, die der Bericht nicht nennt. |
-| B. Polygone selbst per Geländemodell an der Schwelle des Tages teilen | technisch ja, jetzt nicht | Braucht ein Höhenmodell (z. B. EU-DEM, CC BY 4.0), tägliche Neuberechnung und Polygonisierung der Höhenlinie. Für `treeline` fehlt der Zahlenwert weiterhin. ALBINA selbst stellt die Gefahrenstufe nicht so dar. Als Idee in [IDEENSAMMLUNG.md](IDEENSAMMLUNG.md) festgehalten. |
-| C. Färbung nach höchster Stufe, Höhenaufteilung als Piktogramm und Text im Popup | ja | **Umgesetzt.** Das ist die Logik der offiziellen ALBINA-Karten (`micro_regions_a`: „colored by the highest danger rating of the bulletin … no distinction between elevations“; Website: `maxDangerRatings`). Vorsichtig und fachlich korrekt, weil die höchste Stufe irgendwo in der Region gilt. |
-| D. Höhenwahl in der Legende | ja | **Umgesetzt.** Nutzer wählen eine Höhe (1000 bis 3500 m), die Karte zeigt die dort mögliche höchste Stufe. Nutzt ausschließlich die Bulletin-Daten. |
+| Format | CAAML v6 JSON, eine Datei mit allen Bulletins | CAAML v6 JSON (V4), aktives Bulletin zum Abrufzeitpunkt |
+| Regionskennung | `AT-07-14-01`, `IT-32-BZ-08-03`, ... | `CH-1111` |
+| Höhe bei den Gefahrenstufen | ja (Meter oder Waldgrenze) | **nein** |
+| Höhe bei den Lawinenproblemen | ja | ja, mit eigener Gefahrenstufe je Problem |
+| Teilstufen | nein | ja (`-`, `=`, `+`) |
+| Lawinengröße, Stabilität, Häufigkeit | ja | nein |
+| Zusammenfassung / Kernaussage | ja (`highlights`, `avalancheActivity.highlights`) | nein |
+| Beschreibung der Gefahr | `avalancheActivity.comment` | Kommentar je Lawinenproblem, dazu Kernzonen-Text |
+| Texte | Absätze mit `<br/>` | HTML mit Überschriften, Absätzen und Listen |
+| Wetter | Vorhersage (meist leer) | Prognose und Rückblick (lang, mit Zwischenüberschriften) |
+| Tendenz | Typ, Zeitraum, Text | Text |
+| Hauptdatum für Verlinkung | `customData.ALBINA.mainDate` | keines |
+| Außerplanmäßige Berichte | `unscheduled` kommt vor | in der Stichprobe nie |
+| Saison | `latest` bleibt auf dem letzten Winterbericht stehen | leeres Bulletin ohne aktiven Bericht |
+| Regionsnamen | im Bulletin | im Bulletin, für alle 149 Regionen in der Warnregion-API |
+| Lizenz / Namensnennung | CC BY 4.0, Nennung der Warndienste | CC BY 4.0, deutlich sichtbarer Verweis auf das SLF mit Link auf www.slf.ch |
+| Nutzungsbedingungen | Open Data | Schnittstelle nicht für direkte Abfragen aus Kundensystemen gedacht |
 
-## 3.3 Entscheidung
+---
+# 4. Höhenabhängige Gefahrenstufen
 
-- **Standardansicht:** Füllfarbe nach höchster Gefahrenstufe des Bulletins (alle Höhen, alle Tageszeiten). Im Popup steht die Aufteilung nach Höhe und Tageszeit, mit dem offiziellen Piktogramm `levels_<unten>_<oben>` (zeigt z. B. unten Stufe 2, oben Stufe 3 mit Höhenlinie).
-- **Höhenwahl:** Für eine gewählte Höhe zählen alle Gefahrenstufen, die dort gelten können (alle Tageszeiten, vorsichtig). Grenzen werden beidseitig als eingeschlossen behandelt (Annahme, auf der sicheren Seite).
-- **Waldgrenze:** Ohne Zahlenwert in den Daten wird die Waldgrenze **nicht geschätzt**. Hängt das Ergebnis davon ab, gilt die höchste mögliche Stufe, und die Region erhält einen gestrichelten Rand. Die Legende erklärt das.
-- **Kein Schnee / keine Beurteilung:** `no_snow` und `no_rating` werden wie in ALBINAs Karte ohne Füllung dargestellt.
+## 4.1 Was die Quellen liefern
 
-## 3.4 Grenzen dieser Lösung
+**Euregio:** Je Gefahrenstufe **eine** Höhengrenze (`upperBound` = unter, `lowerBound` = über), Meter oder `treeline`, die Schwelle wechselt von Bericht zu Bericht (beobachtet 2000, 2600, 2800 m und `treeline`), zusätzlich die Tageszeit.
 
-- Eine Region kann in tiefen Lagen deutlich geringere Gefahr haben, als die Füllfarbe zeigt. Die Farbe ist die Obergrenze, nicht ein Mittelwert.
-- Bei Berichten mit `treeline`-Grenze ist die Höhenwahl nur eingeschränkt aussagekräftig (siehe oben). In der Stichprobe nutzen 14 von 70 Gefahrenstufen mit Höhengrenze (von 98 insgesamt) `treeline`.
+**SLF:** Eine Stufe je Region (und Tageszeit) ohne Höhe. Die Höhe steht bei den Lawinenproblemen, die jeweils eine eigene Stufe tragen. Typisches Beispiel aus den Daten vom 15.03.2025: Region mit Stufe 3+, Neuschnee und Altschnee „über 2200 m: Stufe 3+“, Nassschnee „unter 1800 m: Stufe 2“. Das entspricht dem Beispiel „unter 2200 m Stufe 2, darüber Stufe 3“, ist aber aus den Lawinenproblemen abgeleitet, nicht aus einer Höhenaufteilung der Region.
+
+In beiden Fällen sind die Polygone rein zweidimensional.
+
+## 4.2 Optionen
+
+| Option | Bewertung |
+|---|---|
+| A. Vorberechnete Höhen-Polygone von ALBINA (`eaws-regions/public/micro-regions_elevation`) | nicht verwendbar: je Region ein festes Paar `low`/`high` mit **einer** Schwelle unklarer Bedeutung, von ALBINA als obsolet geführt, passt nicht zur täglich wechselnden Grenze. Für die Schweiz gibt es nichts Vergleichbares |
+| B. Polygone selbst per Geländemodell an der Tagesgrenze teilen | technisch möglich (EU-DEM, CC BY 4.0), aber aufwendig; `treeline` hat keinen Wert; weder ALBINA noch SLF stellen die Stufe so dar. Als Idee in [IDEENSAMMLUNG.md](IDEENSAMMLUNG.md) |
+| C. Färbung nach höchster Stufe, Aufteilung im Popup | **umgesetzt**, entspricht der offiziellen ALBINA-Karte (`micro_regions_a`, `maxDangerRatings`) und der SLF-Icon-Karte („pro Region die höchste Stufe“, Angabe auf der SLF-Produktseite) |
+| D. Höhenwahl in der Legende | **umgesetzt** für Quellen, die Höhen bei den Gefahrenstufen angeben (Euregio). Für die Schweiz wirkungslos, weil die Stufen keine Höhe tragen |
+
+## 4.3 Entscheidung
+
+- Füllfarbe und Regionssymbol zeigen die **höchste Stufe** des Bulletins (alle Höhen, alle Tageszeiten), bei der Schweiz mit Teilstufe (`3+`).
+- Das Popup zeigt „Gefahrenstufe nach Höhe“ (Feld `danger_by_elevation`): Bei Euregio sind das die Gefahrenstufen mit Höhe (Piktogramm `levels_<unten>_<oben>`). Bei der Schweiz zuerst die Stufe der Region, dann „Gefahrenstufe nach Höhe (je Lawinenproblem)“, zusammengefasst nach Höhe und Stufe, mit den beteiligten Problemen und dem Hinweis, dass die Quelle die Höhe nur bei den Lawinenproblemen nennt.
+- **Waldgrenze:** Ohne Zahlenwert wird sie nicht geschätzt. Hängt das Ergebnis der Höhenwahl davon ab, gilt die höchste mögliche Stufe, die Region erhält einen gestrichelten Rand.
+- **Höhenwahl:** Bei Quellen ohne Höhe in den Gefahrenstufen (SLF) bleibt die höchste Stufe, die Legende sagt das. Eine Ableitung der Stufe je Höhe aus den Lawinenproblemen wäre eine Interpretation (außerhalb der genannten Höhe ist die Stufe nicht angegeben) und unterbleibt.
+
+## 4.4 Grenzen
+
+- Die Farbe ist die Obergrenze der Region, nicht ein Mittelwert. In tiefen Lagen kann die Gefahr deutlich geringer sein.
+- Bei der Schweiz stammen die höhenabhängigen Stufen von den Lawinenproblemen. Wo kein Problem eine Höhe nennt, ist keine Höhenaufteilung bekannt.
 
 ---
 
-# 4. Darstellung
+# 5. Darstellung
 
-| Stufe | Name (offiziell) | Farbe | Quelle der Farbe |
+| Stufe | Name | Farbe | Quelle |
 |---|---|---|---|
-| 1 | Gering | `#ccff66` | ALBINA `_variables.scss` |
-| 2 | Mäßig | `#ffff00` | ALBINA `_variables.scss` |
-| 3 | Erheblich | `#ff9900` | ALBINA `_variables.scss` |
-| 4 | Groß | `#ff0000` | ALBINA `_variables.scss` |
-| 5 | Sehr groß | `#ff0000` mit schwarz-rotem Schachbrett | ALBINA (`bg_checkered`), hier als SVG-Muster |
+| 1 | Gering | `#ccff66` | ALBINA `_variables.scss`, SLF `fill` |
+| 2 | Mäßig | `#ffff00` | ALBINA, SLF |
+| 3 | Erheblich | `#ff9900` | ALBINA, SLF |
+| 4 | Groß | `#ff0000` | ALBINA, SLF |
+| 5 | Sehr groß | `#ff0000` mit rot-schwarzem Schachbrett | ALBINA (`bg_checkered`); der SLF-Hinweis `fill` nennt für Stufe 5 `#800000`, die einheitliche EAWS-Darstellung (Schachbrett) hat Vorrang |
 
-- Die Farben der Europäischen Gefahrenskala bleiben bewusst unverändert und weichen von den allgemeinen Warnfarben im [STYLEGUIDE.md](STYLEGUIDE.md) ab (Wiedererkennung, Sicherheit).
-- **Abgelaufene Berichte:** Nach Ende der Gültigkeit (`validTime.endTime`) gilt der Bericht noch 6 Stunden als „abgelaufen, neuer folgt“ (Farben bleiben, Hinweis im Popup und in der Legende). Danach werden die Regionen grau und gestrichelt ohne Gefahrenstufe dargestellt, und das Popup nennt nur den Ablauf. Ein alter Bericht darf nicht wie ein aktueller aussehen. Die 6 Stunden decken Verzögerungen der GitHub-Actions-Zeitplanung ab (Annahme).
-- **Ebene standardmäßig aus:** Wegen der Überlagerung mit Schutzgebietspolygonen und weil außerhalb der Saison kein aktueller Bericht vorliegt. Die Daten laden erst beim ersten Einblenden.
-- **Offizielle Symbole:** Gefahrenstufen-Piktogramme (`levels_<unten>_<oben>.webp`), Lawinenproblem-Icons (8 Typen), Expositionsrose und Höhen-Piktogramm. Piktogramme und Icons liegen unter `vendor/albina/`, Rose und Höhen-Piktogramm sind als SVG nach den Pfaddaten der ALBINA-Website im Code. Es werden alle sichtbaren Textelemente aus dem Bulletin übernommen: Gültigkeit, Zusammenfassung, Gefahrenstufen nach Höhe/Tageszeit, Lawinenprobleme (Höhenbereich, Expositionen, Schneedeckenstabilität, Gefahrenstellen, Lawinengröße), Lawinensituation, Schneedecke, Tendenz, Wetter, Tourenempfehlung, Gefahrenmuster.
+- Die Farben der Europäischen Gefahrenskala bleiben bewusst unverändert und weichen von den allgemeinen Warnfarben im [STYLEGUIDE.md](STYLEGUIDE.md) ab.
+- **Regionssymbol:** Ein anklickbares Symbol je Region mit Stufe (und Teilstufe) in der Stufenfarbe. Die Position ist der Pol der Unzugänglichkeit des größten Teilpolygons (der Punkt mit dem größten Abstand zum Rand, Algorithmus von Mapbox), in der Pipeline berechnet (`label_point`), damit das Symbol auch bei konkaven Regionen innerhalb liegt. Sichtbar ab Zoomstufe 9 (Regionen sind ca. 15 km groß, darunter überlagern sich die Symbole). Bei Waldgrenze ohne Wert gestrichelter Rand.
+- **Popup:** Regionsname, Quelle, Stufe, Veröffentlichung, Gültigkeit, nächste Aktualisierung, Zusammenfassung (wenn die Quelle eine liefert), Gefahrenstufen nach Höhe und Tageszeit, Lawinenprobleme (Höhenbereich, Expositionen, Stufe, Stabilität, Häufigkeit, Größe, Beschreibung, Kernzonen-Text), Lawinensituation, Schneedecke, Wetter, Wetterrückblick, Tourenempfehlung, Tendenz, Gefahrenmuster, Link zum Lagebericht und Namensnennung. Texte werden als geprüfte Blöcke (Absatz, Überschrift, Liste) angezeigt, nie als HTML.
+- **Abgelaufene Berichte:** Nach Ende der Gültigkeit gilt der Bericht noch 6 Stunden als „abgelaufen, neuer folgt“ (Farben bleiben, Hinweis im Popup und in der Legende). Danach werden die Regionen grau und gestrichelt ohne Stufe dargestellt, das Popup nennt nur den Ablauf. Regionen ohne Bericht (Quelle ohne aktives Bulletin, Sektoren ohne Bericht) sind ebenso grau mit Hinweis.
+- **Ebene standardmäßig aus:** Die Daten laden erst beim ersten Einblenden.
+- **Symbole:** Die Quellen stellen keine eigenen Icon-Downloads bereit (SLF: nur das Produkt „Icon-Karte“). Verwendet werden die EAWS-Standardpiktogramme in der ALBINA-Fassung (Gefahrenstufen `levels_<unten>_<oben>`, Lawinenprobleme, Expositionsrose und Höhenpiktogramm als SVG) für beide Länder. Die Stufenfelder zeichnet das Frontend selbst. Lizenz offen (Abschnitt 10).
 
 ---
 
-# 5. Datenmodell
+# 6. Gemeinsames Datenmodell
 
-## 5.1 `data/avalanche_regions.geojson` (Geometrie, ändert sich selten)
+Schema `mountain-radar/avalanche/1`. Je Quelle zwei Dateien plus ein Verzeichnis, alles in `data/avalanche/`:
 
-```json
-{
-  "type": "FeatureCollection",
-  "source": "https://gitlab.com/eaws/eaws-regions",
-  "license": "CC0 1.0",
-  "features": [
-    { "type": "Feature", "properties": { "id": "AT-07-02-02" },
-      "geometry": { "type": "MultiPolygon", "coordinates": [ ... ] } }
-  ]
-}
+```text
+data/avalanche/index.json              Verzeichnis der Quellen für das Frontend
+data/avalanche/<id>.json               Bulletins und Regionenindex der Quelle (täglich)
+data/avalanche/<id>_regions.geojson    Polygone der Quelle (ändert sich selten)
 ```
 
-- Nur die zum Bulletin-Datum gültigen Polygone, sortiert nach `id`, höchstens ein Polygon je `id`.
-- Koordinaten auf 5 Nachkommastellen gerundet (ca. 1 m), entartete Ringe entfernt, sonst keine Vereinfachung.
-- Größe: ca. 343 KB.
+`<id>` ist `euregio` oder `slf`. Eine Quelle ist von den anderen unabhängig: Fällt sie aus, bleiben ihre Dateien unverändert.
 
-## 5.2 `data/avalanche_bulletin.json` (täglich)
+## 6.1 `index.json`
+
+```json
+{ "schema": "mountain-radar/avalanche/1",
+  "sources": [ { "id": "slf", "bulletin_file": "slf.json", "regions_file": "slf_regions.geojson" } ] }
+```
+
+## 6.2 `<id>.json`
 
 ```json
 {
+  "schema": "mountain-radar/avalanche/1",
+  "source": { "id": "slf", "name": "SLF Lawinenbulletin Schweiz", "provider": "WSL-Institut für Schnee- und Lawinenforschung SLF",
+              "countries": ["CH"], "attribution": "...", "attribution_url": "https://www.slf.ch",
+              "license": "CC BY 4.0", "license_url": "...", "report_url": "...", "report_url_fallback": "...", "bulletin_url": "..." },
   "generated": "2026-10-29T10:37:56Z",
-  "source": "https://static.avalanche.report/bulletins/latest/EUREGIO_de_CAAMLv6.json",
-  "license": "CC BY 4.0",
-  "attribution": "Lawinenwarndienste Tirol, Südtirol und Trentino (Euregio, avalanche.report)",
-  "lang": "de",
-  "mainDate": "2026-05-03",
-  "validTime": { "startTime": "2026-05-02T15:00:00Z", "endTime": "2026-05-03T15:00:00Z" },
-  "bulletins": [ { "...": "siehe unten" } ],
-  "regions": { "AT-07-14-01": { "name": "Region …", "b": 3 } }
+  "status": "active | no_active_bulletin",
+  "reference_date": "2026-03-15",
+  "validity_period": { "start": "...", "end": "..." },
+  "bulletins": [ { "...": "Bulletin, siehe 6.3" } ],
+  "regions": { "CH-1111": { "name": "Waadtländer Voralpen", "country": "CH", "bulletin": 4 } }
 }
 ```
+
+`regions[id].bulletin` ist der Index in `bulletins` oder `null` (Region ohne Bericht). Ein Bulletin gilt für viele Regionen und steht deshalb nur einmal in der Datei. `validity_period` ist `null` ohne Bulletins.
+
+## 6.3 Bulletin
 
 | Feld | Bedeutung |
 |---|---|
-| `regions[id].b` | Index in `bulletins`. Ein Bulletin gilt für viele Regionen, deshalb steht es nur einmal in der Datei |
-| `bulletins[].id`, `publicationTime`, `validTime`, `mainDate`, `unscheduled` | Identität und Gültigkeit laut CAAML (`mainDate` = ALBINA-Hauptdatum) |
-| `bulletins[].maxLevel` | höchste Gefahrenstufe 1 bis 5 (einzige abgeleitete Größe), `null` bei `no_snow`/`no_rating` |
-| `bulletins[].dangerRatings[]` | `{ value, level, period, elevation? }`; `value` = CAAML-Wert, `level` = 1 bis 5 oder `null`, `period` = `all_day`/`earlier`/`later` (Standard `all_day`), `elevation` = `{ lowerBound?, upperBound? }` mit Meterzahl oder `"treeline"` |
-| `bulletins[].avalancheProblems[]` | `{ type, period, elevation?, snowpackStability?, frequency?, avalancheSize?, aspects? }`; `aspects` in Reihenfolge N, NE, E, SE, S, SW, W, NW |
-| `bulletins[].highlights` | Kernaussage des Berichts (nur wenn vorhanden) |
-| `bulletins[].activity` / `snowpack` / `weather` / `travelAdvisory` | Textblöcke `{ highlights?, comment? }`, `comment` als Liste von Absätzen (`<br/>` getrennt); leere Blöcke entfallen |
-| `bulletins[].tendency[]` | `{ type, highlights?, comment?, validTime }` |
-| `bulletins[].dangerPatterns` | Gefahrenmuster-Kennungen, z. B. `["DP10"]` (Tirol-spezifisch, `customData.LWD_Tyrol`) |
+| `id`, `source` | Kennung des Bulletins, Quelle |
+| `publication_time`, `validity_period` `{start, end}`, `next_update?`, `main_date?`, `unscheduled` | Zeiten laut CAAML (`main_date` nur Euregio) |
+| `max_level`, `max_subdivision?` | höchste Gefahrenstufe 1 bis 5 mit Teilstufe (`minus`, `neutral`, `plus`), `null` bei `no_snow`/`no_rating`. Abgeleitet |
+| `danger_ratings[]` | `{ value, level, period, subdivision?, elevation? }` unverändert aus der Quelle; `elevation` = `{ lower_bound?, upper_bound? }` mit Meterzahl oder `"treeline"` |
+| `danger_by_elevation[]` | Gefahrenstufe nach Höhe und Tageszeit für die Anzeige. `basis` = `danger_rating` (Quelle gibt die Höhe bei den Stufen an) oder `avalanche_problem` (Höhe nur bei den Lawinenproblemen, gleiche Kombinationen zusammengefasst, mit `problem_types`). Abgeleitet |
+| `elevation_thresholds[]` | alle Höhengrenzen des Bulletins, Meter aufsteigend, `"treeline"` zuletzt. Abgeleitet |
+| `avalanche_problems[]` | `{ type, period, elevation?, aspects?, snowpack_stability?, frequency?, avalanche_size?, danger_rating?, comment?, core_zone_text? }`; `aspects` in der Reihenfolge N, NE, E, SE, S, SW, W, NW; `danger_rating` = `{ value, level, subdivision? }`; `comment` als Textblöcke |
+| `problem_groups[]` | `{ types, period, category?, title? }`, Probleme mit gleichem Inhalt (SLF) |
+| `text` | `headline?`, `summary?`, `sections[]` (`key` = `activity`, `snowpack`, `weather_forecast`, `weather_review`, `travel_advisory`; je `highlights?`, `blocks[]`), `tendency[]` (`type?`, `validity_period?`, `highlights?`, `blocks[]`) |
+| `danger_patterns[]` | Gefahrenmuster-Kennungen (Tirol-spezifisch) |
 
-Regeln der Pipeline: Texte werden nicht verändert (nur `<br/>` in Absätze geteilt). Fehlende Felder bleiben fehlend. Kommt eine Region in zwei Bulletins vor, gilt das jüngere; bei gleichem Veröffentlichungszeitpunkt bricht die Pipeline ab. Ein Bulletin ohne Gefahrenstufen bricht die Pipeline ab. In beiden Fällen bleiben die bestehenden Dateien unverändert.
+Textblöcke: `{ "type": "paragraph", "text": "..." }`, `{ "type": "heading", "level": 2, "text": "..." }`, `{ "type": "list", "items": ["..."] }`. Die Pipeline wandelt das in CAAML erlaubte HTML (`br`, `p`, `h1` bis `h6`, `ul`, `li`) in Blöcke um, alle anderen Tags entfallen, ihr Text bleibt. Fettdruck geht dabei verloren.
 
-Das Frontend maskiert alle Texte vor der Anzeige (`esc` aus `js/map.js`). Deutsche Bezeichnungen stammen aus `albina-website/app/i18n/caaml/de.json` und stehen in `js/avalanche_logic.js`.
+## 6.4 Geometrie `<id>_regions.geojson`
+
+`FeatureCollection` mit `source`, `geometry_source`, `geometry_license`. Je Feature `properties` = `{ "id", "country", "label_point": [lon, lat] }` und `MultiPolygon` (nur zum Bulletin-Datum gültige Polygone, Koordinaten auf 5 Nachkommastellen gerundet, entartete Ringe entfernt, sonst keine Vereinfachung).
+
+## 6.5 Abbildung auf die geforderten Felder
+
+| Geforderte Angabe | Ort im Modell |
+|---|---|
+| country | `regions[id].country` und `properties.country` (erste zwei Zeichen der EAWS-Kennung) |
+| source | `source.id` der Datei und `bulletin.source`; Lizenz und Namensnennung in `source` |
+| region_id | Schlüssel in `regions`, `properties.id` der Polygone |
+| region_name | `regions[id].name` |
+| geometry | `<id>_regions.geojson` |
+| danger_ratings | `bulletin.danger_ratings` (dazu `danger_by_elevation`, `max_level`) |
+| elevation_thresholds | `bulletin.elevation_thresholds` (Quelle: `danger_ratings` und `avalanche_problems`) |
+| avalanche_problems | `bulletin.avalanche_problems` |
+| aspects | `avalanche_problems[].aspects` |
+| publication_time | `bulletin.publication_time` |
+| validity_period | `bulletin.validity_period` (Datei: gesamter Zeitraum) |
+| bulletin_text | `bulletin.text` (dazu die Beschreibungen in `avalanche_problems[].comment`) |
+
+Die Aufteilung in Bulletin und Region (statt alles je Region zu wiederholen) ist eine Entscheidung zur Dateigröße: Ein Bulletin gilt für bis zu 60 Regionen. Die Zusammenführung zu einem Datensatz je Region passiert im Frontend über `regions[id].bulletin`.
+
+## 6.6 Regeln der Pipeline
+
+- Werte der Quelle bleiben unverändert (Umbenennung auf snake_case), fehlende Felder bleiben fehlend. Abgeleitet werden nur `max_level`, `max_subdivision`, `danger_by_elevation`, `elevation_thresholds` und `label_point`.
+- Kommt eine Region in zwei Bulletins vor, gilt das jüngere; bei gleichem Veröffentlichungszeitpunkt bricht die Pipeline für diese Quelle ab. Ein Bulletin ohne Gefahrenstufen ebenso.
+- Regionen im Bulletin ohne Polygon werden gemeldet und nicht dargestellt. Polygone ohne Bulletin bleiben als „kein Bericht“ sichtbar, Namen aus der Quelle (SLF: Warnregion-API).
+- Ein leeres Euregio-Bulletin ist ein Fehler, ein leeres SLF-Bulletin ist die Saisonpause (`empty_ok`).
 
 ---
+# 7. Datenfluss und Aktualisierung
 
-# 6. Datenfluss und Aktualisierung
-
-```text
-static.avalanche.report  (CAAML v6 JSON, CC BY 4.0)
-gitlab.com/eaws/eaws-regions  (Polygone, CC0)
-        ↓
-GitHub Action "Lawinenlage aktualisieren"  (.github/workflows/update-avalanche.yml)
-  1. scripts/test_fetch_avalanche.py
-  2. scripts/fetch_avalanche.py
-        ↓
-data/avalanche_regions.geojson + data/avalanche_bulletin.json  (Commit nur bei Änderung)
-        ↓
-Browser: js/avalanche.js  (lädt beim ersten Einblenden der Ebene "Lawinenlage (Euregio)")
+```mermaid
+flowchart LR
+  A["static.avalanche.report<br/>CAAML v6 Euregio"] --> P
+  B["aws.slf.ch<br/>CAAML v6 (V4) und Warnregion-Namen"] --> P
+  C["gitlab.com/eaws/eaws-regions<br/>Polygone (CC0)"] --> P
+  P["GitHub Action 'Lawinenlage aktualisieren'<br/>scripts/fetch_avalanche.py<br/>avalanche_sources.py, avalanche_model.py"] --> D["data/avalanche/<br/>index.json, euregio.json, slf.json,<br/>euregio_regions.geojson, slf_regions.geojson"]
+  D --> F["Browser: js/avalanche.js<br/>Layer, Regionssymbole, Popup, Legende"]
 ```
 
-- **Zeitplan:** täglich 06:30 UTC und 16:20 UTC, zusätzlich manuell startbar. Der Regelbericht erscheint um 16:00Z (Winter) bzw. 15:00Z (Sommerzeit), das außerplanmäßige Update am 15.04.2026 kam um 06:00Z. Die Zeiten sind eine Projektentscheidung auf Basis dieser Beobachtungen, die Quelle nennt keine festen Zeiten.
-- **Commits:** Die Dateien werden nur bei neuem Inhalt geschrieben, spätestens nach 7 Tagen (damit das Repository auch außerhalb der Saison aktiv bleibt und der Zeitplan nicht von GitHub deaktiviert wird).
-- **Fehlerverhalten:** Schlägt ein Abruf fehl oder ist das Bulletin unplausibel, endet die Action mit Fehler, die bestehenden Dateien bleiben unverändert. Der Browser zeigt dann irgendwann „abgelaufen“, nie veraltete Stufen als aktuell.
-- **Außerhalb der Saison:** `latest` bleibt der letzte Winterbericht. Die Pipeline schreibt ihn unverändert, das Frontend stellt ihn nach Ablauf grau dar.
-- **Lokal:** `python3 scripts/fetch_avalanche.py`, Tests mit `python3 scripts/test_fetch_avalanche.py`.
+- **Zeitplan:** täglich 07:20 UTC und 16:20 UTC, zusätzlich manuell startbar. Das SLF-Morgenupdate liegt um 8 Uhr Ortszeit (07:00Z Winterzeit), die Abendausgabe beider Dienste um 17 Uhr Ortszeit (16:00Z Winterzeit, 15:00Z Sommerzeit). Die Uhrzeiten sind eine Projektentscheidung auf Basis dieser Zeiten und der beobachteten Veröffentlichungen.
+- **Der Browser fragt die Dienste nie direkt ab.** Das SLF verlangt, dass seine Schnittstellen nicht aus Kundensystemen direkt bedient werden. Die Action holt je Lauf wenige Dateien (SLF: Bulletin, Namen, Polygone) mit Pause zwischen den Abfragen.
+- **Commits:** Dateien werden nur bei neuem Inhalt geschrieben, spätestens nach 7 Tagen (damit das Repository auch außerhalb der Saison aktiv bleibt).
+- **Fehlerverhalten:** Fällt eine Quelle aus, bleiben ihre Dateien unverändert, die übrigen werden gespeichert, der Lauf endet mit Fehler (E-Mail von GitHub). Das Frontend zeigt Berichte nach Ablauf grau, nie veraltete Stufen als aktuell.
+- **Latenz:** Zwischen Veröffentlichung und Lauf liegt etwa eine Stunde (Sommerzeit länger), die Frist „abgelaufen, neuer folgt“ (6 Stunden) deckt auch Verzögerungen der GitHub-Zeitplanung.
+- **Lokal:** `python3 scripts/fetch_avalanche.py [slf|euregio]`. Zum Test mit früheren Berichten (nur Entwicklung): Umgebungsvariablen `AVALANCHE_URL_SLF` (z. B. mit `?activeAt=2026-03-15T08:00:00Z`), `AVALANCHE_URL_EUREGIO` (Archiv-URL) und `AVALANCHE_DATA_DIR`.
 
 ---
 
-# 7. Annahmen und offene Punkte
+# 8. Lizenz und Namensnennung
+
+| Quelle | Lizenz | Pflichten |
+|---|---|---|
+| Euregio-Lawinenreport | CC BY 4.0 | Namensnennung „Lawinenwarndienste Tirol, Südtirol und Trentino (Euregio-Lawinenreport, avalanche.report)“ |
+| SLF | CC BY 4.0 | „deutlich sichtbarer Verweis auf die Datenquelle (WSL-Institut für Schnee- und Lawinenforschung SLF)“, bei digitalen Produkten als Link auf www.slf.ch (Wortlaut der Datenservice-Seite, dort englisch). Der Bericht ist eine sicherheitsrelevante Warnung des Bundes: Inhalte korrekt und aktuell halten. Keine Haftung des SLF für Fehler, Verzögerungen oder Ausfälle, kein Bereitschaftsdienst. Schnittstellen nicht überlasten |
+| eaws-regions | CC0 1.0 | keine |
+
+Die Namensnennung steht in der Legende, im Popup, in der Kartenquellenangabe und im Seitenfuß. Empfehlungen des SLF, die noch offen sind: eine Nachricht an data@slf.ch, um in die Mailingliste „Avalanche Bulletin“ (Hinweise zu Änderungen und Unterbrüchen) aufgenommen zu werden, und optional ein Link auf das Feedback-Tool des SLF (https://pro.slf.ch/reply/public/#/).
+
+---
+
+# 9. Weitere Länder: Empfehlungen
+
+## 9.1 Ausgangslage
+
+- Die ALBINA-Gruppe veröffentlicht täglich `https://static.avalanche.report/eaws_bulletins/{Datum}/{Datum}.ratings.json` (verifiziert für 15.01. und 15.03.2026) mit der **höchsten Gefahrenstufe je EAWS-Region** für viele Länder (u. a. FR, IT, SI, CH, DE, ES, NO). Schlüssel: `REGION`, `REGION:am`, `REGION:pm`, `REGION:high`, `REGION:low` und Kombinationen (z. B. `FR-01=3`, `FR-01:low=2`). Verifiziert: 35 Regionen für Frankreich, 8 für Slowenien (`SI-1`, `SI-10`, ...), 158 für Italien. Die Bedeutung von `high` und `low` ist nicht dokumentiert.
+- [pyAvaCore](https://gitlab.com/albina-euregio/pyAvaCore) (GPL-3.0) wandelt Bulletins vieler Dienste in CAAML v6 und `ratings.json` um. Laut README unterstützt: Frankreich (Météo-France, meteofrance.com/meteo-montagne), Italien (AINEVA: Piemonte, Valle d'Aosta, Lombardia, Veneto, Friuli-Venezia Giulia, Marche; Bozen und Trentino über avalanche.report), Slowenien (ARSO, meteo.arso.gov.si).
+- eaws-regions enthält Polygone für diese Länder (verifiziert: FR 35, SI 19, IT-34 8).
+- Nicht gelungen: vollständiges CAAML für Italien und Slowenien über ALBINAs Zusatzregionen-Pfade. Die erratenen Pfade lieferten 404, die Konfiguration der ALBINA-Website nennt das Muster `/eaws_bulletins/{date}/{date}{region}{lang}.json`, die Auflösung der Platzhalter ist offen.
+
+## 9.2 Empfehlung
+
+1. **Quelle klären, bevor Code entsteht:** Je Land Lizenz und Nutzungsbedingungen des **ursprünglichen Warndienstes** prüfen (Météo-France, AINEVA, ARSO). Die Lizenz von avalanche.report (CC BY 4.0) gilt für ihre eigenen Daten, nicht automatisch für Daten Dritter in `ratings.json`. Das ist offen.
+2. **Schritt 1, nur Gefahrenstufen:** Ein einfacher Normalisierer aus `ratings.json` (Stufe je Region, Hinweis auf den Warndienst und Link) liefert schnell Farben und Symbole für FR, IT und SI im selben Datenmodell (`danger_ratings` mit `level`, sonst nichts). Das Popup zeigt dann ehrlich nur Stufe und Link, keine Probleme oder Texte. Offen: Bedeutung von `high`/`low`/`am`/`pm`. Kennungen vor der Umsetzung abgleichen: Die Polygone für Slowenien in eaws-regions heißen z. B. `SI4`, die Schlüssel der `ratings.json` `SI-10`.
+3. **Schritt 2, vollständige Bulletins:** Jedes Land bekommt einen Eintrag in `scripts/avalanche_sources.py` und, falls der Dienst nicht CAAML v6 liefert, einen Normalisierer in `scripts/avalanche_model.py`. pyAvaCore zeigt, wie die Quellen aufgebaut sind. Wegen GPL-3.0 keinen Code übernehmen, ohne die Lizenz des Projekts zu klären; die Datenformate selbst sind frei lesbar.
+4. **Frankreich:** BRA je Massiv (35 Polygone). **Italien:** AINEVA-Bulletins je Region sowie Meteomont (`IT-MeteoMont`, `IT-34` und weitere Polygon-Dateien in eaws-regions). **Slowenien:** ARSO (Quelle slowenisch, Sprache beachten).
+5. **Sprache:** Das Datenmodell enthält Texte einer Sprache je Quelle. Für mehrsprachige Quellen (SLF liefert de, fr, it, en) entscheidet eine spätere Sprachwahl, ob je Sprache eine Datei entsteht.
+
+## 9.3 Neue Quelle anlegen (Checkliste)
+
+1. Eintrag in `scripts/avalanche_sources.py` (`id`, `name`, `bulletin_url`, `region_codes`, `geometry_codes`, Lizenz, Namensnennung, `empty_ok`, optional `names_url` mit Parser in `NAME_PARSERS`).
+2. Polygone prüfen: `python3 scripts/fetch_avalanche.py <id>` meldet Regionen ohne Polygon.
+3. Tests ergänzen (`scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`), mit einem echten Bulletin der Quelle als Fixture.
+4. Frontend: keine Änderung nötig, `index.json` führt die Quelle auf. Legende und Popup übernehmen Namen, Lizenz und Status. Der Footer in `index.html` nennt die Quelle von Hand.
+5. Dokumentation: [DATENQUELLEN.md](DATENQUELLEN.md), Abschnitt 3 dieses Dokuments, ROADMAP.
+
+---
+
+# 10. Annahmen und offene Punkte
 
 | Punkt | Status |
 |---|---|
-| Lizenz der Grafiken in `vendor/albina/` (Pictos, Problem-Icons): Die Daten stehen unter CC BY 4.0, das ALBINA-Repository unter AGPL-3.0, eine eigene Grafiklizenz nennt das Repository nicht. Vor einer öffentlichen Veröffentlichung beim Lawinenwarndienst Tirol klären (lawine@tirol.gv.at) | offen |
-| Verlinkung auf den Lagebericht: `https://lawinen.report/{Datum}` ist aus dem Routing der ALBINA-Website abgeleitet (Datums-Umschalter), nicht im Browser geprüft | offen |
-| Zeitpunkt der Veröffentlichung im Winter ist an 8 Stichtagen beobachtet, nicht zugesichert | Annahme |
+| Lizenz der Grafiken in `vendor/albina/` (Pictos, Problem-Icons): Daten CC BY 4.0, das ALBINA-Repository AGPL-3.0, eine eigene Grafiklizenz nennt es nicht. Vor einer öffentlichen Veröffentlichung klären (lawine@tirol.gv.at), für die Schweiz zusätzlich beim SLF nachfragen, ob eigene Icons zur Verfügung stehen (data@slf.ch) | offen |
+| Verlinkung: Euregio `https://lawinen.report/{Datum}` ist aus dem Routing der ALBINA-Website abgeleitet; SLF `https://www.slf.ch/de/lawinenbulletin-und-schneesituation/` (Seite erreichbar, nicht auf Deep Links geprüft) | offen |
+| Veröffentlichungszeiten sind beobachtet bzw. vom SLF genannt, nicht zugesichert | Annahme |
 | Grenzen der Höhenbereiche gelten beidseitig als eingeschlossen | Annahme |
 | Frist von 6 Stunden für „abgelaufen, neuer folgt“ | Annahme |
-| Gefahrenstufen 4 und 5 sowie `weatherForecast`/`travelAdvisory` mit Inhalt wurden an keinem Bulletin der Stichprobe gesehen | offen |
-| Waldgrenze ohne Zahlenwert: eine Näherung (z. B. aus Höhenmodell oder Regionsangabe) wäre erfunden und fehlt bewusst | bewusst offen |
-| Kärnten (`AT-02`) und weitere Bundesländer liegen in anderen Warndiensten bzw. der EUREGIO-Datei nur teilweise vor | später |
+| Euregio-Stufen 4 und 5, `weatherForecast`/`travelAdvisory` mit Inhalt und SLF-Stufe 5 wurden in keiner Stichprobe gesehen | offen |
+| SLF-Texte mit anderen Tags als `h1`, `h2`, `p`, `ul`, `li`, `span`, `br` (laut Schema auch `b`, `h3` bis `h6`) sind nur über den Parser und seine Tests abgedeckt, nicht an echten Daten | offen |
+| Waldgrenze ohne Zahlenwert: Eine Näherung wäre erfunden und fehlt bewusst | bewusst offen |
+| SLF-Sprachen fr, it, en werden nicht abgerufen | später |
+| Kärnten (`AT-02`) und weitere Bundesländer, Liechtenstein | später |
 
 ---
 
-# 8. Teststand
+# 11. Teststand
 
-- Pipeline: 17 Tests (`scripts/test_fetch_avalanche.py`), Live-Lauf gegen die echten Quellen erfolgreich (90 Regionen, 5 Bulletins, zweiter Lauf unverändert).
-- Frontend (`js/avalanche*.js`): **im Browser noch nicht geprüft.** Es gibt keine automatisierten JavaScript-Tests im Projekt und keine Node-Installation. Der Test mit echten, gültigen Berichten ist erst nach dem Saisonstart des Lawinenwarndienstes möglich. Bis dahin lässt sich die Darstellung mit dem archivierten Bericht prüfen, wenn die Browseruhr auf den 03.05.2026 gesetzt wird.
+- **Pipeline:** `scripts/test_avalanche_model.py` (27 Tests, u. a. echte SLF-Struktur, HTML-Parser, Höhenableitung, Pol der Unzugänglichkeit) und `scripts/test_fetch_avalanche.py` (11 Tests mit simuliertem Netzwerk: Saisonpause, Idempotenz, Ausfall einer Quelle, Heartbeat). Live-Lauf gegen beide Quellen erfolgreich.
+- **JavaScript-Logik:** `scripts/test_avalanche_logic.html`, ausgeführt mit `python3 scripts/run_js_tests.py` in einem Headless-Browser (Chrome oder Edge): 12 Tests. Ein absichtlich eingebauter Fehler wird erkannt.
+- **Frontend im Browser (Headless-Edge, echte Daten):** Mit den archivierten Berichten vom 15.03.2026 beider Dienste und auf diesen Tag gesetzter Browseruhr geprüft: 224 Regionssymbole (90 Euregio, 134 Schweiz), Farben je Stufe, Popups beider Quellen ohne JavaScript-Fehler und ohne Skript-Elemente im Popup, Höhenwahl, die Zustände „gültig“, „abgelaufen, neuer folgt“, „abgelaufen“ und „Quelle ohne aktives Bulletin“ (echter Live-Zustand der SLF-Datei).
+- **Noch offen:** Der Test mit **aktuellen** Berichten im Winter 2026/27, die Prüfung auf echten Mobilgeräten und die Prüfung der Stufen 4 und 5 bei Euregio. Die Screenshots in `docs/screenshots/` stammen aus den archivierten Berichten vom 15.03.2026.

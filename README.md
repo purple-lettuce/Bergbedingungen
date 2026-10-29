@@ -24,7 +24,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 - Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen
 - Layer-basierte Darstellung für schnellere Orientierung auf der Karte
 - Bedienfeld „Karten & Layer“ für Kartenstil, Ebenen und Legenden, per Klick bedienbar (auch auf Touchgeräten)
-- Lawinenlage der Euregio (Tirol, Südtirol, Trentino) als Layer mit Gefahrenstufen, Höhenangaben und vollständigem Lagebericht im Popup (ab Saisonstart des Lawinenwarndienstes, siehe unten)
+- Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste, siehe unten)
 - Zukunftsfähige Erweiterung um weitere Risiken und Tourenanalysen
 
 ## Screenshots
@@ -57,7 +57,7 @@ Die Dokumentation des Projekts liegt im Ordner [docs/](docs/):
 - [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) — Überblick über Datenquellen, APIs und Integrationen
 - [docs/IDEENSAMMLUNG.md](docs/IDEENSAMMLUNG.md) — Ideen, Konzepte und mögliche Erweiterungen
 - [docs/RECHERCHE_LAWINEN.md](docs/RECHERCHE_LAWINEN.md) — Recherche zu Lawinen- und Risikodaten
-- [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md) — Lawinenlage Euregio: Quellen, Höhenanalyse, Entscheidungen, Datenmodell
+- [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md) — Lawinenlage Euregio und Schweiz: Quellen, API-Endpunkte, Höhenanalyse, gemeinsames Datenmodell, Empfehlungen für weitere Länder
 - [docs/STYLEGUIDE.md](docs/STYLEGUIDE.md) — visuelle und inhaltliche Richtlinien
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) — Arbeitsabläufe und Projektprozesse
 
@@ -71,7 +71,7 @@ Mountain Radar kombiniert eine interaktive Kartenoberfläche mit relevanten Berg
 - **Sperrungen und Hinweise:** Daten von [Digitize the Planet e.V.](https://platform.digitizetheplanet.org/en/api/docs/) (Lizenz CC0)
 - **Wetter:** [Open-Meteo](https://open-meteo.com/), ohne Schlüssel
 - **Schutzgebiete:** regionale Informationen aus GeoJSON- und API-Daten mit Wildlife- und Regeltexten
-- **Lawinenlage:** Lawinenreport der Euregio ([avalanche.report](https://lawinen.report/more/open-data), CC BY 4.0) mit Polygonen aus [EAWS Regions](https://gitlab.com/eaws/eaws-regions) (CC0)
+- **Lawinenlage:** Lawinenreport der Euregio ([avalanche.report](https://lawinen.report/more/open-data), CC BY 4.0) und Lawinenbulletin des [WSL-Instituts für Schnee- und Lawinenforschung SLF](https://www.slf.ch) (CC BY 4.0), Polygone aus [EAWS Regions](https://gitlab.com/eaws/eaws-regions) (CC0)
 
 ## So kommen die Daten auf die Seite
 
@@ -93,8 +93,9 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/protected_areas_alps.geojson` | kompaktes GeoJSON für Schutzgebiete auf der Karte |
 | `data/wildlife_entities.json` | aufgelöste Namen der Schutzgüter (Kennung → Name), nur aus der Digitize API |
 | `data/wildlife_probe.json` | Diagnosebericht der Wildlife-Auflösung (was die API geliefert hat, was fehlt) |
-| `scripts/fetch_avalanche.py`, `scripts/test_fetch_avalanche.py` | Lawinenlage-Pipeline und Tests |
-| `data/avalanche_regions.geojson`, `data/avalanche_bulletin.json` | Polygone und Bulletins der Lawinenlage Euregio |
+| `scripts/avalanche_sources.py`, `scripts/avalanche_model.py`, `scripts/fetch_avalanche.py` | Lawinenlage-Pipeline: Registry der Quellen, gemeinsames Datenmodell, Abruf |
+| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_logic.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage (Python und JavaScript im Headless-Browser) |
+| `data/avalanche/` | Lawinenlage: `index.json`, je Quelle `<id>.json` (Bulletins) und `<id>_regions.geojson` (Polygone) für `euregio` und `slf` |
 | `vendor/albina/` | offizielle ALBINA-Symbole (Gefahrenstufen, Lawinenprobleme), Herkunft in `vendor/albina/README.md` |
 
 ## Aufbau des Programmcodes (`js/`)
@@ -113,9 +114,9 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`) |
 | `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil und einklappbare Legenden, alles per Klick, ohne Fachlogik |
 | `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
-| `js/avalanche.js` | Lawinenlage: Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Popup mit Lagebericht, Höhenwahl; lädt erst beim ersten Einblenden |
-| `js/avalanche_legend.js` | Legende der Lawinenlage mit Gültigkeit des Berichts und Höhenwahl (Abschnitt im Bedienfeld „Karten & Layer“) |
-| `js/avalanche_logic.js` | reine Logik ohne DOM und Leaflet: Gefahrenstufe je Höhe, Gültigkeit, Gruppierung, deutsche Bezeichnungen |
+| `js/avalanche.js` | Lawinenlage aller Quellen: Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Popup mit Lagebericht, Höhenwahl; lädt erst beim ersten Einblenden |
+| `js/avalanche_legend.js` | Legende der Lawinenlage mit Berichtsstatus je Quelle, Stufenfarben, Höhenwahl und Namensnennung (Abschnitt im Bedienfeld „Karten & Layer“) |
+| `js/avalanche_logic.js` | reine Logik ohne DOM und Leaflet auf dem gemeinsamen Datenmodell: Gefahrenstufe je Höhe, Teilstufen, Gültigkeit, Gruppierung, deutsche Bezeichnungen (getestet mit `scripts/run_js_tests.py`) |
 
 Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` und
 `protected_areas.js` → `map.js`; `avalanche.js` → `map.js`, `avalanche_legend.js`, `avalanche_logic.js`;
@@ -162,38 +163,32 @@ zeigt die Einträge maskiert im Popup an; bei Gebieten ohne Angaben bleibt das P
 wird). Das Ergebnis wird als Commit gespeichert. Lokal: die Skripte in der oben stehenden
 Reihenfolge ausführen. Tests: `python3 scripts/test_build_geojson.py` und `python3 scripts/test_fetch_wildlife.py`.
 
-## Lawinenlage (Euregio)
+## Lawinenlage (Euregio und Schweiz)
 
-Die Ebene **Lawinenlage (Euregio)** (Bedienfeld „Karten & Layer“ oben rechts, standardmäßig aus; die Legende steht im selben Bedienfeld) zeigt die 90 Mikroregionen von Tirol,
-Südtirol und Trentino in den offiziellen Farben der Gefahrenskala (Stufe 5 als rot-schwarzes Schachbrett). Ein Klick
-öffnet den Lagebericht: Gültigkeit, Zusammenfassung, Gefahrenstufen nach Höhe und Tageszeit, Lawinenprobleme mit
-Höhenbereich und Expositionen, Bulletintext, Tendenz, mit den offiziellen ALBINA-Symbolen.
+Die Ebene **Lawinenlage** (Bedienfeld „Karten & Layer“ oben rechts, standardmäßig aus; die Legende steht im selben Bedienfeld) zeigt die Warnregionen von Tirol, Südtirol und Trentino (90) und der Schweiz (149) in den offiziellen Farben der Gefahrenskala (Stufe 5 als rot-schwarzes Schachbrett). Jede Region hat ein anklickbares Symbol mit Stufe (Schweiz mit Teilstufe, z. B. 3+) ab Zoomstufe 9. Ein Klick öffnet den Lagebericht: Veröffentlichung und Gültigkeit, Zusammenfassung, Gefahrenstufen nach Höhe, Lawinenprobleme mit Höhenbereich und Expositionen, Bulletintext, Tendenz, mit den offiziellen ALBINA-Symbolen. Beispiele: [Übersicht](docs/screenshots/lawinenlage_uebersicht.jpg), [Popup Schweiz](docs/screenshots/lawinenlage_schweiz_popup.jpg), [Popup Euregio](docs/screenshots/lawinenlage_euregio_popup.jpg) (archivierte Berichte vom 15.03.2026).
 
 ```
-static.avalanche.report (CAAML v6) + eaws-regions (Polygone)
-  -> scripts/fetch_avalanche.py  (GitHub Action "Lawinenlage aktualisieren", 06:30 und 16:20 UTC)
-  -> data/avalanche_bulletin.json + data/avalanche_regions.geojson
+static.avalanche.report (CAAML v6)  aws.slf.ch (CAAML v6, V4)  eaws-regions (Polygone)
+  -> scripts/fetch_avalanche.py  (GitHub Action "Lawinenlage aktualisieren", 07:20 und 16:20 UTC)
+  -> data/avalanche/index.json, <quelle>.json, <quelle>_regions.geojson  (ein gemeinsames Datenmodell)
   -> js/avalanche.js
 ```
 
-**Höhenabhängige Gefahrenstufen:** Der Bericht nennt je Gefahrenstufe eine Höhengrenze (z. B. unter 2000 m Stufe 2,
-darüber Stufe 3), aber keine Geometrie. Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich. Die Karte
-färbt deshalb wie die offizielle ALBINA-Karte nach der **höchsten** Stufe, das Popup zeigt die Aufteilung mit dem offiziellen
-Piktogramm, und die Legende erlaubt die Wahl einer Höhenlage. Begründung: [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md).
+**Ein System für mehrere Länder:** Beide Dienste liefern CAAML v6 und werden auf dasselbe Datenmodell abgebildet (Beschreibung und Felder: [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md)). Ein neues Land ist ein Eintrag in `scripts/avalanche_sources.py`, Frontend und Workflow bleiben unverändert. Empfehlungen für Frankreich, Italien und Slowenien stehen in der Analyse, Abschnitt 9.
 
-**Außerhalb der Saison:** Nach Ablauf eines Berichts werden die Regionen grau ohne Gefahrenstufe dargestellt, ein alter
-Bericht wird nie als aktuell gezeigt. Der aktuell veröffentlichte Bericht ist der letzte des Winters 2025/26.
+**Höhenabhängige Gefahrenstufen:** Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich. Die Karte färbt wie die offiziellen Karten nach der **höchsten** Stufe. Das Popup zeigt die Höhenaufteilung: bei Euregio aus den Gefahrenstufen (mit offiziellem Piktogramm), bei der Schweiz aus den Lawinenproblemen, weil der SLF seine Gefahrenstufen ohne Höhengrenze angibt. Die Legende erlaubt eine Höhenwahl, die nur bei Quellen mit Höhe in den Gefahrenstufen (Euregio) wirkt.
 
-**Daten erzeugen:** Reiter **Actions** → **Lawinenlage aktualisieren** → **Run workflow**. Lokal:
-`python3 scripts/fetch_avalanche.py`, Tests: `python3 scripts/test_fetch_avalanche.py`.
+**Außerhalb der Saison:** Nach Ablauf eines Berichts werden die Regionen grau ohne Gefahrenstufe dargestellt, ein alter Bericht wird nie als aktuell gezeigt. Der Euregio-Bericht ist der letzte des Winters 2025/26, der SLF liefert derzeit keinen aktiven Bericht.
 
-**Teststand:** Pipeline getestet. Das Frontend ist noch nicht im Browser mit gültigen Berichten geprüft, das ist erst nach
-dem Saisonstart des Lawinenwarndienstes möglich.
+**Daten erzeugen:** Reiter **Actions** → **Lawinenlage aktualisieren** → **Run workflow**. Lokal: `python3 scripts/fetch_avalanche.py [euregio|slf]`. Tests: `python3 scripts/test_avalanche_model.py`, `python3 scripts/test_fetch_avalanche.py` und, mit installiertem Chrome oder Edge, `python3 scripts/run_js_tests.py`.
 
+**Namensnennung (CC BY 4.0):** Euregio-Lawinenwarndienste und WSL-Institut für Schnee- und Lawinenforschung SLF (Link auf www.slf.ch) stehen in Legende, Popup, Kartenquellenangabe und Seitenfuß. Der Browser fragt die Dienste nie direkt ab, das SLF verlangt das für seine Schnittstellen.
+
+**Teststand:** Pipeline und JavaScript-Logik getestet, das Frontend mit archivierten Berichten vom 15.03.2026 beider Dienste in einem Headless-Browser geprüft. Der Test mit aktuellen Berichten ist erst nach dem Saisonstart der Lawinenwarndienste möglich.
 ## Status
 
 Das Projekt befindet sich in einer Übergangsphase vor einem möglichen Rebranding und einer weiteren Produktreife. Die Kernfunktionalitäten sind bereits in der Kartenanwendung sichtbar, während die langfristige Ausrichtung in der Roadmap und Dokumentation beschrieben wird.
 
 ## Lizenz und Hinweise
 
-Die Anwendung und die enthaltenen Projektdateien werden gemäß den jeweiligen Datenquellen und Repository-Regeln gepflegt. Für externe Datenquellen gelten die jeweiligen Lizenz- und Nutzungsbedingungen, insbesondere bei Digitize the Planet, Open-Meteo und dem Euregio-Lawinenreport (CC BY 4.0, Namensnennung erforderlich).
+Die Anwendung und die enthaltenen Projektdateien werden gemäß den jeweiligen Datenquellen und Repository-Regeln gepflegt. Für externe Datenquellen gelten die jeweiligen Lizenz- und Nutzungsbedingungen, insbesondere bei Digitize the Planet, Open-Meteo, dem Euregio-Lawinenreport und dem SLF-Lawinenbulletin (beide CC BY 4.0, Namensnennung erforderlich).
