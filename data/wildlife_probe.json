@@ -1,0 +1,130 @@
+{
+  "generated": "2026-10-29T08:30:53Z",
+  "steps": [
+    {
+      "url": "/wildlife?fields=all",
+      "ok": false,
+      "error": "HTTP 400"
+    },
+    {
+      "url": "/wildlife",
+      "ok": true,
+      "rows": 2923,
+      "fields": [
+        "created_at",
+        "id",
+        "protected_area_uuid",
+        "protected_entity_id",
+        "updated_at"
+      ]
+    },
+    {
+      "url": "/protected-entities?fields=all",
+      "ok": false,
+      "error": "HTTP 400"
+    },
+    {
+      "url": "/protected-entities",
+      "ok": true,
+      "rows": 8079,
+      "fields": [
+        "id",
+        "name",
+        "name_scientific",
+        "red_list_category",
+        "species_description",
+        "type"
+      ]
+    }
+  ],
+  "schema": {
+    "available": true,
+    "relevant_paths": {
+      "/protected-areas/{uuid}/wildlife": {
+        "get": [
+          "behavior_recommendation",
+          "connected_rule_id",
+          "created_at",
+          "daytime_id",
+          "habitat_demands",
+          "id",
+          "link_name",
+          "link_url",
+          "presence_from",
+          "presence_to",
+          "protection_landscape",
+          "protection_time_period",
+          "season_id",
+          "sensitive_to",
+          "updated_at",
+          "weathercondition_id"
+        ]
+      },
+      "/wildlife": {
+        "get": [
+          "created_at",
+          "id",
+          "protected_area_uuid",
+          "protected_entity_id",
+          "updated_at"
+        ]
+      },
+      "/wildlife/{id}": {
+        "get": [
+          "behavior_recommendation",
+          "connected_rule_id",
+          "created_at",
+          "daytime_id",
+          "habitat_demands",
+          "id",
+          "link_name",
+          "link_url",
+          "presence_from",
+          "presence_to",
+          "protected_area_uuid",
+          "protected_entity",
+          "protection_landscape",
+          "protection_time_period",
+          "season_id",
+          "sensitive_to",
+          "updated_at",
+          "weathercondition_id"
+        ]
+      },
+      "/protected-entities": {
+        "get": [
+          "id",
+          "name",
+          "name_scientific",
+          "red_list_category",
+          "species_description",
+          "type"
+        ]
+      },
+      "/protected-entities/{id}": {
+        "get": [
+          "id",
+          "name",
+          "name_scientific",
+          "picture",
+          "red_list_category",
+          "red_list_uuid",
+          "species_description",
+          "type"
+        ]
+      }
+    }
+  },
+  "wildlife_sample": {
+    "id": 14,
+    "protected_area_uuid": "afc76604-4f04-41d5-bcab-421818dee828",
+    "protected_entity_id": 4626,
+    "created_at": "2024-08-21T10:14:03.799467Z",
+    "updated_at": "2024-08-21T10:14:03.799495Z"
+  },
+  "result": {
+    "entities_needed": 564,
+    "entities_resolved": 564,
+    "complete": true
+  }
+}
