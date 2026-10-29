@@ -1,165 +1,186 @@
-"""Kleine Tests für fetch_avalanche.py (ohne Netzwerk): python3 scripts/test_fetch_avalanche.py"""
+"""Tests für fetch_avalanche.py und avalanche_sources.py (Netzwerk simuliert): python3 scripts/test_fetch_avalanche.py"""
 
+import datetime
+import json
 import os
 import sys
+import tempfile
 
 sys.path.insert(0, os.path.dirname(__file__))
-import fetch_avalanche as a
+import avalanche_sources as s
+import fetch_avalanche as fa
+import test_avalanche_model as tm
 
-SQ = [[11, 47], [11.1, 47], [11.1, 47.1], [11, 47.1], [11, 47]]
-
-
-def feat(rid, start=None, end=None, geom=None):
-    return {"type": "Feature", "properties": {"id": rid, "start_date": start, "end_date": end},
-            "geometry": geom or {"type": "MultiPolygon", "coordinates": [[SQ]]}}
-
-
-def bulletin(bid, regions, ratings=None, publication="2026-01-10T15:00:00Z", **extra):
-    b = {"bulletinID": bid, "publicationTime": publication,
-         "validTime": {"startTime": publication, "endTime": "2026-01-11T15:00:00Z"},
-         "unscheduled": False, "avalancheProblems": [], "lang": "de",
-         "customData": {"ALBINA": {"mainDate": "2026-01-11"}},
-         "dangerRatings": ratings or [{"mainValue": "moderate", "validTimePeriod": "all_day"}],
-         "regions": [{"regionID": r, "name": "Name " + r} for r in regions]}
-    b.update(extra)
-    return b
+NOW = datetime.datetime(2026, 1, 15, 8, 0, tzinfo=datetime.timezone.utc)
+SLF = next(x for x in s.SOURCES if x["id"] == "slf")
+EUREGIO = next(x for x in s.SOURCES if x["id"] == "euregio")
+SLF_NAMES = {"sectors": [{"sector_id": "4115", "sector_name": "Glarus Nord", "sector_names": {"de": "Glarus Nord (de)"}},
+                         {"sector_id": "4116", "sector_name": "Glarus Süd", "sector_names": {}}]}
 
 
-def test_polygon_validity_boundaries():
-    p = {"start_date": "2022-10-01", "end_date": "2025-10-01"}
-    assert not a.polygon_valid(p, "2022-09-30")
-    assert a.polygon_valid(p, "2022-10-01")
-    assert a.polygon_valid(p, "2025-09-30")
-    assert not a.polygon_valid(p, "2025-10-01")   # end_date ist exklusiv
-    assert a.polygon_valid({}, "2026-01-01") and a.polygon_valid({"start_date": None, "end_date": None}, "2026-01-01")
+def square(rid, x=11.0):
+    ring = [[x, 47], [x + .1, 47], [x + .1, 47.1], [x, 47.1], [x, 47]]
+    return {"type": "Feature", "properties": {"id": rid}, "geometry": {"type": "MultiPolygon", "coordinates": [[ring]]}}
 
 
-def test_round_ring_dedup_and_degenerate():
-    ring = [[11.000001, 47.000001], [11.000002, 47.000002], [11.1, 47], [11.1, 47.1], [11.000001, 47.000001]]
-    assert a.round_ring(ring) == [[11.0, 47.0], [11.1, 47.0], [11.1, 47.1], [11.0, 47.0]]
-    assert a.round_ring([[11, 47], [11.000001, 47], [11, 47.000001], [11, 47]]) is None
+class Fake:
+    """Ersetzt fa.get_json: URL -> Dokument oder Exception."""
+
+    def __init__(self, table):
+        self.table, self.calls = table, []
+
+    def __call__(self, url):
+        self.calls.append(url)
+        v = self.table[url]
+        if isinstance(v, Exception):
+            raise v
+        return v
 
 
-def test_round_geometry_polygon_becomes_multipolygon_and_drops_degenerate_hole():
-    hole = [[11.05, 47.05], [11.050001, 47.05], [11.05, 47.050001], [11.05, 47.05]]
-    g = a.round_geometry({"type": "Polygon", "coordinates": [SQ, hole]})
-    assert g["type"] == "MultiPolygon" and len(g["coordinates"]) == 1 and len(g["coordinates"][0]) == 1
+def setup(table):
+    tmp = tempfile.TemporaryDirectory()
+    fa.DATA_DIR = tmp.name
+    fa.PAUSE = 0
+    fa.get_json = Fake(table)
+    return tmp
 
 
-def test_build_regions_scope_validity_and_sorting():
-    fs = [feat("AT-07-02"), feat("AT-02-01"), feat("IT-32-TN-01"), feat("AT-07-01"),
-          feat("AT-07-03", end="2022-10-01"), feat("AT-07-04", start="2030-01-01")]
-    ids = [f["properties"]["id"] for f in a.build_regions(fs, "2026-01-11")]
-    assert ids == ["AT-07-01", "AT-07-02", "IT-32-TN-01"], ids
+def slf_table(bulletins, polygons=("CH-4115", "CH-4116")):
+    return {SLF["bulletin_url"]: {"bulletins": bulletins}, SLF["names_url"]: SLF_NAMES,
+            fa.REGIONS_URL.format(code="CH"): {"features": [square(p, 8 + i * .2) for i, p in enumerate(polygons)]}}
 
 
-def test_build_regions_same_id_old_and_new_polygon():
-    fs = [feat("AT-07-05", end="2022-10-01"), feat("AT-07-05", start="2022-10-01")]
-    assert len(a.build_regions(fs, "2026-01-11")) == 1
-    assert len(a.build_regions(fs, "2022-01-01")) == 1
+def euregio_table(bulletins):
+    t = {EUREGIO["bulletin_url"]: {"bulletins": bulletins}}
+    for code in EUREGIO["geometry_codes"]:
+        t[fa.REGIONS_URL.format(code=code)] = {"features": [square("AT-07-01")] if code == "AT-07" else []}
+    return t
 
 
-def test_build_regions_duplicate_valid_polygon_fails():
+def load(name):
+    with open(os.path.join(fa.DATA_DIR, name), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def test_slf_off_season_writes_polygons_without_bulletins():
+    tmp = setup(slf_table([]))
+    fa.fetch_source(SLF, NOW)
+    doc = load("slf.json")
+    assert doc["status"] == "no_active_bulletin" and doc["bulletins"] == [] and doc["validity_period"] is None
+    assert doc["source"]["attribution"] == "WSL-Institut für Schnee- und Lawinenforschung SLF" and doc["schema"] == tm.m.SCHEMA
+    assert doc["reference_date"] == "2026-01-15"
+    assert doc["regions"] == {"CH-4115": {"name": "Glarus Nord (de)", "country": "CH", "bulletin": None},
+                              "CH-4116": {"name": "Glarus Süd", "country": "CH", "bulletin": None}}
+    geo = load("slf_regions.geojson")
+    assert [f["properties"]["id"] for f in geo["features"]] == ["CH-4115", "CH-4116"] and geo["source"] == "slf"
+    assert all(len(f["properties"]["label_point"]) == 2 for f in geo["features"])
+    tmp.cleanup()
+
+
+def test_slf_active_bulletin_and_idempotence():
+    tmp = setup(slf_table([tm.slf_bulletin()]))
+    fa.fetch_source(SLF, NOW)
+    doc = load("slf.json")
+    assert doc["status"] == "active" and doc["reference_date"] == "2025-03-15" and len(doc["bulletins"]) == 1
+    assert doc["regions"]["CH-4115"]["bulletin"] == 0 and doc["regions"]["CH-4115"]["name"] == "Name CH-4115"
+    assert doc["bulletins"][0]["max_subdivision"] == "plus"
+    before = os.path.getmtime(os.path.join(fa.DATA_DIR, "slf.json"))
+    fa.fetch_source(SLF, NOW + datetime.timedelta(hours=9))
+    assert os.path.getmtime(os.path.join(fa.DATA_DIR, "slf.json")) == before        # unverändert, kein Schreiben
+    tmp.cleanup()
+
+
+def test_region_without_polygon_is_dropped_and_bulletin_only_for_them_skipped():
+    tmp = setup(slf_table([tm.slf_bulletin(regions=["CH-4115", "CH-9999"]), tm.slf_bulletin("only-missing", ["CH-8888"])]))
+    fa.fetch_source(SLF, NOW)
+    doc = load("slf.json")
+    assert sorted(doc["regions"]) == ["CH-4115", "CH-4116"] and len(doc["bulletins"]) == 1
+    assert doc["regions"]["CH-4116"]["bulletin"] is None
+    tmp.cleanup()
+
+
+def test_euregio_without_regions_is_an_error():
+    tmp = setup(euregio_table([]))
     try:
-        a.build_regions([feat("AT-07-05"), feat("AT-07-05")], "2026-01-11")
-    except ValueError:
+        fa.fetch_source(EUREGIO, NOW)
+    except RuntimeError:
+        tmp.cleanup()
         return
-    raise AssertionError("doppelte gültige Polygone müssen abbrechen")
+    raise AssertionError("leeres Euregio-Bulletin ist kein gültiger Zustand")
 
 
-def test_paragraphs_split_on_br_and_nothing_invented():
-    assert a.paragraphs("Eins <br/> Zwei<br>Drei <BR />") == ["Eins", "Zwei", "Drei"]
-    assert a.paragraphs(None) == [] and a.paragraphs("") == [] and a.paragraphs(5) == []
+def test_names_failure_is_not_fatal():
+    t = slf_table([tm.slf_bulletin()])
+    t[SLF["names_url"]] = RuntimeError("down")
+    tmp = setup(t)
+    fa.fetch_source(SLF, NOW)
+    assert load("slf.json")["regions"]["CH-4116"]["name"] == "Name CH-4116"
+    tmp.cleanup()
 
 
-def test_text_block_empty_is_none():
-    assert a.text_block({}) is None and a.text_block({"highlights": " ", "comment": ""}) is None
-    assert a.text_block({"highlights": "H", "comment": "a<br/>b"}) == {"highlights": "H", "comment": ["a", "b"]}
+def test_source_failure_is_isolated_and_reported():
+    table = euregio_table([tm.euregio_bulletin()])
+    table.update(slf_table([]))
+    table[SLF["bulletin_url"]] = RuntimeError("SLF down")
+    tmp = setup(table)
+    argv_status = fa.main([])
+    assert argv_status == 1                                                       # Fehler gemeldet
+    assert os.path.exists(os.path.join(fa.DATA_DIR, "euregio.json"))              # Euregio trotzdem geschrieben
+    assert not os.path.exists(os.path.join(fa.DATA_DIR, "slf.json"))
+    assert [x["id"] for x in load("index.json")["sources"]] == ["euregio"]
+    tmp.cleanup()
 
 
-def test_rating_levels_treeline_and_defaults():
-    r = a.slim_rating({"mainValue": "considerable", "elevation": {"lowerBound": "2000"}})
-    assert r == {"value": "considerable", "level": 3, "period": "all_day", "elevation": {"lowerBound": 2000}}
-    r = a.slim_rating({"mainValue": "low", "elevation": {"upperBound": "treeline"}, "validTimePeriod": "later"})
-    assert r["elevation"] == {"upperBound": "treeline"} and r["period"] == "later"
-    assert a.slim_rating({"mainValue": "no_snow"})["level"] is None
-    assert a.slim_rating({"mainValue": "very_high"})["level"] == 5
+def test_failed_source_keeps_previous_files_and_index_entry():
+    table = euregio_table([tm.euregio_bulletin()])
+    table.update(slf_table([tm.slf_bulletin()]))
+    tmp = setup(table)
+    assert fa.main([]) == 0
+    old = load("slf.json")
+    table[SLF["bulletin_url"]] = RuntimeError("SLF down")
+    assert fa.main([]) == 1
+    assert load("slf.json") == old and [x["id"] for x in load("index.json")["sources"]] == ["euregio", "slf"]
+    tmp.cleanup()
 
 
-def test_slim_bulletin_max_level_over_elevation_and_periods():
-    b = bulletin("b1", ["AT-07-01"], ratings=[
-        {"mainValue": "low", "elevation": {"upperBound": "2600"}, "validTimePeriod": "later"},
-        {"mainValue": "moderate", "elevation": {"lowerBound": "2600"}, "validTimePeriod": "later"},
-        {"mainValue": "low", "validTimePeriod": "earlier"}])
-    s = a.slim_bulletin(b)
-    assert s["maxLevel"] == 2 and len(s["dangerRatings"]) == 3 and s["mainDate"] == "2026-01-11"
-    assert a.slim_bulletin(bulletin("b2", ["AT-07-01"], ratings=[{"mainValue": "no_snow"}]))["maxLevel"] is None
+def test_main_argument_selects_source_and_rejects_unknown():
+    table = euregio_table([tm.euregio_bulletin()])
+    table.update(slf_table([]))
+    tmp = setup(table)
+    assert fa.main(["slf"]) == 0 and not os.path.exists(os.path.join(fa.DATA_DIR, "euregio.json"))
+    assert fa.main(["gibtesnicht"]) == 2
+    tmp.cleanup()
 
 
-def test_slim_problem_aspects_sorted_and_optional_fields():
-    p = a.slim_problem({"problemType": "wind_slab", "aspects": ["NW", "N", "E"], "avalancheSize": 2,
-                        "elevation": {"lowerBound": "treeline"}})
-    assert p == {"type": "wind_slab", "period": "all_day", "elevation": {"lowerBound": "treeline"},
-                 "avalancheSize": 2, "aspects": ["N", "E", "NW"]}
-    assert a.slim_problem({"problemType": "new_snow"}) == {"type": "new_snow", "period": "all_day"}
+def test_write_if_changed_heartbeat():
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "x.json")
+        assert fa.write_if_changed(path, {"generated": "2026-01-15T00:00:00Z", "a": 1}, NOW, heartbeat=True)   # neu
+        # gleicher Inhalt: bei 8 Tagen Alter neu geschrieben (Heartbeat), bei 1 Tag nicht
+        fa.write_json(path, {"generated": "2026-01-07T00:00:00Z", "a": 1})
+        assert fa.write_if_changed(path, {"generated": "x", "a": 1}, NOW, heartbeat=True)
+        fa.write_json(path, {"generated": "2026-01-14T08:00:00Z", "a": 1})
+        assert not fa.write_if_changed(path, {"generated": "x", "a": 1}, NOW, heartbeat=True)
+        assert fa.write_if_changed(path, {"generated": "x", "a": 2}, NOW, heartbeat=True)   # anderer Inhalt
+        fa.write_json(path, {"generated": "2020-01-01T00:00:00Z", "a": 1})
+        assert not fa.write_if_changed(path, {"generated": "x", "a": 1}, NOW)               # ohne Heartbeat nie nur wegen Alter
 
 
-def test_bulletin_text_fields_and_tendency():
-    b = bulletin("b1", ["AT-07-01"],
-                 avalancheActivity={"highlights": "Kurz", "comment": "A<br/>B"},
-                 snowpackStructure={"comment": "Schnee"}, weatherForecast={}, travelAdvisory={},
-                 tendency=[{"highlights": "Tendenz", "tendencyType": "steady",
-                            "validTime": {"startTime": "x", "endTime": "y"}}],
-                 customData={"ALBINA": {"mainDate": "2026-01-11"}, "LWD_Tyrol": {"dangerPatterns": ["DP10"]}})
-    s = a.slim_bulletin(b)
-    assert s["activity"] == {"highlights": "Kurz", "comment": ["A", "B"]}
-    assert s["snowpack"] == {"comment": ["Schnee"]}
-    assert "weather" not in s and "travelAdvisory" not in s     # leere Blöcke entfallen
-    assert s["tendency"][0]["type"] == "steady" and s["dangerPatterns"] == ["DP10"]
+def test_in_scope_and_slf_names():
+    assert s.in_scope(SLF, "CH-1111") and not s.in_scope(SLF, "CHX-1") and not s.in_scope(SLF, "AT-07-01")
+    assert s.in_scope(EUREGIO, "IT-32-BZ-08-03") and s.in_scope(EUREGIO, "AT-07") and not s.in_scope(EUREGIO, "AT-02-01")
+    assert s.slf_names(SLF_NAMES) == {"CH-4115": "Glarus Nord (de)", "CH-4116": "Glarus Süd"}
 
 
-def test_build_bulletin_scope_and_missing_polygon():
-    doc = {"bulletins": [bulletin("b1", ["AT-07-01", "IT-32-BZ-02", "AT-07-99"]), bulletin("b2", ["AT-02-01"])]}
-    bs, regions, missing, skipped = a.build_bulletin(doc, ["AT-07-01", "IT-32-BZ-02"])
-    assert len(bs) == 1 and skipped == 1 and sorted(regions) == ["AT-07-01", "AT-07-99", "IT-32-BZ-02"]
-    assert missing == ["AT-07-99"] and regions["AT-07-01"] == {"name": "Name AT-07-01", "b": 0}
-
-
-def test_build_bulletin_newer_publication_wins_and_reindexes():
-    old = bulletin("old", ["AT-07-01", "AT-07-02"], publication="2026-01-10T15:00:00Z")
-    new = bulletin("new", ["AT-07-01"], publication="2026-01-11T05:00:00Z")
-    bs, regions, _, _ = a.build_bulletin({"bulletins": [old, new]}, [])
-    assert [b["id"] for b in bs] == ["old", "new"] and regions["AT-07-01"]["b"] == 1 and regions["AT-07-02"]["b"] == 0
-    only_new = bulletin("new2", ["AT-07-01"], publication="2026-01-11T05:00:00Z")
-    bs, regions, _, _ = a.build_bulletin({"bulletins": [old, only_new]}, [])
-    assert regions["AT-07-01"]["b"] == 1
-    old1 = bulletin("old1", ["AT-07-01"], publication="2026-01-10T15:00:00Z")
-    bs, regions, _, _ = a.build_bulletin({"bulletins": [old1, new]}, [])
-    assert [b["id"] for b in bs] == ["new"] and regions["AT-07-01"]["b"] == 0   # überschriebenes Bulletin entfällt
-
-
-def test_build_bulletin_same_age_duplicate_fails():
-    try:
-        a.build_bulletin({"bulletins": [bulletin("x", ["AT-07-01"]), bulletin("y", ["AT-07-01"])]}, [])
-    except ValueError:
-        return
-    raise AssertionError("gleich alte Bulletins für dieselbe Region müssen abbrechen")
-
-
-def test_bulletin_without_ratings_fails():
-    b = bulletin("x", ["AT-07-01"])
-    b["dangerRatings"] = []
-    try:
-        a.build_bulletin({"bulletins": [b]}, [])
-    except ValueError:
-        return
-    raise AssertionError("Bulletin ohne Gefahrenstufen darf nicht still übernommen werden")
-
-
-def test_validity_spans_all_bulletins():
-    b1, b2 = a.slim_bulletin(bulletin("1", ["AT-07-01"])), a.slim_bulletin(bulletin("2", ["AT-07-02"]))
-    b2["validTime"] = {"startTime": "2026-01-09T15:00:00Z", "endTime": "2026-01-12T15:00:00Z"}
-    assert a.validity([b1, b2]) == {"startTime": "2026-01-09T15:00:00Z", "endTime": "2026-01-12T15:00:00Z"}
+def test_registry_is_consistent():
+    ids = [x["id"] for x in s.SOURCES]
+    assert len(ids) == len(set(ids))
+    for x in s.SOURCES:
+        for k in fa.META_KEYS:
+            assert x.get(k), (x["id"], k)
+        assert x["license"] and x["attribution"] and x["geometry_codes"] and x["region_codes"]
+        if x.get("names_url"):
+            assert x["id"] in s.NAME_PARSERS
 
 
 if __name__ == "__main__":

@@ -1,43 +1,36 @@
 #!/usr/bin/env python3
-"""Lawinenlage Euregio Tirol - Südtirol - Trentino (ALBINA).
+"""Lawinenlage: holt Bulletins und Regionspolygone aller Quellen aus avalanche_sources.py.
 
-Holt das aktuelle Lawinenlagebericht-Bulletin (CAAML v6, deutsch) und die Mikroregion-Polygone
-(eaws-regions) und schreibt zwei Dateien:
+Je Quelle entstehen zwei Dateien im gemeinsamen Modell (siehe avalanche_model.py):
 
-  data/avalanche_regions.geojson   Polygone, nur Kennung "id" (ändert sich selten)
-  data/avalanche_bulletin.json     Bulletins + Zuordnung regionID -> Bulletin (täglich)
+  data/avalanche/<id>.json            Bulletins + Regionenindex (täglich)
+  data/avalanche/<id>_regions.geojson Polygone mit Land und Symbolposition (ändert sich selten)
 
-Der Browser verknüpft beide über die Kennung. Gefahrenstufen, Höhen, Lawinenprobleme und Texte werden
-unverändert aus dem Bulletin übernommen, abgeleitet wird nur die höchste Gefahrenstufe.
+und data/avalanche/index.json als Verzeichnis der Quellen für das Frontend. Fällt eine Quelle aus, bleiben ihre
+Dateien unverändert, die übrigen Quellen werden trotzdem geschrieben, der Lauf endet dann mit Fehler.
 
-Datenquellen: Lawinenwarndienste Tirol, Südtirol und Trentino (avalanche.report, CC BY 4.0),
-Polygone: EAWS Regions (CC0 1.0). Siehe docs/DATENQUELLEN.md.
+Aufruf: python3 scripts/fetch_avalanche.py [Quelle ...]
+Datenquellen und Lizenzen: docs/DATENQUELLEN.md
 """
 import datetime
 import json
 import os
-import re
 import sys
 import time
 import urllib.error
 import urllib.request
 
-BULLETIN_URL = os.environ.get(
-    "AVALANCHE_BULLETIN_URL", "https://static.avalanche.report/bulletins/latest/EUREGIO_de_CAAMLv6.json")
-REGIONS_URL = os.environ.get(
-    "AVALANCHE_REGIONS_URL",
-    "https://gitlab.com/eaws/eaws-regions/-/raw/master/public/micro-regions/{code}_micro-regions.geojson.json")
-REGION_CODES = ("AT-07", "IT-32-BZ", "IT-32-TN")   # Tirol, Südtirol, Trentino; die EUREGIO-Datei enthält auch AT-02 (Kärnten)
-DATA_DIR = os.environ.get("AVALANCHE_DATA_DIR", os.path.join(os.path.dirname(__file__), "..", "data"))
-REGIONS_OUT = "avalanche_regions.geojson"
-BULLETIN_OUT = "avalanche_bulletin.json"
-HEARTBEAT_DAYS = 7        # Datei spätestens so oft neu schreiben, damit das Repository auch außerhalb der Saison aktiv bleibt
-COORD_DECIMALS = 5        # ca. 1 m
-UA = "bergbedingungen-snapshot (+https://github.com/purple-lettuce/Bergbedingungen)"
+sys.path.insert(0, os.path.dirname(__file__))
+import avalanche_model as m
+import avalanche_sources as s
 
-LEVELS = {"low": 1, "moderate": 2, "considerable": 3, "high": 4, "very_high": 5}
-ASPECT_ORDER = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-BR = re.compile(r"\s*<br\s*/?>\s*", re.IGNORECASE)
+DATA_DIR = os.environ.get("AVALANCHE_DATA_DIR", os.path.join(os.path.dirname(__file__), "..", "data", "avalanche"))
+REGIONS_URL = os.environ.get("AVALANCHE_REGIONS_URL", s.REGIONS_URL)
+HEARTBEAT_DAYS = 7        # Datei spätestens so oft neu schreiben, damit das Repository auch außerhalb der Saison aktiv bleibt
+PAUSE = 0.5               # Sekunden zwischen Abfragen beim selben Dienst (SLF bittet um Schonung der Schnittstelle)
+UA = "bergbedingungen-snapshot (+https://github.com/purple-lettuce/Bergbedingungen)"
+META_KEYS = ("id", "name", "provider", "countries", "attribution", "attribution_url", "license", "license_url",
+             "report_url", "report_url_fallback", "bulletin_url")
 
 
 def get_json(url):
@@ -57,206 +50,6 @@ def get_json(url):
     raise RuntimeError("Abruf fehlgeschlagen: %s (%s)" % (url, last))
 
 
-def in_scope(region_id):
-    return any(region_id == c or region_id.startswith(c + "-") for c in REGION_CODES)
-
-
-# ---------- Polygone ----------
-
-def polygon_valid(props, date):
-    """Wie albina-website (stores/microRegions.ts): start_date <= Datum < end_date, fehlende Grenzen sind offen."""
-    start, end = props.get("start_date"), props.get("end_date")
-    return (not start or start <= date) and (not end or end > date)
-
-
-def round_ring(ring):
-    out = []
-    for x, y in ring:
-        p = [round(x, COORD_DECIMALS), round(y, COORD_DECIMALS)]
-        if not out or p != out[-1]:
-            out.append(p)
-    return out if len(out) >= 4 else None   # weniger als vier Punkte ist kein gültiger Ring
-
-
-def round_geometry(geom):
-    """Rundet Koordinaten; entfernt entartete Ringe. Gibt None zurück, wenn nichts übrig bleibt."""
-    if geom["type"] == "Polygon":
-        polys = [geom["coordinates"]]
-    elif geom["type"] == "MultiPolygon":
-        polys = geom["coordinates"]
-    else:
-        raise ValueError("Unerwarteter Geometrietyp: %s" % geom["type"])
-    result = []
-    for poly in polys:
-        rings = [round_ring(r) for r in poly]
-        if rings and rings[0] is not None:             # Außenring muss bleiben, entartete Löcher entfallen
-            result.append([r for r in rings if r is not None])
-    return {"type": "MultiPolygon", "coordinates": result} if result else None
-
-
-def build_regions(features, date):
-    """Gültige Polygone zum Datum, eine Kennung genau einmal, sortiert nach Kennung."""
-    by_id = {}
-    for f in features:
-        props = f.get("properties") or {}
-        rid = props.get("id")
-        if not rid or not in_scope(rid) or not polygon_valid(props, date):
-            continue
-        if rid in by_id:
-            raise ValueError("Kennung %s hat am %s mehrere gültige Polygone" % (rid, date))
-        geom = round_geometry(f["geometry"])
-        if geom is None:
-            raise ValueError("Kennung %s: Geometrie nach dem Runden leer" % rid)
-        by_id[rid] = {"type": "Feature", "properties": {"id": rid}, "geometry": geom}
-    return [by_id[k] for k in sorted(by_id)]
-
-
-# ---------- Bulletin ----------
-
-def paragraphs(text):
-    """CAAML-Texte trennen Absätze mit <br/>; Ergebnis ist eine Liste reiner Textabsätze."""
-    if not text or not isinstance(text, str):
-        return []
-    return [p.strip() for p in BR.split(text) if p.strip()]
-
-
-def text_block(d):
-    """CAAML-Textblock {highlights, comment} -> {"highlights": str, "comment": [Absätze]}; leer -> None."""
-    if not isinstance(d, dict):
-        return None
-    out = {}
-    hl = " ".join(paragraphs(d.get("highlights")))
-    if hl:
-        out["highlights"] = hl
-    comment = paragraphs(d.get("comment"))
-    if comment:
-        out["comment"] = comment
-    return out or None
-
-
-def bound(value):
-    """Höhengrenze: Zahl in Metern oder 'treeline' (Waldgrenze, ohne Zahlenwert in den Daten)."""
-    if value == "treeline":
-        return "treeline"
-    return int(value)
-
-
-def elevation(e):
-    if not isinstance(e, dict):
-        return None
-    out = {k: bound(e[k]) for k in ("lowerBound", "upperBound") if e.get(k) not in (None, "")}
-    return out or None
-
-
-def slim_rating(r):
-    value = r["mainValue"]
-    out = {"value": value, "level": LEVELS.get(value), "period": r.get("validTimePeriod") or "all_day"}
-    el = elevation(r.get("elevation"))
-    if el:
-        out["elevation"] = el
-    return out
-
-
-def slim_problem(p):
-    out = {"type": p["problemType"], "period": p.get("validTimePeriod") or "all_day"}
-    el = elevation(p.get("elevation"))
-    if el:
-        out["elevation"] = el
-    for key in ("snowpackStability", "frequency"):
-        if p.get(key):
-            out[key] = p[key]
-    if p.get("avalancheSize") is not None:
-        out["avalancheSize"] = int(p["avalancheSize"])
-    aspects = [a for a in ASPECT_ORDER if a in (p.get("aspects") or [])]
-    if aspects:
-        out["aspects"] = aspects
-    return out
-
-
-
-def main_date(b):
-    d = ((b.get("customData") or {}).get("ALBINA") or {}).get("mainDate")
-    return d or b["validTime"]["endTime"][:10]
-
-
-def slim_bulletin(b):
-    ratings = [slim_rating(r) for r in b.get("dangerRatings") or []]
-    levels = [r["level"] for r in ratings if r["level"]]
-    out = {
-        "id": b["bulletinID"],
-        "publicationTime": b["publicationTime"],
-        "validTime": {"startTime": b["validTime"]["startTime"], "endTime": b["validTime"]["endTime"]},
-        "mainDate": main_date(b),
-        "unscheduled": bool(b.get("unscheduled")),
-        "maxLevel": max(levels) if levels else None,
-        "dangerRatings": ratings,
-        "avalancheProblems": [slim_problem(p) for p in b.get("avalancheProblems") or []],
-    }
-    headline = " ".join(paragraphs(b.get("highlights")))
-    if headline:
-        out["highlights"] = headline
-    for key, src in (("activity", "avalancheActivity"), ("snowpack", "snowpackStructure"),
-                     ("weather", "weatherForecast"), ("travelAdvisory", "travelAdvisory")):
-        blk = text_block(b.get(src))
-        if blk:
-            out[key] = blk
-    tendency = []
-    for t in b.get("tendency") or []:
-        blk = text_block(t) or {}
-        if t.get("tendencyType"):
-            blk["type"] = t["tendencyType"]
-        if t.get("validTime"):
-            blk["validTime"] = t["validTime"]
-        if blk:
-            tendency.append(blk)
-    if tendency:
-        out["tendency"] = tendency
-    patterns = ((b.get("customData") or {}).get("LWD_Tyrol") or {}).get("dangerPatterns")
-    if patterns:
-        out["dangerPatterns"] = list(patterns)
-    return out
-
-
-def build_bulletin(doc, region_ids):
-    """Verdichtet das CAAML-Dokument auf die Regionen im Umfang. region_ids: Kennungen mit Polygon."""
-    bulletins, regions = [], {}
-    skipped = 0
-    for b in doc["bulletins"]:
-        scoped = [r for r in b.get("regions") or [] if in_scope(r["regionID"])]
-        if not scoped:
-            skipped += 1
-            continue
-        if not b.get("dangerRatings"):
-            raise ValueError("Bulletin %s ohne Gefahrenstufen" % b.get("bulletinID"))
-        slim = slim_bulletin(b)
-        idx = len(bulletins)
-        bulletins.append(slim)
-        for r in scoped:
-            rid = r["regionID"]
-            if rid in regions:   # selten: Region in zwei Bulletins, dann gilt das jüngere
-                other = bulletins[regions[rid]["b"]]
-                if other["publicationTime"] == slim["publicationTime"]:
-                    raise ValueError("Region %s in zwei gleich alten Bulletins" % rid)
-                if other["publicationTime"] > slim["publicationTime"]:
-                    continue
-            regions[rid] = {"name": r.get("name") or rid, "b": idx}
-    # Bulletins ohne zugeordnete Region (alle überschrieben) entfernen, Indizes neu vergeben
-    used = sorted({v["b"] for v in regions.values()})
-    remap = {old: new for new, old in enumerate(used)}
-    bulletins = [bulletins[i] for i in used]
-    for v in regions.values():
-        v["b"] = remap[v["b"]]
-    missing_polygon = sorted(set(regions) - set(region_ids))
-    return bulletins, {k: regions[k] for k in sorted(regions)}, missing_polygon, skipped
-
-
-def validity(bulletins):
-    return {"startTime": min(b["validTime"]["startTime"] for b in bulletins),
-            "endTime": max(b["validTime"]["endTime"] for b in bulletins)}
-
-
-# ---------- Schreiben ----------
-
 def write_json(path, doc):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + ".tmp"
@@ -273,76 +66,120 @@ def read_json(path):
         return None
 
 
-def parse_time(s):
-    return datetime.datetime.fromisoformat(s.replace("Z", "+00:00"))
+def parse_time(t):
+    return datetime.datetime.fromisoformat(t.replace("Z", "+00:00"))
 
 
-def main():
-    doc = get_json(BULLETIN_URL)
-    if not isinstance(doc, dict) or not doc.get("bulletins"):
-        raise RuntimeError("Bulletin-Datei enthält keine Bulletins")
-    scoped = [b for b in doc["bulletins"] if any(in_scope(r["regionID"]) for r in b.get("regions") or [])]
-    if not scoped:
-        raise RuntimeError("Keine Regionen aus %s im Bulletin" % ", ".join(REGION_CODES))
-    date = max(main_date(b) for b in scoped)
+def write_if_changed(path, doc, now, heartbeat=False):
+    """Schreibt nur bei neuem Inhalt. Mit heartbeat zusätzlich, wenn die Datei älter als HEARTBEAT_DAYS ist."""
+    old = read_json(path)
+    if old is not None:
+        same = {k: v for k, v in old.items() if k != "generated"} == {k: v for k, v in doc.items() if k != "generated"}
+        fresh = (not heartbeat) or (old.get("generated") and
+                                    now - parse_time(old["generated"]) < datetime.timedelta(days=HEARTBEAT_DAYS))
+        if same and fresh:
+            return False
+    write_json(path, doc)
+    return True
+
+
+def get_bulletin(url):
+    doc = get_json(url)
+    if not isinstance(doc, dict) or not isinstance(doc.get("bulletins"), list):
+        raise RuntimeError("Unerwartetes Format von %s" % url)
+    return doc
+
+
+def fetch_source(source, now):
+    sid = source["id"]
+    url = os.environ.get("AVALANCHE_URL_" + sid.upper(), source["bulletin_url"])
+    doc = get_bulletin(url)
+    scoped = [b for b in doc["bulletins"] if any(s.in_scope(source, r["regionID"]) for r in b.get("regions") or [])]
+    if not scoped and not source["empty_ok"]:
+        raise RuntimeError("Keine Regionen aus %s im Bulletin" % ", ".join(source["region_codes"]))
+    date = max((m.bulletin_date(b) for b in scoped), default=now.date().isoformat())
+
+    names = {}
+    if source.get("names_url"):
+        time.sleep(PAUSE)
+        try:
+            names = s.NAME_PARSERS[sid](get_json(source["names_url"]))
+        except Exception as e:   # Namen sind nicht kritisch, ohne sie zeigt das Popup die Kennung
+            print("[%s] Hinweis: Regionsnamen nicht geladen (%s)" % (sid, e))
 
     features = []
-    for code in REGION_CODES:
+    for code in source["geometry_codes"]:
+        time.sleep(PAUSE)
         features.extend(get_json(REGIONS_URL.format(code=code))["features"])
-    regions = build_regions(features, date)
+    regions = m.build_regions(features, date, lambda rid: s.in_scope(source, rid))
     if not regions:
         raise RuntimeError("Keine gültigen Polygone für %s" % date)
-    region_ids = [f["properties"]["id"] for f in regions]
+    region_ids = {f["properties"]["id"] for f in regions}
 
-    bulletins, mapping, missing_polygon, skipped = build_bulletin(doc, region_ids)
-    print("Bulletin-Datum: %s, %d Bulletins, %d Regionen im Umfang (%d Bulletins außerhalb übersprungen)"
-          % (date, len(bulletins), len(mapping), skipped))
-    print("Polygone gültig am %s: %d, ohne Bulletin: %d" % (date, len(regions), len(set(region_ids) - set(mapping))))
+    in_bulletin = {r["regionID"] for b in scoped for r in b.get("regions") or [] if s.in_scope(source, r["regionID"])}
+    missing_polygon = sorted(in_bulletin - region_ids)   # ohne Polygon nicht darstellbar
+    bulletins, index, skipped = m.build_index({"bulletins": scoped}, sid, lambda rid: rid in region_ids, names)
+    for rid in sorted(region_ids - set(index)):   # Polygone ohne Bulletin bleiben als "kein Bericht" sichtbar
+        index[rid] = {"name": names.get(rid) or rid, "country": m.region_country(rid), "bulletin": None}
+    index = {k: index[k] for k in sorted(index)}
+    with_report = sum(1 for v in index.values() if v["bulletin"] is not None)
+
+    print("[%s] Datum %s: %d Bulletins, %d Regionen mit Bericht, %d Polygone ohne Bericht"
+          % (sid, date, len(bulletins), with_report, len(index) - with_report))
     if missing_polygon:
-        print("WARNUNG: Regionen im Bulletin ohne Polygon (werden nicht dargestellt): %s" % ", ".join(missing_polygon))
+        print("[%s] WARNUNG: Regionen im Bulletin ohne Polygon (nicht dargestellt): %s" % (sid, ", ".join(missing_polygon)))
+    if not bulletins:
+        print("[%s] Kein aktives Bulletin (Saisonpause)." % sid)
 
-    now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
     out_dir = os.path.abspath(DATA_DIR)
-
-    regions_doc = {
-        "type": "FeatureCollection",
-        "source": "https://gitlab.com/eaws/eaws-regions",
-        "license": "CC0 1.0",
-        "features": regions,
-    }
-    regions_path = os.path.join(out_dir, REGIONS_OUT)
-    if read_json(regions_path) != regions_doc:
-        write_json(regions_path, regions_doc)
-        print("Geschrieben: %s (%.1f KB)" % (regions_path, os.path.getsize(regions_path) / 1024))
-    else:
-        print("Polygone unverändert.")
-
+    regions_doc = {"type": "FeatureCollection", "schema": m.SCHEMA, "source": sid,
+                   "geometry_source": "https://gitlab.com/eaws/eaws-regions", "geometry_license": "CC0 1.0",
+                   "features": regions}
+    changed = write_if_changed(os.path.join(out_dir, sid + "_regions.geojson"), regions_doc, now)
     bulletin_doc = {
+        "schema": m.SCHEMA,
+        "source": {k: source[k] for k in META_KEYS},
         "generated": now.isoformat().replace("+00:00", "Z"),
-        "source": BULLETIN_URL,
-        "license": "CC BY 4.0",
-        "attribution": "Lawinenwarndienste Tirol, Südtirol und Trentino (Euregio, avalanche.report)",
-        "lang": "de",
-        "mainDate": date,
-        "validTime": validity(bulletins),
+        "status": "active" if bulletins else "no_active_bulletin",
+        "reference_date": date,
+        "validity_period": m.validity(bulletins),
         "bulletins": bulletins,
-        "regions": mapping,
+        "regions": index,
     }
-    bulletin_path = os.path.join(out_dir, BULLETIN_OUT)
-    old = read_json(bulletin_path)
-    if old:
-        comparable = {k: v for k, v in old.items() if k != "generated"}
-        fresh = old.get("generated") and (now - parse_time(old["generated"])) < datetime.timedelta(days=HEARTBEAT_DAYS)
-        if fresh and comparable == {k: v for k, v in bulletin_doc.items() if k != "generated"}:
-            print("Bulletin unverändert.")
-            return
-    write_json(bulletin_path, bulletin_doc)
-    print("Geschrieben: %s (%.1f KB)" % (bulletin_path, os.path.getsize(bulletin_path) / 1024))
+    changed |= write_if_changed(os.path.join(out_dir, sid + ".json"), bulletin_doc, now, heartbeat=True)
+    print("[%s] %s" % (sid, "Dateien geschrieben." if changed else "unverändert."))
+
+
+def write_index(now):
+    """Verzeichnis der Quellen, deren Dateien vorhanden sind (auch wenn der heutige Abruf fehlschlug)."""
+    out_dir = os.path.abspath(DATA_DIR)
+    entries = []
+    for source in s.SOURCES:
+        sid = source["id"]
+        if read_json(os.path.join(out_dir, sid + ".json")) and read_json(os.path.join(out_dir, sid + "_regions.geojson")):
+            entries.append({"id": sid, "bulletin_file": sid + ".json", "regions_file": sid + "_regions.geojson"})
+    write_if_changed(os.path.join(out_dir, "index.json"), {"schema": m.SCHEMA, "sources": entries}, now)
+
+
+def main(argv):
+    wanted = set(argv)
+    unknown = wanted - {x["id"] for x in s.SOURCES}
+    if unknown:
+        print("Unbekannte Quelle: %s" % ", ".join(sorted(unknown)), file=sys.stderr)
+        return 2
+    now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+    failed = []
+    for source in s.SOURCES:
+        if wanted and source["id"] not in wanted:
+            continue
+        try:
+            fetch_source(source, now)
+        except Exception as e:
+            failed.append(source["id"])
+            print("[%s] FEHLER: %s. Bestehende Dateien bleiben unverändert." % (source["id"], e), file=sys.stderr)
+    write_index(now)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print("FEHLER: %s. Bestehende Dateien bleiben unverändert." % e, file=sys.stderr)
-        sys.exit(1)
+    sys.exit(main(sys.argv[1:]))

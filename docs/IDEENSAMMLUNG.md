@@ -499,7 +499,7 @@ Status:
 
 Die Gefahrenstufe je Höhenband nicht nur im Popup, sondern auf der Karte darstellen: Die Höhengrenze des Berichts (z. B. 2600 m) wird mit einem Höhenmodell (z. B. EU-DEM, CC BY 4.0) in eine Maske oder Höhenlinie umgesetzt und auf die Polygone der Region angewendet.
 
-Hindernisse: Die Grenze wechselt täglich, die Waldgrenze (`treeline`) hat in den Daten keinen Zahlenwert, ALBINA selbst färbt nur nach der höchsten Stufe. Analyse: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 3.
+Hindernisse: Die Grenze wechselt täglich, die Waldgrenze (`treeline`) hat in den Daten keinen Zahlenwert, ALBINA und SLF färben selbst nur nach der höchsten Stufe, und der SLF gibt bei den Gefahrenstufen gar keine Höhe an (nur bei den Lawinenproblemen). Analyse: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 4.
 
 Verwandt: Hangneigungs- und Expositionslayer (Gefahr nur für Hänge der genannten Expositionen anzeigen).
 

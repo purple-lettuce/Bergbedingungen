@@ -1,0 +1,121 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests avalanche_logic.js</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as A from '../js/avalanche_logic.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+
+var H = 3600 * 1000;
+var VALID = { start: '2026-01-14T16:00:00Z', end: '2026-01-15T16:00:00Z' };
+var END = Date.parse(VALID.end);
+
+function bulletin(ratings, extra) {
+  var b = { danger_ratings: ratings, max_level: Math.max.apply(null, ratings.map(function (r) { return r.level || 0; })) || null, avalanche_problems: [] };
+  Object.assign(b, extra || {});
+  return b;
+}
+var R = function (level, extra) { return Object.assign({ value: 'x', level: level, period: 'all_day' }, extra || {}); };
+
+test('bulletinStatus: gültig, kürzlich abgelaufen, abgelaufen', function () {
+  eq(A.bulletinStatus(VALID, END), 'valid');
+  eq(A.bulletinStatus(VALID, END + 1), 'stale');
+  eq(A.bulletinStatus(VALID, END + A.STALE_HOURS * H), 'stale');
+  eq(A.bulletinStatus(VALID, END + A.STALE_HOURS * H + 1), 'expired');
+  eq(A.bulletinStatus(VALID, Date.parse(VALID.start) - H), 'valid');
+});
+
+test('levelLabel und ratingText mit Teilstufen', function () {
+  eq(A.levelLabel(3, 'plus'), '3+'); eq(A.levelLabel(3, 'neutral'), '3='); eq(A.levelLabel(4, 'minus'), '4-');
+  eq(A.levelLabel(2, undefined), '2'); eq(A.levelLabel(null, 'plus'), '');
+  eq(A.ratingText({ level: 3, subdivision: 'plus' }), 'Stufe 3+ – Erheblich');
+  eq(A.ratingText({ level: null, value: 'no_snow' }), 'Kein Schnee');
+});
+
+test('ratingCoverage: Grenzen, Waldgrenze unbekannt', function () {
+  eq(A.ratingCoverage(R(2), 500), true);
+  eq(A.ratingCoverage(R(2, { elevation: { lower_bound: 2000 } }), 2000), true);
+  eq(A.ratingCoverage(R(2, { elevation: { lower_bound: 2000 } }), 1999), false);
+  eq(A.ratingCoverage(R(1, { elevation: { upper_bound: 2000 } }), 2000), true);
+  eq(A.ratingCoverage(R(1, { elevation: { upper_bound: 2000 } }), 2001), false);
+  eq(A.ratingCoverage(R(2, { elevation: { lower_bound: 'treeline' } }), 3000), null);
+  eq(A.ratingCoverage(R(2, { elevation: { lower_bound: 1800, upper_bound: 2400 } }), 2500), false);
+});
+
+test('levelAtAltitude: Euregio-Stufen mit Höhe', function () {
+  var b = bulletin([R(1, { elevation: { upper_bound: 2000 } }), R(3, { subdivision: 'plus', elevation: { lower_bound: 2000 } })]);
+  eq(A.levelAtAltitude(b, null), { level: 3, subdivision: undefined, uncertain: false });
+  eq(A.levelAtAltitude(b, 1500).level, 1);
+  eq(A.levelAtAltitude(b, 2500).level, 3);
+  eq(A.levelAtAltitude(b, 2500).subdivision, 'plus');
+  eq(A.levelAtAltitude(b, 2000).level, 3);   // Grenze zählt zu beiden Seiten, höchste Stufe gilt (vorsichtig)
+});
+
+test('levelAtAltitude: Waldgrenze ohne Wert gibt höchste mögliche Stufe, unsicher', function () {
+  var b = bulletin([R(1, { elevation: { upper_bound: 'treeline' } }), R(2, { elevation: { lower_bound: 'treeline' } })]);
+  eq(A.levelAtAltitude(b, 1000), { level: 2, subdivision: null, uncertain: true });
+});
+
+test('levelAtAltitude: ohne Höhe in den Stufen (SLF) wirkt die Höhenwahl nicht', function () {
+  var b = bulletin([R(3, { subdivision: 'plus' })], { max_subdivision: 'plus' });
+  eq(A.levelAtAltitude(b, 1500), { level: 3, subdivision: 'plus', uncertain: false });
+  eq(A.hasElevationRatings(b), false);
+  eq(A.hasElevationRatings(bulletin([R(2, { elevation: { lower_bound: 2000 } })])), true);
+});
+
+test('levelAtAltitude: kein Schnee ergibt null', function () {
+  eq(A.levelAtAltitude(bulletin([R(null, { value: 'no_snow' })]), null), null);
+  eq(A.levelAtAltitude(bulletin([R(null, { value: 'no_snow', elevation: { upper_bound: 1500 } }), R(2, { elevation: { lower_bound: 1500 } })]), 1000), null);
+});
+
+test('elevationLabel und elevationWhere', function () {
+  eq(A.elevationLabel(undefined), 'Alle Höhenlagen'); eq(A.elevationLabel({ lower_bound: 2200 }), 'Über 2200 m');
+  eq(A.elevationLabel({ upper_bound: 1800 }), 'Unter 1800 m'); eq(A.elevationLabel({ lower_bound: 'treeline' }), 'Über der Waldgrenze');
+  eq(A.elevationLabel({ upper_bound: 'treeline' }), 'Unter der Waldgrenze'); eq(A.elevationLabel({ lower_bound: 1800, upper_bound: 2400 }), 'Zwischen 1800 m und 2400 m');
+  eq(A.elevationWhere(undefined), 'all'); eq(A.elevationWhere({ lower_bound: 1 }), 'above'); eq(A.elevationWhere({ upper_bound: 1 }), 'below'); eq(A.elevationWhere({ lower_bound: 1, upper_bound: 2 }), 'middle');
+});
+
+test('bandGroups: Piktogramm bei Teilung an derselben Grenze, sonst keines', function () {
+  var split = [{ period: 'all_day', level: 3, elevation: { lower_bound: 2200 } }, { period: 'all_day', level: 2, elevation: { upper_bound: 2200 } }];
+  eq(A.bandGroups(split)[0].picto, [2, 3]);
+  eq(A.bandGroups([{ period: 'all_day', level: 3, elevation: { lower_bound: 2200 } }, { period: 'all_day', level: 2, elevation: { upper_bound: 1800 } }])[0].picto, null);
+  eq(A.bandGroups([{ period: 'all_day', level: 4 }])[0].picto, [4, 4]);
+  eq(A.bandGroups([{ period: 'later', level: 2 }, { period: 'all_day', level: 1 }]).map(function (g) { return g.period; }), ['all_day', 'later']);
+});
+
+test('problemGroups: Gruppen mit Titel, Kommentar einmal, Reste am Ende', function () {
+  var c1 = [{ type: 'paragraph', text: 'A' }];
+  var b = { avalanche_problems: [
+    { type: 'new_snow', period: 'all_day', comment: c1 }, { type: 'persistent_weak_layers', period: 'all_day', comment: c1 },
+    { type: 'wet_snow', period: 'all_day', comment: [{ type: 'paragraph', text: 'B' }] }, { type: 'cornices', period: 'all_day' }],
+    problem_groups: [{ types: ['new_snow', 'persistent_weak_layers'], period: 'all_day', title: 'Trockene Lawinen' }, { types: ['wet_snow'], period: 'all_day', title: 'Nasse Lawinen' }] };
+  var g = A.problemGroups(b);
+  eq(g.map(function (x) { return x.title; }), ['Trockene Lawinen', 'Nasse Lawinen', 'Weitere']);
+  eq(g[0].problems.length, 2); eq(g[0].comments.length, 1); eq(g[1].comments.length, 1); eq(g[2].comments.length, 0);
+  eq(A.problemGroups({ avalanche_problems: [{ type: 'wind_slab', period: 'all_day' }] }).map(function (x) { return x.title; }), [null]);
+});
+
+test('reportUrl: Hauptdatum nur bei gültigem Format', function () {
+  var s = { report_url: 'https://x.test/{main_date}', report_url_fallback: 'https://x.test/' };
+  eq(A.reportUrl(s, { main_date: '2026-01-15' }), 'https://x.test/2026-01-15');
+  eq(A.reportUrl(s, { main_date: '../x' }), 'https://x.test/'); eq(A.reportUrl(s, {}), 'https://x.test/'); eq(A.reportUrl(s, null), 'https://x.test/');
+  eq(A.reportUrl({ report_url: 'https://y.test/', report_url_fallback: 'https://y.test/' }, null), 'https://y.test/');
+});
+
+test('formatTime: Ortszeit Wien', function () {
+  eq(/17:00/.test(A.formatTime('2026-01-15T16:00:00Z')), true);   // Winterzeit
+  eq(/17:00/.test(A.formatTime('2026-07-15T15:00:00Z')), true);   // Sommerzeit
+});
+
+var failed = results.filter(function (r) { return !r.ok; });
+document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+</script>

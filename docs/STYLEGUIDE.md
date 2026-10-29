@@ -168,7 +168,7 @@ Die Layerfarben müssen schnell verständlich und im Kartenkontext gut sichtbar 
 
 ## Lawinengefahrenstufen (Ausnahme)
 
-Die Lawinenlage verwendet die offiziellen Farben der Europäischen Gefahrenskala, nicht die allgemeinen Warnfarben oben: 1 `#ccff66`, 2 `#ffff00`, 3 `#ff9900`, 4 `#ff0000`, 5 `#ff0000` mit rot-schwarzem Schachbrett. Wiedererkennung und Sicherheit gehen vor Konsistenz. Quelle und Begründung: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 4.
+Die Lawinenlage verwendet die offiziellen Farben der Europäischen Gefahrenskala, nicht die allgemeinen Warnfarben oben: 1 `#ccff66`, 2 `#ffff00`, 3 `#ff9900`, 4 `#ff0000`, 5 `#ff0000` mit rot-schwarzem Schachbrett. Wiedererkennung und Sicherheit gehen vor Konsistenz. Der SLF-Hinweis `fill` nennt für Stufe 5 die Farbe `#800000`; einheitlich gilt das Schachbrett (EAWS). Teilstufen der Schweiz werden als Zusatz zur Stufenzahl geschrieben (3-, 3=, 3+). Quelle und Begründung: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 5.
 
 ## Regeln
 

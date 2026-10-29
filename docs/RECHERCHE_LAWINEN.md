@@ -13,13 +13,13 @@ Geometrie:
 Aktualisierung:
 Notizen:
 
-Schweiz
-Quelle:
-Lizenz:
-API:
-Geometrie:
-Aktualisierung:
-Notizen:
+Schweiz (umgesetzt, Details in LAWINENLAGE_ANALYSE.md)
+Quelle: WSL-Institut für Schnee- und Lawinenforschung SLF (https://www.slf.ch)
+Lizenz: CC BY 4.0, deutlich sichtbarer Verweis auf das SLF mit Link auf www.slf.ch
+API: https://aws.slf.ch/api/bulletin/caaml/v4/de/json (CAAML v6, ?activeAt=<Zeitpunkt> für frühere Bulletins), Dokumentation https://aws.slf.ch/api/bulletin/caaml
+Geometrie: eaws-regions CH_micro-regions (identisch mit https://aws.slf.ch/api/warningregion/warnregionDefinition/current/geojson), 149 Warnregionen
+Aktualisierung: täglich 17 Uhr, Update 8 Uhr im Winter, im Sommer nur bei starkem Schneefall; ohne aktives Bulletin {"bulletins":[]}
+Notizen: Gefahrenstufen ohne Höhengrenze (Höhe nur bei den Lawinenproblemen), Teilstufen 3-, 3=, 3+, Texte als HTML, Schnittstelle nicht für direkte Abfragen aus Kundensystemen gedacht
 
 Frankreich
 Quelle:
