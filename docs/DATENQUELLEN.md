@@ -4,33 +4,556 @@ Mountain Radar
 Interner Repositoryname:
 Bergbedingungen
 
-# 📚 Datenquellen
+# 📚 Datenquellen — Mountain Radar / Alpine Risk Intelligence
 
-> Version: 0.1
+> Version: 2.0
 >
 > Letzte Aktualisierung: Oktober 2026
 >
-> Dieses Dokument dokumentiert alle aktuell verwendeten und zukünftig geplanten Datenquellen von Bergbedingungen.
+> Dieses Dokument dokumentiert alle aktuell verwendeten, in Arbeit befindlichen und zukünftig geplanten Datenquellen von Mountain Radar.
 >
-> Für jede Datenquelle werden Quelle, Lizenz, API, Datenfelder, Update-Strategie und geplanter Einsatzzweck dokumentiert.
->
-> Informationen, die noch nicht verifiziert wurden, sind ausdrücklich als Recherchepunkte gekennzeichnet.
+> Für jede Datenquelle werden Beschreibung, Fachlicher Nutzen, URL, Lizenz, Priorität, Roadmap-Phase, Abhängigkeiten und lokale Dateien dokumentiert.
 
 ---
 
-# Statusübersicht
+# Statusübersicht — Alle Datenquellen
 
-| Datenquelle | Status | Verwendung |
-|------------|------------|------------|
-| Digitize The Planet | ✅ Produktiv | Schutzgebiete |
-| Closures | ✅ Produktiv | Sperrungen |
-| Wetter | ✅ Produktiv | Wetter |
-| Lawinenlage Euregio (ALBINA) | 🟡 Umgesetzt, Test mit aktuellen Berichten ab Saisonstart | Lawinenlayer |
-| Lawinenlage Schweiz (SLF) | 🟡 Umgesetzt, Test mit aktuellen Berichten ab Saisonstart | Lawinenlayer |
-| Lawinenlage weitere Länder (FR, IT, SI, ...) | 🔬 Recherche, Empfehlung liegt vor | Risikoanalyse |
-| Kuratorium für Alpine Sicherheit | 🔬 Recherche | Unfalllayer |
-| Bayerisches Kuratorium für Alpine Sicherheit | 🔬 Recherche | Unfalllayer |
-| Digiway Absturzrisiko | 🔬 Recherche | Risikolayer |
+| Datenquelle | Status | Verwendung | Priorität |
+|------------|------------|------------|------------|
+| Austrian DEM / DGM | ✅ In Umsetzung | Geländeanalyse | 🔴 Sehr hoch |
+| OpenStreetMap (OSM) | ✅ In Umsetzung | Infrastruktur | 🔴 Sehr hoch |
+| Digitize The Planet (DTP) | ✅ Produktiv | Schutzgebiete | 🔴 Sehr hoch |
+| Closures | ✅ Produktiv | Sperrungen | 🟡 Mittel |
+| GeoSphere Austria | 🟡 Geplant | Wetterrisiko | 🔴 Sehr hoch |
+| Meteostat | 🟡 Geplant | Historische Wetterdaten | 🟡 Mittel-Hoch |
+| ALBINA Euregio | 🟡 In Umsetzung | Lawinenlage | 🔴 Sehr hoch |
+| SLF Schweiz | 🟡 In Umsetzung | Lawinenlage | 🔴 Sehr hoch |
+| SLF Forschungsdaten | 🔬 Geplant | Unfall-Hotspots | 🔴 Sehr hoch |
+| BMI Alpinpolizei | 🔬 Recherche | Unfallstatistiken | 🟠 Hoch |
+| Tirol Data Hub | 🔬 Recherche | Schutzgebiete, Wildlife | 🟡 Mittel |
+| Basemap.at | 🟡 Geplant | Kartografie | 🟡 Mittel |
+| Leaflet Plugins | ✅ In Umsetzung | Frontend | 🟡 Mittel |
+| Météo-France Lawinenlage | 🔬 Recherche | Lawinenlage FR | 🟠 Mittel |
+| AINEVA (Italien) | 🔬 Recherche | Lawinenlage IT | 🟠 Mittel |
+| ARSO (Slowenien) | 🔬 Recherche | Lawinenlage SI | 🟠 Mittel |
+| Meteomatics | 🟢 Optional | Erweiterte Wetterdaten | 🟢 Niedrig |
+| Browser Geolocation API | ✅ Verfügbar | Toolbox | 🔴 Sehr hoch |
+| Ephemeris-Daten (SunCalc) | 🟡 Geplant | Toolbox | 🟢 Niedrig-Mittel |
+| Smartphone Sensor APIs | 🟡 Geplant | Mobile Toolbox | 🔴 Sehr hoch |
+
+---
+
+# 1. WETTER & UNWETTERWARNUNGEN
+
+### GeoSphere Austria (🇦🇹 prioritär)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://data.hub.geosphere.at/ |
+| **Beschreibung** | Österreichisches Meteorologisches Warnungssystem |
+| **Fachlicher Nutzen** | Gewitterwarnungen, Starkregenwarnungen, Windwarnungen, Hitzewarnungen |
+| **Geplanter Einsatz** | Wetterrisiko, Gewitterrisiko, Tourenwarnungen |
+| **Lizenzsituation** | Open Data (CC BY 4.0) ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 2 (Wetterintegration) |
+| **Zugeordnete Module** | Wetterrisiko, Alpine Risk Engine |
+| **Status** | Geplant |
+| **Abhängigkeiten** | Keine |
+| **Notizen** | Grundlage für Tourenwarnungen und die Risikobewertung |
+
+### Meteostat
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://meteostat.net/ |
+| **Beschreibung** | Historische Wetterdaten-Plattform |
+| **Fachlicher Nutzen** | Historische Wetterdaten, Niederschlagsverlauf, Steinschlag-/Murenerkennung |
+| **Geplanter Einsatz** | Indikatoren für Steinschlag/Muren |
+| **Lizenzsituation** | Open Data (kostenlos) ✅ |
+| **Priorität** | 🟡 Mittel-Hoch |
+| **Roadmap-Phase** | Phase 3 (Gefahrenmodellierung) |
+| **Zugeordnete Module** | Geländeanalyse, Alpine Risk Engine |
+| **Status** | Geplant |
+| **Abhängigkeiten** | DEM (für Murensimulation) |
+| **Notizen** | Historische Kontextualisierung für Risikokalibrierung |
+
+---
+
+# 2. GELÄNDEMODELLE & TOPOGRAPHIE
+
+### Austrian DEM / DGM (🇦🇹 Basis)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://www.data.gv.at/ |
+| **Beschreibung** | Österreichisches Digitales Höhenmodell (10m-Auflösung) |
+| **Fachlicher Nutzen** | Hangneigung, Exposition, Steilheit, Geländeanalyse, Absturzrisiko-Berechnung |
+| **Geplanter Einsatz** | Risk Engine, GPX Analyse, Gefahrenmodelle |
+| **Lizenzsituation** | Open Data (CC BY 4.0) ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 1 (Grundlagen) |
+| **Zugeordnete Module** | Geländeanalyse, GPX Analyse, Alpine Risk Engine |
+| **Status** | In Umsetzung |
+| **Abhängigkeiten** | Keine (unabhängig) |
+| **Notizen** | Fundamentales Datenset für alle geometrischen Analysen |
+
+---
+
+# 3. SCHUTZGEBIETE & REGELN
+
+### Digitize The Planet (DTP)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://digitizetheplanet.org/ |
+| **API** | https://platform.digitizetheplanet.org/api/v2/ |
+| **Beschreibung** | Globale Schutzgebietsdatenbank |
+| **Fachlicher Nutzen** | Schutzgebiete (Nationalpark, Naturschutzgebiet, Wildruhezone, Winterruhezone) mit Regeln und Wildlife |
+| **Geplanter Einsatz** | Schutzgebietslayer, Popupinformationen, Tourenanalyse |
+| **Lizenzsituation** | 🔬 Zu recherchieren |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 1 (Grundlagen) |
+| **Zugeordnete Module** | Schutzgebiete, Alpine Risk Engine |
+| **Status** | ✅ Produktiv |
+| **Abhängigkeiten** | Keine |
+
+**Lokale Dateien:**
+```
+data/protected_areas_alps.geojson
+data/wildlife_entities.json
+data/wildlife_probe.json
+```
+
+**Skripte:**
+```
+scripts/fetch_wildlife.py
+scripts/fetch_protected_area_details_v2.py
+scripts/build_geojson.py
+scripts/test_build_geojson.py
+```
+
+**Aktualisierung:** Manuelle Aktualisierung über GitHub Action ✅
+
+**Details:** Siehe [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md) für Tiernamen-Auflösung
+
+---
+
+# 4. INFRASTRUKTUR & WEGE
+
+### OpenStreetMap — Overpass API (🌍 umfassend)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://wiki.openstreetmap.org/wiki/Overpass_API |
+| **Test-Tool** | https://overpass-turbo.eu/ |
+| **Beschreibung** | Globales Vektordatennetz mit Wegen, Hütten, Infrastruktur |
+| **Fachlicher Nutzen** | Wegschwierigkeit (sac_scale), Oberflächentyp, alpine Infrastruktur, Hütten, Trinkwasser, Klettersteige |
+| **Relevante Tags** | sac_scale, trail_visibility, surface, tourism=alpine_hut, amenity=shelter, natural=spring, amenity=drinking_water, emergency=*, highway=via_ferrata |
+| **Geplanter Einsatz** | Wegschwierigkeit, Infrastruktur, Notunterkünfte, Klettersteige, Alpine Risk Engine |
+| **Lizenzsituation** | Open Data (ODbL 1.0) ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 1 (Grundlagen) |
+| **Zugeordnete Module** | Infrastruktur, GPX Analyse, Alpine Risk Engine |
+| **Status** | In Umsetzung |
+| **Abhängigkeiten** | Keine (unabhängig) |
+| **Notizen** | Deckt 80% der relevanten Infrastruktur ab; Datenqualität variabel nach Region |
+
+### Closures (Sperrungen)
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Wege- und Gebietsperrungen |
+| **Fachlicher Nutzen** | Sperrungen, Wegsperren, Einschränkungen |
+| **Geplanter Einsatz** | Closures Layer, Tourenanalyse |
+| **Lizenzsituation** | 🔬 Zu recherchieren |
+| **Priorität** | 🟡 Mittel |
+| **Status** | ✅ Produktiv |
+| **Aktualisierung** | Automatisch ✅ |
+
+### Tirol Data Hub (🇦🇹 regional)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://www.datahub.tirol/leistungen/datenkatalog |
+| **Beschreibung** | Open Data Portal des Landes Tirol |
+| **Potenziale** | Sperrungen, Forstwege, Infrastruktur, Rettungspunkte, Wildnis-Daten |
+| **Geplanter Einsatz** | Infrastruktur-Verfeinerung, Wildlife, Schutzgebiete |
+| **Lizenzsituation** | CC BY 4.0 (meist) ✅ |
+| **Priorität** | 🟡 Mittel |
+| **Roadmap-Phase** | Phase 3 (Gefahrenmodellierung) |
+| **Status** | 🔬 Recherche erforderlich |
+
+---
+
+# 5. LAWINENLAGE & SCHNEE
+
+### ALBINA — Euregio Lawinenlage (🇦🇹🇮🇹 operativ)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://lawis.at/lawis_api/public/swagger/ |
+| **Bulletin** | https://static.avalanche.report/bulletins/latest/EUREGIO_de_CAAMLv6.json |
+| **Beschreibung** | Gemeinsames Lawinenwarnungssystem Euregio (Österreich, Südtirol, Liechtenstein) |
+| **Fachlicher Nutzen** | Operative Lawinenwarnungen nach Höhenstufe und Exposition |
+| **Geplanter Einsatz** | Lawinenlage-Layer, Tourenwarnungen, Alpine Risk Engine |
+| **Lizenzsituation** | CC BY 4.0 ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 2 (Wetterintegration) |
+| **Zugeordnete Module** | Lawinenlage, Alpine Risk Engine |
+| **Status** | 🟡 In Umsetzung (Test ab Wintersaison 2026/27) |
+| **Abhängigkeiten** | OSM (Kontext), DEM (Exposition) |
+| **Notizen** | Saisonale Verfügbarkeit (Winter); CC BY 4.0 Lizenz beachten |
+
+**Lokale Dateien:**
+```
+data/avalanche/euregio.json
+data/avalanche/euregio_regions.geojson
+```
+
+**Details:** Siehe [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md)
+
+### SLF Schweiz — CAAML Bulletin (🇨🇭 operativ)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://aws.slf.ch/api/bulletin/caaml/v4/de/json |
+| **Beschreibung** | Schweizer Lawinenwarnungssystem des SLF |
+| **Fachlicher Nutzen** | Schweizer Lawinenlage mit Teilstufen (-, =, +) |
+| **Geplanter Einsatz** | Lawinenlage-Layer, Tourenwarnungen, Alpine Risk Engine |
+| **Lizenzsituation** | CC BY 4.0 ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 2 (Wetterintegration) |
+| **Zugeordnete Module** | Lawinenlage, Alpine Risk Engine |
+| **Status** | 🟡 In Umsetzung (Test mit archivierten Berichten) |
+| **Abhängigkeiten** | OSM, DEM |
+| **Notizen** | Komplementär zu ALBINA; erweitert Coverage auf Schweiz; CC BY 4.0 Lizenz |
+
+**Lokale Dateien:**
+```
+data/avalanche/slf.json
+data/avalanche/slf_regions.geojson
+```
+
+**Details:** Siehe [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md)
+
+**Gemeinsame Pipeline:** Alle Lawinenquellen durchlaufen gemeinsames Datenmodell:
+```
+scripts/avalanche_sources.py      (Registry der Quellen)
+scripts/avalanche_model.py         (Normalisierung)
+scripts/fetch_avalanche.py         (Abruf und Schreiben)
+scripts/test_avalanche_model.py    (Tests)
+data/avalanche/index.json          (Verzeichnis für Frontend)
+```
+
+---
+
+# 5b. LAWINENLAGE — FOLGEQUELLEN
+
+### Météo-France — Lawinenbulletin (🇫🇷 geplant)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://meteofrance.com/ |
+| **Beschreibung** | Französisches Lawinenwarnungssystem |
+| **Fachlicher Nutzen** | Lawinenlage in Französischen Alpen |
+| **Geplanter Einsatz** | Erweiterung Coverage auf Frankreich |
+| **Lizenzsituation** | ⚠️ **Zu recherchieren** |
+| **Priorität** | 🟠 Mittel |
+| **Roadmap-Phase** | Phase 4 (Internationale Expansion) |
+| **Status** | 🔬 Nicht gestartet |
+| **Abhängigkeiten** | ALBINA/SLF-Integration (precedent) |
+| **Notizen** | Regionale Erweiterung; Lizenz und Nutzungsbedingungen zu klären |
+
+### AINEVA — Italien (🇮🇹 geplant)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://www.aineva.it/ |
+| **Beschreibung** | Italienische Lawinen-Datenbank und Warnsystem |
+| **Fachlicher Nutzen** | Lawinenlage in italienischen Alpen |
+| **Geplanter Einsatz** | Erweiterung Coverage auf Italien |
+| **Lizenzsituation** | ⚠️ **Zu recherchieren** |
+| **Priorität** | 🟠 Mittel |
+| **Roadmap-Phase** | Phase 4 (Internationale Expansion) |
+| **Status** | 🔬 Nicht gestartet |
+| **Abhängigkeiten** | ALBINA/SLF-Integration |
+
+### ARSO — Slowenien (🇸🇮 geplant)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://www.arso.gov.si/ |
+| **Beschreibung** | Slowenisches Lawinenwarnungssystem |
+| **Fachlicher Nutzen** | Lawinenlage in slowenischen Alpen |
+| **Geplanter Einsatz** | Erweiterung Coverage auf Slowenien |
+| **Lizenzsituation** | ⚠️ **Zu recherchieren** |
+| **Priorität** | 🟠 Mittel |
+| **Roadmap-Phase** | Phase 4 (Internationale Expansion) |
+| **Status** | 🔬 Nicht gestartet |
+
+### SLF Forschungsdaten — Lawinenunfälle (🇨🇭 historisch)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://www.slf.ch/ |
+| **Beschreibung** | Historische Datenbank von Lawinenunfällen und Ereignissen |
+| **Fachlicher Nutzen** | Unfall-Hotspots, historische Analyse, Häufungen nach Exposition/Höhe |
+| **Geplanter Einsatz** | Unfallanalyse, Lawinengefahr-Hotspots, Alpine Risk Engine |
+| **Lizenzsituation** | 🔬 Zu klären |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 3 (Gefahrenmodellierung) |
+| **Zugeordnete Module** | Unfallanalyse, Alpine Risk Engine |
+| **Status** | 🔬 Geplant |
+| **Abhängigkeiten** | DEM, OSM (Kontext) |
+| **Notizen** | Enables evidence-based risk calibration |
+
+---
+
+# 6. UNFÄLLE & EREIGNISSE
+
+### BMI Alpinpolizei — Alpinstatistik (🇦🇹 jährlich)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://www.bmi.gv.at/202/alpinpolizei/ |
+| **Beschreibung** | Jährliche Statistik von Alpin- und Bergunfällen in Österreich |
+| **Fachlicher Nutzen** | Alpine Unfallstatistiken, Unfalltypen (Sturz, Absturz, Erfrierung, etc.) |
+| **Geplanter Einsatz** | Unfallanalyse, Risikokalibrierung, Warnsysteme |
+| **Lizenzsituation** | Open Data ✅ |
+| **Priorität** | 🟠 Hoch |
+| **Roadmap-Phase** | Phase 3 (Gefahrenmodellierung) |
+| **Zugeordnete Module** | Unfallanalyse, Alpine Risk Engine |
+| **Status** | 🔬 Recherche |
+| **Abhängigkeiten** | Georeferenzierung notwendig |
+| **Offen** | Gibt es georeferenzierte Unfalldaten? (nur PDF-Reports verfügbar?) |
+| **Notizen** | Statistiken werden ca. März des Folgejahrs veröffentlicht |
+
+### Kuratorium für Alpine Sicherheit (Österreich)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://alpinesicherheit.at/ |
+| **Beschreibung** | Österreichische Unfalldatenbank |
+| **Geplanter Einsatz** | Unfalllayer, Unfall-Heatmap |
+| **Lizenzsituation** | 🔬 Zu recherchieren |
+| **Priorität** | 🟠 Hoch |
+| **Status** | 🔬 Recherche |
+| **Abhängigkeiten** | API oder Datenexport erforderlich |
+
+---
+
+# 7. KARTOGRAPHISCHE GRUNDLAGEN
+
+### Basemap.at (🇦🇹 Kartografik)
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://basemap.at/#anwendungen |
+| **Beschreibung** | Österreichische Grundkarten und Hintergrundlayer |
+| **Fachlicher Nutzen** | Hintergrundkarten, Orthofotos, Schummerung, Terrain-Kontext |
+| **Geplanter Einsatz** | Kartendarstellung, UI/UX-Kontext |
+| **Lizenzsituation** | Open Data (CC BY 4.0) ✅ |
+| **Priorität** | 🟡 Mittel |
+| **Roadmap-Phase** | Phase 1 (Grundlagen) |
+| **Zugeordnete Module** | GPX Analyse (UI) |
+| **Status** | Geplant |
+| **Notizen** | Ergänzt OSM-Daten mit amtlichen Kartographien |
+
+### Leaflet Plugins
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://leafletjs.com/plugins.html |
+| **Beschreibung** | Umfangreiche Plugin-Bibliothek für Kartenvisualisierung |
+| **Fachlicher Nutzen** | Kartenfunktionen, GPX-Import, Analysewerkzeuge, Layer-Management |
+| **Geplanter Einsatz** | Frontend-Komponenten für GPX-Visualisierung und -Analyse |
+| **Lizenzsituation** | Gemischt (meist Open Source) ✅ |
+| **Priorität** | 🟡 Mittel |
+| **Status** | In Umsetzung |
+| **Abhängigkeiten** | Keine |
+
+---
+
+# 8. WETTER — ERWEITERTE QUELLEN
+
+### Meteomatics Weather API
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://www.meteomatics.com/en/weather-api/ |
+| **Beschreibung** | Kommerzielle erweiterte Wetterdaten und Prognosen |
+| **Fachlicher Nutzen** | Hochauflösende Wetter-Prognosen, Windmodelle, Temperaturgradienten |
+| **Geplanter Einsatz** | Alternative/Ergänzung zu GeoSphere, Mikroklima-Modellierung |
+| **Lizenzsituation** | Kommerziell 💰 |
+| **Priorität** | 🟢 Niedrig-Mittel |
+| **Roadmap-Phase** | Phase 3+ (Optional) |
+| **Status** | Alternative Quelle |
+| **Abhängigkeiten** | GeoSphere (Primär) |
+| **Notizen** | Fallback/Ergänzung; höhere Granularität, aber kommerziell |
+
+---
+
+# 9. TOOLBOX-DATENQUELLEN
+
+Datenquellen speziell für die Mountain Radar Toolbox (Website + Mobile App).
+
+### Browser Geolocation API
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Standard-Browser-API für Standorterkennung |
+| **Fachlicher Nutzen** | Nutzer-Standort für Entfernungsmessung |
+| **Geplanter Einsatz** | WEB-T4, MOB-T4, MOB-T5 — Standort-basierte Werkzeuge |
+| **Lizenzsituation** | Open Standard (W3C Geolocation API) ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 1 (Website Toolbox) |
+| **Zugeordnete Module** | Mountain Radar Toolbox (Website) |
+| **Status** | ✅ Verfügbar in allen modernen Browsern |
+| **Abhängigkeiten** | HTTPS-Verbindung, Nutzer-Erlaubnis |
+| **Notizen** | Genauigkeit 10-100m je nach Device/Location |
+
+### Ephemeris-Daten für Sonnenstand & Mondphasen
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://github.com/mourner/suncalc |
+| **Beschreibung** | Berechnung von Sonnenaufgang, Sonnenuntergang, Mondphasen |
+| **Fachlicher Nutzen** | Touren-Planung nach Lichtverhältnissen, Fotografie |
+| **Geplanter Einsatz** | MOB-T6 (Sonnenstand), Mondphase, Golden Hour |
+| **Lizenzsituation** | MIT ✅ (Open Source) |
+| **Priorität** | 🟢 Niedrig-Mittel |
+| **Roadmap-Phase** | Phase 5 (Mobile App Erweiterte Werkzeuge) |
+| **Status** | 🟡 Geplant |
+| **Abhängigkeiten** | Keine (nur Koordinaten + Zeit) |
+| **Notizen** | SunCalc.js ist leicht und offline-fähig |
+
+### OSM Emergency Tags & Rettungspunkte
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://wiki.openstreetmap.org/wiki/Key:emergency |
+| **Beschreibung** | OpenStreetMap-Tags für Notfallpunkte und Rettungsstationen |
+| **Fachlicher Nutzen** | Notruf-Information, nächste Rettungsstation, Biwak-Finder |
+| **Geplanter Einsatz** | MOB-T5 Rettungspunkt-Finder, Notrufnummern |
+| **Lizenzsituation** | ODbL 1.0 ✅ (wie OSM) |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 4 (Mobile App) |
+| **Status** | ✅ Bereits in OSM vorhanden |
+| **Abhängigkeiten** | OSM Overpass API |
+| **Notizen** | Kritisch für Notfall-Szenarien |
+
+### Smartphone Sensor APIs
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Smartphone-Sensoren für Mobile App (Magnetometer, Accelerometer, Gyroskop, GPS) |
+| **Fachlicher Nutzen** | Kompass, Hangneigungsmesser, Standort-Sensoren |
+| **Geplanter Einsatz** | MOB-T1, MOB-T2, MOB-T3, MOB-T5 |
+| **Lizenzsituation** | Native APIs (Android, iOS) ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 4 (Mobile App) |
+| **Status** | 🟡 Geplant |
+| **Abhängigkeiten** | Mobile App Framework (React Native, Flutter o.ä.) |
+| **Notizen** | Erfordert OS-Erlaubnis, Batterieintensiv |
+
+---
+
+# Abhängigkeitsmatrix
+
+```
+Alpine Risk Engine (Zielmodul)
+├── Geländeanalyse
+│   ├── DEM ✓ (Foundation)
+│   ├── Meteostat (Steinschlag/Muren)
+│   └── Exposition (aus DEM)
+│
+├── Wetterrisiko
+│   ├── GeoSphere ✓ (Primary)
+│   └── Meteostat (Historisch)
+│
+├── Lawinenlage
+│   ├── ALBINA ✓ (Euregio)
+│   ├── SLF ✓ (Schweiz)
+│   ├── Météo-France (Frankreich)
+│   ├── AINEVA (Italien)
+│   └── ARSO (Slowenien)
+│
+├── Infrastruktur
+│   ├── OSM ✓ (Primary)
+│   ├── Tirol Data Hub (Regional)
+│   └── Basemap.at (Context)
+│
+└── Unfallanalyse
+    ├── SLF Forschungsdaten ✓
+    └── BMI Alpinpolizei (AT)
+```
+
+---
+
+# Lizenzsituation Übersicht
+
+| Quelle | Lizenz | Status |
+|---|---|---|
+| DEM AT | CC BY 4.0 ✅ | Klar |
+| OSM | ODbL 1.0 ✅ | Klar |
+| GeoSphere | CC BY 4.0 ✅ | Klar |
+| Basemap.at | CC BY 4.0 ✅ | Klar |
+| ALBINA/SLF | CC BY 4.0 ✅ | Klar |
+| Meteostat | CC0 ✅ | Klar |
+| Tirol Hub | CC BY 4.0 (meist) ✅ | Klar |
+| Leaflet | MIT/gemischt ✅ | Klar |
+| Browser APIs | Open Standards ✅ | Klar |
+| Ephemeris-Daten | MIT ✅ | Klar |
+| **Digitize The Planet** | ⚠️ **Zu recherchieren** | Offen |
+| **Closures** | ⚠️ **Zu recherchieren** | Offen |
+| **Météo-France** | ⚠️ **Zu recherchieren** | Offen |
+| **AINEVA** | ⚠️ **Zu recherchieren** | Offen |
+| **ARSO** | ⚠️ **Zu recherchieren** | Offen |
+| **BMI** | ⚠️ **Zu recherchieren** | Offen |
+| Meteomatics | Kommerziell 💰 | Klar |
+
+---
+
+# Priorisierungslogik
+
+🔴 **Sehr hoch**: Foundation (DEM, OSM, GeoSphere, ALBINA/SLF, Browser APIs)  
+🟠 **Hoch**: Unfallanalyse, Erweiterung (Météo-France, AINEVA, ARSO)  
+🟡 **Mittel**: Kontext/Verfeinerung (Basemap, Tirol Hub, Meteostat, Leaflet)  
+🟢 **Niedrig**: Optional/Zukunft (Meteomatics, Ephemeris für Toolbox)
+
+---
+
+# Offene Rechercheaufgaben
+
+## Sehr hohe Priorität
+- [x] ALBINA Euregio
+- [x] SLF Schweiz
+- [ ] Digitize The Planet Lizenz
+- [ ] Closures Details
+- [ ] GeoSphere Integration
+
+## Hohe Priorität
+- [ ] SLF Forschungsdaten Lizenz
+- [ ] BMI Daten Georeferenzierung
+- [ ] Méteo-France Lizenz & API
+- [ ] AINEVA Lizenz & API
+- [ ] ARSO Lizenz & API
+
+## Mittlere Priorität
+- [ ] Tirol Data Hub Details
+- [ ] Zusätzliche DEM für andere Länder
+- [ ] Kuratorium für Alpine Sicherheit
+
+---
+
+# Versionshistorie
+
+| Version | Datum | Änderung |
+|---------|-------|----------|
+| 2.0 | 2026-10-29 | Konsolidation: Neue strukturierte Datenquellen mit allen Details + alte Workflow-Informationen |
+| 1.0 | 2026-10 | Initial Bergbedingungen Datenquellen |
+
+
 
 ---
 
