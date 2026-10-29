@@ -1,0 +1,46 @@
+name: Lawinenlage aktualisieren
+
+# Zweimal täglich (nach der Veröffentlichung des Euregio-Lageberichts am späten Nachmittag und nach dem
+# Morgen-Update) sowie manuell startbar. Die Uhrzeiten sind eine Projektentscheidung, die Quelle nennt keine
+# festen Zeiten (siehe docs/DATENQUELLEN.md). Die Datei ändert sich nur bei neuem Inhalt, spätestens nach 7 Tagen.
+
+on:
+  schedule:
+    - cron: "30 6 * * *"
+    - cron: "20 16 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-avalanche
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tests
+        run: python3 scripts/test_fetch_avalanche.py
+
+      - name: Lawinenlage abrufen
+        run: |
+          python3 scripts/fetch_avalanche.py | tee avalanche.log
+          { echo '### Lawinenlage'; echo '```'; cat avalanche.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Änderungen speichern
+        run: |
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "Keine Änderungen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/avalanche_regions.geojson data/avalanche_bulletin.json
+          git commit -m "Lawinenlage aktualisiert"
+          git pull --rebase
+          git push

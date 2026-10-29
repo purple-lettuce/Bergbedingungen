@@ -1,10 +1,12 @@
-// Einstieg: verbindet Karte, Wetter, Sperrungen und Schutzgebiete,
+// Einstieg: verbindet Karte, Wetter, Sperrungen, Schutzgebiete und Lawinenlage,
 // registriert die Ereignisse und startet das Laden in der ursprünglichen Reihenfolge.
 
 import { map, el } from './map.js';
 import { loadWeather } from './weather.js';
 import { loadProtectedAreas } from './protected_areas.js';
+import { initAvalanche } from './avalanche.js';
 import { loadData, render, scheduleRender } from './closures.js';
+import { initClosuresLegend } from './closures_legend.js';
 
 // ---------- Ereignisse ----------
 map.on('moveend', scheduleRender);
@@ -23,6 +25,10 @@ document.getElementById('wx-geo').addEventListener('click', function () {
 var c0 = map.getCenter();
 loadWeather(c0.lat, c0.lng);
 
+initClosuresLegend();
+
 loadProtectedAreas();
+
+initAvalanche();
 
 loadData();

@@ -1,7 +1,7 @@
 // Schutzgebiete (Naturschutzgebiete, Naturparks, Schongebiete ...) als GeoJSON-Ebene.
 
 import { protectedAreasLayer, esc } from './map.js';
-import { addProtectedAreasLegend } from './protected_areas_legend.js';
+import { addProtectedAreasLegend, protectedAreasLegendFailed } from './protected_areas_legend.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
 const CATEGORY_NAMES = {
@@ -174,5 +174,6 @@ const categoryName =
     console.log("Schutzgebiete geladen:", geojson.features.length);
   } catch (err) {
     console.error("Fehler beim Laden der Schutzgebiete", err);
+    protectedAreasLegendFailed();
   }
 }
