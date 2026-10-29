@@ -352,6 +352,74 @@ Alpine Risk Engine (Zielmodul)
 
 ---
 
+## 11. TOOLBOX-DATENQUELLEN
+
+Datenquellen speziell für die Mountain Radar Toolbox.
+
+### Browser Geolocation API
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Standard-Browser-API für Standorterkennung |
+| **Fachlicher Nutzen** | Nutzer-Standort für Entfernungsmessung, Wetterprognose am aktuellen Ort |
+| **Geplanter Einsatz** | WEB-T4, MOB-T4, MOB-T5, Standort-basierte Werkzeuge |
+| **Lizenzsituation** | Open Standard (W3C Geolocation API) ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 1 (Website Toolbox) |
+| **Zugeordnete Module** | Mountain Radar Toolbox (Website) |
+| **Status** | ✅ Verfügbar in allen modernen Browsern |
+| **Abhängigkeiten** | HTTPS-Verbindung, Nutzer-Erlaubnis |
+| **Notizen** | Genauigkeit 10-100m je nach Device/Location |
+
+### Ephemeris-Daten für Sonnenstand & Mondphasen
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://github.com/mourner/suncalc (JavaScript Library) |
+| **Beschreibung** | Berechnung von Sonnenaufgang, Sonnenuntergang, Mondphasen, Golden Hour für beliebige Koordinaten |
+| **Fachlicher Nutzen** | Touren-Planung nach Lichtverhältnissen, Fotografie, Sicherheit |
+| **Geplanter Einsatz** | MOB-T6 (Sonnenstand), Zukünftig: Mondphase & Zeiten, Golden Hour |
+| **Lizenzsituation** | MIT ✅ (Open Source) |
+| **Priorität** | 🟢 Niedrig-Mittel |
+| **Roadmap-Phase** | Phase 5 (Mobile App Erweiterte Werkzeuge) |
+| **Zugeordnete Module** | Mountain Radar Toolbox (Mobile) |
+| **Status** | 🟡 Geplant |
+| **Abhängigkeiten** | Keine (nur Koordinaten + Zeit) |
+| **Notizen** | SunCalc.js ist leicht und offline-fähig |
+
+### OSM Emergency Tags & Rettungspunkte
+
+| Eigenschaft | Wert |
+|---|---|
+| **URL** | https://wiki.openstreetmap.org/wiki/Key:emergency |
+| **Beschreibung** | OpenStreetMap-Tags für Notfallpunkte, Rettungsstationen, Notrufnummern nach Land |
+| **Fachlicher Nutzen** | Notruf-Information, nächste Rettungsstation, Biwak-Finder |
+| **Geplanter Einsatz** | Zukünftig: MOB-T5 Rettungspunkt-Finder, Notrufnummern |
+| **Lizenzsituation** | ODbL 1.0 ✅ (wie OSM) |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 4 (Mobile App Grundlagen) |
+| **Zugeordnete Module** | Mountain Radar Toolbox (Mobile), Alpine Risk Engine |
+| **Status** | ✅ Bereits in OSM vorhanden |
+| **Abhängigkeiten** | OSM Overpass API |
+| **Notizen** | Kritisch für Notfall-Szenarien |
+
+### Smartphone Sensor APIs
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Smartphone-Sensoren für Mobile App (Magnetometer, Accelerometer, Gyroskop, GPS) |
+| **Fachlicher Nutzen** | Kompass, Hangneigungsmesser, Standort-Sensoren |
+| **Geplanter Einsatz** | MOB-T1, MOB-T2, MOB-T3, MOB-T5 |
+| **Lizenzsituation** | Native APIs (Android, iOS) ✅ |
+| **Priorität** | 🔴 Sehr hoch |
+| **Roadmap-Phase** | Phase 4 (Mobile App) |
+| **Zugeordnete Module** | Mountain Radar Toolbox (Mobile) |
+| **Status** | 🟡 Geplant |
+| **Abhängigkeiten** | Mobile App Framework (React Native, Flutter o.ä.) |
+| **Notizen** | Erfordert OS-Erlaubnis, Batterieintensiv |
+
+---
+
 ## Legende
 
 - ✅ Eingegriffene Quellen (bereits teilweise integriert oder in Roadmap)

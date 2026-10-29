@@ -55,6 +55,7 @@ Diese Module sind das Rückgrat der Alpine Risk Intelligence:
 | **Schutzgebiete** | Recherche | 3 | Tirol Hub, Regional | 🟡 Mittel |
 | **Wildlife** | Recherche | 3 | Tirol Hub, Regional | 🟡 Mittel |
 | **Alpine Risk Engine** | Design | 3-5 | Alle Module | 🔴 Sehr hoch |
+| **Mountain Radar Toolbox** | Design | 1-5 | DEM, OSM, GeoSphere, Browser APIs | 🟡 Mittel-Hoch |
 
 ---
 
@@ -436,7 +437,281 @@ AP-3.2: Alpine Risk Engine (Phase 3)
 
 ---
 
-# 🎓 Qualitätsmetriken
+# 🧰 Mountain Radar Toolbox
+
+**Mission:** Eine zentrale Sammlung alpiner Werkzeuge für Tourenplanung, Orientierung und Risikobeurteilung — sowohl in der Web-App als auch in der zukünftigen Mobile App.
+
+**Vision:** Know before you go. — Mit der Toolbox können Nutzer schnell Koordinaten prüfen, Entfernungen messen, Höhen bestimmen und GPS-Daten validieren.
+
+---
+
+## Website Toolbox
+
+Diese Werkzeuge sind bereits in der Web-Anwendung oder sind dort leicht implementierbar:
+
+### WEB-T1: Wetter am Punkt ✅ (Existierend)
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Klick auf Karte → Wetterdaten für den Punkt |
+| **Nutzen** | Schnelle Wetterprognose an beliebigen Lokationen |
+| **Priorität** | 🔴 Sehr hoch |
+| **Phase** | Phase 2 |
+| **Abhängigkeiten** | GeoSphere API, Browser Geolocation (optional) |
+| **Status** | ✅ Teilweise implementiert |
+| **Zielgruppe** | Website |
+
+### WEB-T2: Koordinaten anzeigen
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Klick auf Karte → Anzeige von Breitengrad und Längengrad |
+| **Nutzen** | Schnelle Koordinaten-Referenzierung für Planung und Notfälle |
+| **Priorität** | 🟠 Hoch |
+| **Phase** | Phase 1 |
+| **Abhängigkeiten** | Browser Leaflet API, Höhenmodell (optional) |
+| **Status** | 🟡 Geplant |
+| **Zielgruppe** | Website, Mobile |
+| **Notizen** | Formats: Dezimal, DMS (Degree Minute Second) |
+
+### WEB-T3: Höhe anzeigen
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Klick auf Karte → Anzeige der Höhe über Meer |
+| **Nutzen** | Geländekontext, Lawinenstufen-Bestimmung, Schneefall-Schwelle |
+| **Priorität** | 🟠 Hoch |
+| **Phase** | Phase 1 |
+| **Abhängigkeiten** | DEM (Austrian), ggf. Interpolation für Präzision |
+| **Status** | 🟡 Geplant |
+| **Zielgruppe** | Website, Mobile |
+| **Implementierungshinweise** | DEM-Auflösung 10m ermöglicht gute Höhen-Abfrage |
+
+### WEB-T4: Entfernung zum Standort
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Browser-Standort → Klick auf Karte → Luftlinie-Distanz |
+| **Nutzen** | Schnelle Orientierung, Rettungsplanung |
+| **Priorität** | 🟡 Mittel |
+| **Phase** | Phase 1 |
+| **Abhängigkeiten** | Browser Geolocation API, Haversine-Formel |
+| **Status** | 🟡 Geplant |
+| **Zielgruppe** | Website, Mobile |
+| **Erweiterung** | Später: Gehstrecke (über Routing-Engine) |
+
+### WEB-T5: Entfernung zwischen zwei Punkten
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Nutzer setzt Punkt A → Punkt B → Entfernung + Höhenunterschied |
+| **Nutzen** | Tourenplanung, Etappenkalkulation |
+| **Priorität** | 🟡 Mittel |
+| **Phase** | Phase 1 |
+| **Abhängigkeiten** | DEM (für Höhenunterschied), Haversine-Formel |
+| **Status** | 🟡 Geplant |
+| **Zielgruppe** | Website, Mobile |
+| **Erweiterung** | Später: Höhenprofil, Gehzeiten |
+
+### WEB-T6: Höhenprofil entlang Linie
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Nutzer zeichnet Linie → Höhenprofil-Diagramm |
+| **Nutzen** | Detaillierte Steigungsanalyse, Etappenplanung |
+| **Priorität** | 🟠 Hoch |
+| **Phase** | Phase 1 |
+| **Abhängigkeiten** | DEM, Leaflet Plugins |
+| **Status** | 🟡 Geplant (ähnlich zu GPX Höhenprofil) |
+| **Zielgruppe** | Website |
+
+---
+
+## Mobile Toolbox
+
+Diese Werkzeuge erfordern die Mobile App und Smartphone-Sensoren:
+
+### MOB-T1: Kompass
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Digitaler Kompass mit Himmelsrichtungen |
+| **Nutzen** | Feldorientierung ohne externe Hilfsmittel |
+| **Priorität** | 🟠 Hoch |
+| **Phase** | Phase 4 (Mobile App Start) |
+| **Abhängigkeiten** | Smartphone Magnetometer, Gyroskop |
+| **Notizen** | Standard in GPS Status, Gaia GPS |
+| **Zielgruppe** | Mobile App |
+
+### MOB-T2: Peilkompass
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Peilung eines sichtbaren Objekts (Berggipfel, Hütte) |
+| **Nutzen** | Orientierung vor Ort, Kartengeopunkte validieren |
+| **Priorität** | 🟡 Mittel |
+| **Phase** | Phase 4 |
+| **Abhängigkeiten** | Smartphone Kamera, Kompass, Augmented Reality (optional) |
+| **Erweiterung** | Später: AR-Overlay mit Kartendaten |
+| **Zielgruppe** | Mobile App |
+
+### MOB-T3: Hangneigungsmesser
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Messung der Hangneigung via Smartphone-Accelerometer |
+| **Nutzen** | 🔴 **Kritisch für alpine Sicherheit**: Lawinenrisiko-Beurteilung, Absturzrisiko vor Ort |
+| **Priorität** | 🔴 Sehr hoch |
+| **Phase** | Phase 4 |
+| **Abhängigkeiten** | Smartphone Accelerometer, Neigungskalibrierung |
+| **Notizen** | Alpine Regel: > 30° = erhöhtes Lawinenrisiko |
+| **Zielgruppe** | Mobile App |
+| **Integrationen** | Vergleich mit DEM-Hangneigung (Validierung) |
+
+### MOB-T4: Entfernungsmesser
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Messung zwischen zwei Positionen am Smartphone |
+| **Nutzen** | Spontane Distanzmessung im Feld |
+| **Priorität** | 🟡 Mittel |
+| **Phase** | Phase 4 |
+| **Abhängigkeiten** | Browser Geolocation API, Haversine-Formel |
+| **Status** | Ähnlich zu WEB-T4, aber mobil-optimiert |
+| **Zielgruppe** | Mobile App |
+
+### MOB-T5: Standortwerkzeuge (GPS Status)
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Anzeige von GPS-Metadaten: Präzision, Höhe, Koordinaten, Richtung, Geschwindigkeit |
+| **Nutzen** | GPS-Signalqualität prüfen, Genauigkeit validieren |
+| **Priorität** | 🟡 Mittel |
+| **Phase** | Phase 4 |
+| **Abhängigkeiten** | Smartphone GPS, Compass, Accelerometer |
+| **Notizen** | Ähnlich der App "GPS Status" (Google Play) |
+| **Zielgruppe** | Mobile App |
+
+### MOB-T6: Sonnenstand & Dämmerung
+
+| Eigenschaft | Wert |
+|---|---|
+| **Beschreibung** | Anzeige von Sonnenaufgang, Sonnenuntergang, Golden Hour für aktuellen Standort |
+| **Nutzen** | Tourenplanung, Fotografie, Sicherheit (Lichtverhältnisse) |
+| **Priorität** | 🟢 Niedrig-Mittel |
+| **Phase** | Phase 5 |
+| **Abhängigkeiten** | Ephemeris-Daten (frei verfügbar), Standort |
+| **Status** | 🟡 Geplant |
+| **Zielgruppe** | Mobile App |
+
+---
+
+## Zukünftige Erweiterungen
+
+Diese Werkzeuge sind für spätere Phasen geplant:
+
+| Werkzeug | Beschreibung | Priorität | Phase | Abhängigkeiten |
+|---|---|---|---|---|
+| **Mondphase & Zeiten** | Mondaufgang, Monduntergang, Phasen | 🟢 Niedrig | Phase 5 | Ephemeris-Daten |
+| **Wettertrend** | Kurzfrist-Prognose (6-24h) | 🟠 Hoch | Phase 5 | GeoSphere, Meteostat |
+| **Notrufinformationen** | Notrufnummern nach Land | 🔴 Sehr hoch | Phase 4 | OSM Emergency Tags |
+| **Rettungspunkt-Finder** | Nächste Hütte, Biwak, Rettungspunkt | 🟠 Hoch | Phase 4 | OSM, DEM |
+| **Offline-Navigation** | Karten + Daten ohne Netzwerk | 🟠 Hoch | Phase 5 | Mobile Cache, Vector Tiles |
+| **Schneefall-Prognose** | Schneefall-Schwelle für Route | 🟡 Mittel | Phase 3+ | GeoSphere, Meteostat, DEM |
+| **Wind-Richtung & -Stärke** | Windverhältnisse am Standort | 🟡 Mittel | Phase 3+ | GeoSphere |
+| **Ultraviolet Index** | UV-Belastung | 🟢 Niedrig | Phase 5 | GeoSphere |
+
+---
+
+## Technische Abhängigkeiten der Toolbox
+
+### Browser-APIs (Website & Mobile Web)
+
+```
+Browser Geolocation API
+  └─ Standort des Nutzers
+     ├─ WEB-T4: Entfernung zum Standort
+     ├─ MOB-T4: Entfernungsmesser
+     └─ MOB-T5: Standortwerkzeuge
+
+Leaflet / Mapbox GL JS
+  └─ Kartendarstellung & Interaktion
+     ├─ WEB-T2: Koordinaten anzeigen
+     ├─ WEB-T3: Höhe anzeigen
+     └─ WEB-T5: Entfernung zwischen Punkten
+```
+
+### Smartphone-Sensoren (Mobile App)
+
+```
+Magnetometer (Kompass)
+  └─ MOB-T1: Kompass
+  └─ MOB-T2: Peilkompass
+
+Accelerometer (Neigungssensor)
+  └─ MOB-T3: Hangneigungsmesser
+  └─ MOB-T5: Standortwerkzeuge
+
+GPS + Gyroskop
+  └─ MOB-T5: Standortwerkzeuge
+```
+
+### Datenquellen
+
+```
+DEM (Austrian)
+  ├─ WEB-T3: Höhe anzeigen
+  ├─ WEB-T5: Höhenunterschied
+  ├─ MOB-T3: Hangneigungsmesser (Validierung)
+  └─ MOB-T5: Rettungspunkt-Finder
+
+GeoSphere API
+  ├─ WEB-T1: Wetter am Punkt
+  ├─ Zukünftig: Wettertrend
+  └─ Zukünftig: Wind & UV
+
+OSM (Overpass API)
+  └─ MOB-T5: Notrufinformationen, Rettungspunkte
+
+Ephemeris-Daten (Libastronomy o.ä.)
+  ├─ MOB-T6: Sonnenstand & Dämmerung
+  └─ Zukünftig: Mondphase & Zeiten
+```
+
+---
+
+## Arbeitspaket-Ideen für die Toolbox
+
+```
+AP-1.4: Website Koordinaten- & Höhen-Werkzeuge (Phase 1)
+  ├─ Werkzeuge: WEB-T2, WEB-T3
+  ├─ Datenquellen: DEM, Leaflet
+  └─ Ziel: Klick auf Karte → Koordinaten + Höhe
+
+AP-1.5: Website Distanz-Werkzeuge (Phase 1)
+  ├─ Werkzeuge: WEB-T4, WEB-T5
+  ├─ Abhängigkeiten: Browser Geolocation
+  └─ Ziel: Punkt-zu-Punkt Messungen
+
+AP-2.3: Website Wetter-am-Punkt Ausbauen (Phase 2)
+  ├─ Werkzeug: WEB-T1
+  ├─ Integration: GeoSphere
+  └─ Ziel: Umfassendere Wetterdaten
+
+AP-4.1: Mobile App Sensoren Integration (Phase 4)
+  ├─ Werkzeuge: MOB-T1, MOB-T2, MOB-T3, MOB-T5
+  ├─ Abhängigkeiten: Smartphone-APIs
+  └─ Ziel: Kern-Sensoren-Suite
+
+AP-5.1: Mobile App Erweiterte Werkzeuge (Phase 5)
+  ├─ Werkzeuge: MOB-T6, Wettertrend, Offline-Nav
+  ├─ Status: Futures
+  └─ Ziel: Premium-Features für Mobile
+```
+
+---
+
+
 
 Diese Metriken werden pro Phase gemessen:
 
