@@ -81,6 +81,39 @@ def test_area_without_extras_unchanged():
     assert "wildlife_names" not in geo and "rule_texts" not in geo
 
 
+def test_protected_entity_id_resolves_via_entities():
+    # Verknüpfungseintrag: id = Verknüpfung (3320), protected_entity_id = Schutzgut. Nur Letzteres zählt.
+    lookup = {4626: "Steinadler", 3320: "FALSCH"}
+    geo, st = b.build([area(wildlife=[{"id": 3320, "protected_area_uuid": "u", "protected_entity_id": 4626}])], lookup)
+    assert geo["wildlife_names"] == ["Steinadler"] and st["wildlife_resolved"] == 1
+
+
+def test_unknown_entity_is_not_invented():
+    geo, st = b.build([area(wildlife=[{"id": 1, "protected_entity_id": 999}])], {4626: "Steinadler"})
+    assert "wildlife_names" not in geo and st["wildlife_resolved"] == 0
+
+
+def test_nested_entity_object():
+    item = {"id": 5, "protected_entity": {"id": 4626, "name_de": "Steinadler"}}
+    geo, _ = b.build([area(wildlife=[item])], {})
+    assert geo["wildlife_names"] == ["Steinadler"]
+
+
+def test_nested_area_name_is_not_taken_as_wildlife():
+    item = {"id": 5, "protected_entity_id": 4626, "protected_area": {"uuid": "u", "name_de": "Karwendel"}}
+    geo, st = b.build([area(wildlife=[item])], {})
+    assert "wildlife_names" not in geo and st["wildlife_resolved"] == 0
+
+
+def test_entities_file_loaded(tmp=None):
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "e.json")
+        json.dump({"entities": {"4626": "Steinadler", "x": "ignoriert", "7": "  "}}, open(path, "w"))
+        assert b.load_wildlife_lookup(path) == {4626: "Steinadler"}
+        assert b.load_wildlife_lookup(os.path.join(d, "fehlt.json")) == {}
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:
