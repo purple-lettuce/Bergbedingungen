@@ -3,16 +3,18 @@
 Neben Geometrie, Name, Kategorie und Beschreibung werden lesbare Informationen zu
 Wildlife und Regeln übernommen (nur das, was das Frontend im Popup anzeigt):
 
-- Wildlife: Die Schutzgebiete verweisen nur per ID auf Verknüpfungseinträge (mit protected_entity_id).
-  Die Namen werden über data/wildlife_entities.json aufgelöst (scripts/fetch_wildlife.py, nur Daten aus der
-  Digitize API). Was dort nicht steht, wird nicht angezeigt; es gibt keine eigenen Zuordnungstabellen.
+- Wildlife: Die Schutzgebiete verweisen nur per ID auf Verknüpfungseinträge. Die id im Eintrag ist die id der
+  Verknüpfung (GET /wildlife), nicht die der Tierart. Über die Tabelle links in data/wildlife_entities.json
+  (Verknüpfung -> protected_entity_id, scripts/fetch_wildlife.py) führt der Weg zum Schutzgut; dessen Name und Art
+  (FAUNA, FLORA, HABITAT) stammen aus derselben Datei, nur aus Daten der Digitize API. Was dort nicht steht, wird
+  nicht angezeigt; es gibt keine eigenen Zuordnungstabellen.
 - Regeln: Es wird der ausgeschriebene Regeltext der API übernommen (text_de, sonst
   text, sonst text_en). Regeln ohne Text werden bewusst weggelassen: Aus Aktivität
   und Bedingungen allein lässt sich nicht sicher ableiten, ob etwas erlaubt oder
   verboten ist.
 
 Kompakt: Namen und Regeltexte stehen einmal in Tabellen am Ende der FeatureCollection
-("wildlife_names", "rule_texts"), die Gebiete verweisen darauf über Indizes
+("wildlife_names", dazu parallel "wildlife_types", "rule_texts"), die Gebiete verweisen darauf über Indizes
 (properties.w, properties.r). IDs von Wildlife und Regeln gelangen nicht in die Datei.
 
 Aufruf:
@@ -47,7 +49,9 @@ TEXT_KEYS = ("text_de", "text", "text_en")
 REF_KEYS = ("protected_entity_id", "wildlife_id", "wildlife", "wildlife_species_id", "species_id", "species")
 # Felder mit "_id", die sicher etwas anderes bezeichnen.
 NOT_REF_KEYS = {"protected_area_id", "area_id", "parent_id", "category_id", "organization_id",
-                "source_id", "activity_id", "state_id", "country_id"}
+                "source_id", "activity_id", "state_id", "country_id",
+                # Felder der Verknüpfung selbst (Regel, Jahreszeit, Tageszeit, Wetter): keine Schutzgüter
+                "connected_rule_id", "season_id", "daytime_id", "weathercondition_id"}
 
 MAX_RULES = 8  # Regeln pro Gebiet, wichtige (is_important) zuerst
 
@@ -86,6 +90,28 @@ def load_wildlife_lookup(path):
         if ident is not None and isinstance(name, str) and name.strip():
             lookup[ident] = name.strip()
     return lookup
+
+
+def load_wildlife_extras(path):
+    """(links, types) aus data/wildlife_entities.json.
+
+    links: id der Verknüpfung (Wildlife-Eintrag im Schutzgebiet) -> Kennung des Schutzguts,
+    types: Kennung des Schutzguts -> Art (FAUNA, FLORA, HABITAT). Fehlen die Felder (ältere Datei), sind beide leer.
+    """
+    if not os.path.exists(path):
+        return {}, {}
+    with open(path, encoding="utf-8") as f:
+        doc = json.load(f)
+    links, types = {}, {}
+    for key, value in (doc.get("links") or {}).items():
+        a, b = as_key(key), as_key(value)
+        if a is not None and b is not None:
+            links[a] = b
+    for key, value in (doc.get("types") or {}).items():
+        ident = as_key(key)
+        if ident is not None and isinstance(value, str) and value.strip():
+            types[ident] = value.strip().upper()
+    return links, types
 
 
 def resolve_wildlife(item, lookup, forced_key=None):
@@ -172,9 +198,16 @@ class Table:
         return self.index[text]
 
 
-def build(areas, lookup, forced_key=None):
-    """Gibt (geojson, Statistik) zurück."""
+def build(areas, lookup, forced_key=None, links=None, types=None):
+    """Gibt (geojson, Statistik) zurück.
+
+    links: {id der Verknüpfung: Kennung des Schutzguts} (data/wildlife_entities.json), types: {Kennung: Art}.
+    Die id eines Wildlife-Eintrags im Schutzgebiet ist die id der Verknüpfung. Ist sie in links bekannt, ist der Weg zum
+    Schutzgut eindeutig, und die Heuristik über andere Felder wird nicht mehr herangezogen (sie könnte IDs verwechseln).
+    """
     wildlife_table, rule_table = Table(), Table()
+    wildlife_types = []         # Art je Eintrag der Tabelle wildlife_names (gleicher Index), None = unbekannt
+    wildlife_index = {}         # (Name, Art) -> Index
     stats = {"areas": 0, "wildlife_items": 0, "wildlife_resolved": 0, "wildlife_unresolved_samples": [],
              "wildlife_keys": {}, "rule_items": 0, "rules_kept": 0}
     features = []
@@ -197,11 +230,21 @@ def build(areas, lookup, forced_key=None):
         wild = []
         for item in area.get("wildlife") or []:
             stats["wildlife_items"] += 1
-            name, via = resolve_wildlife(item, lookup, forced_key)
+            eid = links.get(as_key(item.get("id"))) if links and isinstance(item, dict) else None
+            if eid is not None:
+                name, via = lookup.get(eid), "verknüpfung"
+            else:
+                name, via = resolve_wildlife(item, lookup, forced_key)
             if name:
                 stats["wildlife_resolved"] += 1
                 stats["wildlife_keys"][via] = stats["wildlife_keys"].get(via, 0) + 1
-                idx = wildlife_table.add(name)
+                kind = (types or {}).get(eid)
+                key = (name, kind)
+                if key not in wildlife_index:
+                    wildlife_index[key] = len(wildlife_types)
+                    wildlife_table.items.append(name)
+                    wildlife_types.append(kind)
+                idx = wildlife_index[key]
                 if idx not in wild:
                     wild.append(idx)
             elif len(stats["wildlife_unresolved_samples"]) < 3:
@@ -220,6 +263,8 @@ def build(areas, lookup, forced_key=None):
     geojson = {"type": "FeatureCollection", "features": features}
     if wildlife_table.items:
         geojson["wildlife_names"] = wildlife_table.items
+        if any(wildlife_types):
+            geojson["wildlife_types"] = wildlife_types
     if rule_table.items:
         geojson["rule_texts"] = rule_table.items
     return geojson, stats
@@ -234,11 +279,15 @@ def main():
         areas = json.load(f)
 
     lookup = load_wildlife_lookup(WILDLIFE_FILE)
+    links, types = load_wildlife_extras(WILDLIFE_FILE)
     if not lookup:
         print("Hinweis: data/wildlife_entities.json fehlt oder ist leer (scripts/fetch_wildlife.py ausführen, "
               "siehe docs/WILDLIFE_ANALYSE.md). Wildlife wird nur übernommen, wenn der Name direkt im Eintrag steht.")
+    elif not links:
+        print("Hinweis: data/wildlife_entities.json enthält keine Verknüpfungen (Feld links, scripts/fetch_wildlife.py "
+              "erneut ausführen). Wildlife-Einträge ohne direkten Verweis auf das Schutzgut bleiben unaufgelöst.")
 
-    geojson, st = build(areas, lookup, args.wildlife_key)
+    geojson, st = build(areas, lookup, args.wildlife_key, links, types)
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(geojson, f, ensure_ascii=False, separators=(",", ":"))
@@ -246,6 +295,11 @@ def main():
     print(f"{st['areas']} Features geschrieben")
     print(f"Wildlife: {st['wildlife_resolved']} von {st['wildlife_items']} Einträgen aufgelöst "
           f"({len(geojson.get('wildlife_names', []))} verschiedene Namen)")
+    if geojson.get("wildlife_types"):
+        kinds = {}
+        for k in geojson["wildlife_types"]:
+            kinds[k or "unbekannt"] = kinds.get(k or "unbekannt", 0) + 1
+        print("  Arten:", ", ".join(f"{k} ({n})" for k, n in sorted(kinds.items())))
     if st["wildlife_keys"]:
         print("  aufgelöst über Feld:", ", ".join(f"{k} ({n})" for k, n in st["wildlife_keys"].items()))
     if st["wildlife_resolved"] < st["wildlife_items"]:

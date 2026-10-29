@@ -1,6 +1,6 @@
 # Wildlife-Auflösung: Analyse der DTP-Daten
 
-Stand: 28.10.2026. Dieses Dokument erklärt, warum im Popup der Schutzgebiete keine Tiernamen erschienen,
+Stand: 28.10.2026, Abschnitt 7 ergänzt am 29.10.2026 (Lösung über Verknüpfungen). Dieses Dokument erklärt, warum im Popup der Schutzgebiete keine Tiernamen erschienen,
 was die Pipeline jetzt tut, was sich nicht prüfen ließ und welche Lösungswege es gibt.
 
 ## 1. Befund
@@ -85,5 +85,31 @@ von Namen aus Gebietsbeschreibungen, Platzhalter.
 
 ## 6. Grenzen dieser Analyse
 
-- Die DTP-API war aus meiner Umgebung nicht erreichbar. Das Verhalten der neuen Pipeline ist mit Tests an nachgebildeten Antwortformen geprüft (`scripts/test_fetch_wildlife.py`, `scripts/test_build_geojson.py`), **nicht gegen die echte API**. Der erste Workflow-Lauf liefert den Beleg.
+- Stand 28.10.2026: Die DTP-API war aus meiner Umgebung nicht erreichbar. Das Verhalten der Pipeline war mit Tests an nachgebildeten Antwortformen geprüft (`scripts/test_fetch_wildlife.py`, `scripts/test_build_geojson.py`), nicht gegen die echte API. Die Workflow-Läufe und die Prüfung in Abschnitt 7 haben das inzwischen an echten Daten bestätigt.
 - Das Schema (`/schema/`) wird als JSON oder YAML gelesen. Gibt die API ein anderes Format zurück, fehlt nur der Schema-Teil des Berichts, die übrigen Quellen werden trotzdem geprüft.
+
+## 7. Auflösung über Verknüpfungen (Stand 29.10.2026)
+
+Der Workflow-Lauf vom 29.10.2026 und eine Prüfung gegen die echte API haben gezeigt, wo die Auflösung hing.
+
+**Befund**
+
+- `GET /protected-entities` liefert die Stammdaten: `id`, `name`, `name_scientific`, `red_list_category` und `type`. `type` ist `FAUNA`, `FLORA` oder `HABITAT` (8079 Einträge). Alle 564 Schutzgüter, auf die Verknüpfungen verweisen, sind damit mit Namen aufgelöst (315 `FAUNA`, 175 `FLORA`, 74 `HABITAT`). `data/wildlife_entities.json` enthielt diese Namen bereits.
+- Die Auflösung scheiterte nicht bei den Namen, sondern am **fehlenden Verweis in den Gebieten**: Ein Wildlife-Eintrag in den Gebietsdetails trägt nur die `id` der Verknüpfung (zum Beispiel 3320) und Metadaten (`presence_from`, `connected_rule_id`, `season_id`, ...), aber kein `protected_entity_id`. Deshalb blieben alle 1321 Einträge unaufgelöst und `wildlife_names` leer.
+- Den Verweis liefert `GET /wildlife`: Dort ist `id` die Verknüpfung und `protected_entity_id` das Schutzgut (2923 Zeilen).
+
+**Prüfung der Zuordnung an echten Daten** (Gebietsdetails vom 23.10.2026, `/wildlife` vom 29.10.2026)
+
+- Alle 1321 `id`-Werte der Wildlife-Einträge in den Gebieten kommen in `/wildlife` vor.
+- Gebiete, die sich über Name und Änderungszeitpunkt eindeutig der Liste mit `uuid` zuordnen lassen (alle bis auf 38): Bei **allen 1315** Verknüpfungen stimmt `protected_area_uuid` der Zeile mit der `uuid` des Gebiets überein. Die Zuordnung `id` → `protected_entity_id` ist damit belegt und kein Zufall überlappender Wertebereiche.
+
+**Umsetzung**
+
+- `fetch_wildlife.py` speichert zusätzlich `links` (Verknüpfung → Schutzgut) und `types` (Schutzgut → Art) in `data/wildlife_entities.json`. Ist das OpenAPI-Schema nicht lesbar (lokal fehlt oft `pyyaml`), fragt es den bekannten Endpunkt `/protected-entities` ab. Liefert ein Lauf keine Namen, bleibt eine vorhandene Datei unverändert, statt geleert zu werden.
+- `build_geojson.py` löst Wildlife-Einträge über die Verknüpfungs-ID auf: Eintrag → `links` → Schutzgut → Name und Art. Ist die `id` in `links` bekannt, wird **nicht** mehr über andere Felder geraten. Die Felder `connected_rule_id`, `season_id`, `daytime_id` und `weathercondition_id` zählen ausdrücklich nicht als Verweis auf Schutzgüter, weil ihre Werte mit Schutzgut-Kennungen zusammenfallen können. Die `id` des Eintrags wird nie direkt als Schutzgut-Kennung verwendet.
+- Die GeoJSON-Datei trägt zusätzlich `wildlife_types` (gleicher Index wie `wildlife_names`, `null` = Art unbekannt).
+- Im Popup stehen Tiere unter „Wildlife“, Pflanzen (`FLORA`) und Lebensräume (`HABITAT`) getrennt darunter unter „Pflanzen und Lebensräume“. Symbole sind reine Darstellung (Art laut API, bei Tieren nach dem Wortende des Namens, sonst Pfotensymbol).
+
+**Ergebnis eines lokalen Baus** (Gebietsdetails vom 23.10.2026): 1321 von 1321 Einträgen aufgelöst, 187 verschiedene Namen (111 `FAUNA`, 42 `FLORA`, 34 `HABITAT`), 669 Gebiete mit Wildlife, größtes Gebiet 45 Einträge.
+
+**Offen:** Die Zuordnung hängt an der Stabilität der Verknüpfungs-IDs der API. Ändert die API sie, bleiben betroffene Einträge unaufgelöst (es wird nicht geraten, die Statistik des Laufs zeigt es). Habitate stehen in den Daten teils mit sehr langen Namen (zum Beispiel FFH-Lebensraumtypen), sie werden unverändert angezeigt.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Führt die JavaScript-Tests (scripts/test_avalanche_logic.html, scripts/test_avalanche_frontend.html) in einem Headless-Browser aus.
+"""Führt die JavaScript-Tests (scripts/test_*.html: Lawinenlage, Schutzgebiete) in einem Headless-Browser aus.
 
 Gebraucht wird Chrome, Chromium oder Edge. Ohne Browser endet das Skript mit Hinweis (Exit 0), mit
 --require-browser mit Fehler. Aufruf: python3 scripts/run_js_tests.py [--require-browser]
@@ -16,7 +16,7 @@ import tempfile
 import threading
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html"]
+PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html", "test_protected_areas.html"]
 CANDIDATES = [
     os.environ.get("BROWSER", ""),
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",

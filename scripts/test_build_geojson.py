@@ -112,6 +112,62 @@ def test_entities_file_loaded(tmp=None):
         json.dump({"entities": {"4626": "Steinadler", "x": "ignoriert", "7": "  "}}, open(path, "w"))
         assert b.load_wildlife_lookup(path) == {4626: "Steinadler"}
         assert b.load_wildlife_lookup(os.path.join(d, "fehlt.json")) == {}
+        assert b.load_wildlife_extras(path) == ({}, {})                       # ältere Datei ohne links und types
+        assert b.load_wildlife_extras(os.path.join(d, "fehlt.json")) == ({}, {})
+
+
+def test_links_and_types_file_loaded():
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "e.json")
+        json.dump({"entities": {"4626": "Steinadler"}, "types": {"4626": "fauna", "x": "FLORA", "5": ""},
+                   "links": {"3320": 4626, "y": 1, "3321": "x"}}, open(path, "w"))
+        assert b.load_wildlife_extras(path) == ({3320: 4626}, {4626: "FAUNA"})
+
+
+# ---------- Verknüpfungen: id des Wildlife-Eintrags -> Schutzgut ----------
+
+ENT = {4626: "Steinadler", 4700: "Arnika", 4800: "Hochmoore", 3320: "FALSCH"}
+LINKS = {3320: 4626, 3321: 4700, 3322: 4800, 3323: 4626}
+TYPES = {4626: "FAUNA", 4700: "FLORA", 4800: "HABITAT"}
+
+
+def test_link_id_resolves_to_entity_name_and_type():
+    a = area(wildlife=[{"id": 3320, "presence_from": None}, {"id": 3321}, {"id": 3322}, {"id": 3323}])
+    geo, st = b.build([a], ENT, links=LINKS, types=TYPES)
+    p = geo["features"][0]["properties"]
+    assert [geo["wildlife_names"][i] for i in p["w"]] == ["Steinadler", "Arnika", "Hochmoore"]    # Duplikat nur einmal
+    assert [geo["wildlife_types"][i] for i in p["w"]] == ["FAUNA", "FLORA", "HABITAT"]
+    assert st["wildlife_resolved"] == 4 and st["wildlife_keys"] == {"verknüpfung": 4}
+    assert geo["wildlife_names"] != ["FALSCH"]            # die id selbst (3320) ist keine Schutzgut-Kennung
+
+
+def test_link_with_known_id_never_falls_back_to_heuristic_keys():
+    # season_id 4626 kollidiert mit einer Schutzgut-Kennung: Die Verknüpfung (id 3321) gehört zu Arnika, nicht zum Steinadler
+    geo, _ = b.build([area(wildlife=[{"id": 3321, "season_id": 4626, "connected_rule_id": 4626}])], ENT, links=LINKS, types=TYPES)
+    assert geo["wildlife_names"] == ["Arnika"]
+    # Entität ohne Namen: unaufgelöst, kein Raten über andere Felder
+    geo, st = b.build([area(wildlife=[{"id": 3399, "season_id": 4626}])], ENT, links={3399: 9999}, types=TYPES)
+    assert "wildlife_names" not in geo and st["wildlife_resolved"] == 0
+
+
+def test_rule_season_weather_ids_are_not_references():
+    geo, st = b.build([area(wildlife=[{"id": 5, "season_id": 4626, "daytime_id": 4626, "weathercondition_id": 4626,
+                                      "connected_rule_id": 4626}])], ENT)
+    assert "wildlife_names" not in geo and st["wildlife_resolved"] == 0
+
+
+def test_unknown_link_id_is_not_resolved_by_id():
+    geo, st = b.build([area(wildlife=[{"id": 4626}])], ENT, links=LINKS, types=TYPES)         # 4626 ist Schutzgut, keine Verknüpfung
+    assert "wildlife_names" not in geo and st["wildlife_resolved"] == 0
+
+
+def test_same_name_with_different_type_is_kept_apart_and_types_optional():
+    ent = {1: "Moor", 2: "Moor"}
+    geo, _ = b.build([area(wildlife=[{"id": 10}, {"id": 11}])], ent, links={10: 1, 11: 2}, types={1: "FLORA", 2: "HABITAT"})
+    assert geo["wildlife_names"] == ["Moor", "Moor"] and geo["wildlife_types"] == ["FLORA", "HABITAT"]
+    geo, _ = b.build([area(wildlife=[{"id": 10}])], ent, links={10: 1})                         # ohne Arten
+    assert geo["wildlife_names"] == ["Moor"] and "wildlife_types" not in geo
 
 
 if __name__ == "__main__":

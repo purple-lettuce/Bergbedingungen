@@ -134,7 +134,7 @@ scripts/test_build_geojson.py
 
 **Aktualisierung:** Manuelle Aktualisierung über GitHub Action ✅
 
-**Details:** Siehe [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md) für Tiernamen-Auflösung
+**Details:** Siehe [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md) für Tiernamen-Auflösung (Verknüpfungen, Namen, Art `FAUNA`/`FLORA`/`HABITAT`)
 
 ---
 
@@ -653,8 +653,9 @@ Run workflow
 
 ### Wildlife
 
-- Verknüpfungen Schutzgebiet → Schutzgut (`protected_entity_id`) über `/wildlife` und `/protected-areas/{uuid}/wildlife`
-- Namen der Schutzgüter: Quelle noch zu bestätigen, Details und Lösungswege in [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md)
+- Verknüpfungen Schutzgebiet → Schutzgut (`protected_entity_id`) über `GET /wildlife` (`id` = Verknüpfung, `protected_area_uuid`, `protected_entity_id`). Die `id` eines Wildlife-Eintrags in den Gebietsdetails ist die Verknüpfungs-ID.
+- Namen und Art der Schutzgüter (`type`: `FAUNA`, `FLORA`, `HABITAT`) über `GET /protected-entities` (8079 Einträge, alle 564 benötigten aufgelöst)
+- Details, Prüfung der Zuordnung an echten Daten und Grenzen: [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md), Abschnitt 7
 
 ### Regeln
 

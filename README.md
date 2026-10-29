@@ -22,9 +22,9 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 
 - Karte mit relevanten Inhalten für alpine Regionen
 - Anzeige von Sperrungen und Hinweisen aus aktuellen Daten
-- Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen
+- Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen, mit Symbolen im Popup und Filter nach Schutzgebietskategorie
 - Layer-basierte Darstellung für schnellere Orientierung auf der Karte
-- Bedienfeld „Karten & Layer” für Kartenstil, Ebenen und Legenden, per Klick bedienbar (auch auf Touchgeräten)
+- Bedienfeld „Karten & Layer” für Kartenstil, Ebenen, Filter und Legenden, per Klick bedienbar (auch auf Touchgeräten)
 - Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste)
 
 **Geplant (Roadmap Phase 1-2):**
@@ -131,10 +131,10 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/closures.json` | aktuelle Sperrungen und Hinweise |
 | `scripts/fetch_protected_areas.py`, `scripts/fetch_protected_area_details_v2.py`, `scripts/fetch_wildlife.py`, `scripts/build_geojson.py` | Schutzgebiets-Pipeline |
 | `data/protected_areas_alps.geojson` | kompaktes GeoJSON für Schutzgebiete auf der Karte |
-| `data/wildlife_entities.json` | aufgelöste Namen der Schutzgüter (Kennung → Name), nur aus der Digitize API |
+| `data/wildlife_entities.json` | aufgelöste Schutzgüter: Kennung → Name, Kennung → Art (`FAUNA`, `FLORA`, `HABITAT`) und Verknüpfung → Kennung, nur aus der Digitize API |
 | `data/wildlife_probe.json` | Diagnosebericht der Wildlife-Auflösung (was die API geliefert hat, was fehlt) |
 | `scripts/avalanche_providers.py`, `scripts/avalanche_sources.py`, `scripts/avalanche_model.py`, `scripts/avalanche_schema.py`, `scripts/fetch_avalanche.py` | Lawinen-Framework: Provider je Quelle, Registry, Normalisierung, Standardmodell und GeoJSON-Schema, zentrale Pipeline ([docs/AVALANCHE_ARCHITECTURE.md](docs/AVALANCHE_ARCHITECTURE.md)) |
-| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage (Python und JavaScript im Headless-Browser) |
+| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/test_protected_areas.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage und der Schutzgebiets-Oberfläche (Python und JavaScript im Headless-Browser) |
 | `data/avalanche/` | Lawinenlage: `index.json`, je Quelle `<id>.json` (Bulletins) und `<id>_regions.geojson` (Polygone) für `euregio` und `slf` |
 | `vendor/albina/` | offizielle ALBINA-Symbole (Gefahrenstufen, Lawinenprobleme), Herkunft in `vendor/albina/README.md` |
 
@@ -149,10 +149,13 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/map.js` | Leaflet-Karte, Kachelebenen (OpenStreetMap, OpenTopoMap), Ebenengruppen, Warnhinweise sowie gemeinsame Hilfen (`el`, `esc`, `setStatus`) |
 | `js/closures.js` | Sperrungen und Hinweise: `data/closures.json` laden, filtern, auf der Karte und in der Liste darstellen, Popups, Sprung zu einem Eintrag |
 | `js/weather.js` | Wetterwidget mit Open-Meteo und Standortmarker |
-| `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene |
+| `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene, Farben nach Kategorie, bindet Popup, Legende und Filter an |
+| `js/protected_areas_popup.js` | Popup der Schutzgebiete als HTML-Text (rein): Kategorie, Beschreibung, Wildlife-Schilder, Regeln mit Symbol |
+| `js/popup_icons.js` | Symbole für die Popups (rein): Wildlife nach Art und Tiername (unbekannt: Pfotensymbol), Regeln nach Thema und Art (Verbot, eingeschränkt, erlaubt) aus dem Wortlaut |
+| `js/protected_areas_filter.js` | Filterlogik nach Schutzgebietskategorie: blendet die vorhandenen Flächen ein und aus, ohne neu zu laden |
 | `js/protected_areas_legend.js` | Legende der Schutzgebiete (Abschnitt im Bedienfeld „Karten & Layer“): Farben der Kategorien, die in den Daten vorkommen |
-| `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`) |
-| `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil und einklappbare Legenden, alles per Klick, ohne Fachlogik |
+| `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen, Filter und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`, Filter: `panel.addFilter(...)`) |
+| `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil, einklappbare Filter und Legenden, alles per Klick, ohne Fachlogik |
 | `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
 | `js/avalanche.js` | Lawinenlage aller Quellen (Karte): Datensatz je Region aufbauen, Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Höhenwahl; lädt erst beim ersten Einblenden |
 | `js/avalanche_popup.js` | dieselbe Popup-Komponente für jede Quelle: Lagebericht aus einem Regionsdatensatz, rein (ohne DOM und Leaflet) |
@@ -162,10 +165,10 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/avalanche_legend.js` | Legende der Lawinenlage mit Berichtsstatus je Quelle, Stufenfarben, Höhenwahl, Hinweisen und Namensnennung (Abschnitt im Bedienfeld „Karten & Layer“) |
 | `js/avalanche_logic.js` | reine Logik ohne DOM und Leaflet auf dem Regionsdatensatz: Gefahrenstufe je Höhe, Gültigkeit, Gruppierung, Link zum Lagebericht (getestet mit `scripts/run_js_tests.py`) |
 
-Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` und
-`protected_areas.js` → `map.js`; `avalanche.js` → `map.js`, `html.js`, `avalanche_legend.js`, `avalanche_symbols.js`, `avalanche_logic.js`, `avalanche_model.js`, `avalanche_popup.js`;
+Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` → `map.js`;
+`protected_areas.js` → `map.js`, `layers.js`, `protected_areas_legend.js`, `protected_areas_filter.js`, `protected_areas_popup.js`; `protected_areas_popup.js` → `html.js`, `popup_icons.js`; `avalanche.js` → `map.js`, `html.js`, `avalanche_legend.js`, `avalanche_symbols.js`, `avalanche_logic.js`, `avalanche_model.js`, `avalanche_popup.js`;
 `avalanche_popup.js` → `html.js`, `avalanche_symbols.js`, `avalanche_logic.js`; `avalanche_symbols.js` → `html.js`;
-`avalanche_legend.js` → `html.js`, `layers.js`, `avalanche_logic.js`, `avalanche_symbols.js`; `layers.js` → `map.js`, `layer_panel.js`; die Legendenmodule `protected_areas_legend.js` und `closures_legend.js` → `layers.js`. `map.js` → `html.js`. `html.js`, `layer_panel.js`, `avalanche_logic.js` und `avalanche_model.js` hängen von keiner
+`avalanche_legend.js` → `html.js`, `layers.js`, `avalanche_logic.js`, `avalanche_symbols.js`; `layers.js` → `map.js`, `layer_panel.js`; die Legendenmodule `protected_areas_legend.js` und `closures_legend.js` → `layers.js`. `map.js` → `html.js`. `html.js`, `popup_icons.js`, `protected_areas_filter.js`, `layer_panel.js`, `avalanche_logic.js` und `avalanche_model.js` hängen von keiner
 anderen Datei ab.
 
 Hinweis: Wegen der Module muss die Seite über einen Webserver (zum Beispiel GitHub Pages) geöffnet
@@ -173,40 +176,48 @@ werden, nicht per Doppelklick als lokale Datei. Das galt für Karte und Daten sc
 
 ## Schutzgebiete: Datenpipeline, Wildlife und Regeln
 
-Die Popups der Schutzgebiete zeigen Kategorie, Beschreibung, **Wildlife** und **Regeln**.
+Die Popups der Schutzgebiete zeigen Kategorie, Beschreibung, **Wildlife** und **Regeln**, jeweils mit Symbolen. Im Bedienfeld „Karten & Layer“ lassen sich die Schutzgebiete unter **Filter Schutzgebiete** nach Kategorie ein- und ausblenden.
+
+**Filter:** Ein Schalter je Kategorie, die in den Daten vorkommt (mit Farbfeld und Anzahl), dazu „Alle“ und „Keine“ und eine Statuszeile („10 von 11 sichtbar“). Der Filter blendet nur die vorhandenen Flächen ein und aus, ohne neu zu laden. Er bleibt beim Zoomen und Verschieben erhalten und gilt auch, wenn die Ebene „Schutzgebiete“ aus- und wieder eingeschaltet wird. Der Abschnitt ist zunächst eingeklappt.
+
+**Symbole im Popup:** Regeln bekommen ein Themensymbol (Hunde, Drohnen, Zelten, Radfahren, ...) und einen farbigen Rand nach Art der Regel (Verbot, eingeschränkt, erlaubt), ein Zeitraum steht in einer eigenen Zeile. Wildlife erscheint als Schilder mit Symbol: Tiere (Art `FAUNA`) unter „Wildlife“ mit einem Symbol nach dem Tiernamen, Pflanzen und Lebensräume (`FLORA`, `HABITAT`) getrennt darunter mit festem Symbol. Die Art stammt aus der Digitize API, die Symbole sind reine Darstellung, der Text bleibt unverändert. Nicht erkannte Tiernamen bekommen ein neutrales Pfotensymbol, nichts wird geraten.
 
 ```
 fetch_protected_areas.py            Liste aller Schutzgebiete -> data/protected_areas.json
 fetch_protected_area_details_v2.py  Details je Gebiet (fields=all, mit "wildlife" und "rules")
                                     -> data/protected_areas_alps.json (nicht im Repo, groß)
-fetch_wildlife.py                   Wildlife-Namen aus der API -> data/wildlife_entities.json, data/wildlife_probe.json
+fetch_wildlife.py                   Namen, Arten und Verknüpfungen der Schutzgüter aus der API
+                                    -> data/wildlife_entities.json, data/wildlife_probe.json
 build_geojson.py                    alles zusammenführen -> data/protected_areas_alps.geojson
 ```
 
-**Woher kommen die Tiernamen?** Ein Schutzgebiet verweist bei `wildlife` nur auf Verknüpfungseinträge
-(`id`, `protected_area_uuid`, `protected_entity_id`), auch `GET /api/v2/wildlife` liefert in der
-Grundeinstellung nur diese Verknüpfungen, keine Namen. `fetch_wildlife.py` sucht die Namen deshalb
-ausschließlich in offiziellen DTP-Quellen: `GET /wildlife?fields=all`, danach Endpunkte für Schutzgüter,
-die das offizielle OpenAPI-Schema (`/schema/`) deklariert, danach `GET /protected-areas/{uuid}/wildlife`.
-`build_geojson.py` löst `protected_entity_id` damit auf. Es gibt keine eigenen Zuordnungstabellen, und
-was die API nicht liefert, wird nicht angezeigt (das Wildlife-Feld im Popup bleibt dann weg). Ob und wie
-weit die Auflösung gelingt, steht im Protokoll des Workflows und in `data/wildlife_probe.json`.
-Ausführliche Analyse, offene Punkte und Lösungswege: [docs/WILDLIFE_ANALYSE.md](docs/WILDLIFE_ANALYSE.md).
+**Woher kommen die Tiernamen?** Ein Schutzgebiet verweist bei `wildlife` nur auf Verknüpfungseinträge. Deren
+`id` ist die id der Verknüpfung (`GET /api/v2/wildlife`: `id`, `protected_area_uuid`, `protected_entity_id`),
+nicht die der Tierart. `fetch_wildlife.py` speichert diese Verknüpfungen (`links`) und holt Namen und Art
+(`type`) der Schutzgüter ausschließlich aus offiziellen DTP-Quellen (zum Beispiel `GET /protected-entities`).
+`build_geojson.py` löst über die Verknüpfungs-ID auf: Wildlife-Eintrag → Verknüpfung → `protected_entity_id`
+→ Name und Art. Diesen Weg haben wir an den echten Daten geprüft (alle 1315 prüfbaren Verknüpfungen gehören zum
+richtigen Schutzgebiet). Es gibt keine eigenen Zuordnungstabellen, und was die API nicht liefert, wird nicht
+angezeigt. Ob und wie weit die Auflösung gelingt, steht im Protokoll des Workflows und in
+`data/wildlife_probe.json`. Ausführliche Analyse: [docs/WILDLIFE_ANALYSE.md](docs/WILDLIFE_ANALYSE.md).
 
 **Regeln** werden mit dem ausgeschriebenen Text der API übernommen (`text_de`, sonst `text`, sonst
 `text_en`), wichtige Regeln (`is_important`) zuerst, ohne Doppelte, höchstens 8 je Gebiet,
 saisonale Regeln mit Zeitraum (z. B. „01.12.–30.04.\"). Regeln ohne Text werden ausgelassen, weil sich
 aus Aktivität und Bedingungen allein nicht sicher ableiten lässt, ob etwas erlaubt oder verboten ist.
 
-**Kompakte Datei:** Namen und Regeltexte stehen einmal in Tabellen am Ende der GeoJSON-Datei
-(`wildlife_names`, `rule_texts`), die Gebiete verweisen per Index darauf (`properties.w`,
-`properties.r`). Interne IDs gelangen nicht in die Datei. Das Frontend (`js/protected_areas.js`)
-zeigt die Einträge maskiert im Popup an; bei Gebieten ohne Angaben bleibt das Popup wie bisher.
+**Kompakte Datei:** Namen, Arten und Regeltexte stehen einmal in Tabellen am Ende der GeoJSON-Datei
+(`wildlife_names`, dazu parallel `wildlife_types`, und `rule_texts`), die Gebiete verweisen per Index darauf
+(`properties.w`, `properties.r`). Interne IDs gelangen nicht in die Datei. Das Frontend
+(`js/protected_areas_popup.js`) zeigt die Einträge maskiert im Popup an; bei Gebieten ohne Angaben bleibt das Popup wie bisher.
 
 **Daten erzeugen:** Reiter **Actions** → **Schutzgebiete aktualisieren** → **Run workflow**
 (`.github/workflows/update-protected-areas.yml`, dauert länger, weil jedes Gebiet einzeln abgefragt
 wird). Das Ergebnis wird als Commit gespeichert. Lokal: die Skripte in der oben stehenden
-Reihenfolge ausführen. Tests: `python3 scripts/test_build_geojson.py` und `python3 scripts/test_fetch_wildlife.py`.
+Reihenfolge ausführen (`fetch_wildlife.py` liest das OpenAPI-Schema der API als YAML, dafür braucht es das Python-Paket
+`pyyaml`, auf den GitHub-Runnern ist es vorhanden; ohne lesbares Schema fragt das Skript den bekannten Endpunkt
+`/protected-entities` ab und lässt eine vorhandene Namensdatei unverändert, wenn ein Lauf keine Namen liefert). Tests: `python3 scripts/test_build_geojson.py`,
+`python3 scripts/test_fetch_wildlife.py` und, mit installiertem Chrome oder Edge, `python3 scripts/run_js_tests.py`.
 
 ## Lawinenlage (Euregio und Schweiz)
 

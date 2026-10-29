@@ -13,7 +13,8 @@ Namen. Dieses Skript sucht die Namen ausschließlich in offiziellen DTP-Quellen,
 liefert. Keine eigenen Zuordnungstabellen, keine erfundenen Namen.
 
 Ergebnis:
-  data/wildlife_entities.json   Kennung -> Name (klein, wird von build_geojson.py gelesen)
+  data/wildlife_entities.json   Kennung -> Name, Kennung -> Art (FAUNA, FLORA, HABITAT) und Verknüpfung -> Kennung
+                                (klein, wird von build_geojson.py gelesen)
   data/wildlife_probe.json      Diagnosebericht: was geprüft wurde, was die API geliefert hat, was fehlt
 """
 
@@ -27,13 +28,14 @@ import urllib.request
 
 sys.path.insert(0, os.path.dirname(__file__))
 from fetch_protected_areas import BASE, DATA_DIR, PAUSE, UA, fetch_all, get_json  # noqa: E402
-from wildlife_lookup import as_key, entity_pairs  # noqa: E402
+from wildlife_lookup import ENTITY_WORDS, as_key, entity_pairs  # noqa: E402
 
 OUT_ENTITIES = os.path.join(DATA_DIR, "wildlife_entities.json")
 OUT_PROBE = os.path.join(DATA_DIR, "wildlife_probe.json")
 
 NESTED_SAMPLE = 5          # so viele Gebiete werden zuerst probeweise über den verschachtelten Endpunkt abgefragt
 KEYWORDS = ("wildlife", "entit", "species", "animal")
+FALLBACK_ENTITY_ENDPOINTS = ("/protected-entities",)   # nur wenn das OpenAPI-Schema nicht lesbar ist
 
 
 # ---------- Schema (OpenAPI) ----------
@@ -134,15 +136,39 @@ def collect(entities, rows, bare_id_is_entity=False):
     return n
 
 
+def collect_types(types, rows, rows_are_entities=False):
+    """Art des Schutzguts (FAUNA, FLORA, HABITAT ...), wie die API sie im Feld type des Schutzguts liefert.
+
+    Gelesen wird nur der Eintrag eines Schutzgut-Endpunkts (rows_are_entities=True: id und type im selben Eintrag) oder
+    ein verschachteltes Schutzgut-Objekt mit eigener id. Die id eines Verknüpfungseintrags (/wildlife) ist nie die eines
+    Schutzguts. Fehlt die Angabe, bleibt die Art unbekannt.
+    """
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        candidates = [row] if rows_are_entities else []
+        candidates += [v for k, v in row.items() if isinstance(v, dict) and any(w in k.lower() for w in ENTITY_WORDS)]
+        for obj in candidates:
+            eid, t = as_key(obj.get("id")), obj.get("type")
+            if eid is not None and isinstance(t, str) and t.strip():
+                types[eid] = t.strip().upper()
+
+
 def main():
     probe = {"generated": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
              "steps": [], "schema": {}, "wildlife_sample": None}
     entities = {}
+    types = {}
 
     # 0. Offizielles Schema: welche Endpunkte zu Wildlife/Schutzgütern gibt es, welche Felder liefern sie?
     schema = load_schema()
     paths = relevant_paths(schema)
-    probe["schema"] = {"available": schema is not None, "relevant_paths": paths}
+    if schema is None:
+        # Ohne lesbares Schema (z. B. fehlt lokal das Paket pyyaml) bleibt nur der bekannte Schutzgut-Endpunkt der API
+        # (laut früherem Diagnosebericht vorhanden). Er wird abgefragt wie ein im Schema deklarierter Endpunkt.
+        paths = {p: {"get": []} for p in FALLBACK_ENTITY_ENDPOINTS}
+        print("Hinweis: Schema nicht lesbar, verwende", ", ".join(FALLBACK_ENTITY_ENDPOINTS))
+    probe["schema"] = {"available": schema is not None, "relevant_paths": paths if schema is not None else {}}
     print("OpenAPI-Schema:", "abrufbar" if schema else "nicht abrufbar")
     for p, m in paths.items():
         print("  ", p, {k: v for k, v in m.items()})
@@ -155,8 +181,15 @@ def main():
         probe["wildlife_sample"] = rows[0]
     wanted = {as_key(r.get("protected_entity_id")) for r in rows if isinstance(r, dict)} - {None}
     areas = sorted({r.get("protected_area_uuid") for r in rows if isinstance(r, dict) and r.get("protected_area_uuid")})
+    # Verknüpfungen: Die id eines Wildlife-Eintrags im Schutzgebiet ist die id dieser Verknüpfung. Über sie führt der Weg
+    # zum Schutzgut (protected_entity_id), ohne dass IDs verwechselt werden (siehe docs/WILDLIFE_ANALYSE.md, Abschnitt 7).
+    links = {}
+    for r in rows:
+        if isinstance(r, dict) and as_key(r.get("id")) is not None and as_key(r.get("protected_entity_id")) is not None:
+            links[as_key(r["id"])] = as_key(r["protected_entity_id"])
     print(f"/wildlife: {len(rows)} Verknüpfungen, {len(wanted)} verschiedene Schutzgüter, {len(areas)} Gebiete")
     collect(entities, rows)
+    collect_types(types, rows)
     print(f"  Namen aus /wildlife: {len(set(entities) & wanted)} von {len(wanted)}")
 
     # 2. Endpunkte für Schutzgüter/Arten laut Schema
@@ -164,6 +197,7 @@ def main():
         for p in entity_endpoints(paths):
             r = fetch_variants(BASE + p, ["fields=all", ""], log)
             collect(entities, r, bare_id_is_entity=True)
+            collect_types(types, r, rows_are_entities=True)
             print(f"  {p}: {len(r or [])} Einträge, aufgelöst jetzt {len(set(entities) & wanted)} von {len(wanted)}")
             if not (wanted - set(entities)):
                 break
@@ -175,12 +209,14 @@ def main():
         for uuid in sample:
             r = fetch_variants(f"{BASE}/protected-areas/{uuid}/wildlife", ["fields=all", ""], log)
             got += collect(entities, r)
+            collect_types(types, r)
             time.sleep(PAUSE)
         print(f"  /protected-areas/{{uuid}}/wildlife (Stichprobe {len(sample)} Gebiete): {got} Namen")
         if got:
             for uuid in areas[NESTED_SAMPLE:]:
                 r = fetch_variants(f"{BASE}/protected-areas/{uuid}/wildlife", ["fields=all"], [])
                 collect(entities, r)
+                collect_types(types, r)
                 time.sleep(PAUSE)
 
     resolved = len(set(entities) & wanted)
@@ -192,10 +228,23 @@ def main():
               "Siehe data/wildlife_probe.json und docs/WILDLIFE_ANALYSE.md (Ursache und Lösungswege).")
 
     os.makedirs(DATA_DIR, exist_ok=True)
-    with open(OUT_ENTITIES, "w", encoding="utf-8") as f:
-        json.dump({"generated": probe["generated"], "source": BASE,
-                   "entities": {str(k): v for k, v in sorted(entities.items()) if k in wanted or not wanted}},
-                  f, ensure_ascii=False, separators=(",", ":"))
+    keep_old = False
+    if wanted and not resolved and os.path.exists(OUT_ENTITIES):
+        # Ein Lauf ohne Namen (z. B. API nicht erreichbar oder Endpunkt geändert) darf eine brauchbare Datei nicht leeren.
+        try:
+            with open(OUT_ENTITIES, encoding="utf-8") as f:
+                keep_old = bool((json.load(f) or {}).get("entities"))
+        except (OSError, ValueError):
+            keep_old = False
+    if keep_old:
+        print("Hinweis: Die vorhandene data/wildlife_entities.json bleibt unverändert (der Lauf hat keine Namen geliefert).")
+    else:
+        with open(OUT_ENTITIES, "w", encoding="utf-8") as f:
+            json.dump({"generated": probe["generated"], "source": BASE,
+                       "entities": {str(k): v for k, v in sorted(entities.items()) if k in wanted or not wanted},
+                       "types": {str(k): v for k, v in sorted(types.items()) if k in wanted or not wanted},
+                       "links": {str(k): v for k, v in sorted(links.items())}},
+                      f, ensure_ascii=False, separators=(",", ":"))
     with open(OUT_PROBE, "w", encoding="utf-8") as f:
         json.dump(probe, f, ensure_ascii=False, indent=2)
     print(OUT_ENTITIES)

@@ -82,7 +82,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | Priorität | Thema | Status |
 |------------|------------|------------|
 | 1 | Legende für Schutzgebiete | Erledigt |
-| 2 | Filter nach Schutzgebietstyp | Offen |
+| 2 | Filter nach Schutzgebietstyp | Erledigt (Filter im Bedienfeld „Karten & Layer“, Symbole für Wildlife und Regeln im Popup) |
 | 3 | Lawinenlage | In Arbeit (Euregio und Schweiz umgesetzt, Test mit aktuellen Berichten ab Saisonstart) |
 | 4 | Unfalllayer | Recherche |
 | 5 | Unfall-Heatmap | Konzept |
@@ -273,12 +273,22 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 - [ ] Weitere Länder (Frankreich, Italien, Slowenien, übrige Bundesländer) als Provider, Lizenzen vorher klären
 - [ ] Archiv der Bulletins (historische Lawinenlage), Lawinenunfälle, Risikobewertung, GPX-Tourenanalyse und KI-Auswertung auf Basis des Standardmodells (Konzept: Architektur, Abschnitt 12)
 
+## Schutzgebiete: Filter, Symbole, Wildlife-Namen ✅
+
+- [x] Filter nach Schutzgebietskategorie als Abschnitt „Filter Schutzgebiete“ im Bedienfeld „Karten & Layer“ (Schalter je Kategorie mit Farbfeld und Anzahl, „Alle“ und „Keine“, Statuszeile; gilt auch nach Aus- und Einschalten der Ebene)
+- [x] Regeln im Popup mit Themensymbol und farbigem Rand nach Art der Regel (Verbot, eingeschränkt, erlaubt)
+- [x] Wildlife im Popup als Schilder mit Symbol, Pflanzen und Lebensräume getrennt (Art laut Digitize API)
+- [x] Tiernamen aufgelöst: Verknüpfungs-ID → Schutzgut → Name und Art, an echten Daten geprüft (Details: [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md), Abschnitt 7)
+- [x] Wildlife-Daten im Repository aktualisiert (Lauf „Schutzgebiete aktualisieren“ am 29.10.2026: 685 Gebiete mit Wildlife, 187 Namen)
+- [ ] Darstellung der Wildlife-Einträge verbessern (lange Habitatnamen, Gruppierung)
+
 ---
 
 # 📚 Versionshistorie
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.2 | 2026-10-29 | Schutzgebiete: Filter, Symbole, Wildlife-Namen |
 | 2.1 | 2026-10-29 | Meilenstein „Mehrländriges Lawinenframework“ |
 | 2.0 | 2026-10-29 | Konsolidation: Alpine Risk Intelligence Roadmap + Mountain Radar Toolbox integriert |
 | 1.0 | 2026-10 | Initial Bergbedingungen Roadmap |
