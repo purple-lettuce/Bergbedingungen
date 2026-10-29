@@ -279,7 +279,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 - [x] Regeln im Popup mit Themensymbol und farbigem Rand nach Art der Regel (Verbot, eingeschränkt, erlaubt)
 - [x] Wildlife im Popup als Schilder mit Symbol, Pflanzen und Lebensräume getrennt (Art laut Digitize API)
 - [x] Tiernamen aufgelöst: Verknüpfungs-ID → Schutzgut → Name und Art, an echten Daten geprüft (Details: [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md), Abschnitt 7)
-- [ ] Wildlife-Daten im Repository aktualisiert (Lauf „Schutzgebiete aktualisieren“), siehe Pull Request
+- [x] Wildlife-Daten im Repository aktualisiert (Lauf „Schutzgebiete aktualisieren“ am 29.10.2026: 685 Gebiete mit Wildlife, 187 Namen)
 - [ ] Darstellung der Wildlife-Einträge verbessern (lange Habitatnamen, Gruppierung)
 
 ---
