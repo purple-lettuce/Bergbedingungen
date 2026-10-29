@@ -88,6 +88,39 @@ def test_nothing_resolvable_writes_diagnosis_and_no_names():
     assert out["probe"]["wildlife_sample"] == link[0]
 
 
+def test_links_and_types_are_stored():
+    import tempfile
+    link = [{"id": 11, "protected_area_uuid": "a", "protected_entity_id": 4}, {"id": 12, "protected_area_uuid": "a", "protected_entity_id": 5},
+            {"id": 13, "protected_area_uuid": "b", "protected_entity_id": 4}]
+
+    def fake(url):
+        if url.endswith("/wildlife?fields=all"):
+            return link
+        if url.endswith("/protected-entities?fields=all"):
+            return [{"id": 4, "name_de": "Steinadler", "type": "fauna"}, {"id": 5, "name_de": "Arnika", "type": "FLORA"},
+                    {"id": 6, "name_de": "unbenutzt", "type": "FAUNA"}]
+        return []
+
+    out = run(fake, tempfile, schema=SCHEMA)
+    assert out["links"] == {"11": 4, "12": 5, "13": 4}, out["links"]
+    assert out["entities"] == {"4": "Steinadler", "5": "Arnika"}
+    assert out["types"] == {"4": "FAUNA", "5": "FLORA"}          # nur benötigte Schutzgüter, Art groß geschrieben
+
+
+def test_types_never_taken_from_link_rows():
+    import tempfile
+    # Die id eines Verknüpfungseintrags ist keine Schutzgut-Kennung: ein type dort darf nicht als Art von Schutzgut 11 gelten
+    link = [{"id": 11, "protected_area_uuid": "a", "protected_entity_id": 4, "type": "FLORA", "name_de": "Steinadler"}]
+    out = run(lambda url: link if url.endswith("/wildlife?fields=all") else [], tempfile, schema=SCHEMA)
+    assert out["entities"] == {"4": "Steinadler"} and out["types"] == {}
+
+
+def test_collect_types_nested_object_with_own_id():
+    types = {}
+    fw.collect_types(types, [{"id": 9, "protected_entity": {"id": 4, "name_de": "Gams", "type": "FAUNA"}}])
+    assert types == {4: "FAUNA"}
+
+
 def run(fake_fetch_all, tempfile, schema=None):
     import json
     with tempfile.TemporaryDirectory() as d:

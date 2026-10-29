@@ -1,6 +1,6 @@
-// Bedienfeld "Karten & Layer": die einzige Stelle für Kartenstil, Ebenen und Legenden.
+// Bedienfeld "Karten & Layer": die einzige Stelle für Kartenstil, Ebenen, Filter und Legenden.
 // Alles wird per Klick bedient (kein Hover), auch auf Touchgeräten. Das Feld kennt keine Fachlogik:
-// Ebenen, Kartenstile und Legenden werden in js/layers.js eingetragen.
+// Ebenen, Kartenstile, Filter und Legenden werden in js/layers.js eingetragen.
 
 var MOBILE_QUERY = '(max-width: 820px)';   // wie im Stylesheet: Seitenleiste unter der Karte
 var counter = 0;
@@ -65,7 +65,7 @@ export function createLayerPanel(map) {
     return input;
   }
 
-  // Reihenfolge der Abschnitte: Layer, Kartenstil, danach die Legenden in der Reihenfolge ihrer Anmeldung.
+  // Reihenfolge der Abschnitte: Layer, Kartenstil, danach Filter und Legenden in der Reihenfolge ihrer Anmeldung.
   var layerList = make('ul', 'kl-options');
   addSection('Layer', true).appendChild(layerList);
   var styleList = make('ul', 'kl-options');
@@ -117,6 +117,86 @@ export function createLayerPanel(map) {
         setContent: function (c) {
           if (typeof c === 'string') inner.innerHTML = c;
           else inner.replaceChildren(c);
+        }
+      };
+    },
+
+    // Filter zu einer Ebene als eingeklappter Abschnitt mit einem Schalter je Eintrag (Kategorie, Art, ...).
+    // Das Feld hält keinen Zustand außer den Schaltern selbst und kennt die Fachlogik nicht: Bei jeder Änderung
+    // ruft es onChange(id, an) auf. Gibt { setMessage(text), setItems(items, onChange) } zurück;
+    // items = [{ id, label, count?, swatch? (DOM-Knoten) }], zu Beginn sind alle Einträge an.
+    addFilter: function (title, layer) {
+      var content = addSection(title, false);
+      if (layer) {
+        var hint = make('p', 'kl-off muted');
+        hint.textContent = 'Diese Ebene ist ausgeblendet. Der Filter gilt, sobald sie unter „Layer“ eingeschaltet wird.';
+        content.appendChild(hint);
+        var syncHint = function () { hint.hidden = map.hasLayer(layer); };
+        syncHint();
+        layer.on('add remove', syncHint);
+      }
+      var inner = make('div', 'kl-filter');
+      content.appendChild(inner);
+      return {
+        element: inner,
+        setMessage: function (text) {
+          var p = make('p', 'muted');
+          p.textContent = text;
+          inner.replaceChildren(p);
+        },
+        setItems: function (items, onChange) {
+          var bar = make('div', 'kl-filter-bar');
+          var status = make('span', 'kl-filter-status muted');
+          status.setAttribute('role', 'status');
+          var all = make('button', 'kl-link');
+          all.type = 'button';
+          all.textContent = 'Alle';
+          var none = make('button', 'kl-link');
+          none.type = 'button';
+          none.textContent = 'Keine';
+          bar.appendChild(status);
+          bar.appendChild(all);
+          bar.appendChild(none);
+          var list = make('ul', 'kl-options');
+          var inputs = [];
+
+          function updateStatus() {
+            var n = inputs.filter(function (i) { return i.input.checked; }).length;
+            status.textContent = n === inputs.length ? 'Alle ' + n + ' sichtbar' : n + ' von ' + inputs.length + ' sichtbar';
+          }
+          items.forEach(function (item) {
+            var li = make('li');
+            var lab = make('label', 'kl-opt');
+            var input = make('input');
+            input.type = 'checkbox';
+            input.checked = true;
+            lab.appendChild(input);
+            if (item.swatch) lab.appendChild(item.swatch);
+            var text = make('span', 'kl-opt-label');
+            text.textContent = item.label;
+            lab.appendChild(text);
+            if (item.count !== undefined) {
+              var count = make('span', 'kl-count');
+              count.textContent = '(' + item.count + ')';
+              lab.appendChild(count);
+            }
+            li.appendChild(lab);
+            list.appendChild(li);
+            input.addEventListener('change', function () { updateStatus(); onChange(item.id, input.checked); });
+            inputs.push({ id: item.id, input: input });
+          });
+          function setAll(on) {
+            inputs.forEach(function (i) {
+              if (i.input.checked === on) return;
+              i.input.checked = on;
+              onChange(i.id, on);
+            });
+            updateStatus();
+          }
+          all.addEventListener('click', function () { setAll(true); });
+          none.addEventListener('click', function () { setAll(false); });
+          updateStatus();
+          inner.replaceChildren(bar, list);
         }
       };
     }

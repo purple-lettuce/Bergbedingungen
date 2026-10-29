@@ -28,6 +28,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Tests
+        run: |
+          python3 scripts/test_fetch_wildlife.py
+          python3 scripts/test_build_geojson.py
+
       - name: Wildlife-Namen auflösen
         run: |
           python3 scripts/fetch_wildlife.py | tee wildlife.log

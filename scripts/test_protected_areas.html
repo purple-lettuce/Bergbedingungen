@@ -1,0 +1,220 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests Schutzgebiete (Symbole, Popup, Filter)</title>
+<pre id="result">läuft …</pre>
+<div id="map" style="width:400px;height:300px"></div>
+<script src="../vendor/leaflet/leaflet.js"></script>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import { wildlifeIcon, ruleInfo, splitSeason } from '../js/popup_icons.js';
+import { extraPopupHtml, areaPopup, WILDLIFE_SHOWN } from '../js/protected_areas_popup.js';
+import { createCategoryFilter, bindCategoryFilter } from '../js/protected_areas_filter.js';
+import { createLayerPanel } from '../js/layer_panel.js';
+
+var results = [];
+var queue = [];
+function test(name, fn) { queue.push({ name: name, fn: fn }); }
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function ok(cond, msg) { if (!cond) throw new Error(msg); }
+
+// ---------- Symbole ----------
+
+test('wildlifeIcon: Art der Datenquelle hat Vorrang, Tiere nach dem Wortende', function () {
+  eq(wildlifeIcon('Arnika', 'FLORA'), '🌿'); eq(wildlifeIcon('Hochmoore', 'HABITAT'), '🏞️');
+  eq(wildlifeIcon('Hirschzunge', 'FLORA'), '🌿');                       // Pflanze mit "Hirsch" im Namen
+  eq(wildlifeIcon('Rothirsch', 'FAUNA'), '🦌'); eq(wildlifeIcon('Birkhuhn'), '🐔'); eq(wildlifeIcon('Steinadler'), '🦅');
+  eq(wildlifeIcon('Zwergfledermaus'), '🦇'); eq(wildlifeIcon('Gämse'), '🐐'); eq(wildlifeIcon('Uhu'), '🦉');
+  eq(wildlifeIcon('Alpenschneehuhn'), '🐔'); eq(wildlifeIcon('Schneehase'), '🐇'); eq(wildlifeIcon('Kreuzotter'), '🐍');
+});
+
+test('wildlifeIcon: keine Fehlgriffe durch Wortteile, Unbekanntes bleibt neutral', function () {
+  eq(wildlifeIcon('Atlantische Kegelrobbe'), '🦭');                      // enthält "egel", ist aber kein Egel
+  eq(wildlifeIcon('Braunkehlchen'), '🐦');                               // enthält "unke", ist aber keine Unke
+  eq(wildlifeIcon('Austernfischer'), '🦆');                              // enthält "fisch", ist aber kein Fisch
+  eq(wildlifeIcon('Hasel'), '🐟');                                       // Fisch, kein Hase
+  eq(wildlifeIcon('Augsburger Bär'), '🐾');                              // Nachtfalter, kein Bär
+  eq(wildlifeIcon('Nachtkerzenschwärmer'), '🐾'); eq(wildlifeIcon(''), '🐾'); eq(wildlifeIcon(null), '🐾'); eq(wildlifeIcon(undefined, 'XYZ'), '🐾');
+  eq(wildlifeIcon('Fischotter'), '🦦'); eq(wildlifeIcon('Alpen-Ringelspinner'), '🦋');
+});
+
+test('ruleInfo: Thema und Art aus dem Wortlaut, Text unverändert', function () {
+  eq(ruleInfo('Hunde sind verboten.'), { icon: '🐕', kind: 'ban' });
+  eq(ruleInfo('Für Hunde gilt Leinenpflicht.'), { icon: '🐕', kind: 'limit' });
+  eq(ruleInfo('Reiten ist nur auf ausgewiesenen Wegen erlaubt.'), { icon: '🐴', kind: 'limit' });
+  eq(ruleInfo('Bespannte Fahrzeuge (Kutschen) sind verboten.'), { icon: '🐴', kind: 'ban' });
+  eq(ruleInfo('Kraftfahrzeuge sind verboten.'), { icon: '🚗', kind: 'ban' });
+  eq(ruleInfo('Betreten des Gebietes ist vom 1. November bis zum 15. Mai verboten. (01.11.–15.05.)'), { icon: '🥾', kind: 'ban' });
+  eq(ruleInfo('Zelten ist erlaubt.').kind, 'allow'); eq(ruleInfo('Etwas ganz anderes.'), { icon: '📌', kind: 'info' });
+});
+
+test('splitSeason: Zeitraum am Ende getrennt, sonst unverändert', function () {
+  eq(splitSeason('Betreten verboten. (01.12.–30.04.)'), { main: 'Betreten verboten.', season: '(01.12.–30.04.)' });
+  eq(splitSeason('Ohne Zeitraum.'), { main: 'Ohne Zeitraum.', season: '' });
+});
+
+test('echte Regeltexte: jede Regel bekommt Symbol und Art', async function () {
+  var g = await (await fetch('../data/protected_areas_alps.geojson')).json();
+  ok(g.rule_texts.length > 100, 'Regeltexte vorhanden');
+  var kinds = {};
+  g.rule_texts.forEach(function (t) {
+    var i = ruleInfo(t);
+    ok(i.icon && ['ban', 'limit', 'allow', 'info'].indexOf(i.kind) !== -1, t);
+    kinds[i.kind] = true;
+  });
+  ok(kinds.ban && kinds.limit, 'Verbote und Einschränkungen kommen vor');
+});
+
+// ---------- Popup ----------
+
+var GEO = {
+  wildlife_names: ['Birkhuhn', 'Arnika', 'Hochmoore', 'Fuchs <b>', 'Gams'],
+  wildlife_types: ['FAUNA', 'FLORA', 'HABITAT', null, 'FAUNA'],
+  rule_texts: ['Hunde sind verboten.', 'Reiten ist nur auf ausgewiesenen Wegen erlaubt. (01.12.–30.04.)']
+};
+
+test('Popup: Tiere unter Wildlife, Pflanzen und Lebensräume getrennt, Regeln mit Symbol und Art', function () {
+  var html = extraPopupHtml({ w: [0, 1, 2, 3, 4], r: [0, 1] }, GEO);
+  var wl = html.indexOf('Wildlife:'), pl = html.indexOf('Pflanzen und Lebensräume:'), ru = html.indexOf('Regeln:');
+  ok(wl !== -1 && pl > wl && ru > pl, 'Reihenfolge Wildlife, Pflanzen, Regeln');
+  ok(html.indexOf('🐔</span>Birkhuhn') !== -1 && html.indexOf('🌿</span>Arnika') !== -1 && html.indexOf('🏞️</span>Hochmoore') !== -1, 'Symbole je Eintrag');
+  ok(html.indexOf('Fuchs &lt;b&gt;') !== -1, 'Namen maskiert');
+  ok(html.indexOf('Fuchs <b>') === -1, 'kein ungeprüftes Markup');
+  ok(html.indexOf('pa-rule ban') !== -1 && html.indexOf('pa-rule limit') !== -1, 'Regeln nach Art');
+  ok(html.indexOf('<span class="pa-season">(01.12.–30.04.)</span>') !== -1, 'Zeitraum in eigener Zeile');
+});
+
+test('Popup: lange Listen gekürzt, Gebiet ohne Angaben bleibt unverändert', function () {
+  var names = [], types = [], idx = [];
+  for (var i = 0; i < 20; i++) { names.push('Tier ' + i); types.push('FAUNA'); idx.push(i); }
+  var html = extraPopupHtml({ w: idx }, { wildlife_names: names, wildlife_types: types });
+  eq(html.split('<li><span class="pa-ico"').length - 1, WILDLIFE_SHOWN); ok(html.indexOf('und 8 weitere') !== -1, 'Rest als „und n weitere“');
+  var p = areaPopup({ name: 'A & B', summary: '<i>x</i>' }, {}, 'Naturpark');
+  eq(p.extra, ''); eq(p.html, '<h3>A &amp; B</h3><p><b>Kategorie:</b> Naturpark</p><p>&lt;i&gt;x&lt;/i&gt;</p>');
+  eq(extraPopupHtml({ w: [0], r: [0] }, {}), '');                          // ältere Datei ohne Tabellen
+});
+
+test('Popup: Datei ohne Arten (wildlife_types fehlt) zeigt alle unter Wildlife', function () {
+  var html = extraPopupHtml({ w: [0, 1] }, { wildlife_names: ['Birkhuhn', 'Arnika'] });
+  ok(html.indexOf('Wildlife:') !== -1 && html.indexOf('Pflanzen und Lebensräume') === -1, 'alle unter Wildlife');
+});
+
+test('echte Daten: Popups aller Gebiete ohne Fehler, Wildlife mit Symbolen vorhanden', async function () {
+  var g = await (await fetch('../data/protected_areas_alps.geojson')).json();
+  var withWildlife = 0, withRules = 0;
+  g.features.forEach(function (f) {
+    var p = areaPopup(f.properties, g, 'X');
+    ok(!/undefined|\[object|null/.test(p.html), 'Rohwert im Popup: ' + f.properties.name);
+    if (p.html.indexOf('pa-chips') !== -1) withWildlife++;
+    if (p.html.indexOf('pa-rules') !== -1) withRules++;
+  });
+  ok(withRules > 1000, 'Regeln im Popup');
+  // Sobald die Daten Tiernamen enthalten (nach dem Lauf „Schutzgebiete aktualisieren“), müssen Gebiete Wildlife zeigen
+  if ((g.wildlife_names || []).length) ok(withWildlife > 100, 'Wildlife im Popup: ' + withWildlife);
+});
+
+// ---------- Filter ----------
+
+function features() {
+  function sq(x) { return { type: 'Polygon', coordinates: [[[x, 47], [x + 0.1, 47], [x + 0.1, 47.1], [x, 47.1], [x, 47]]] }; }
+  return { type: 'FeatureCollection', features: [
+    { type: 'Feature', properties: { category_id: 1, name: 'A' }, geometry: sq(11) },
+    { type: 'Feature', properties: { category_id: 2, name: 'B' }, geometry: sq(11.2) },
+    { type: 'Feature', properties: { category_id: 2, name: 'C' }, geometry: sq(11.4) },
+    { type: 'Feature', properties: { category_id: 20, name: 'D' }, geometry: sq(11.6) }] };
+}
+function build() {
+  var byCat = {};
+  var geo = L.geoJSON(features(), { onEachFeature: function (f, layer) {
+    layer.bindPopup('<b>' + f.properties.name + '</b>');
+    (byCat[f.properties.category_id] = byCat[f.properties.category_id] || []).push(layer);
+  } });
+  return { geo: geo, byCat: byCat };
+}
+
+test('createCategoryFilter: Flächen einer Kategorie aus- und einblenden, Popups bleiben', function () {
+  var b = build(), f = createCategoryFilter(b.geo, b.byCat);
+  eq(b.geo.getLayers().length, 4);
+  eq(f.setVisible(2, false), 2); eq(b.geo.getLayers().length, 2); eq(f.isVisible(2), false);
+  eq(f.setVisible(2, false), 0); eq(b.geo.getLayers().length, 2);          // doppeltes Ausblenden ohne Wirkung
+  eq(f.setVisible(2, true), 2); eq(b.geo.getLayers().length, 4); eq(f.isVisible(2), true);
+  eq(f.setVisible(2, true), 0); eq(b.geo.getLayers().length, 4);           // doppeltes Einblenden fügt nichts doppelt ein
+  ok(b.byCat[2][0].getPopup().getContent() === '<b>B</b>', 'Popup bleibt gebunden');
+  eq(f.setVisible(999, false), 0);                                         // unbekannte Kategorie
+});
+
+test('createCategoryFilter: wirkt auch bei Ebene auf der Karte', function () {
+  var map = L.map('map').setView([47.05, 11.3], 10), b = build(), f = createCategoryFilter(b.geo, b.byCat);
+  b.geo.addTo(map);
+  var n = function () { return document.querySelectorAll('#map path.leaflet-interactive').length; };
+  eq(n(), 4); f.setVisible(1, false); eq(n(), 3); f.setVisible(1, true); eq(n(), 4);
+  map.removeLayer(b.geo); f.setVisible(20, false); map.addLayer(b.geo);    // Filter gilt auch nach Aus- und Einschalten der Ebene
+  eq(n(), 3);
+  map.remove();
+});
+
+test('Bedienfeld: Filterabschnitt mit Schaltern, Alle/Keine und Statuszeile', function () {
+  var host = document.createElement('div');
+  document.body.appendChild(host);
+  host.id = 'panelmap';
+  host.style.cssText = 'width:300px;height:200px';
+  var map = L.map(host).setView([47, 11], 8);
+  var panel = createLayerPanel(map);
+  var layer = L.layerGroup();
+  var sec = panel.addFilter('Filter Test', layer);
+  var content = host.querySelector('.kl-filter');
+  ok(content, 'Abschnitt vorhanden');
+  sec.setMessage('Wird geladen …'); eq(content.textContent, 'Wird geladen …');
+  var calls = [];
+  sec.setItems([{ id: 1, label: 'Eins', count: 3 }, { id: 2, label: 'Zwei', count: 5, swatch: document.createElement('span') }], function (id, on) { calls.push([id, on]); });
+  var boxes = content.querySelectorAll('input[type=checkbox]');
+  eq(boxes.length, 2); ok(boxes[0].checked && boxes[1].checked, 'zu Beginn alle an');
+  eq(content.querySelector('.kl-filter-status').textContent, 'Alle 2 sichtbar');
+  eq(content.querySelectorAll('.kl-count')[1].textContent, '(5)'); eq(content.querySelectorAll('.kl-opt-label')[0].textContent, 'Eins');
+  boxes[0].click(); eq(calls, [[1, false]]); eq(content.querySelector('.kl-filter-status').textContent, '1 von 2 sichtbar');
+  var link = function (t) { return [].slice.call(content.querySelectorAll('.kl-link')).filter(function (b) { return b.textContent === t; })[0]; };
+  link('Keine').click(); eq(calls, [[1, false], [2, false]]);               // nur Änderungen werden gemeldet
+  eq(content.querySelector('.kl-filter-status').textContent, '0 von 2 sichtbar');
+  link('Alle').click(); eq(calls.slice(2), [[1, true], [2, true]]); eq(content.querySelector('.kl-filter-status').textContent, 'Alle 2 sichtbar');
+  var hint = host.querySelector('.kl-off'); ok(hint && !hint.hidden, 'Hinweis bei ausgeblendeter Ebene');
+  map.addLayer(layer); ok(hint.hidden, 'Hinweis weg, sobald die Ebene sichtbar ist');
+  var title = [].slice.call(host.querySelectorAll('.kl-toggle')).filter(function (b) { return b.textContent === 'Filter Test'; })[0];
+  eq(title.getAttribute('aria-expanded'), 'false');                          // zunächst eingeklappt
+  map.remove(); host.remove();
+});
+
+test('Bedienfeld: Texte der Filtereinträge werden nicht als HTML gesetzt', function () {
+  var host = document.createElement('div');
+  document.body.appendChild(host);
+  var map = L.map(host).setView([47, 11], 8);
+  var sec = createLayerPanel(map).addFilter('F', null);
+  sec.setItems([{ id: 1, label: '<img src=x onerror=alert(1)>', count: 1 }], function () {});
+  eq(host.querySelectorAll('.kl-filter img').length, 0); ok(host.querySelector('.kl-opt-label').textContent.indexOf('<img') === 0, 'Text');
+  map.remove(); host.remove();
+});
+
+test('bindCategoryFilter: Schalter steuern die Karte über createCategoryFilter', function () {
+  var host = document.createElement('div');
+  document.body.appendChild(host);
+  var map = L.map(host).setView([47, 11], 8);
+  var sec = createLayerPanel(map).addFilter('F', null);
+  var b = build();
+  var entries = [{ id: 1, label: 'N', count: 1, style: { color: '#145a32', fillColor: '#1e8449', fillOpacity: 0.25 } },
+    { id: 2, label: 'M', count: 2, style: { color: '#1b5e20', fillColor: '#43a047', fillOpacity: 0.2 } }];
+  bindCategoryFilter(sec, b.geo, b.byCat, entries);
+  var boxes = host.querySelectorAll('.kl-filter input');
+  boxes[1].click(); eq(b.geo.getLayers().length, 2); boxes[1].click(); eq(b.geo.getLayers().length, 4);
+  var sw = host.querySelector('.kl-filter .pa-sw'); ok(sw && sw.querySelector('i'), 'Farbfeld'); eq(sw.style.borderColor !== '', true);
+  map.remove(); host.remove();
+});
+
+(async function run() {
+  for (var t of queue) {
+    try { await t.fn(); results.push({ name: t.name, ok: true }); } catch (e) { results.push({ name: t.name, ok: false, error: String(e.message || e) }); }
+  }
+  var failed = results.filter(function (r) { return !r.ok; });
+  document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+})();
+</script>
