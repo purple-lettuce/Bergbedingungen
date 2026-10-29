@@ -236,11 +236,13 @@ data/avalanche/slf_regions.geojson
 
 **Details:** Siehe [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md)
 
-**Gemeinsame Pipeline:** Alle Lawinenquellen durchlaufen gemeinsames Datenmodell:
+**Gemeinsame Pipeline:** Alle Lawinenquellen durchlaufen dasselbe Datenmodell, siehe Abschnitt „Gemeinsame Lawinen-Pipeline“ und [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md):
 ```
-scripts/avalanche_sources.py      (Registry der Quellen)
+scripts/avalanche_providers.py     (Provider je Quelle)
+scripts/avalanche_sources.py       (Registry der Provider)
 scripts/avalanche_model.py         (Normalisierung)
-scripts/fetch_avalanche.py         (Abruf und Schreiben)
+scripts/avalanche_schema.py        (Standardmodell, GeoJSON-Schema)
+scripts/fetch_avalanche.py         (zentrale Pipeline)
 scripts/test_avalanche_model.py    (Tests)
 data/avalanche/index.json          (Verzeichnis für Frontend)
 ```
@@ -919,15 +921,18 @@ Siehe [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 3.
 
 # Gemeinsame Lawinen-Pipeline
 
-Alle Lawinenquellen laufen durch dieselbe Pipeline und dasselbe Datenmodell (Schema `mountain-radar/avalanche/1`, Beschreibung in [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 6).
+Alle Lawinenquellen laufen durch dieselbe Pipeline und dasselbe Datenmodell (Schema `mountain-radar/avalanche/2`). Architektur, Provider-Konzept, Datenmodell, GeoJSON-Schema und die Anleitung für neue Länder: [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md). Befunde zu den Daten: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md).
 
 ```text
-scripts/avalanche_sources.py      Registry der Quellen (neues Land = ein Eintrag)
+scripts/avalanche_providers.py    Provider je Quelle (AvalancheProvider, CaamlV6Provider, AlbinaProvider, SLFProvider)
+scripts/avalanche_sources.py      Registry der Provider (neues Land = eine Klasse + eine Zeile)
 scripts/avalanche_model.py        Normalisierung CAAML v6 -> gemeinsames Modell, Geometrie, Symbolposition
-scripts/fetch_avalanche.py        Abruf und Schreiben (data/avalanche/)
+scripts/avalanche_schema.py       Standardmodell je Region, GeoJSON-Schema, Prüfung
+scripts/fetch_avalanche.py        zentrale Pipeline: Abruf über die Provider, Prüfung, Schreiben (data/avalanche/)
 scripts/test_avalanche_model.py   Tests des Modells
-scripts/test_fetch_avalanche.py   Tests des Abrufs (Netzwerk simuliert)
-scripts/test_avalanche_logic.html JavaScript-Tests, ausgeführt mit scripts/run_js_tests.py
+scripts/test_fetch_avalanche.py   Tests der Pipeline (Netzwerk simuliert)
+scripts/test_avalanche_framework.py  Tests von Standardmodell, GeoJSON-Schema und Provider-Vertrag
+scripts/test_avalanche_logic.html, scripts/test_avalanche_frontend.html  JavaScript-Tests, ausgeführt mit scripts/run_js_tests.py
 data/avalanche/index.json         Verzeichnis der Quellen für das Frontend
 ```
 

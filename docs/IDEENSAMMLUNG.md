@@ -361,6 +361,8 @@ Status:
 
 💡 Idee
 
+Technische Anbindung vorbereitet: Archiv der Bulletins und Unfallquellen nach dem Provider-Muster, siehe [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md), Abschnitt 12.
+
 ---
 
 ## Unfallhistorie einer Region

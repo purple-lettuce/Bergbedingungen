@@ -92,7 +92,8 @@ Die Dokumentation des Projekts liegt im Ordner [docs/](docs/):
 
 ### Fachliche Analysen
 
-- **[docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md)** — Lawinenlage Euregio und Schweiz: Quellen, API-Endpunkte, Höhenanalyse, gemeinsames Datenmodell, Empfehlungen für weitere Länder
+- **[docs/AVALANCHE_ARCHITECTURE.md](docs/AVALANCHE_ARCHITECTURE.md)** — Lawinen-Framework: Datenfluss, Provider-Konzept, Standardmodell, GeoJSON-Schema, Anleitung für neue Länder
+- **[docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md)** — Lawinenlage Euregio und Schweiz: Quellen, API-Endpunkte, Höhenanalyse, Befunde, Empfehlungen für weitere Länder
 - **[docs/WILDLIFE_ANALYSE.md](docs/WILDLIFE_ANALYSE.md)** — Wildlife-Daten: Tiernamen-Auflösung, Datenquellen, Lösungswege
 - **[docs/RECHERCHE_LAWINEN.md](docs/RECHERCHE_LAWINEN.md)** — Recherche zu Lawinen- und Risikodaten
 
@@ -132,8 +133,8 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/protected_areas_alps.geojson` | kompaktes GeoJSON für Schutzgebiete auf der Karte |
 | `data/wildlife_entities.json` | aufgelöste Namen der Schutzgüter (Kennung → Name), nur aus der Digitize API |
 | `data/wildlife_probe.json` | Diagnosebericht der Wildlife-Auflösung (was die API geliefert hat, was fehlt) |
-| `scripts/avalanche_sources.py`, `scripts/avalanche_model.py`, `scripts/fetch_avalanche.py` | Lawinenlage-Pipeline: Registry der Quellen, gemeinsames Datenmodell, Abruf |
-| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_logic.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage (Python und JavaScript im Headless-Browser) |
+| `scripts/avalanche_providers.py`, `scripts/avalanche_sources.py`, `scripts/avalanche_model.py`, `scripts/avalanche_schema.py`, `scripts/fetch_avalanche.py` | Lawinen-Framework: Provider je Quelle, Registry, Normalisierung, Standardmodell und GeoJSON-Schema, zentrale Pipeline ([docs/AVALANCHE_ARCHITECTURE.md](docs/AVALANCHE_ARCHITECTURE.md)) |
+| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage (Python und JavaScript im Headless-Browser) |
 | `data/avalanche/` | Lawinenlage: `index.json`, je Quelle `<id>.json` (Bulletins) und `<id>_regions.geojson` (Polygone) für `euregio` und `slf` |
 | `vendor/albina/` | offizielle ALBINA-Symbole (Gefahrenstufen, Lawinenprobleme), Herkunft in `vendor/albina/README.md` |
 
@@ -153,13 +154,18 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`) |
 | `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil und einklappbare Legenden, alles per Klick, ohne Fachlogik |
 | `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
-| `js/avalanche.js` | Lawinenlage aller Quellen: Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Popup mit Lagebericht, Höhenwahl; lädt erst beim ersten Einblenden |
-| `js/avalanche_legend.js` | Legende der Lawinenlage mit Berichtsstatus je Quelle, Stufenfarben, Höhenwahl und Namensnennung (Abschnitt im Bedienfeld „Karten & Layer“) |
-| `js/avalanche_logic.js` | reine Logik ohne DOM und Leaflet auf dem gemeinsamen Datenmodell: Gefahrenstufe je Höhe, Teilstufen, Gültigkeit, Gruppierung, deutsche Bezeichnungen (getestet mit `scripts/run_js_tests.py`) |
+| `js/avalanche.js` | Lawinenlage aller Quellen (Karte): Datensatz je Region aufbauen, Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Höhenwahl; lädt erst beim ersten Einblenden |
+| `js/avalanche_popup.js` | dieselbe Popup-Komponente für jede Quelle: Lagebericht aus einem Regionsdatensatz, rein (ohne DOM und Leaflet) |
+| `js/avalanche_symbols.js` | gemeinsames Symbolmodell: Gefahrenstufen, Expositionen, Lawinenprobleme, Gefahrenmuster, Höhenangaben, Piktogramme, deutsche Bezeichnungen |
+| `js/avalanche_model.js` | Regionsdatensatz im Browser (Standardmodell aus Polygon-Properties und Bulletin) |
+| `js/html.js` | HTML-Maskierung `esc` ohne Abhängigkeiten (`map.js` exportiert sie weiter) |
+| `js/avalanche_legend.js` | Legende der Lawinenlage mit Berichtsstatus je Quelle, Stufenfarben, Höhenwahl, Hinweisen und Namensnennung (Abschnitt im Bedienfeld „Karten & Layer“) |
+| `js/avalanche_logic.js` | reine Logik ohne DOM und Leaflet auf dem Regionsdatensatz: Gefahrenstufe je Höhe, Gültigkeit, Gruppierung, Link zum Lagebericht (getestet mit `scripts/run_js_tests.py`) |
 
 Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` und
-`protected_areas.js` → `map.js`; `avalanche.js` → `map.js`, `avalanche_legend.js`, `avalanche_logic.js`;
-`avalanche_legend.js` → `map.js`, `layers.js`, `avalanche_logic.js`; `layers.js` → `map.js`, `layer_panel.js`; die Legendenmodule `protected_areas_legend.js` und `closures_legend.js` → `layers.js`. `map.js`, `layer_panel.js` und `avalanche_logic.js` hängen von keiner
+`protected_areas.js` → `map.js`; `avalanche.js` → `map.js`, `html.js`, `avalanche_legend.js`, `avalanche_symbols.js`, `avalanche_logic.js`, `avalanche_model.js`, `avalanche_popup.js`;
+`avalanche_popup.js` → `html.js`, `avalanche_symbols.js`, `avalanche_logic.js`; `avalanche_symbols.js` → `html.js`;
+`avalanche_legend.js` → `html.js`, `layers.js`, `avalanche_logic.js`, `avalanche_symbols.js`; `layers.js` → `map.js`, `layer_panel.js`; die Legendenmodule `protected_areas_legend.js` und `closures_legend.js` → `layers.js`. `map.js` → `html.js`. `html.js`, `layer_panel.js`, `avalanche_logic.js` und `avalanche_model.js` hängen von keiner
 anderen Datei ab.
 
 Hinweis: Wegen der Module muss die Seite über einen Webserver (zum Beispiel GitHub Pages) geöffnet
@@ -213,13 +219,13 @@ static.avalanche.report (CAAML v6)  aws.slf.ch (CAAML v6, V4)  eaws-regions (Pol
   -> js/avalanche.js
 ```
 
-**Ein System für mehrere Länder:** Beide Dienste liefern CAAML v6 und werden auf dasselbe Datenmodell abgebildet (Beschreibung und Felder: [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md)). Ein neues Land ist ein Eintrag in `scripts/avalanche_sources.py`, Frontend und Workflow bleiben unverändert. Empfehlungen für Frankreich, Italien und Slowenien stehen in der Analyse, Abschnitt 9.
+**Ein System für mehrere Länder:** Jede Quelle ist ein Provider (eine Klasse in `scripts/avalanche_providers.py`) und wird auf dasselbe Standardmodell und GeoJSON-Schema abgebildet, geprüft in der Pipeline. Das Frontend kennt keine Quelle: ein Regionsdatensatz, ein Popup, ein Symbolmodell. Ein neues Land ist eine Provider-Klasse und eine Zeile in `scripts/avalanche_sources.py`, Frontend und Workflow bleiben unverändert. Architektur, Datenmodell, GeoJSON-Schema und Anleitung für neue Länder: [docs/AVALANCHE_ARCHITECTURE.md](docs/AVALANCHE_ARCHITECTURE.md). Befunde zu den Daten und Empfehlungen für Frankreich, Italien und Slowenien: [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md).
 
 **Höhenabhängige Gefahrenstufen:** Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich. Die Karte färbt wie die offiziellen Karten nach der **höchsten** Stufe. Das Popup zeigt die Höhenaufteilung: bei Euregio aus den Gefahrenstufen (mit offiziellem Piktogramm), bei der Schweiz aus den Lawinenproblemen, weil der SLF seine Gefahrenstufen ohne Höhengrenze angibt. Die Legende erlaubt eine Höhenwahl, die nur bei Quellen mit Höhe in den Gefahrenstufen (Euregio) wirkt.
 
 **Außerhalb der Saison:** Nach Ablauf eines Berichts werden die Regionen grau ohne Gefahrenstufe dargestellt, ein alter Bericht wird nie als aktuell gezeigt. Der Euregio-Bericht ist der letzte des Winters 2025/26, der SLF liefert derzeit keinen aktiven Bericht.
 
-**Daten erzeugen:** Reiter **Actions** → **Lawinenlage aktualisieren** → **Run workflow**. Lokal: `python3 scripts/fetch_avalanche.py [euregio|slf]`. Tests: `python3 scripts/test_avalanche_model.py`, `python3 scripts/test_fetch_avalanche.py` und, mit installiertem Chrome oder Edge, `python3 scripts/run_js_tests.py`.
+**Daten erzeugen:** Reiter **Actions** → **Lawinenlage aktualisieren** → **Run workflow**. Lokal: `python3 scripts/fetch_avalanche.py [euregio|slf]`. Tests: `python3 scripts/test_avalanche_model.py`, `python3 scripts/test_fetch_avalanche.py`, `python3 scripts/test_avalanche_framework.py` und, mit installiertem Chrome oder Edge, `python3 scripts/run_js_tests.py`.
 
 **Namensnennung (CC BY 4.0):** Euregio-Lawinenwarndienste und WSL-Institut für Schnee- und Lawinenforschung SLF (Link auf www.slf.ch) stehen in Legende, Popup, Kartenquellenangabe und Seitenfuß. Der Browser fragt die Dienste nie direkt ab, das SLF verlangt das für seine Schnittstellen.
 

@@ -5,6 +5,7 @@
 <script type="module">
 // Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
 import * as A from '../js/avalanche_logic.js';
+import * as S from '../js/avalanche_symbols.js';
 
 var results = [];
 function test(name, fn) {
@@ -35,10 +36,10 @@ test('bulletinStatus: gültig, kürzlich abgelaufen, abgelaufen', function () {
 });
 
 test('levelLabel und ratingText mit Teilstufen', function () {
-  eq(A.levelLabel(3, 'plus'), '3+'); eq(A.levelLabel(3, 'neutral'), '3='); eq(A.levelLabel(4, 'minus'), '4-');
-  eq(A.levelLabel(2, undefined), '2'); eq(A.levelLabel(null, 'plus'), '');
-  eq(A.ratingText({ level: 3, subdivision: 'plus' }), 'Stufe 3+ – Erheblich');
-  eq(A.ratingText({ level: null, value: 'no_snow' }), 'Kein Schnee');
+  eq(S.levelLabel(3, 'plus'), '3+'); eq(S.levelLabel(3, 'neutral'), '3='); eq(S.levelLabel(4, 'minus'), '4-');
+  eq(S.levelLabel(2, undefined), '2'); eq(S.levelLabel(null, 'plus'), '');
+  eq(S.ratingText({ level: 3, subdivision: 'plus' }), 'Stufe 3+ – Erheblich');
+  eq(S.ratingText({ level: null, value: 'no_snow' }), 'Kein Schnee');
 });
 
 test('ratingCoverage: Grenzen, Waldgrenze unbekannt', function () {
@@ -78,10 +79,10 @@ test('levelAtAltitude: kein Schnee ergibt null', function () {
 });
 
 test('elevationLabel und elevationWhere', function () {
-  eq(A.elevationLabel(undefined), 'Alle Höhenlagen'); eq(A.elevationLabel({ lower_bound: 2200 }), 'Über 2200 m');
-  eq(A.elevationLabel({ upper_bound: 1800 }), 'Unter 1800 m'); eq(A.elevationLabel({ lower_bound: 'treeline' }), 'Über der Waldgrenze');
-  eq(A.elevationLabel({ upper_bound: 'treeline' }), 'Unter der Waldgrenze'); eq(A.elevationLabel({ lower_bound: 1800, upper_bound: 2400 }), 'Zwischen 1800 m und 2400 m');
-  eq(A.elevationWhere(undefined), 'all'); eq(A.elevationWhere({ lower_bound: 1 }), 'above'); eq(A.elevationWhere({ upper_bound: 1 }), 'below'); eq(A.elevationWhere({ lower_bound: 1, upper_bound: 2 }), 'middle');
+  eq(S.elevationLabel(undefined), 'Alle Höhenlagen'); eq(S.elevationLabel({ lower_bound: 2200 }), 'Über 2200 m');
+  eq(S.elevationLabel({ upper_bound: 1800 }), 'Unter 1800 m'); eq(S.elevationLabel({ lower_bound: 'treeline' }), 'Über der Waldgrenze');
+  eq(S.elevationLabel({ upper_bound: 'treeline' }), 'Unter der Waldgrenze'); eq(S.elevationLabel({ lower_bound: 1800, upper_bound: 2400 }), 'Zwischen 1800 m und 2400 m');
+  eq(S.elevationWhere(undefined), 'all'); eq(S.elevationWhere({ lower_bound: 1 }), 'above'); eq(S.elevationWhere({ upper_bound: 1 }), 'below'); eq(S.elevationWhere({ lower_bound: 1, upper_bound: 2 }), 'middle');
 });
 
 test('bandGroups: Piktogramm bei Teilung an derselben Grenze, sonst keines', function () {

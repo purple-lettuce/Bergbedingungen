@@ -31,6 +31,7 @@ jobs:
         run: |
           python3 scripts/test_avalanche_model.py
           python3 scripts/test_fetch_avalanche.py
+          python3 scripts/test_avalanche_framework.py
 
       - name: Lawinenlage abrufen
         id: fetch

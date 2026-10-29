@@ -202,8 +202,9 @@ Details finden sich in DATENQUELLEN.md (Abschnitt 11. TOOLBOX-DATENQUELLEN).
 ### Phase 2 — Status: IN PROGRESS
 - [x] ALBINA CAAML-Parser
 - [x] SLF CAAML-Parser
+- [x] Mehrländriges Lawinenframework (siehe Technische Meilensteine)
 - [ ] GeoSphere API Integration
-- [ ] Lawinenlage-Visualisierung
+- [ ] Lawinenlage-Visualisierung: Euregio und Schweiz umgesetzt, Test mit aktuellen Berichten ab Saisonstart 2026/27 offen
 - [ ] Tourenwarnungen-Logik
 - [ ] Website Wetter-am-Punkt erweitert
 
@@ -253,8 +254,24 @@ Aus dieser Roadmap können neue Arbeitspakete abgeleitet werden:
 
 **Phase 4+ Arbeitspakete:**
 - AP-4.1: Mobile App Sensor Integration
-- AP-4.2: Internationale Lawinenlage
+- AP-4.2: Internationale Lawinenlage (je Land ein Provider, Anleitung in AVALANCHE_ARCHITECTURE.md)
 - AP-5.1: Alpine Risk Engine (GA) & Community
+
+---
+
+# 🏗️ Technische Meilensteine
+
+## Mehrländriges Lawinenframework ✅
+
+Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md).
+
+- [x] Provider-Architektur: `AvalancheProvider`, `CaamlV6Provider`, `AlbinaProvider`, `SLFProvider`, Registry; ein neues Land ist eine Klasse und eine Zeile
+- [x] Standardmodell je Region (Quelle, Land, Region, Geometrie, Zeiten, Gefahrenstufen, Höhengrenzen, Lawinenprobleme, Expositionen, Gefahrenmuster, Kernaussage, Bulletintext) mit Schema-Prüfung in der Pipeline
+- [x] Standardisiertes GeoJSON (Schema `mountain-radar/avalanche/2`), identische Properties für jede Quelle
+- [x] Quellenunabhängiges Frontend: ein Regionsdatensatz, ein Popup, ein Symbolmodell (Gefahrenstufen, Expositionen, Lawinenprobleme, Gefahrenmuster), kein Quellenbezug im Code (per Test geprüft)
+- [x] Euregio und Schweiz ohne Änderung der Bulletin-Daten migriert, GitHub Action unverändert, Tests erweitert
+- [ ] Weitere Länder (Frankreich, Italien, Slowenien, übrige Bundesländer) als Provider, Lizenzen vorher klären
+- [ ] Archiv der Bulletins (historische Lawinenlage), Lawinenunfälle, Risikobewertung, GPX-Tourenanalyse und KI-Auswertung auf Basis des Standardmodells (Konzept: Architektur, Abschnitt 12)
 
 ---
 
@@ -262,6 +279,7 @@ Aus dieser Roadmap können neue Arbeitspakete abgeleitet werden:
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.1 | 2026-10-29 | Meilenstein „Mehrländriges Lawinenframework“ |
 | 2.0 | 2026-10-29 | Konsolidation: Alpine Risk Intelligence Roadmap + Mountain Radar Toolbox integriert |
 | 1.0 | 2026-10 | Initial Bergbedingungen Roadmap |
 
@@ -274,4 +292,5 @@ Diese Roadmap ist Teil eines größeren Dokumentationssystems:
 - **DATENQUELLEN.md** — Vollständiger Katalog aller Datenquellen (15+) mit URLs, Lizenzen und Phasen
 - **docs/WORKFLOW.md** — Entwicklungs-Workflow und Definition of Done
 - **docs/LAWINENLAGE_ANALYSE.md** — Detaillierte Analyse der Lawinenlage-Integration
+- **docs/AVALANCHE_ARCHITECTURE.md** — Lawinen-Framework: Provider, Datenmodell, GeoJSON-Schema, Erweiterung um neue Länder
 - **docs/WILDLIFE_ANALYSE.md** — Analyse und Dokumentation der Wildlife-Daten

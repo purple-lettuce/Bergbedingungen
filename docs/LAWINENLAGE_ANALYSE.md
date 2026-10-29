@@ -4,14 +4,16 @@
 >
 > Dieses Dokument hält fest, was die Datenquellen tatsächlich liefern, welche Entscheidungen daraus folgen und wie die Daten im Projekt fließen. Aussagen sind als **verifiziert** (an echten Daten geprüft), **abgeleitet** (aus dem Quelltext oder der Dokumentation der Anbieter) oder **offen** gekennzeichnet.
 >
-> Zugehörige Dokumente: [DATENQUELLEN.md](DATENQUELLEN.md) (Quellen, Lizenzen), [ROADMAP.md](ROADMAP.md) (Status).
+> Zugehörige Dokumente: [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md) (Framework: Provider, Datenmodell, GeoJSON-Schema, Erweiterung), [DATENQUELLEN.md](DATENQUELLEN.md) (Quellen, Lizenzen), [ROADMAP.md](ROADMAP.md) (Status).
+>
+> **Hinweis:** Die technische Beschreibung des Datenmodells und der Pipeline steht seit dem Framework-Umbau in [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md) und ist dort maßgeblich. Die Abschnitte 6, 7 und 9.3 dieses Dokuments sind entsprechend nachgeführt. Dieses Dokument bleibt die Quelle für Befunde an den Daten und Entscheidungen zur Darstellung.
 
 ---
 
 # Ergebnis in Kürze
 
 - Umfang: **Euregio** (Tirol, Südtirol, Trentino, 90 Regionen) und **Schweiz** (SLF, 149 Warnregionen, davon 119 bis 135 mit Bericht je nach Tag).
-- Beide Dienste liefern CAAML v6 nach dem EAWS-Schema. Alle Quellen werden auf **ein gemeinsames Datenmodell** abgebildet, Frontend und Pipeline kennen nur dieses Modell. Ein neues Land ist ein Eintrag in `scripts/avalanche_sources.py`.
+- Beide Dienste liefern CAAML v6 nach dem EAWS-Schema. Alle Quellen werden auf **ein gemeinsames Datenmodell** abgebildet, Frontend und Pipeline kennen nur dieses Modell. Ein neues Land ist eine Provider-Klasse in `scripts/avalanche_providers.py` und eine Zeile in `scripts/avalanche_sources.py`.
 - Die Geometrie kommt für alle Länder aus [eaws-regions](https://gitlab.com/eaws/eaws-regions). Die Polygone der Schweiz dort sind **identisch** mit der Warnregion-API des SLF (149 von 149 Polygonen, gleiche Kennungen `CH-<sector_id>`).
 - **Höhe:** Euregio nennt Höhengrenzen bei den Gefahrenstufen, **SLF nicht** (in 71 von 71 Stufen keine Höhe). Beim SLF steht die Höhe nur bei den Lawinenproblemen, jedes Problem hat dort eine eigene Gefahrenstufe. Eine echte Teilung der Polygone ist bei keiner Quelle möglich. Die Karte färbt nach der **höchsten Stufe**, das Popup zeigt die höhenabhängigen Stufen (Euregio: aus den Gefahrenstufen, Schweiz: aus den Lawinenproblemen, jeweils mit Herkunftshinweis).
 - Abgelaufene Berichte werden nicht als Gefahrenstufe dargestellt. Aktuell ist der Euregio-Bericht der letzte des Winters 2025/26, der SLF-Dienst liefert keinen aktiven Bericht (Saisonpause).
@@ -181,7 +183,7 @@ In beiden Fällen sind die Polygone rein zweidimensional.
 
 # 6. Gemeinsames Datenmodell
 
-Schema `mountain-radar/avalanche/1`. Je Quelle zwei Dateien plus ein Verzeichnis, alles in `data/avalanche/`:
+Schema `mountain-radar/avalanche/2` (löste `/1` ab: einheitliche Property-Namen der Polygon-Datei, `main_date` im Regionsdatensatz). Je Quelle zwei Dateien plus ein Verzeichnis, alles in `data/avalanche/`. Das Standardmodell je Region (Regionsdatensatz, alle Felder, Typen, Regeln) und das GeoJSON-Schema beschreibt [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md), Abschnitte 5 und 6. Hier die Speicherform:
 
 ```text
 data/avalanche/index.json              Verzeichnis der Quellen für das Frontend
@@ -194,7 +196,7 @@ data/avalanche/<id>_regions.geojson    Polygone der Quelle (ändert sich selten)
 ## 6.1 `index.json`
 
 ```json
-{ "schema": "mountain-radar/avalanche/1",
+{ "schema": "mountain-radar/avalanche/2",
   "sources": [ { "id": "slf", "bulletin_file": "slf.json", "regions_file": "slf_regions.geojson" } ] }
 ```
 
@@ -202,10 +204,10 @@ data/avalanche/<id>_regions.geojson    Polygone der Quelle (ändert sich selten)
 
 ```json
 {
-  "schema": "mountain-radar/avalanche/1",
+  "schema": "mountain-radar/avalanche/2",
   "source": { "id": "slf", "name": "SLF Lawinenbulletin Schweiz", "provider": "WSL-Institut für Schnee- und Lawinenforschung SLF",
               "countries": ["CH"], "attribution": "...", "attribution_url": "https://www.slf.ch",
-              "license": "CC BY 4.0", "license_url": "...", "report_url": "...", "report_url_fallback": "...", "bulletin_url": "..." },
+              "license": "CC BY 4.0", "license_url": "...", "report_url": "...", "report_url_fallback": "...", "bulletin_url": "...", "notes": [ "optional, Hinweise für die Legende" ] },
   "generated": "2026-10-29T10:37:56Z",
   "status": "active | no_active_bulletin",
   "reference_date": "2026-03-15",
@@ -236,7 +238,7 @@ Textblöcke: `{ "type": "paragraph", "text": "..." }`, `{ "type": "heading", "le
 
 ## 6.4 Geometrie `<id>_regions.geojson`
 
-`FeatureCollection` mit `source`, `geometry_source`, `geometry_license`. Je Feature `properties` = `{ "id", "country", "label_point": [lon, lat] }` und `MultiPolygon` (nur zum Bulletin-Datum gültige Polygone, Koordinaten auf 5 Nachkommastellen gerundet, entartete Ringe entfernt, sonst keine Vereinfachung).
+`FeatureCollection` mit `schema`, `source`, `geometry_source`, `geometry_license`. Je Feature `properties` = `{ "source", "country", "region_id", "region_name", "label_point": [lon, lat] }` und `MultiPolygon` (nur zum Bulletin-Datum gültige Polygone, Koordinaten auf 5 Nachkommastellen gerundet, entartete Ringe entfernt, sonst keine Vereinfachung). Dieselben Properties für jede Quelle, geprüft in der Pipeline und in den Tests.
 
 ## 6.5 Abbildung auf die geforderten Felder
 
@@ -244,8 +246,8 @@ Textblöcke: `{ "type": "paragraph", "text": "..." }`, `{ "type": "heading", "le
 |---|---|
 | country | `regions[id].country` und `properties.country` (erste zwei Zeichen der EAWS-Kennung) |
 | source | `source.id` der Datei und `bulletin.source`; Lizenz und Namensnennung in `source` |
-| region_id | Schlüssel in `regions`, `properties.id` der Polygone |
-| region_name | `regions[id].name` |
+| region_id | Schlüssel in `regions`, `properties.region_id` der Polygone |
+| region_name | `regions[id].name`, `properties.region_name` der Polygone |
 | geometry | `<id>_regions.geojson` |
 | danger_ratings | `bulletin.danger_ratings` (dazu `danger_by_elevation`, `max_level`) |
 | elevation_thresholds | `bulletin.elevation_thresholds` (Quelle: `danger_ratings` und `avalanche_problems`) |
@@ -272,7 +274,7 @@ flowchart LR
   A["static.avalanche.report<br/>CAAML v6 Euregio"] --> P
   B["aws.slf.ch<br/>CAAML v6 (V4) und Warnregion-Namen"] --> P
   C["gitlab.com/eaws/eaws-regions<br/>Polygone (CC0)"] --> P
-  P["GitHub Action 'Lawinenlage aktualisieren'<br/>scripts/fetch_avalanche.py<br/>avalanche_sources.py, avalanche_model.py"] --> D["data/avalanche/<br/>index.json, euregio.json, slf.json,<br/>euregio_regions.geojson, slf_regions.geojson"]
+  P["GitHub Action 'Lawinenlage aktualisieren'<br/>scripts/fetch_avalanche.py<br/>avalanche_sources.py, avalanche_providers.py,<br/>avalanche_model.py, avalanche_schema.py"] --> D["data/avalanche/<br/>index.json, euregio.json, slf.json,<br/>euregio_regions.geojson, slf_regions.geojson"]
   D --> F["Browser: js/avalanche.js<br/>Layer, Regionssymbole, Popup, Legende"]
 ```
 
@@ -310,17 +312,19 @@ Die Namensnennung steht in der Legende, im Popup, in der Kartenquellenangabe und
 
 1. **Quelle klären, bevor Code entsteht:** Je Land Lizenz und Nutzungsbedingungen des **ursprünglichen Warndienstes** prüfen (Météo-France, AINEVA, ARSO). Die Lizenz von avalanche.report (CC BY 4.0) gilt für ihre eigenen Daten, nicht automatisch für Daten Dritter in `ratings.json`. Das ist offen.
 2. **Schritt 1, nur Gefahrenstufen:** Ein einfacher Normalisierer aus `ratings.json` (Stufe je Region, Hinweis auf den Warndienst und Link) liefert schnell Farben und Symbole für FR, IT und SI im selben Datenmodell (`danger_ratings` mit `level`, sonst nichts). Das Popup zeigt dann ehrlich nur Stufe und Link, keine Probleme oder Texte. Offen: Bedeutung von `high`/`low`/`am`/`pm`. Kennungen vor der Umsetzung abgleichen: Die Polygone für Slowenien in eaws-regions heißen z. B. `SI4`, die Schlüssel der `ratings.json` `SI-10`.
-3. **Schritt 2, vollständige Bulletins:** Jedes Land bekommt einen Eintrag in `scripts/avalanche_sources.py` und, falls der Dienst nicht CAAML v6 liefert, einen Normalisierer in `scripts/avalanche_model.py`. pyAvaCore zeigt, wie die Quellen aufgebaut sind. Wegen GPL-3.0 keinen Code übernehmen, ohne die Lizenz des Projekts zu klären; die Datenformate selbst sind frei lesbar.
+3. **Schritt 2, vollständige Bulletins:** Jedes Land bekommt eine Provider-Klasse in `scripts/avalanche_providers.py` (bei einem Dienst ohne CAAML v6 mit eigenem `parse_bulletins`, Anleitung in [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md), Abschnitt 8). pyAvaCore zeigt, wie die Quellen aufgebaut sind. Wegen GPL-3.0 keinen Code übernehmen, ohne die Lizenz des Projekts zu klären; die Datenformate selbst sind frei lesbar.
 4. **Frankreich:** BRA je Massiv (35 Polygone). **Italien:** AINEVA-Bulletins je Region sowie Meteomont (`IT-MeteoMont`, `IT-34` und weitere Polygon-Dateien in eaws-regions). **Slowenien:** ARSO (Quelle slowenisch, Sprache beachten).
 5. **Sprache:** Das Datenmodell enthält Texte einer Sprache je Quelle. Für mehrsprachige Quellen (SLF liefert de, fr, it, en) entscheidet eine spätere Sprachwahl, ob je Sprache eine Datei entsteht.
 
 ## 9.3 Neue Quelle anlegen (Checkliste)
 
-1. Eintrag in `scripts/avalanche_sources.py` (`id`, `name`, `bulletin_url`, `region_codes`, `geometry_codes`, Lizenz, Namensnennung, `empty_ok`, optional `names_url` mit Parser in `NAME_PARSERS`).
-2. Polygone prüfen: `python3 scripts/fetch_avalanche.py <id>` meldet Regionen ohne Polygon.
-3. Tests ergänzen (`scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`), mit einem echten Bulletin der Quelle als Fixture.
-4. Frontend: keine Änderung nötig, `index.json` führt die Quelle auf. Legende und Popup übernehmen Namen, Lizenz und Status. Der Footer in `index.html` nennt die Quelle von Hand.
-5. Dokumentation: [DATENQUELLEN.md](DATENQUELLEN.md), Abschnitt 3 dieses Dokuments, ROADMAP.
+Die Schritte für ein neues Land stehen in [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md), Abschnitt 8. Kurzfassung:
+
+1. Provider-Klasse in `scripts/avalanche_providers.py` (Metadaten wie `id`, `bulletin_url`, `region_codes`, `geometry_codes`, Lizenz, Namensnennung, `empty_ok`; bei Formaten ohne CAAML v6 zusätzlich `parse_bulletins`, optional `fetch_names`) und eine Zeile in `PROVIDERS` in `scripts/avalanche_sources.py`.
+2. Polygone prüfen: `python3 scripts/fetch_avalanche.py <id>` meldet Regionen ohne Polygon und Verstöße gegen das Schema.
+3. Tests ergänzen (`scripts/test_avalanche_framework.py`, `scripts/test_avalanche_model.py`), mit einem echten Bulletin der Quelle als Fixture.
+4. Frontend: keine Änderung nötig, `index.json` führt die Quelle auf. Legende und Popup übernehmen Namen, Lizenz, Hinweise und Status. Der Footer in `index.html` nennt die Quelle von Hand.
+5. Dokumentation: [DATENQUELLEN.md](DATENQUELLEN.md), [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md) (Abschnitt 10), ROADMAP.
 
 ---
 
@@ -343,7 +347,7 @@ Die Namensnennung steht in der Legende, im Popup, in der Kartenquellenangabe und
 
 # 11. Teststand
 
-- **Pipeline:** `scripts/test_avalanche_model.py` (27 Tests, u. a. echte SLF-Struktur, HTML-Parser, Höhenableitung, Pol der Unzugänglichkeit) und `scripts/test_fetch_avalanche.py` (11 Tests mit simuliertem Netzwerk: Saisonpause, Idempotenz, Ausfall einer Quelle, Heartbeat). Live-Lauf gegen beide Quellen erfolgreich.
-- **JavaScript-Logik:** `scripts/test_avalanche_logic.html`, ausgeführt mit `python3 scripts/run_js_tests.py` in einem Headless-Browser (Chrome oder Edge): 12 Tests. Ein absichtlich eingebauter Fehler wird erkannt.
-- **Frontend im Browser (Headless-Edge, echte Daten):** Mit den archivierten Berichten vom 15.03.2026 beider Dienste und auf diesen Tag gesetzter Browseruhr geprüft: 224 Regionssymbole (90 Euregio, 134 Schweiz), Farben je Stufe, Popups beider Quellen ohne JavaScript-Fehler und ohne Skript-Elemente im Popup, Höhenwahl, die Zustände „gültig“, „abgelaufen, neuer folgt“, „abgelaufen“ und „Quelle ohne aktives Bulletin“ (echter Live-Zustand der SLF-Datei).
+- **Pipeline:** `scripts/test_avalanche_model.py` (27 Tests, u. a. echte SLF-Struktur, HTML-Parser, Höhenableitung, Pol der Unzugänglichkeit), `scripts/test_fetch_avalanche.py` (11 Tests mit simuliertem Netzwerk: Saisonpause, Idempotenz, Ausfall einer Quelle, Heartbeat) und `scripts/test_avalanche_framework.py` (11 Tests: Standardmodell und GeoJSON-Schema für beide Quellen identisch, Prüfung von Abweichungen, neuer Provider ohne CAAML durch die Pipeline). Live-Lauf gegen beide Quellen erfolgreich, auch mit dem archivierten SLF-Bericht vom 15.03.2026 (134 Regionen im Standardschema gültig).
+- **JavaScript:** `scripts/test_avalanche_logic.html` (12 Tests Logik) und `scripts/test_avalanche_frontend.html` (10 Tests: Regionsdatensatz, Popup, Symbolik, kein Quellenbezug im Quellcode), ausgeführt mit `python3 scripts/run_js_tests.py` in einem Headless-Browser (Chrome oder Edge). Ein absichtlich eingebauter Fehler (Verzweigung nach Quelle im Popup) wird erkannt.
+- **Frontend im Browser (Headless-Edge, echte Daten):** Mit den archivierten Berichten vom 15.03.2026 beider Dienste und auf diesen Tag gesetzter Browseruhr geprüft: 224 Regionssymbole (90 Euregio, 134 Schweiz), Farben je Stufe, Popups beider Quellen ohne JavaScript-Fehler und ohne Skript-Elemente im Popup, Höhenwahl, die Zustände „gültig“, „abgelaufen, neuer folgt“, „abgelaufen“ und „Quelle ohne aktives Bulletin“ (echter Live-Zustand der SLF-Datei). Nach dem Framework-Umbau wiederholt (Headless-Edge, Browseruhr auf 15.03.2026, Euregio aus der Repository-Datei, SLF aus dem archivierten Bericht): 224 Regionssymbole, Popups beider Quellen über dieselbe Komponente ohne Fehler und ohne defekte Bilder, Legende mit den Hinweisen aus den Metadaten, Höhenwahl ohne Fehler.
 - **Noch offen:** Der Test mit **aktuellen** Berichten im Winter 2026/27, die Prüfung auf echten Mobilgeräten und die Prüfung der Stufen 4 und 5 bei Euregio. Die Screenshots in `docs/screenshots/` stammen aus den archivierten Berichten vom 15.03.2026.

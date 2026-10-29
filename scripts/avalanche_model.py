@@ -8,10 +8,9 @@ max_level, danger_by_elevation und elevation_thresholds. Fehlende Felder bleiben
 """
 import heapq
 import math
-import re
 from html.parser import HTMLParser
 
-SCHEMA = "mountain-radar/avalanche/1"
+from avalanche_schema import SCHEMA   # Version des Datenmodells, an einer Stelle gepflegt
 
 LEVELS = {"low": 1, "moderate": 2, "considerable": 3, "high": 4, "very_high": 5}
 SUBDIVISION_ORDER = {"minus": 1, "neutral": 2, "plus": 3}
@@ -340,50 +339,62 @@ def problem_groups(b):
     return groups
 
 
-def normalize_bulletin(b, source_id):
-    """Ein CAAML-v6-Bulletin -> Bulletin des gemeinsamen Modells (ohne Regionen, die stehen im Index)."""
-    ratings = [danger_rating(r) for r in b.get("dangerRatings") or []]
-    problems = [avalanche_problem(p) for p in b.get("avalancheProblems") or []]
+def make_bulletin(source_id, bulletin_id, publication_time, valid_from, valid_until, ratings, problems=(), unscheduled=False,
+                  next_update=None, main_date=None, problem_groups=None, text=None, danger_patterns=None):
+    """Bulletin des gemeinsamen Modells aus bereits normalisierten Stufen und Lawinenproblemen.
+
+    Ergänzt die abgeleiteten Felder (max_level, max_subdivision, danger_by_elevation, elevation_thresholds). Nutzen
+    CAAML-Provider über normalize_bulletin, Provider anderer Formate direkt (Stufen mit danger_rating(), Probleme mit
+    avalanche_problem() oder als Dicts nach docs/AVALANCHE_ARCHITECTURE.md).
+    """
+    ratings, problems = list(ratings), list(problems)
     level, sub = max_rating(ratings)
     out = {
-        "id": b["bulletinID"],
+        "id": bulletin_id,
         "source": source_id,
-        "publication_time": b["publicationTime"],
-        "validity_period": {"start": b["validTime"]["startTime"], "end": b["validTime"]["endTime"]},
-        "unscheduled": bool(b.get("unscheduled")),
+        "publication_time": publication_time,
+        "validity_period": {"start": valid_from, "end": valid_until},
+        "unscheduled": bool(unscheduled),
         "max_level": level,
     }
     if sub:
         out["max_subdivision"] = sub
-    if b.get("nextUpdate"):
-        out["next_update"] = b["nextUpdate"]
-    md = main_date(b)
-    if md:
-        out["main_date"] = md
+    if next_update:
+        out["next_update"] = next_update
+    if main_date:
+        out["main_date"] = main_date
     out["danger_ratings"] = ratings
     out["danger_by_elevation"] = danger_by_elevation(ratings, problems)
     out["elevation_thresholds"] = elevation_thresholds(ratings, problems)
     out["avalanche_problems"] = problems
-    groups = problem_groups(b)
-    if groups:
-        out["problem_groups"] = groups
-    text = text_content(b)
+    if problem_groups:
+        out["problem_groups"] = problem_groups
     if text:
         out["text"] = text
-    patterns = ((b.get("customData") or {}).get("LWD_Tyrol") or {}).get("dangerPatterns")
-    if patterns:
-        out["danger_patterns"] = list(patterns)
+    if danger_patterns:
+        out["danger_patterns"] = list(danger_patterns)
     return out
 
 
-def build_index(doc, source_id, in_scope, names=None):
-    """Bulletins und Regionenindex einer Quelle.
+def normalize_bulletin(b, source_id):
+    """Ein CAAML-v6-Bulletin -> Bulletin des gemeinsamen Modells (ohne Regionen, die stehen im Index)."""
+    return make_bulletin(
+        source_id, b["bulletinID"], b["publicationTime"], b["validTime"]["startTime"], b["validTime"]["endTime"],
+        [danger_rating(r) for r in b.get("dangerRatings") or []],
+        [avalanche_problem(p) for p in b.get("avalancheProblems") or []],
+        unscheduled=b.get("unscheduled"), next_update=b.get("nextUpdate"), main_date=main_date(b),
+        problem_groups=problem_groups(b), text=text_content(b),
+        danger_patterns=((b.get("customData") or {}).get("LWD_Tyrol") or {}).get("dangerPatterns"))
 
-    Rückgabe (bulletins, regions, skipped): regions = {regionID: {"name", "country", "bulletin"}}, bulletin ist der
-    Index in bulletins. Kommt eine Region in zwei Bulletins vor, gilt das jüngere; bei gleichem
-    Veröffentlichungszeitpunkt bricht die Funktion mit ValueError ab. Ein Bulletin ohne Gefahrenstufen ebenso.
+
+def parse_caaml(doc, source_id, in_scope):
+    """CAAML-v6-Dokument -> (items, skipped). Gemeinsamer Parser aller CAAML-Provider.
+
+    item = {"bulletin": Bulletin des Modells, "regions": [{"id", "name"?}], "date": "JJJJ-MM-TT"}; nur Regionen im
+    Geltungsbereich (in_scope). Bulletins ohne solche Regionen zählen als skipped, ein Bulletin ohne Gefahrenstufen
+    bricht mit ValueError ab. Das ist auch die Form, die jeder Provider für nicht-CAAML-Quellen liefern muss.
     """
-    bulletins, regions, skipped = [], {}, 0
+    items, skipped = [], 0
     for b in doc.get("bulletins") or []:
         scoped = [r for r in b.get("regions") or [] if in_scope(r["regionID"])]
         if not scoped:
@@ -391,11 +402,25 @@ def build_index(doc, source_id, in_scope, names=None):
             continue
         if not b.get("dangerRatings"):
             raise ValueError("Bulletin %s ohne Gefahrenstufen" % b.get("bulletinID"))
-        slim = normalize_bulletin(b, source_id)
+        items.append({"bulletin": normalize_bulletin(b, source_id), "date": bulletin_date(b),
+                      "regions": [{"id": r["regionID"], **({"name": r["name"]} if r.get("name") else {})} for r in scoped]})
+    return items, skipped
+
+
+def index_bulletins(items, names=None):
+    """Bulletins und Regionenindex einer Quelle aus den Items eines Providers (Form: siehe parse_caaml).
+
+    Rückgabe (bulletins, regions): regions = {regionID: {"name", "country", "bulletin"}}, bulletin ist der Index in
+    bulletins. Kommt eine Region in zwei Bulletins vor, gilt das jüngere; bei gleichem Veröffentlichungszeitpunkt
+    bricht die Funktion mit ValueError ab. Der Name kommt aus dem Bulletin, sonst aus names, sonst ist es die Kennung.
+    """
+    bulletins, regions = [], {}
+    for item in items:
+        slim = item["bulletin"]
         idx = len(bulletins)
         bulletins.append(slim)
-        for r in scoped:
-            rid = r["regionID"]
+        for r in item["regions"]:
+            rid = r["id"]
             if rid in regions:
                 other = bulletins[regions[rid]["bulletin"]]
                 if other["publication_time"] == slim["publication_time"]:
@@ -409,7 +434,14 @@ def build_index(doc, source_id, in_scope, names=None):
     bulletins = [bulletins[i] for i in used]
     for v in regions.values():
         v["bulletin"] = remap[v["bulletin"]]
-    return bulletins, {k: regions[k] for k in sorted(regions)}, skipped
+    return bulletins, {k: regions[k] for k in sorted(regions)}
+
+
+def build_index(doc, source_id, in_scope, names=None):
+    """CAAML-Dokument -> (bulletins, regions, skipped), siehe parse_caaml und index_bulletins."""
+    items, skipped = parse_caaml(doc, source_id, in_scope)
+    bulletins, regions = index_bulletins(items, names)
+    return bulletins, regions, skipped
 
 
 def validity(bulletins):
@@ -549,6 +581,6 @@ def build_regions(features, date, in_scope):
         if geom is None:
             raise ValueError("Kennung %s: Geometrie nach dem Runden leer" % rid)
         by_id[rid] = {"type": "Feature",
-                      "properties": {"id": rid, "country": region_country(rid), "label_point": label_point(geom)},
+                      "properties": {"region_id": rid, "country": region_country(rid), "label_point": label_point(geom)},
                       "geometry": geom}
     return [by_id[k] for k in sorted(by_id)]

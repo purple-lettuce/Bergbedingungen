@@ -289,7 +289,7 @@ def test_build_regions_scope_validity_country_label_and_sorting():
     fs = [feat("AT-07-02"), feat("AT-02-01"), feat("CH-1111"), feat("AT-07-01"),
           feat("AT-07-03", end="2022-10-01"), feat("AT-07-04", start="2030-01-01")]
     out = m.build_regions(fs, "2026-01-11", scope)
-    assert [f["properties"]["id"] for f in out] == ["AT-07-01", "AT-07-02", "CH-1111"]
+    assert [f["properties"]["region_id"] for f in out] == ["AT-07-01", "AT-07-02", "CH-1111"]
     p = out[0]["properties"]
     assert p["country"] == "AT" and abs(p["label_point"][0] - 11.05) < 0.002 and abs(p["label_point"][1] - 47.05) < 0.002
 
