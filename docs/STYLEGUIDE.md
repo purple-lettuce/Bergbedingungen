@@ -166,6 +166,10 @@ Die Layerfarben müssen schnell verständlich und im Kartenkontext gut sichtbar 
 - Wetter / Standort: ruhige, neutrale Kartenfarben mit strukturierter Akzentfarbe
 - Basismaps: dezent und neutral
 
+## Lawinengefahrenstufen (Ausnahme)
+
+Die Lawinenlage verwendet die offiziellen Farben der Europäischen Gefahrenskala, nicht die allgemeinen Warnfarben oben: 1 `#ccff66`, 2 `#ffff00`, 3 `#ff9900`, 4 `#ff0000`, 5 `#ff0000` mit rot-schwarzem Schachbrett. Wiedererkennung und Sicherheit gehen vor Konsistenz. Quelle und Begründung: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 4.
+
 ## Regeln
 
 - gleiche Informationsarten sollten konsistent farblich kodiert sein

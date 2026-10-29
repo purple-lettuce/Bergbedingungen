@@ -491,6 +491,20 @@ Die KI erklärt Fachbegriffe und Einschränkungen.
 
 # Kartenfunktionen
 
+## Höhenabhängige Lawinenlage per Geländemodell
+
+Status:
+
+💡 Idee
+
+Die Gefahrenstufe je Höhenband nicht nur im Popup, sondern auf der Karte darstellen: Die Höhengrenze des Berichts (z. B. 2600 m) wird mit einem Höhenmodell (z. B. EU-DEM, CC BY 4.0) in eine Maske oder Höhenlinie umgesetzt und auf die Polygone der Region angewendet.
+
+Hindernisse: Die Grenze wechselt täglich, die Waldgrenze (`treeline`) hat in den Daten keinen Zahlenwert, ALBINA selbst färbt nur nach der höchsten Stufe. Analyse: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md), Abschnitt 3.
+
+Verwandt: Hangneigungs- und Expositionslayer (Gefahr nur für Hänge der genannten Expositionen anzeigen).
+
+---
+
 ## 3D Geländedarstellung
 
 Status:

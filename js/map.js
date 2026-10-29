@@ -1,5 +1,6 @@
 // Karte und gemeinsame Bausteine: Leaflet-Karte, Kachelebenen, Ebenengruppen,
-// Ebenenauswahl, Warnhinweise sowie die gemeinsam genutzten Seitenelemente.
+// Warnhinweise sowie die gemeinsam genutzten Seitenelemente.
+// Kartenstil, Ebenen und Legenden bedient ausschließlich das Bedienfeld "Karten & Layer" (js/layers.js).
 // Leaflet (`L`) wird vorher über vendor/leaflet/leaflet.js global geladen.
 
 export var map = L.map('map', { zoomControl: true }).setView([47.2, 11.4], 10);
@@ -60,20 +61,7 @@ export var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
   attribution: 'Kartendaten © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, SRTM | Darstellung © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
 });
 
-// ---------- Ebenengruppen und Ebenenauswahl ----------
+// ---------- Ebenengruppen ----------
 export var layerGroup = L.layerGroup().addTo(map);
 export var protectedAreasLayer = L.layerGroup().addTo(map);
-L.control.layers(
-  {
-    'OpenStreetMap': osm,
-    'Topo mit Höhenlinien': topo
-  },
-  {
-    'Sperrungen & Hinweise': layerGroup,
-    'Schutzgebiete': protectedAreasLayer
-  },
-  {
-    position: 'topright',
-    collapsed: true
-  }
-).addTo(map);
+export var avalancheLayer = L.layerGroup();   // standardmäßig ausgeblendet, lädt beim ersten Einblenden

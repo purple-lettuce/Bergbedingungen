@@ -110,20 +110,77 @@ footer a { color: var(--accent); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
-.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 8px 0 0; }
-.legend .lg { display: inline-flex; align-items: center; gap: 5px; }
-.legend .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
-.legend .dot.closure { background: var(--closure); }
-.legend .dot.notice { background: var(--notice); }
-.legend .dot.upcoming { background: var(--upcoming); }
 
-/* Legende der Schutzgebiete (Kartenelement unten links) */
-.pa-legend { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); max-width: min(260px, calc(100vw - 32px)); font-family: var(--font-body); font-size: 13px; }
-.pa-legend .pa-toggle { display: block; width: 100%; min-height: 36px; text-align: left; border: 0; border-radius: 5px; background: transparent; font-family: var(--font-display); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.pa-legend .pa-toggle::after { content: "▾"; float: right; margin-left: 8px; }
-.pa-legend .pa-toggle[aria-expanded="false"]::after { content: "▸"; }
-.pa-legend .pa-list { list-style: none; margin: 0; padding: 0 10px 8px; max-height: min(260px, 40vh); overflow-y: auto; }
-.pa-legend .pa-list li { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
-.pa-legend .pa-sw { flex: none; position: relative; width: 18px; height: 12px; border: 2px solid; border-radius: 2px; overflow: hidden; }
-.pa-legend .pa-sw i { position: absolute; inset: 0; }
-.pa-legend .pa-label { min-width: 0; overflow-wrap: anywhere; }
+/* Bedienfeld "Karten & Layer" (Kartenelement oben rechts): Layer, Kartenstil und Legenden, alles per Klick */
+[hidden] { display: none !important; }
+.kl-panel { width: min(300px, calc(100vw - 32px)); background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.25); font-family: var(--font-body); font-size: 14px; }
+.kl-head, .kl-toggle { display: block; width: 100%; min-height: 40px; text-align: left; border: 0; background: transparent; font-family: var(--font-display); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.kl-head { color: var(--accent-fg); background: var(--accent); border-radius: 5px; }
+.kl-head[aria-expanded="true"] { border-radius: 5px 5px 0 0; }
+.kl-toggle { color: var(--muted); padding: 6px 12px; }
+.kl-head::after, .kl-toggle::after { content: "▾"; float: right; margin-left: 8px; }
+.kl-head[aria-expanded="false"]::after, .kl-toggle[aria-expanded="false"]::after { content: "▸"; }
+.kl-body { max-height: calc(100vh - 190px); overflow-y: auto; overscroll-behavior: contain; }
+.kl-sec + .kl-sec { border-top: 1px solid var(--line); }
+.kl-h { margin: 0; font-size: inherit; }
+.kl-content { padding: 0 12px 10px; }
+.kl-options { list-style: none; margin: 0; padding: 0; }
+.kl-opt { display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
+.kl-opt input { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.kl-off { margin: 0 0 6px; }
+.kl-legend .muted { margin: 0; }
+
+/* Zeilen der Legenden: Farbfeld und Text */
+.pa-list { list-style: none; margin: 0; padding: 0; }
+.pa-list li { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.pa-sw { flex: none; position: relative; width: 18px; height: 12px; border: 2px solid; border-radius: 2px; overflow: hidden; }
+.pa-sw i { position: absolute; inset: 0; }
+.pa-label { min-width: 0; overflow-wrap: anywhere; }
+.dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.dot.closure { background: var(--closure); }
+.dot.notice { background: var(--notice); }
+.dot.upcoming { background: var(--upcoming); }
+/* Lawinenlage Euregio: Gefahrenstufen (offizielle Farben der Europäischen Gefahrenskala), Legende und Popup */
+.av-lv1 { background: #ccff66; }
+.av-lv2 { background: #ffff00; }
+.av-lv3 { background: #ff9900; }
+.av-lv4 { background: #ff0000; color: #fff; }
+.av-lv5 { background: repeating-conic-gradient(#000 0 25%, #f00 0 50%) 0 0 / 10px 10px; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+.av-chip { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid rgba(0,0,0,.45); border-radius: 5px; font-family: var(--font-display); font-size: 16px; font-weight: 700; color: #1d2623; }
+.av-sw { flex: none; width: 18px; height: 14px; border: 1px solid rgba(0,0,0,.5); border-radius: 2px; }
+.av-sw.av-none { background: transparent; border-style: dashed; }
+.kl-legend .av-status { margin: 0 0 6px; }
+.kl-legend .av-alt { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.kl-legend .av-alt select { font: inherit; min-width: 0; flex: 1; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 3px 6px; }
+.kl-legend .av-note { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+.kl-legend a { color: var(--accent); }
+.av-warn { background: #fff3cd; border: 1px solid #e0b43c; border-radius: 5px; padding: 6px 8px; color: #1d2623; }
+.av-popup .leaflet-popup-content { max-width: none; margin: 12px 14px; }
+.av-pop { font-size: 13px; line-height: 1.4; }
+.av-pop h3 { margin: 0; font-size: 16px; }
+.av-pop p { margin: 4px 0; }
+.av-pop .muted { color: #5d6a65; }
+.av-head { display: flex; align-items: center; gap: 10px; }
+.av-sub { font-weight: 600; }
+.av-id { margin-top: 2px; font-size: 11px; color: #5d6a65; }
+.av-lead { font-weight: 600; }
+.av-sec h4 { margin: 12px 0 4px; padding-bottom: 2px; border-bottom: 1px solid #e3e6e3; font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #5d6a65; }
+.av-rating + .av-rating { margin-top: 8px; }
+.av-period { font-weight: 600; margin-bottom: 2px; }
+.av-rating-body { display: flex; align-items: center; gap: 10px; }
+.av-picto { flex: none; width: 84px; height: auto; }
+.av-rows { list-style: none; margin: 0; padding: 0; min-width: 0; }
+.av-rows li { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.av-rows .av-chip { width: 22px; height: 22px; font-size: 13px; }
+.av-problem { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #e3e6e3; }
+.av-problem:first-of-type { border-top: 0; }
+.av-problem-icon { flex: none; width: 52px; height: 52px; }
+.av-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 10px; margin: 4px 0 0; }
+.av-facts dt { font-size: 12px; color: #5d6a65; align-self: center; }
+.av-facts dd { display: flex; align-items: center; gap: 6px; margin: 0; }
+.av-rose, .av-elev { flex: none; width: 38px; height: auto; color: #333; }
+.av-patterns { margin: 4px 0; padding-left: 18px; }
+.av-foot { margin: 12px 0 0; font-size: 12px; color: #5d6a65; }
+.av-foot a { color: #1f5c4a; }
+@media (max-width: 820px) { .kl-body { max-height: calc(60vh - 100px); } }
+@media (pointer: coarse) { .kl-head, .kl-toggle { min-height: 44px; } .kl-opt { min-height: 44px; } }

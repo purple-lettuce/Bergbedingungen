@@ -84,9 +84,9 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 
 | Priorität | Thema | Status |
 |------------|------------|------------|
-| 1 | Legende für Schutzgebiete | Offen |
+| 1 | Legende für Schutzgebiete | Erledigt |
 | 2 | Filter nach Schutzgebietstyp | Offen |
-| 3 | Lawinenlage | offen |
+| 3 | Lawinenlage | In Arbeit (Euregio umgesetzt, Test ab Saisonstart) |
 | 4 | Unfalllayer | Recherche |
 | 5 | Unfall-Heatmap | Konzept |
 | 6 | Digiway Absturzrisiko | Konzept |
@@ -96,6 +96,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 10 | Design & UX | Geplant |
 | 11 | KI-Assistent | Zukunft |
 | 12 | PWA & Offline | Zukunft |
+| 13 | Basemap Austria Orthofotos | Geplant |
 
 ---
 
@@ -167,9 +168,9 @@ Zusätzliche Risikoinformationen für den Alpenraum sichtbar machen.
 
 ## Status
 
-🔵 Recherchephase
+🟡 In Arbeit
 
-Fortschritt: 0 %
+Fortschritt: ca. 10 % (2.1 Lawinenlage Euregio umgesetzt, übrige Punkte offen)
 
 ---
 
@@ -183,19 +184,30 @@ für spätere Tourenanalysen.
 
 ### Regionen
 
-- [ ] Österreich
+- [x] Euregio Tirol, Südtirol und Trentino (ALBINA, 90 Mikroregionen)
+- [ ] Österreich (übrige Bundesländer; die EUREGIO-Datei enthält teils Kärnten, bewusst nicht übernommen)
 - [ ] Schweiz
 - [ ] Frankreich
-- [ ] Italien
+- [ ] Italien (außerhalb der Euregio)
 - [ ] Slowenien
 
-### Geplante Funktionen
+### Umgesetzt (Euregio)
 
-- [ ] Lawinenregionen
-- [ ] Gefahrenstufen
-- [ ] Farbige Darstellung nach Höhenstufe
-- [ ] Popup-Informationen
-- [ ] Verlinkung auf Lageberichte
+Details, Entscheidungen und Datenmodell: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md)
+
+- [x] Lawinenregionen als Polygone
+- [x] Gefahrenstufen in den offiziellen Farben, Stufe 5 als rot-schwarzes Schachbrett
+- [x] Darstellung nach Höhenstufe: Färbung nach höchster Stufe (wie ALBINA), Höhenaufteilung im Popup mit offiziellem Piktogramm, Höhenwahl in der Legende. Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich (Begründung in der Analyse)
+- [x] Popup mit Gültigkeit, Lawinenproblemen (Höhenbereich, Expositionen), Zusammenfassung und Bulletintext, offizielle Symbole
+- [x] Verlinkung auf den Lagebericht (Link aus dem Routing der ALBINA-Website abgeleitet, noch nicht geprüft)
+- [x] Automatische Aktualisierung über GitHub Actions (zweimal täglich)
+- [x] Abgelaufene Berichte werden nicht als Gefahrenstufe dargestellt
+
+### Offen (Euregio)
+
+- [ ] **Browser-Test mit echten, gültigen Berichten:** erst nach dem Saisonstart des Lawinenwarndienstes möglich (der aktuelle Bericht ist der letzte des Winters 2025/26). Das Frontend ist bisher nicht im Browser geprüft
+- [ ] Lizenz der ALBINA-Grafiken in `vendor/albina/` klären (siehe Analyse, Abschnitt 7)
+- [ ] Ebene standardmäßig einblenden, sobald Berichte aktuell sind (Entscheidung nach dem Praxistest)
 
 ### Langfristig
 

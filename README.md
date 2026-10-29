@@ -23,7 +23,9 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 - Wetterinformationen mit lokaler Lage- und Umfeldsicht
 - Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen
 - Layer-basierte Darstellung für schnellere Orientierung auf der Karte
-- Zukunftsfähige Erweiterung um Lawinenlage, Risiken und Tourenanalysen
+- Bedienfeld „Karten & Layer“ für Kartenstil, Ebenen und Legenden, per Klick bedienbar (auch auf Touchgeräten)
+- Lawinenlage der Euregio (Tirol, Südtirol, Trentino) als Layer mit Gefahrenstufen, Höhenangaben und vollständigem Lagebericht im Popup (ab Saisonstart des Lawinenwarndienstes, siehe unten)
+- Zukunftsfähige Erweiterung um weitere Risiken und Tourenanalysen
 
 ## Screenshots
 
@@ -55,6 +57,7 @@ Die Dokumentation des Projekts liegt im Ordner [docs/](docs/):
 - [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) — Überblick über Datenquellen, APIs und Integrationen
 - [docs/IDEENSAMMLUNG.md](docs/IDEENSAMMLUNG.md) — Ideen, Konzepte und mögliche Erweiterungen
 - [docs/RECHERCHE_LAWINEN.md](docs/RECHERCHE_LAWINEN.md) — Recherche zu Lawinen- und Risikodaten
+- [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md) — Lawinenlage Euregio: Quellen, Höhenanalyse, Entscheidungen, Datenmodell
 - [docs/STYLEGUIDE.md](docs/STYLEGUIDE.md) — visuelle und inhaltliche Richtlinien
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) — Arbeitsabläufe und Projektprozesse
 
@@ -68,6 +71,7 @@ Mountain Radar kombiniert eine interaktive Kartenoberfläche mit relevanten Berg
 - **Sperrungen und Hinweise:** Daten von [Digitize the Planet e.V.](https://platform.digitizetheplanet.org/en/api/docs/) (Lizenz CC0)
 - **Wetter:** [Open-Meteo](https://open-meteo.com/), ohne Schlüssel
 - **Schutzgebiete:** regionale Informationen aus GeoJSON- und API-Daten mit Wildlife- und Regeltexten
+- **Lawinenlage:** Lawinenreport der Euregio ([avalanche.report](https://lawinen.report/more/open-data), CC BY 4.0) mit Polygonen aus [EAWS Regions](https://gitlab.com/eaws/eaws-regions) (CC0)
 
 ## So kommen die Daten auf die Seite
 
@@ -89,6 +93,9 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/protected_areas_alps.geojson` | kompaktes GeoJSON für Schutzgebiete auf der Karte |
 | `data/wildlife_entities.json` | aufgelöste Namen der Schutzgüter (Kennung → Name), nur aus der Digitize API |
 | `data/wildlife_probe.json` | Diagnosebericht der Wildlife-Auflösung (was die API geliefert hat, was fehlt) |
+| `scripts/fetch_avalanche.py`, `scripts/test_fetch_avalanche.py` | Lawinenlage-Pipeline und Tests |
+| `data/avalanche_regions.geojson`, `data/avalanche_bulletin.json` | Polygone und Bulletins der Lawinenlage Euregio |
+| `vendor/albina/` | offizielle ALBINA-Symbole (Gefahrenstufen, Lawinenprobleme), Herkunft in `vendor/albina/README.md` |
 
 ## Aufbau des Programmcodes (`js/`)
 
@@ -98,14 +105,22 @@ geladen und steht als globales `L` zur Verfügung.
 | Datei | Zuständig für |
 | --- | --- |
 | `js/app.js` | Einstieg: Ereignisse verbinden (Kartenbewegung, Klick, Suche, Filter, Wetterknöpfe) und das Laden starten (Wetter, Schutzgebiete, Sperrungen) |
-| `js/map.js` | Leaflet-Karte, Kachelebenen (OpenStreetMap, OpenTopoMap), Ebenengruppen, Ebenenauswahl, Warnhinweise sowie gemeinsame Hilfen (`el`, `esc`, `setStatus`) |
+| `js/map.js` | Leaflet-Karte, Kachelebenen (OpenStreetMap, OpenTopoMap), Ebenengruppen, Warnhinweise sowie gemeinsame Hilfen (`el`, `esc`, `setStatus`) |
 | `js/closures.js` | Sperrungen und Hinweise: `data/closures.json` laden, filtern, auf der Karte und in der Liste darstellen, Popups, Sprung zu einem Eintrag |
 | `js/weather.js` | Wetterwidget mit Open-Meteo und Standortmarker |
 | `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene |
-| `js/protected_areas_legend.js` | Legende der Schutzgebiete (Kartenelement unten links): Farben der Kategorien, die in den Daten vorkommen; folgt der Ebene „Schutzgebiete“ |
+| `js/protected_areas_legend.js` | Legende der Schutzgebiete (Abschnitt im Bedienfeld „Karten & Layer“): Farben der Kategorien, die in den Daten vorkommen |
+| `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`) |
+| `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil und einklappbare Legenden, alles per Klick, ohne Fachlogik |
+| `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
+| `js/avalanche.js` | Lawinenlage: Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Popup mit Lagebericht, Höhenwahl; lädt erst beim ersten Einblenden |
+| `js/avalanche_legend.js` | Legende der Lawinenlage mit Gültigkeit des Berichts und Höhenwahl (Abschnitt im Bedienfeld „Karten & Layer“) |
+| `js/avalanche_logic.js` | reine Logik ohne DOM und Leaflet: Gefahrenstufe je Höhe, Gültigkeit, Gruppierung, deutsche Bezeichnungen |
 
 Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` und
-`protected_areas.js` → `map.js`. `map.js` hängt von keiner anderen Datei ab.
+`protected_areas.js` → `map.js`; `avalanche.js` → `map.js`, `avalanche_legend.js`, `avalanche_logic.js`;
+`avalanche_legend.js` → `map.js`, `layers.js`, `avalanche_logic.js`; `layers.js` → `map.js`, `layer_panel.js`; die Legendenmodule `protected_areas_legend.js` und `closures_legend.js` → `layers.js`. `map.js`, `layer_panel.js` und `avalanche_logic.js` hängen von keiner
+anderen Datei ab.
 
 Hinweis: Wegen der Module muss die Seite über einen Webserver (zum Beispiel GitHub Pages) geöffnet
 werden, nicht per Doppelklick als lokale Datei. Das galt für Karte und Daten schon vorher.
@@ -147,10 +162,38 @@ zeigt die Einträge maskiert im Popup an; bei Gebieten ohne Angaben bleibt das P
 wird). Das Ergebnis wird als Commit gespeichert. Lokal: die Skripte in der oben stehenden
 Reihenfolge ausführen. Tests: `python3 scripts/test_build_geojson.py` und `python3 scripts/test_fetch_wildlife.py`.
 
+## Lawinenlage (Euregio)
+
+Die Ebene **Lawinenlage (Euregio)** (Bedienfeld „Karten & Layer“ oben rechts, standardmäßig aus; die Legende steht im selben Bedienfeld) zeigt die 90 Mikroregionen von Tirol,
+Südtirol und Trentino in den offiziellen Farben der Gefahrenskala (Stufe 5 als rot-schwarzes Schachbrett). Ein Klick
+öffnet den Lagebericht: Gültigkeit, Zusammenfassung, Gefahrenstufen nach Höhe und Tageszeit, Lawinenprobleme mit
+Höhenbereich und Expositionen, Bulletintext, Tendenz, mit den offiziellen ALBINA-Symbolen.
+
+```
+static.avalanche.report (CAAML v6) + eaws-regions (Polygone)
+  -> scripts/fetch_avalanche.py  (GitHub Action "Lawinenlage aktualisieren", 06:30 und 16:20 UTC)
+  -> data/avalanche_bulletin.json + data/avalanche_regions.geojson
+  -> js/avalanche.js
+```
+
+**Höhenabhängige Gefahrenstufen:** Der Bericht nennt je Gefahrenstufe eine Höhengrenze (z. B. unter 2000 m Stufe 2,
+darüber Stufe 3), aber keine Geometrie. Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich. Die Karte
+färbt deshalb wie die offizielle ALBINA-Karte nach der **höchsten** Stufe, das Popup zeigt die Aufteilung mit dem offiziellen
+Piktogramm, und die Legende erlaubt die Wahl einer Höhenlage. Begründung: [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md).
+
+**Außerhalb der Saison:** Nach Ablauf eines Berichts werden die Regionen grau ohne Gefahrenstufe dargestellt, ein alter
+Bericht wird nie als aktuell gezeigt. Der aktuell veröffentlichte Bericht ist der letzte des Winters 2025/26.
+
+**Daten erzeugen:** Reiter **Actions** → **Lawinenlage aktualisieren** → **Run workflow**. Lokal:
+`python3 scripts/fetch_avalanche.py`, Tests: `python3 scripts/test_fetch_avalanche.py`.
+
+**Teststand:** Pipeline getestet. Das Frontend ist noch nicht im Browser mit gültigen Berichten geprüft, das ist erst nach
+dem Saisonstart des Lawinenwarndienstes möglich.
+
 ## Status
 
 Das Projekt befindet sich in einer Übergangsphase vor einem möglichen Rebranding und einer weiteren Produktreife. Die Kernfunktionalitäten sind bereits in der Kartenanwendung sichtbar, während die langfristige Ausrichtung in der Roadmap und Dokumentation beschrieben wird.
 
 ## Lizenz und Hinweise
 
-Die Anwendung und die enthaltenen Projektdateien werden gemäß den jeweiligen Datenquellen und Repository-Regeln gepflegt. Für externe Datenquellen gelten die jeweiligen Lizenz- und Nutzungsbedingungen, insbesondere bei Digitize the Planet sowie Open-Meteo.
+Die Anwendung und die enthaltenen Projektdateien werden gemäß den jeweiligen Datenquellen und Repository-Regeln gepflegt. Für externe Datenquellen gelten die jeweiligen Lizenz- und Nutzungsbedingungen, insbesondere bei Digitize the Planet, Open-Meteo und dem Euregio-Lawinenreport (CC BY 4.0, Namensnennung erforderlich).
