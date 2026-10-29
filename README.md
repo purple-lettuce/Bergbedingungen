@@ -18,14 +18,29 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 
 ## Features
 
+**Aktuell implementiert:**
+
 - Karte mit relevanten Inhalten für alpine Regionen
 - Anzeige von Sperrungen und Hinweisen aus aktuellen Daten
-- Wetterinformationen mit lokaler Lage- und Umfeldsicht
 - Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen
 - Layer-basierte Darstellung für schnellere Orientierung auf der Karte
-- Bedienfeld „Karten & Layer“ für Kartenstil, Ebenen und Legenden, per Klick bedienbar (auch auf Touchgeräten)
-- Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste, siehe unten)
-- Zukunftsfähige Erweiterung um weitere Risiken und Tourenanalysen
+- Bedienfeld „Karten & Layer” für Kartenstil, Ebenen und Legenden, per Klick bedienbar (auch auf Touchgeräten)
+- Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste)
+
+**Geplant (Roadmap Phase 1-2):**
+
+- Website Toolbox: Koordinaten anzeigen, Höhe anzeigen, Entfernungsmessungen, Höhenprofil
+- GPX-Upload und Tourenanalyse
+- Wetterrisiko-Integration (GeoSphere)
+- Geländeanalyse-Engine (Hangneigung, Exposition, Absturzrisiko)
+
+**Zukünftig (Roadmap Phase 3-5):**
+
+- Alpine Risk Engine (Risikobewertung basierend auf 14 Faktoren)
+- Unfallanalyse und Unfall-Hotspot-Visualisierung
+- Mobile App mit Toolbox (Kompass, Hangneigungsmesser, Standort-Sensoren)
+- Internationale Expansion (Frankreich, Italien, Slowenien)
+- Community-Features (Echtzeit-Meldungen)
 
 ## Screenshots
 
@@ -37,29 +52,53 @@ Derzeit noch kein Final-Design. Der Platz für Screenshots ist hier reserviert:
 [ Screenshot 3: Filter- und Lageansicht auf der Karte ]
 ```
 
-## Roadmap-Verweis
+## Roadmap und Dokumentation
 
-Die langfristige Produkt- und Entwicklungsplanung findet sich in [docs/ROADMAP.md](docs/ROADMAP.md).
+Mountain Radar entwickelt sich schrittweise zu einer **Alpine Risk Intelligence Plattform**. Die langfristige Produkt- und Entwicklungsplanung, einschließlich der Kernmodule und technischen Phasen, findet sich in [docs/ROADMAP.md](docs/ROADMAP.md).
 
-Dort werden Vision, Priorisierung, Phasen und geplante Erweiterungen beschrieben, etwa:
+**Roadmap-Übersicht (Alpine Risk Intelligence):**
 
-- Schutzgebiete und Kartenlayer
-- Alpine Risiken
+Die Entwicklung erfolgt in **5 technischen Phasen** (bis Q1 2028+):
+
+1. **Phase 1 — Grundlagen** (Q4 2026 - Q1 2027): DEM, OSM, Kartografie, Website Toolbox
+2. **Phase 2 — Wetterintegration** (Q1 - Q2 2027): GeoSphere, ALBINA/SLF Lawinenlage, Wetterwarnungen
+3. **Phase 3 — Gefahrenmodellierung** (Q2 - Q3 2027): Unfallanalyse, Alpine Risk Engine (Beta)
+4. **Phase 4 — Mobile App & Internationale Expansion** (Q4 2027 - Q1 2028): Mobile Toolbox, Météo-France, AINEVA, ARSO
+5. **Phase 5 — Production & Optimierung** (Q1 2028+): Alpine Risk Engine (GA), Community-Features
+
+**Kernmodule:**
+- Geländeanalyse
+- GPX Analyse
+- Infrastruktur
+- Wetterrisiko
 - Lawinenlage
-- Unfall- und Sicherheitsdaten
-- Tourenanalyse, Routing und KI-gestützte Hilfen
+- Unfallanalyse
+- Schutzgebiete & Wildlife
+- Alpine Risk Engine
+- **Mountain Radar Toolbox** (Website + Mobile)
+
+Die Kernfrage für den Nutzer:
+> "Wenn ich diese Tour morgen gehe, worauf muss ich achten?"
 
 ## Dokumentationsübersicht
 
 Die Dokumentation des Projekts liegt im Ordner [docs/](docs/):
 
-- [docs/ROADMAP.md](docs/ROADMAP.md) — Produktvision, Phasen, Prioritäten und langfristige Planung
-- [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) — Überblick über Datenquellen, APIs und Integrationen
-- [docs/IDEENSAMMLUNG.md](docs/IDEENSAMMLUNG.md) — Ideen, Konzepte und mögliche Erweiterungen
-- [docs/RECHERCHE_LAWINEN.md](docs/RECHERCHE_LAWINEN.md) — Recherche zu Lawinen- und Risikodaten
-- [docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md) — Lawinenlage Euregio und Schweiz: Quellen, API-Endpunkte, Höhenanalyse, gemeinsames Datenmodell, Empfehlungen für weitere Länder
-- [docs/STYLEGUIDE.md](docs/STYLEGUIDE.md) — visuelle und inhaltliche Richtlinien
-- [docs/WORKFLOW.md](docs/WORKFLOW.md) — Arbeitsabläufe und Projektprozesse
+### Hauptdokumentation (Source of Truth)
+
+- **[docs/ROADMAP.md](docs/ROADMAP.md)** — Alpine Risk Intelligence Roadmap mit 5 Phasen, 9 Kernmodulen, Mountain Radar Toolbox (Website + Mobile), Abhängigkeiten und Akzeptanzkriterien
+- **[docs/DATENQUELLEN.md](docs/DATENQUELLEN.md)** — Vollständiger Katalog aller Datenquellen (20+) mit URLs, Lizenzen, Prioritäten, Roadmap-Phasen, lokalen Dateien und Skripten
+- **[docs/WORKFLOW.md](docs/WORKFLOW.md)** — Arbeitsabläufe, Definition of Done, Dokumentations-Prozesse
+
+### Fachliche Analysen
+
+- **[docs/LAWINENLAGE_ANALYSE.md](docs/LAWINENLAGE_ANALYSE.md)** — Lawinenlage Euregio und Schweiz: Quellen, API-Endpunkte, Höhenanalyse, gemeinsames Datenmodell, Empfehlungen für weitere Länder
+- **[docs/WILDLIFE_ANALYSE.md](docs/WILDLIFE_ANALYSE.md)** — Wildlife-Daten: Tiernamen-Auflösung, Datenquellen, Lösungswege
+- **[docs/RECHERCHE_LAWINEN.md](docs/RECHERCHE_LAWINEN.md)** — Recherche zu Lawinen- und Risikodaten
+
+### Richtlinien
+
+- **[docs/STYLEGUIDE.md](docs/STYLEGUIDE.md)** — Visuelle und inhaltliche Richtlinien
 
 ## Produktüberblick
 
@@ -187,7 +226,15 @@ static.avalanche.report (CAAML v6)  aws.slf.ch (CAAML v6, V4)  eaws-regions (Pol
 **Teststand:** Pipeline und JavaScript-Logik getestet, das Frontend mit archivierten Berichten vom 15.03.2026 beider Dienste in einem Headless-Browser geprüft. Der Test mit aktuellen Berichten ist erst nach dem Saisonstart der Lawinenwarndienste möglich.
 ## Status
 
-Das Projekt befindet sich in einer Übergangsphase vor einem möglichen Rebranding und einer weiteren Produktreife. Die Kernfunktionalitäten sind bereits in der Kartenanwendung sichtbar, während die langfristige Ausrichtung in der Roadmap und Dokumentation beschrieben wird.
+Das Projekt befindet sich in der **Entwicklung zur Alpine Risk Intelligence Plattform**:
+
+- ✅ **Phase 1 (Grundlagen):** DEM, OSM, Kartografie teilweise umgesetzt
+- 🟡 **Phase 2 (Wetterintegration):** ALBINA/SLF Lawinenlage in Umsetzung, GeoSphere geplant
+- 🔬 **Phase 3+ (Gefahrenmodellierung, Mobile App, Internationale Expansion):** In Planung
+
+Die Roadmap, Datenquellen und Entwicklungs-Workflows sind vollständig dokumentiert. Neue Arbeitspakete können direkt aus [docs/ROADMAP.md](docs/ROADMAP.md) und [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) abgeleitet werden.
+
+Der Repository-Name ist weiterhin "Bergbedingungen", der öffentliche Produktname ist **Mountain Radar**.
 
 ## Lizenz und Hinweise
 
