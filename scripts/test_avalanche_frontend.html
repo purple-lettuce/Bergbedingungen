@@ -1,0 +1,186 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests Lawinen-Frontend (Datensatz, Popup, Symbole)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Prüft, dass Popup, Symbole und Logik für jede Quelle dieselben sind (Akzeptanztests AT-2, AT-3, AT-9).
+import { RECORD_FIELDS, toRecord } from '../js/avalanche_model.js';
+import { popupHtml, unknownRegionHtml } from '../js/avalanche_popup.js';
+import * as S from '../js/avalanche_symbols.js';
+import { levelAtAltitude, bulletinStatus } from '../js/avalanche_logic.js';
+
+var results = [];
+var queue = [];
+function test(name, fn) { queue.push({ name: name, fn: fn }); }
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function ok(cond, msg) { if (!cond) throw new Error(msg); }
+
+// Bulletins im Standardmodell, wie die Pipeline sie schreibt: Euregio-Art (Höhen bei den Stufen, Zusammenfassung,
+// Gefahrenmuster) und SLF-Art (Teilstufe, Höhen nur bei den Problemen, Gruppen, keine Zusammenfassung)
+var VALIDITY = { start: '2026-01-14T16:00:00Z', end: '2026-01-15T16:00:00Z' };
+var EUREGIO_BULLETIN = {
+  id: 'eu-1', source: 'euregio', publication_time: '2026-01-14T16:00:00Z', validity_period: VALIDITY, unscheduled: true, max_level: 3,
+  main_date: '2026-01-15',
+  danger_ratings: [{ value: 'considerable', level: 3, period: 'all_day', elevation: { lower_bound: 2200 } },
+    { value: 'moderate', level: 2, period: 'all_day', elevation: { upper_bound: 2200 } }],
+  danger_by_elevation: [{ basis: 'danger_rating', period: 'all_day', value: 'considerable', level: 3, elevation: { lower_bound: 2200 } },
+    { basis: 'danger_rating', period: 'all_day', value: 'moderate', level: 2, elevation: { upper_bound: 2200 } }],
+  elevation_thresholds: [2200],
+  avalanche_problems: [{ type: 'wind_slab', period: 'all_day', aspects: ['N', 'NE'], elevation: { lower_bound: 2200 }, snowpack_stability: 'poor', frequency: 'few', avalanche_size: 2 }],
+  text: { headline: 'Heikle Verhältnisse.', summary: 'Kurz.', sections: [{ key: 'activity', blocks: [{ type: 'paragraph', text: 'A <b>fett</b>' }] }] },
+  danger_patterns: ['DP10']
+};
+var SLF_BULLETIN = {
+  id: 'slf-1', source: 'slf', publication_time: '2026-01-14T16:00:00Z', validity_period: VALIDITY, unscheduled: false, max_level: 3,
+  max_subdivision: 'plus', next_update: '2026-01-15T16:00:00Z',
+  danger_ratings: [{ value: 'considerable', level: 3, period: 'all_day', subdivision: 'plus' }],
+  danger_by_elevation: [{ basis: 'avalanche_problem', period: 'all_day', value: 'considerable', level: 3, subdivision: 'plus', elevation: { lower_bound: 2200 }, problem_types: ['new_snow'] },
+    { basis: 'avalanche_problem', period: 'all_day', value: 'moderate', level: 2, elevation: { upper_bound: 1800 }, problem_types: ['wet_snow'] }],
+  elevation_thresholds: [1800, 2200],
+  avalanche_problems: [
+    { type: 'new_snow', period: 'all_day', aspects: ['NW', 'N', 'NE'].sort(), elevation: { lower_bound: 2200 }, danger_rating: { value: 'considerable', level: 3, subdivision: 'plus' },
+      comment: [{ type: 'paragraph', text: 'Erster Absatz.' }], core_zone_text: 'Gefahrenstufe 3+ über 2200m.' },
+    { type: 'wet_snow', period: 'all_day', aspects: ['S'], elevation: { upper_bound: 1800 }, danger_rating: { value: 'moderate', level: 2 } }],
+  problem_groups: [{ types: ['new_snow'], period: 'all_day', title: 'Trockene Lawinen' }, { types: ['wet_snow'], period: 'all_day', title: 'Nasse Lawinen' }],
+  text: { sections: [{ key: 'snowpack', blocks: [{ type: 'heading', level: 2, text: 'Schneedecke' }, { type: 'list', items: ['Eins', 'Zwei'] }] }] }
+};
+var SOURCES = {
+  euregio: { id: 'euregio', name: 'Quelle Eins', attribution: 'Anbieter Eins', attribution_url: 'https://eins.test/', license: 'CC BY 4.0', license_url: 'https://lizenz.test/', report_url: 'https://eins.test/{main_date}', report_url_fallback: 'https://eins.test/' },
+  slf: { id: 'slf', name: 'Quelle Zwei', attribution: 'Anbieter Zwei', attribution_url: 'https://zwei.test/', license: 'CC BY 4.0', license_url: 'https://lizenz.test/', report_url: 'https://zwei.test/', report_url_fallback: 'https://zwei.test/' }
+};
+function props(source, id) { return { source: source, country: id.slice(0, 2), region_id: id, region_name: 'Region ' + id, label_point: [11, 47] }; }
+function view(source, id, bulletin, status) {
+  return { record: toRecord(props(source, id), bulletin), source: SOURCES[source], status: status || 'valid' };
+}
+
+// ---------- AT-1 / AT-2: ein Datensatzmodell ----------
+
+test('toRecord: beide Quellen und Region ohne Bericht haben dieselben Felder in derselben Reihenfolge', function () {
+  var recs = [toRecord(props('euregio', 'AT-07-01'), EUREGIO_BULLETIN), toRecord(props('slf', 'CH-1111'), SLF_BULLETIN), toRecord(props('slf', 'CH-2222'), null)];
+  recs.forEach(function (r) { eq(Object.keys(r), RECORD_FIELDS); });
+  eq([recs[0].source, recs[0].country, recs[1].source, recs[1].country], ['euregio', 'AT', 'slf', 'CH']);
+  eq(recs[0].valid_from, VALIDITY.start); eq(recs[0].valid_until, VALIDITY.end);
+  eq(recs[0].highlights, 'Heikle Verhältnisse.'); eq(recs[0].bulletin_text.summary, 'Kurz.'); ok(!('headline' in recs[0].bulletin_text), 'headline nicht im Text');
+  eq(recs[0].aspects, ['N', 'NE']); eq(recs[1].aspects, ['N', 'NE', 'S', 'NW']);
+  eq([recs[2].bulletin_id, recs[2].publication_time, recs[2].max_level, recs[2].danger_ratings, recs[2].highlights], [null, null, null, [], null]);
+});
+
+test('toRecord: Typen gleich, egal aus welcher Quelle', function () {
+  var a = toRecord(props('euregio', 'AT-07-01'), EUREGIO_BULLETIN), b = toRecord(props('slf', 'CH-1111'), SLF_BULLETIN);
+  RECORD_FIELDS.forEach(function (k) {
+    if (a[k] === null || b[k] === null) return;
+    eq(Array.isArray(a[k]) + typeof a[k], Array.isArray(b[k]) + typeof b[k]);
+  });
+});
+
+test('echte Daten: jede Quelle in data/avalanche/ ergibt Datensätze mit demselben Modell', async function () {
+  var index = await (await fetch('../data/avalanche/index.json')).json();
+  ok(index.sources.length >= 2, 'mindestens zwei Quellen');
+  for (var entry of index.sources) {
+    var bdoc = await (await fetch('../data/avalanche/' + entry.bulletin_file)).json();
+    var gdoc = await (await fetch('../data/avalanche/' + entry.regions_file)).json();
+    ok(gdoc.features.length > 0, entry.id + ': keine Regionen');
+    gdoc.features.forEach(function (f) {
+      eq(Object.keys(f.properties), ['source', 'country', 'region_id', 'region_name', 'label_point']);
+      eq(f.properties.source, entry.id);
+      var info = bdoc.regions[f.properties.region_id] || {};
+      var rec = toRecord(f.properties, typeof info.bulletin === 'number' ? bdoc.bulletins[info.bulletin] : null);
+      eq(Object.keys(rec), RECORD_FIELDS);
+      var html = popupHtml({ record: rec, source: bdoc.source, status: rec.bulletin_id ? bulletinStatus({ start: rec.valid_from, end: rec.valid_until }, Date.parse(rec.valid_from) + 1000) : 'none' });
+      ok(html.indexOf('av-pop') !== -1 && !/undefined|\[object/.test(html), entry.id + ' ' + rec.region_id + ': Popup fehlerhaft');
+    });
+  }
+});
+
+// ---------- AT-3: dieselbe Popup-Komponente ----------
+
+test('popupHtml: dieselbe Funktion rendert Euregio- und SLF-Datensatz vollständig', function () {
+  var eu = popupHtml(view('euregio', 'AT-07-01', EUREGIO_BULLETIN)), ch = popupHtml(view('slf', 'CH-1111', SLF_BULLETIN));
+  [eu, ch].forEach(function (h) {
+    ok(h.indexOf('<div class="av-pop">') === 0, 'Wurzelelement');
+    ['Gültigkeit', 'Gefahrenstufe nach Höhe', 'Lawinenprobleme', 'av-foot'].forEach(function (s) { ok(h.indexOf(s) !== -1, s + ' fehlt'); });
+    ok(!/<script|undefined|null|\[object/.test(h), 'keine Rohwerte oder Skripte');
+  });
+  ok(eu.indexOf('Gefahrenmuster') !== -1 && eu.indexOf('GM 10: Frühjahrssituation') !== -1 && eu.indexOf('Zusammenfassung') !== -1, 'Euregio-Felder');
+  ok(ch.indexOf('3+') !== -1 && ch.indexOf('je Lawinenproblem') !== -1 && ch.indexOf('Trockene Lawinen') !== -1 && ch.indexOf('Zusammenfassung') === -1, 'SLF-Felder nur, weil sie gefüllt sind');
+  ok(eu.indexOf('&lt;b&gt;fett') !== -1, 'Texte aus den Daten werden maskiert');
+});
+
+test('popupHtml: Unterschiede ergeben sich nur aus den Daten, nicht aus der Quelle', function () {
+  // derselbe Berichtsinhalt unter zwei Quellen: identisches Popup bis auf Name der Quelle, Namensnennung und Links
+  var a = popupHtml(view('euregio', 'AT-07-01', EUREGIO_BULLETIN)), b = popupHtml(view('slf', 'AT-07-01', Object.assign({}, EUREGIO_BULLETIN, { source: 'slf' })));
+  function neutral(h) { return h.replace(/Quelle (Eins|Zwei)|Anbieter (Eins|Zwei)|https:\/\/(eins|zwei)\.test\/[^"]*/g, 'X'); }
+  eq(neutral(a), neutral(b));
+});
+
+test('popupHtml: Zustände ohne Bericht, abgelaufen und abgelaufen mit neuem Bericht', function () {
+  var none = popupHtml(view('slf', 'CH-2222', null, 'none')), expired = popupHtml(view('euregio', 'AT-07-01', EUREGIO_BULLETIN, 'expired')),
+    stale = popupHtml(view('euregio', 'AT-07-01', EUREGIO_BULLETIN, 'stale'));
+  ok(none.indexOf('Kein aktueller Lagebericht') !== -1 && none.indexOf('Gefahrenstufe nach Höhe') === -1, 'ohne Bericht');
+  ok(expired.indexOf('Kein aktueller Lagebericht') !== -1 && expired.indexOf('Lawinenprobleme') === -1, 'abgelaufen');
+  ok(stale.indexOf('Bericht abgelaufen') !== -1 && stale.indexOf('Lawinenprobleme') !== -1, 'abgelaufen, neuer folgt');
+  ok(unknownRegionHtml('<x>').indexOf('&lt;x&gt;') !== -1, 'Kennung maskiert');
+});
+
+test('popupHtml: Link auf den Lagebericht nur mit https, Hauptdatum nur im gültigen Format', function () {
+  var h = popupHtml(view('euregio', 'AT-07-01', EUREGIO_BULLETIN));
+  ok(h.indexOf('href="https://eins.test/2026-01-15"') !== -1, 'Hauptdatum im Link');
+  var evil = Object.assign({}, SOURCES.slf, { attribution_url: 'javascript:alert(1)', license_url: 'http://x.test' });
+  var h2 = popupHtml({ record: toRecord(props('slf', 'CH-1111'), SLF_BULLETIN), source: evil, status: 'valid' });
+  ok(h2.indexOf('javascript:') === -1 && h2.indexOf('href="http://') === -1, 'unsichere Links entfernt');
+});
+
+// ---------- AT-9: gemeinsame Symbolik ----------
+
+test('Gefahrenstufen: ein Modell, gleiche Darstellung für jede Quelle', function () {
+  S.LEVELS.forEach(function (l) {
+    var m = S.dangerLevel(l);
+    eq([m.level, typeof m.name, /^#[0-9a-f]{6}$/.test(m.color), m.css], [l, 'string', true, 'av-lv' + l]);
+  });
+  eq(S.dangerLevel(3).color, '#ff9900'); eq(S.dangerLevel(5).checkered, true); eq(S.dangerLevel(null), null);
+  var eu = toRecord(props('euregio', 'AT-07-01'), Object.assign({}, EUREGIO_BULLETIN, { max_level: 3, danger_ratings: [{ value: 'considerable', level: 3, period: 'all_day' }] }));
+  var ch = toRecord(props('slf', 'CH-1111'), Object.assign({}, SLF_BULLETIN, { max_subdivision: undefined }));
+  eq(levelAtAltitude(eu, null), levelAtAltitude(ch, null));                    // Stufe 3: gleiches Ergebnis
+  eq(S.levelChip(eu.max_level, eu.max_subdivision), S.levelChip(ch.max_level, ch.max_subdivision));
+  ok(S.levelChip(3).indexOf('av-lv3') !== -1, 'Stufe 3 -> av-lv3');
+  eq(S.levelLabel(3, 'plus'), '3+'); eq(S.levelChip(null), '');
+});
+
+test('Symbolmodell vollständig: Expositionen, Lawinenprobleme, Gefahrenmuster', async function () {
+  eq(S.ASPECTS.map(function (a) { return a.id; }), ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']);
+  eq(S.aspectsLabel(S.ASPECTS.map(function (a) { return a.id; })), 'Alle Expositionen'); eq(S.aspectsLabel(['N', 'SE']), 'Nord, Süd-Ost');
+  ok(S.roseSvg(['N', 'S']).split('fill="#19abff"').length === 3, 'zwei markierte Richtungen');
+  for (var type of Object.keys(S.PROBLEM_TYPES)) {
+    var m = S.problemModel(type);
+    ok(m.name && m.icon, type);
+    ok((await fetch('../' + S.ICON_BASE + m.icon)).ok, 'Piktogramm fehlt: ' + m.icon);
+  }
+  eq(S.problemModel('neu_in_frankreich'), { type: 'neu_in_frankreich', name: 'neu_in_frankreich', icon: null });
+  for (var l = 1; l <= 5; l++) ok((await fetch('../' + S.ICON_BASE + 'pictos/levels_' + l + '_' + l + '.webp')).ok, 'Stufenpiktogramm ' + l);
+  eq(Object.keys(S.DANGER_PATTERNS).length, 10); eq(S.dangerPatternLabel('DP6'), 'GM 6: Lockerer Schnee und Wind'); eq(S.dangerPatternLabel('XY'), 'XY');
+});
+
+// ---------- AT-2: keine Sonderlogik je Quelle im Frontend ----------
+
+test('Quellcode der Lawinenmodule enthält keine Verzweigung nach Quelle oder Land', async function () {
+  var files = ['avalanche.js', 'avalanche_popup.js', 'avalanche_legend.js', 'avalanche_logic.js', 'avalanche_symbols.js', 'avalanche_model.js'];
+  for (var f of files) {
+    var code = await (await fetch('../js/' + f)).text();
+    code = code.replace(/https?:\/\/[^\s'")]+/g, '').replace(/vendor\/albina\//g, '').replace(/\/\/[^\n]*/g, '');
+    var hit = code.match(/\b(slf|euregio|albina)\b/i) || code.match(/\.(source|country)\s*[!=]==?/) || code.match(/['"](AT|CH|IT|FR|SI)['"]/);
+    ok(!hit, f + ': Sonderlogik gefunden: ' + (hit && hit[0]));
+  }
+});
+
+(async function run() {
+  for (var t of queue) {
+    try { await t.fn(); results.push({ name: t.name, ok: true }); } catch (e) { results.push({ name: t.name, ok: false, error: String(e.message || e) }); }
+  }
+  var failed = results.filter(function (r) { return !r.ok; });
+  document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+})();
+</script>

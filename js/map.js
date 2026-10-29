@@ -3,6 +3,9 @@
 // Kartenstil, Ebenen und Legenden bedient ausschließlich das Bedienfeld "Karten & Layer" (js/layers.js).
 // Leaflet (`L`) wird vorher über vendor/leaflet/leaflet.js global geladen.
 
+import { esc } from './html.js';
+export { esc };   // gemeinsame Maskierung, liegt in html.js, damit reine Module sie ohne Karte nutzen können
+
 export var map = L.map('map', { zoomControl: true }).setView([47.2, 11.4], 10);
 
 // ---------- Gemeinsame Hilfen ----------
@@ -15,12 +18,6 @@ export var el = {
   fUpcoming: document.getElementById('f-upcoming'),
   wx: document.getElementById('wx')
 };
-
-export function esc(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-  });
-}
 
 export function setStatus(msg, isErr) {
   el.status.textContent = msg;

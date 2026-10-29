@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Führt die JavaScript-Tests (scripts/test_avalanche_logic.html) in einem Headless-Browser aus.
+"""Führt die JavaScript-Tests (scripts/test_avalanche_logic.html, scripts/test_avalanche_frontend.html) in einem Headless-Browser aus.
 
 Gebraucht wird Chrome, Chromium oder Edge. Ohne Browser endet das Skript mit Hinweis (Exit 0), mit
 --require-browser mit Fehler. Aufruf: python3 scripts/run_js_tests.py [--require-browser]
@@ -16,6 +16,7 @@ import tempfile
 import threading
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html"]
 CANDIDATES = [
     os.environ.get("BROWSER", ""),
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
@@ -49,7 +50,19 @@ def main(argv):
         return 1 if "--require-browser" in argv else 0
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=ROOT))
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    url = "http://127.0.0.1:%d/scripts/test_avalanche_logic.html" % server.server_address[1]
+    base = "http://127.0.0.1:%d/scripts/" % server.server_address[1]
+    exit_code = 0
+    try:
+        for page in PAGES:
+            print("== " + page)
+            exit_code |= run_page(browser, base + page)
+    finally:
+        server.shutdown()
+    return exit_code
+
+
+def run_page(browser, url):
+    import html
     with tempfile.TemporaryDirectory() as profile:
         cmd = [browser, "--headless=new", "--disable-gpu", "--no-sandbox", "--no-first-run", "--user-data-dir=" + profile,
                "--virtual-time-budget=10000", "--dump-dom", url]
@@ -58,13 +71,10 @@ def main(argv):
         except subprocess.TimeoutExpired:
             print("Browser-Zeitüberschreitung")
             return 1
-        finally:
-            server.shutdown()
     m = re.search(r'<pre id="result">(.*?)</pre>', out, re.S)
     if not m:
         print("Kein Testergebnis im Browser (JavaScript-Fehler beim Laden?)")
         return 1
-    import html
     res = json.loads(html.unescape(m.group(1)))
     for r in res["results"]:
         print(("ok   " if r["ok"] else "FEHL ") + r["name"] + ("" if r["ok"] else ": " + r["error"]))

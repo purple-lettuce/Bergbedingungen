@@ -1,1 +1,1 @@
-{"schema":"mountain-radar/avalanche/1","sources":[{"id":"euregio","bulletin_file":"euregio.json","regions_file":"euregio_regions.geojson"},{"id":"slf","bulletin_file":"slf.json","regions_file":"slf_regions.geojson"}]}
+{"schema":"mountain-radar/avalanche/2","sources":[{"id":"euregio","bulletin_file":"euregio.json","regions_file":"euregio_regions.geojson"},{"id":"slf","bulletin_file":"slf.json","regions_file":"slf_regions.geojson"}]}

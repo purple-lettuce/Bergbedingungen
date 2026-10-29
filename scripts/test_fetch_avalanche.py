@@ -12,8 +12,8 @@ import fetch_avalanche as fa
 import test_avalanche_model as tm
 
 NOW = datetime.datetime(2026, 1, 15, 8, 0, tzinfo=datetime.timezone.utc)
-SLF = next(x for x in s.SOURCES if x["id"] == "slf")
-EUREGIO = next(x for x in s.SOURCES if x["id"] == "euregio")
+SLF = s.get_provider("slf")
+EUREGIO = s.get_provider("euregio")
 SLF_NAMES = {"sectors": [{"sector_id": "4115", "sector_name": "Glarus Nord", "sector_names": {"de": "Glarus Nord (de)"}},
                          {"sector_id": "4116", "sector_name": "Glarus Süd", "sector_names": {}}]}
 
@@ -46,13 +46,13 @@ def setup(table):
 
 
 def slf_table(bulletins, polygons=("CH-4115", "CH-4116")):
-    return {SLF["bulletin_url"]: {"bulletins": bulletins}, SLF["names_url"]: SLF_NAMES,
+    return {SLF.bulletin_url: {"bulletins": bulletins}, SLF.names_url: SLF_NAMES,
             fa.REGIONS_URL.format(code="CH"): {"features": [square(p, 8 + i * .2) for i, p in enumerate(polygons)]}}
 
 
 def euregio_table(bulletins):
-    t = {EUREGIO["bulletin_url"]: {"bulletins": bulletins}}
-    for code in EUREGIO["geometry_codes"]:
+    t = {EUREGIO.bulletin_url: {"bulletins": bulletins}}
+    for code in EUREGIO.geometry_codes:
         t[fa.REGIONS_URL.format(code=code)] = {"features": [square("AT-07-01")] if code == "AT-07" else []}
     return t
 
@@ -72,7 +72,7 @@ def test_slf_off_season_writes_polygons_without_bulletins():
     assert doc["regions"] == {"CH-4115": {"name": "Glarus Nord (de)", "country": "CH", "bulletin": None},
                               "CH-4116": {"name": "Glarus Süd", "country": "CH", "bulletin": None}}
     geo = load("slf_regions.geojson")
-    assert [f["properties"]["id"] for f in geo["features"]] == ["CH-4115", "CH-4116"] and geo["source"] == "slf"
+    assert [f["properties"]["region_id"] for f in geo["features"]] == ["CH-4115", "CH-4116"] and geo["source"] == "slf"
     assert all(len(f["properties"]["label_point"]) == 2 for f in geo["features"])
     tmp.cleanup()
 
@@ -111,7 +111,7 @@ def test_euregio_without_regions_is_an_error():
 
 def test_names_failure_is_not_fatal():
     t = slf_table([tm.slf_bulletin()])
-    t[SLF["names_url"]] = RuntimeError("down")
+    t[SLF.names_url] = RuntimeError("down")
     tmp = setup(t)
     fa.fetch_source(SLF, NOW)
     assert load("slf.json")["regions"]["CH-4116"]["name"] == "Name CH-4116"
@@ -121,7 +121,7 @@ def test_names_failure_is_not_fatal():
 def test_source_failure_is_isolated_and_reported():
     table = euregio_table([tm.euregio_bulletin()])
     table.update(slf_table([]))
-    table[SLF["bulletin_url"]] = RuntimeError("SLF down")
+    table[SLF.bulletin_url] = RuntimeError("SLF down")
     tmp = setup(table)
     argv_status = fa.main([])
     assert argv_status == 1                                                       # Fehler gemeldet
@@ -137,7 +137,7 @@ def test_failed_source_keeps_previous_files_and_index_entry():
     tmp = setup(table)
     assert fa.main([]) == 0
     old = load("slf.json")
-    table[SLF["bulletin_url"]] = RuntimeError("SLF down")
+    table[SLF.bulletin_url] = RuntimeError("SLF down")
     assert fa.main([]) == 1
     assert load("slf.json") == old and [x["id"] for x in load("index.json")["sources"]] == ["euregio", "slf"]
     tmp.cleanup()
@@ -167,20 +167,19 @@ def test_write_if_changed_heartbeat():
 
 
 def test_in_scope_and_slf_names():
-    assert s.in_scope(SLF, "CH-1111") and not s.in_scope(SLF, "CHX-1") and not s.in_scope(SLF, "AT-07-01")
-    assert s.in_scope(EUREGIO, "IT-32-BZ-08-03") and s.in_scope(EUREGIO, "AT-07") and not s.in_scope(EUREGIO, "AT-02-01")
-    assert s.slf_names(SLF_NAMES) == {"CH-4115": "Glarus Nord (de)", "CH-4116": "Glarus Süd"}
+    assert SLF.in_scope("CH-1111") and not SLF.in_scope("CHX-1") and not SLF.in_scope("AT-07-01")
+    assert EUREGIO.in_scope("IT-32-BZ-08-03") and EUREGIO.in_scope("AT-07") and not EUREGIO.in_scope("AT-02-01")
+    assert SLF.parse_names(SLF_NAMES) == {"CH-4115": "Glarus Nord (de)", "CH-4116": "Glarus Süd"}
 
 
 def test_registry_is_consistent():
-    ids = [x["id"] for x in s.SOURCES]
-    assert len(ids) == len(set(ids))
-    for x in s.SOURCES:
-        for k in fa.META_KEYS:
-            assert x.get(k), (x["id"], k)
-        assert x["license"] and x["attribution"] and x["geometry_codes"] and x["region_codes"]
-        if x.get("names_url"):
-            assert x["id"] in s.NAME_PARSERS
+    ids = [p.id for p in s.PROVIDERS]
+    assert len(ids) == len(set(ids)) and ids == ["euregio", "slf"]
+    for p in s.PROVIDERS:
+        p.validate()
+        assert set(fa.META_KEYS) <= set(p.meta()) and set(p.meta()) - set(fa.META_KEYS) <= {"notes"}
+        assert all(p.meta()[k] for k in fa.META_KEYS)
+    assert s.get_provider("slf") is SLF and s.get_provider("gibtesnicht") is None
 
 
 if __name__ == "__main__":
