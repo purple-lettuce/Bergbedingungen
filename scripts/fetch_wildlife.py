@@ -35,6 +35,7 @@ OUT_PROBE = os.path.join(DATA_DIR, "wildlife_probe.json")
 
 NESTED_SAMPLE = 5          # so viele Gebiete werden zuerst probeweise über den verschachtelten Endpunkt abgefragt
 KEYWORDS = ("wildlife", "entit", "species", "animal")
+FALLBACK_ENTITY_ENDPOINTS = ("/protected-entities",)   # nur wenn das OpenAPI-Schema nicht lesbar ist
 
 
 # ---------- Schema (OpenAPI) ----------
@@ -162,7 +163,12 @@ def main():
     # 0. Offizielles Schema: welche Endpunkte zu Wildlife/Schutzgütern gibt es, welche Felder liefern sie?
     schema = load_schema()
     paths = relevant_paths(schema)
-    probe["schema"] = {"available": schema is not None, "relevant_paths": paths}
+    if schema is None:
+        # Ohne lesbares Schema (z. B. fehlt lokal das Paket pyyaml) bleibt nur der bekannte Schutzgut-Endpunkt der API
+        # (laut früherem Diagnosebericht vorhanden). Er wird abgefragt wie ein im Schema deklarierter Endpunkt.
+        paths = {p: {"get": []} for p in FALLBACK_ENTITY_ENDPOINTS}
+        print("Hinweis: Schema nicht lesbar, verwende", ", ".join(FALLBACK_ENTITY_ENDPOINTS))
+    probe["schema"] = {"available": schema is not None, "relevant_paths": paths if schema is not None else {}}
     print("OpenAPI-Schema:", "abrufbar" if schema else "nicht abrufbar")
     for p, m in paths.items():
         print("  ", p, {k: v for k, v in m.items()})
@@ -222,12 +228,23 @@ def main():
               "Siehe data/wildlife_probe.json und docs/WILDLIFE_ANALYSE.md (Ursache und Lösungswege).")
 
     os.makedirs(DATA_DIR, exist_ok=True)
-    with open(OUT_ENTITIES, "w", encoding="utf-8") as f:
-        json.dump({"generated": probe["generated"], "source": BASE,
-                   "entities": {str(k): v for k, v in sorted(entities.items()) if k in wanted or not wanted},
-                   "types": {str(k): v for k, v in sorted(types.items()) if k in wanted or not wanted},
-                   "links": {str(k): v for k, v in sorted(links.items())}},
-                  f, ensure_ascii=False, separators=(",", ":"))
+    keep_old = False
+    if wanted and not resolved and os.path.exists(OUT_ENTITIES):
+        # Ein Lauf ohne Namen (z. B. API nicht erreichbar oder Endpunkt geändert) darf eine brauchbare Datei nicht leeren.
+        try:
+            with open(OUT_ENTITIES, encoding="utf-8") as f:
+                keep_old = bool((json.load(f) or {}).get("entities"))
+        except (OSError, ValueError):
+            keep_old = False
+    if keep_old:
+        print("Hinweis: Die vorhandene data/wildlife_entities.json bleibt unverändert (der Lauf hat keine Namen geliefert).")
+    else:
+        with open(OUT_ENTITIES, "w", encoding="utf-8") as f:
+            json.dump({"generated": probe["generated"], "source": BASE,
+                       "entities": {str(k): v for k, v in sorted(entities.items()) if k in wanted or not wanted},
+                       "types": {str(k): v for k, v in sorted(types.items()) if k in wanted or not wanted},
+                       "links": {str(k): v for k, v in sorted(links.items())}},
+                      f, ensure_ascii=False, separators=(",", ":"))
     with open(OUT_PROBE, "w", encoding="utf-8") as f:
         json.dump(probe, f, ensure_ascii=False, indent=2)
     print(OUT_ENTITIES)

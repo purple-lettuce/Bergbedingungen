@@ -121,6 +121,42 @@ def test_collect_types_nested_object_with_own_id():
     assert types == {4: "FAUNA"}
 
 
+def test_unreadable_schema_falls_back_to_known_entity_endpoint():
+    import tempfile
+    link = [{"id": 1, "protected_area_uuid": "a", "protected_entity_id": 4}]
+    calls = []
+
+    def fake(url):
+        calls.append(url.replace(fw.BASE, ""))
+        if url.endswith("/wildlife?fields=all"):
+            return link
+        if url.endswith("/protected-entities?fields=all"):
+            return [{"id": 4, "name_de": "Steinadler", "type": "FAUNA"}]
+        return []
+
+    out = run(fake, tempfile, schema=None)                                   # Schema nicht lesbar (z. B. kein pyyaml)
+    assert out["entities"] == {"4": "Steinadler"} and out["types"] == {"4": "FAUNA"}, out
+    assert "/protected-entities?fields=all" in calls
+
+
+def test_failed_run_keeps_existing_good_entities_file():
+    import json
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        fw.OUT_ENTITIES = os.path.join(d, "e.json")
+        fw.OUT_PROBE = os.path.join(d, "p.json")
+        fw.DATA_DIR = d
+        fw.load_schema = lambda: None
+        fw.PAUSE = 0
+        good = {"generated": "x", "entities": {"4": "Steinadler"}, "types": {"4": "FAUNA"}, "links": {"1": 4}}
+        json.dump(good, open(fw.OUT_ENTITIES, "w"))
+        link = [{"id": 1, "protected_area_uuid": "a", "protected_entity_id": 4}]
+        fw.fetch_all = lambda url: link if url.endswith("/api/v2/wildlife?fields=all") else []     # Verknüpfungen ohne Namen
+        fw.main()
+        assert json.load(open(fw.OUT_ENTITIES)) == good                      # nicht geleert
+        assert json.load(open(fw.OUT_PROBE))["result"]["entities_resolved"] == 0   # Diagnose wird trotzdem geschrieben
+
+
 def run(fake_fetch_all, tempfile, schema=None):
     import json
     with tempfile.TemporaryDirectory() as d:
