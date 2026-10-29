@@ -10,15 +10,15 @@ Bergbedingungen
 Status:
 Übergangsphase vor möglichem Rebranding.
 
-# 🏔️ Bergbedingungen Roadmap
+# 🏔️ Mountain Radar Roadmap
 
-> Version: 1.0
+> Version: 2.0
 >
 > Letzte Aktualisierung: Oktober 2026
 >
-> Dieses Dokument beschreibt die langfristige Vision, die strategische Ausrichtung und die Priorisierung der Entwicklung von Bergbedingungen.
+> Dieses Dokument beschreibt die langfristige Vision, die strategische Ausrichtung und die technische Roadmap der Entwicklung von Mountain Radar / Bergbedingungen.
 >
-> Technische Details, Datenquellen, APIs und Implementierungsinformationen werden in separaten Dokumenten dokumentiert.
+> Technische Details, Datenquellen und APIs sind in DATENQUELLEN.md dokumentiert.
 
 ---
 
@@ -26,9 +26,9 @@ Status:
 
 Nach Abschluss eines Arbeitspakets müssen folgende Dokumente geprüft werden:
 
-- ROADMAP.md
+- ROADMAP.md (dieses Dokument)
 - DATENQUELLEN.md
-- IDEENSAMMLUNG.md
+- docs/WORKFLOW.md
 
 Die Dokumentation ist die maßgebliche Quelle für den Projektstatus.
 
@@ -36,14 +36,11 @@ Die Dokumentation ist die maßgebliche Quelle für den Projektstatus.
 
 # Vision
 
-Bergbedingungen entwickelt sich von einer Kartenanwendung zu einem digitalen Tourenassistenten für den Alpenraum.
+Mountain Radar entwickelt sich von einer Kartenanwendung zu einem digitalen Tourenassistenten für den Alpenraum.
 
-Ziel ist es, sämtliche für Bergsportler relevanten Informationen an einem Ort zusammenzuführen und diese später intelligent auszuwerten.
+Die langfristige Mission ist **ALPINE RISK INTELLIGENCE**: Ein Nutzer lädt einen GPX Track hoch oder plant eine Route. Mountain Radar analysiert über 14 verschiedene Risikofaktoren und erstellt daraus eine evidenzbasierte Risikobewertung mit konkreten Warnungen und Empfehlungen.
 
-Ein Nutzer soll künftig nicht mehr zahlreiche Webseiten einzeln besuchen müssen, um sich über Wetter, Schutzgebiete, Lawinenlage, Sperrungen oder Risiken zu informieren.
-
-Stattdessen soll Bergbedingungen die Frage beantworten:
-
+**Zentrale Frage für den Nutzer:**
 > "Wenn ich diese Tour morgen gehe, worauf muss ich achten?"
 
 ---
@@ -90,486 +87,191 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 4 | Unfalllayer | Recherche |
 | 5 | Unfall-Heatmap | Konzept |
 | 6 | Digiway Absturzrisiko | Konzept |
-| 7 | GPX Upload | Geplant |
-| 8 | Tourenanalyse | Geplant |
-| 9 | Routing | Geplant |
+| 7 | GPX Upload & Tourenanalyse | Geplant |
+| 8 | Mountain Radar Toolbox | Planung (Website + Mobile) |
+| 9 | Alpine Risk Engine | Planung (Phase 3) |
 | 10 | Design & UX | Geplant |
-| 11 | KI-Assistent | Zukunft |
-| 12 | PWA & Offline | Zukunft |
-| 13 | Basemap Austria Orthofotos | Geplant |
+| 11 | PWA & Offline | Zukunft |
+| 12 | Mobile App | Zukunft (Phase 4+) |
 
 ---
 
-# Entwicklungsphasen
-
----
-
-# Phase 1 — Schutzgebiete
-
-## Ziel
-
-Schutzgebiete verständlich, visuell ansprechend und praxisnah darstellen.
-
----
-
-## Status
-
-🟡 In Arbeit
-
-Fortschritt: ca. 90 %
-
----
-
-## Bereits umgesetzt
-
-- [x] Schutzgebiete als Layer
-- [x] Schutzgebietskategorien
-- [x] Farben nach Schutzgebietstyp
-- [x] Schutzgebietspopup
-- [x] Beschreibung im Popup
-- [x] Kategorie im Popup
-- [x] Wildlife im Popup
-- [x] Regeln im Popup
-- [x] Wildlife-Datenpipeline
-- [ ] Tiernamen im Popup: Auflösung von `protected_entity_id` in Arbeit, Stand und Lösungswege in [WILDLIFE_ANALYSE.md](WILDLIFE_ANALYSE.md)
-- [x] GitHub Workflow zur Aktualisierung
-- [x] Automatische GeoJSON-Erzeugung
-
----
-
-## Noch offen
-
-- [ ] Legende nach Schutzgebietstyp
-- [ ] Filter nach Schutzgebietskategorie
-- [ ] Darstellung der Regeln verbessern
-- [ ] Darstellung der Wildlife-Einträge verbessern
-- [ ] Icons für Regeln
-- [ ] Icons für Wildlife
-
----
-
-## Meilenstein
-
-Phase 1 gilt als abgeschlossen, wenn:
-
-- Legende vorhanden ist
-- Filter vorhanden ist
-- Schutzgebietsinformationen vollständig dargestellt werden
-
----
-
-# Phase 2 — Alpine Risiken
-
-## Ziel
-
-Zusätzliche Risikoinformationen für den Alpenraum sichtbar machen.
-
----
-
-## Status
-
-🟡 In Arbeit
-
-Fortschritt: ca. 15 % (2.1 Lawinenlage Euregio und Schweiz umgesetzt, übrige Punkte offen)
-
----
-
-# 2.1 Lawinenlage
-
-## Ziel
-
-Aktuelle Lawinenlage direkt auf der Karte visualisieren. Schaffung der Datengrundlage
-für spätere Tourenanalysen.
-
-
-### Regionen
-
-- [x] Euregio Tirol, Südtirol und Trentino (ALBINA, 90 Mikroregionen)
-- [x] Schweiz (SLF, 149 Warnregionen)
-- [ ] Österreich (übrige Bundesländer; die EUREGIO-Datei enthält teils Kärnten, bewusst nicht übernommen)
-- [ ] Frankreich (Empfehlung und Quellenlage: Analyse, Abschnitt 9)
-- [ ] Italien (außerhalb der Euregio, siehe Analyse, Abschnitt 9)
-- [ ] Slowenien (siehe Analyse, Abschnitt 9)
-
-### Umgesetzt (Euregio und Schweiz)
-
-Details, Entscheidungen und Datenmodell: [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md)
-
-- [x] Gemeinsames Datenmodell und Pipeline für mehrere Länder: je Quelle ein Eintrag in der Registry, ein Normalisierer für CAAML v6, gemeinsame Geometrie aus eaws-regions
-- [x] Lawinenregionen als Polygone
-- [x] Gefahrenstufen in den offiziellen Farben, Stufe 5 als rot-schwarzes Schachbrett; Teilstufen der Schweiz (3-, 3=, 3+)
-- [x] Zentrales anklickbares Symbol je Region (Position als Pol der Unzugänglichkeit in der Pipeline berechnet)
-- [x] Darstellung nach Höhenstufe: Färbung nach höchster Stufe (wie ALBINA und SLF), Höhenaufteilung im Popup (Euregio aus den Gefahrenstufen, Schweiz aus den Lawinenproblemen, weil der SLF keine Höhe bei den Gefahrenstufen angibt), Höhenwahl in der Legende. Eine echte Teilung der Polygone ist mit den offenen Daten nicht möglich (Begründung in der Analyse)
-- [x] Popup mit Veröffentlichung, Gültigkeit, Lawinenproblemen (Höhenbereich, Expositionen), Zusammenfassung (wo die Quelle sie liefert), Bulletintext, offizielle Symbole
-- [x] Verlinkung auf den Lagebericht (Links aus der ALBINA-Website abgeleitet bzw. SLF-Seite, Deep Links nicht geprüft)
-- [x] Automatische Aktualisierung über GitHub Actions (zweimal täglich, eine Action für alle Quellen)
-- [x] Abgelaufene Berichte und Quellen ohne aktives Bulletin werden nicht als Gefahrenstufe dargestellt
-- [x] Tests: Python (38), JavaScript-Logik im Headless-Browser (12), Frontend mit archivierten Berichten vom 15.03.2026 in einem Headless-Browser geprüft
-
-### Offen (Lawinenlage)
-
-- [ ] **Test mit aktuellen, gültigen Berichten** im Winter 2026/27 (erst nach dem Saisonstart der Lawinenwarndienste möglich); Prüfung auf echten Mobilgeräten
-- [ ] Lizenz der ALBINA-Grafiken in `vendor/albina/` klären, SLF nach eigenen Icons fragen (siehe Analyse, Abschnitt 10)
-- [ ] Mailingliste des SLF abonnieren (data@slf.ch), Hinweise zu Änderungen und Unterbrüchen
-- [ ] Ebene standardmäßig einblenden, sobald Berichte aktuell sind (Entscheidung nach dem Praxistest)
-- [ ] Weitere Länder anbinden (Reihenfolge und Vorgehen: Analyse, Abschnitt 9)
-
-### Langfristig
-
-- [ ] Analyse entlang von GPX-Tracks
-- [ ] Analyse geplanter Routen
-
----
-
-# 2.2 Unfallereignisse
-
-## Ziel
-
-Dokumentierte alpine Unfälle sichtbar machen.
-
-### Geplante Datenquellen
-
-- [ ] Kuratorium für Alpine Sicherheit (Österreich)
-- [ ] Bayerisches Kuratorium für Alpine Sicherheit
-
-### Geplante Funktionen
-
-- [ ] Unfallpunkte auf Karte
-- [ ] Popup-Informationen
-- [ ] Zeitfilter
-- [ ] Unfalltypfilter
-
-### Unfalltypen
-
-- Lawinenunfall
-- Absturz
-- Orientierungslosigkeit
-- Blockierung
-- Bergrettungseinsatz
-- Sonstige Alpinunfälle
-
----
-
-# 2.3 Unfall-Heatmap
-
-## Ziel
-
-Risikohotspots sichtbar machen.
-
-### Geplante Funktionen
-
-- [ ] Heatmap-Layer
-- [ ] Unfallstatistische Verdichtung
-- [ ] Zeitbereichsfilter
-- [ ] Unfalltypfilter
-
-### Nutzen
-
-Nutzer erkennen bereits vor der Planung:
-
-- häufige Unfallgebiete
-- kritische Regionen
-- Gefahrenkonzentrationen
-
----
-
-# 2.4 Digiway Absturzrisiko
-
-## Ziel
-
-Berechnetes Absturzrisiko alpiner Wanderwege visualisieren.
-
-### Geplante Funktionen
-
-- [ ] Risikolayer
-- [ ] Darstellung nach Risikoklassen
-- [ ] Popup mit Zusatzinformationen
-- [ ] Einbindung in Tourenanalyse
-
-### Nutzen
-
-Zusätzliche Risikobewertung für:
-
-- Bergwanderer
-- Trailrunner
-- Hochtourengeher
-
----
-
-## Meilenstein
-
-Phase 2 gilt als abgeschlossen, wenn:
-
-- Lawinenlage verfügbar ist
-- Unfallereignisse angezeigt werden
-- Heatmap vorhanden ist
-- Absturzrisiko integriert ist
-
----
-
-# Phase 3 — GPX Analyse
-
-## Ziel
-
-Bestehende Touren automatisch analysieren.
-
----
-
-## Status
-
-⚪ Geplant
-
-Fortschritt: 0 %
-
----
-
-# 3.1 GPX Upload
-
-### Funktionen
-
-- [ ] GPX-Dateien hochladen
-- [ ] GPX auf Karte darstellen
-- [ ] GPX speichern
-- [ ] GPX entfernen
-
----
-
-# 3.2 Tourenanalyse
-
-### Analysebereiche
-
-- [ ] Schutzgebiete
-- [ ] Wildlife
-- [ ] Regeln
-- [ ] Sperrungen
-- [ ] Wetter
-- [ ] Lawinenlage
-- [ ] Unfallereignisse
-- [ ] Unfall-Heatmap
-- [ ] Absturzrisiko
-
----
-
-## Beispielausgabe
-
-```text
-✅ Keine Sperrungen
-
-⚠ Wildruhezone betroffen
-
-⚠ Drei relevante Schutzgebiete
-
-⚠ Lawinenstufe 3
-
-⚠ Erhöhtes Absturzrisiko
-
-⚠ Unfall-Hotspot entlang der Route
+# 📊 Roadmap-Übersicht — Alpine Risk Intelligence
+
+Mountain Radar wird in **5 technischen Phasen** entwickelt:
+
+```
+Phase 1: Grundlagen (Q4 2026 - Q1 2027)
+├─ DEM, OSM, Kartografie
+├─ Geländeanalyse-Module
+├─ Website Toolbox (Koordinaten, Höhe, Entfernungen)
+└─ GPX-Import & Visualisierung
+
+Phase 2: Wetterintegration (Q1 - Q2 2027)
+├─ GeoSphere-Integration
+├─ ALBINA & SLF Lawinenlage
+├─ Tourenwarnungen
+└─ Website Wetter-am-Punkt erweitert
+
+Phase 3: Gefahrenmodellierung (Q2 - Q3 2027)
+├─ Unfallanalyse-Engine
+├─ Steinschlag- & Muren-Indikatoren
+├─ Regionale Daten (Tirol)
+└─ Alpine Risk Engine (Beta)
+
+Phase 4: Mobile App & Internationale Expansion (Q4 2027 - Q1 2028)
+├─ Mobile App Framework
+├─ Mobile Toolbox (Kompass, Hangneigungsmesser, GPS Status, etc.)
+├─ Smartphone Sensor Integration
+├─ Météo-France, AINEVA, ARSO Integration
+└─ Multi-Land Coverage
+
+Phase 5: Production & Optimierung (Q1 2028+)
+├─ Alpine Risk Engine (GA)
+├─ Performance-Optimierung
+├─ Benutzerforschung & Refinement
+├─ Community-Features
+└─ Erweiterte Toolbox-Features (Sonnenstand, Offline-Nav, etc.)
 ```
 
 ---
 
-## Meilenstein
+# 🎯 Kernmodule
 
-Phase 3 gilt als abgeschlossen, wenn GPX-Dateien vollständig analysiert werden können.
+Diese 10 Module sind das Rückgrat der Alpine Risk Intelligence:
 
----
+| Modul | Status | Phase | Priorität |
+|---|---|---|---|
+| **Geländeanalyse** | In Arbeit | 1 | 🔴 Sehr hoch |
+| **GPX Analyse** | In Arbeit | 1 | 🔴 Sehr hoch |
+| **Infrastruktur** | In Arbeit | 1 | 🔴 Sehr hoch |
+| **Wetterrisiko** | Geplant | 2 | 🔴 Sehr hoch |
+| **Lawinenlage** | In Umsetzung | 2 | 🔴 Sehr hoch |
+| **Unfallanalyse** | Geplant | 3 | 🟠 Hoch |
+| **Schutzgebiete** | Recherche | 3 | 🟡 Mittel |
+| **Wildlife** | Recherche | 3 | 🟡 Mittel |
+| **Alpine Risk Engine** | Design | 3-5 | 🔴 Sehr hoch |
+| **Mountain Radar Toolbox** | Design | 1-5 | 🟡 Mittel-Hoch |
 
-# Phase 4 — Routing & Tourenplanung
-
-## Ziel
-
-Touren direkt innerhalb von Bergbedingungen planen.
-
----
-
-## Status
-
-⚪ Geplant
-
-Fortschritt: 0 %
-
----
-
-## Funktionen
-
-- [ ] Startpunkt setzen
-- [ ] Zielpunkt setzen
-- [ ] Route berechnen
-- [ ] Route bearbeiten
-- [ ] Route speichern
+Datenquellen für alle Module sind in **DATENQUELLEN.md** dokumentiert.
 
 ---
 
-## Erweiterte Analyse
+# 🧰 Mountain Radar Toolbox
 
-Eine geplante Route wird automatisch analysiert hinsichtlich:
+**Mission:** Eine zentrale Sammlung alpiner Werkzeuge für Tourenplanung, Orientierung und Risikobeurteilung — sowohl in der Web-App als auch in der zukünftigen Mobile App.
 
-- Schutzgebieten
-- Regeln
-- Wildlife
-- Sperrungen
-- Wetter
-- Lawinenlage
-- Unfallereignissen
-- Absturzrisiko
+**Vision:** Know before you go. — Mit der Toolbox können Nutzer schnell Koordinaten prüfen, Entfernungen messen, Höhen bestimmen und GPS-Daten validieren.
 
----
+## Website Toolbox (Phase 1-2)
 
-## Meilenstein
+- **WEB-T1:** Wetter am Punkt ✅ (Existierend, Phase 2)
+- **WEB-T2:** Koordinaten anzeigen (Phase 1)
+- **WEB-T3:** Höhe anzeigen (Phase 1)
+- **WEB-T4:** Entfernung zum Standort (Phase 1)
+- **WEB-T5:** Entfernung zwischen zwei Punkten (Phase 1)
+- **WEB-T6:** Höhenprofil entlang Linie (Phase 1)
 
-Phase 4 gilt als abgeschlossen, wenn Touren vollständig innerhalb der Anwendung geplant und bewertet werden können.
+## Mobile Toolbox (Phase 4-5)
 
----
+- **MOB-T1:** Kompass (Phase 4)
+- **MOB-T2:** Peilkompass (Phase 4)
+- **MOB-T3:** Hangneigungsmesser — 🔴 Kritisch für Lawinenbeurteilung (Phase 4)
+- **MOB-T4:** Entfernungsmesser (Phase 4)
+- **MOB-T5:** Standortwerkzeuge / GPS Status (Phase 4)
+- **MOB-T6:** Sonnenstand & Dämmerung (Phase 5)
 
-# Phase 5 — Design & Benutzererlebnis
+**Zukünftige Erweiterungen:** Mondphase, Wettertrend, Notrufinformationen, Rettungspunkt-Finder, Offline-Navigation, Schneefall-Prognose, Wind-Daten, UV-Index.
 
-## Ziel
-
-Professionelle und attraktive Nutzererfahrung.
-
----
-
-## Status
-
-⚪ Geplant
-
-Fortschritt: 0 %
+Details finden sich in DATENQUELLEN.md (Abschnitt 11. TOOLBOX-DATENQUELLEN).
 
 ---
 
-## Geplante Verbesserungen
+# 📋 Implementierungs-Checkliste
 
-- [ ] Modernes Design
-- [ ] Konsistentes Farbschema
-- [ ] Mobile Optimierung
-- [ ] Überarbeitung der Popups
-- [ ] Einheitliche Icons
-- [ ] Verbesserte Layersteuerung
-- [ ] Verbesserte Navigation
+### Phase 1 — Status: IN PROGRESS
+- [x] DEM-Integration
+- [x] OSM Overpass API Integration
+- [x] GPX-Parser
+- [x] Höhenprofil-Berechnung
+- [ ] Wegschwierigkeit-Matching (sac_scale)
+- [ ] Website Toolbox: Koordinaten & Höhe
+- [ ] Website Toolbox: Entfernungsmessungen
+- [ ] Basemap.at Integration
 
----
+### Phase 2 — Status: IN PROGRESS
+- [x] ALBINA CAAML-Parser
+- [x] SLF CAAML-Parser
+- [ ] GeoSphere API Integration
+- [ ] Lawinenlage-Visualisierung
+- [ ] Tourenwarnungen-Logik
+- [ ] Website Wetter-am-Punkt erweitert
 
-## Zielbild
+### Phase 3 — Status: PLANNED
+- [ ] BMI-Daten georeferenzieren
+- [ ] Unfall-Hotspot-Algorithmus
+- [ ] Steinschlag-/Muren-Indikatoren
+- [ ] Schutzgebiete-Modul
+- [ ] Wildlife-Modul
+- [ ] Alpine Risk Engine (Beta)
 
-Bergbedingungen soll wie ein professionelles Produkt wirken und öffentlich präsentierbar sein.
+### Phase 4 — Status: FUTURE
+- [ ] Mobile App Framework
+- [ ] Smartphone Sensor Integration
+- [ ] Mobile Toolbox (Kompass, Hangneigungsmesser, etc.)
+- [ ] Météo-France Integration
+- [ ] AINEVA Integration
+- [ ] ARSO Integration
 
----
-
-# Phase 6 — KI-Unterstützung
-
-## Ziel
-
-Alle vorhandenen Daten intelligent interpretieren.
-
----
-
-## Status
-
-⚪ Zukunft
-
----
-
-## Grundsatz
-
-Die KI soll keine eigenen Daten erzeugen.
-
-Die KI analysiert und erklärt vorhandene Informationen.
-
----
-
-## Typische Fragen
-
-- Kann ich diese Tour morgen machen?
-- Welche Risiken bestehen?
-- Welche Regeln gelten?
-- Wo liegt das größte Risiko?
-- Welche Alternativen gibt es?
+### Phase 5 — Status: FUTURE
+- [ ] Alpine Risk Engine GA
+- [ ] Benutzerforschung & Refinement
+- [ ] Community-Features
+- [ ] Erweiterte Toolbox-Features
 
 ---
 
-## Beispiel
+# 🔗 Arbeitspaket-Generator
 
-```text
-Die Tour ist grundsätzlich möglich.
+Aus dieser Roadmap können neue Arbeitspakete abgeleitet werden:
 
-Zu beachten:
+**Phase 1 Arbeitspakete:**
+- AP-1.1: DEM-Integration
+- AP-1.2: OSM Infrastruktur-Abfragen
+- AP-1.3: GPX-Analyse-Pipeline
+- AP-1.4: Website Koordinaten- & Höhen-Werkzeuge
+- AP-1.5: Website Distanz-Werkzeuge
 
-- Gefahrenstufe 3 in Abschnitt X
-- Wildruhezone zwischen km 5 und km 8
-- Erhöhtes Absturzrisiko im Gipfelbereich
-- Drei relevante Schutzgebietsregeln
-```
+**Phase 2 Arbeitspakete:**
+- AP-2.1: GeoSphere Integration
+- AP-2.2: ALBINA & SLF Parser
+- AP-2.3: Website Wetter-am-Punkt erweitert
 
----
+**Phase 3 Arbeitspakete:**
+- AP-3.1: BMI-Daten Georeferenzierung
+- AP-3.2: Alpine Risk Engine (Beta)
 
-## Meilenstein
-
-Phase 6 gilt als abgeschlossen, wenn natürliche Fragen vollständig auf Basis der vorhandenen Daten beantwortet werden können.
-
----
-
-# Phase 7 — PWA & Offline
-
-## Ziel
-
-Optimale mobile Nutzung.
+**Phase 4+ Arbeitspakete:**
+- AP-4.1: Mobile App Sensor Integration
+- AP-4.2: Internationale Lawinenlage
+- AP-5.1: Alpine Risk Engine (GA) & Community
 
 ---
 
-## Status
+# 📚 Versionshistorie
 
-⚪ Zukunft
-
----
-
-## Funktionen
-
-- [ ] Zum Homescreen hinzufügen
-- [ ] Offline Karten
-- [ ] Offline Schutzgebiete
-- [ ] Offline Risikolayer
-- [ ] Standortfunktion
-- [ ] Offline Tourenanalyse
-- [ ] Push-Benachrichtigungen
+| Version | Datum | Änderung |
+|---------|-------|----------|
+| 2.0 | 2026-10-29 | Konsolidation: Alpine Risk Intelligence Roadmap + Mountain Radar Toolbox integriert |
+| 1.0 | 2026-10 | Initial Bergbedingungen Roadmap |
 
 ---
 
-## Meilenstein
+# 🔗 Zusätzliche Dokumentation
 
-Bergbedingungen soll auch ohne stabile Mobilfunkverbindung nutzbar sein.
+Diese Roadmap ist Teil eines größeren Dokumentationssystems:
 
----
-
-# Langfristiges Zielbild
-
-## Arbeitsablauf
-
-```text
-Tour planen
-↓
-Wetter prüfen
-↓
-Sperrungen prüfen
-↓
-Schutzgebiete prüfen
-↓
-Wildlife prüfen
-↓
-Regeln prüfen
-↓
-Lawinenlage prüfen
-↓
-Unfälle prüfen
-↓
-Absturzrisiko prüfen
-↓
-Gesamtauswertung erhalten
-```
-
----
-
-## Endziel
-
-Bergbedingungen soll die zentrale Informationsplattform für Bergsportler im Alpenraum werden und die Frage beantworten:
-
-> „Wenn du diese Tour morgen so durchführst, solltest du genau auf diese Punkte achten.“
+- **DATENQUELLEN.md** — Vollständiger Katalog aller Datenquellen (15+) mit URLs, Lizenzen und Phasen
+- **docs/WORKFLOW.md** — Entwicklungs-Workflow und Definition of Done
+- **docs/LAWINENLAGE_ANALYSE.md** — Detaillierte Analyse der Lawinenlage-Integration
+- **docs/WILDLIFE_ANALYSE.md** — Analyse und Dokumentation der Wildlife-Daten
