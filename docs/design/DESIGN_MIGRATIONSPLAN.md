@@ -54,8 +54,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 
 ### Stufe A — Fundament (geringes Risiko)
 
-**D1 — Branding-Text und Favicon**
-- Umfang: `<title>` „Mountain Radar“, Überschrift, Claim und Slogan im Header, Favicon aus `mountain-radar-app-icon-m.svg`, Meta-Beschreibung. Kein Layout-Umbau.
+**D1 — Branding-Text und Favicon** ✅ erledigt (30.10.2026)
+- Umsetzung: `<title>` „Mountain Radar – Alpine Risk Intelligence“, Meta-Beschreibung, Favicon und kleines App-Icon im Header (direkt aus `docs/design/`, keine Kopie), Überschrift „Mountain Radar“, Claim und Slogan als Textzeile. Kein Layout-Umbau.
+- Ursprünglicher Umfang: `<title>` „Mountain Radar“, Überschrift, Claim und Slogan im Header, Favicon aus `mountain-radar-app-icon-m.svg`, Meta-Beschreibung. Kein Layout-Umbau.
 - Dateien: `index.html`, ggf. `assets/` oder `favicon`.
 - Akzeptanz: Titel und Header zeigen Mountain Radar. Keine Funktionsänderung.
 - Zugleich erledigt den offenen Punkt aus ROADMAP („Branding in der Anwendung“).
