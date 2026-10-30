@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<defs>
+  <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#dce8e9"/><stop offset="1" stop-color="#eef0e9"/></linearGradient>
+  <linearGradient id="forest" x2="1" y2="1"><stop stop-color="#779484"/><stop offset=".52" stop-color="#a3b29a"/><stop offset="1" stop-color="#6f8a7e"/></linearGradient>
+  <linearGradient id="ridge" x2=".9" y2="1"><stop stop-color="#d5ddd3"/><stop offset=".42" stop-color="#aab8ad"/><stop offset="1" stop-color="#859a91"/></linearGradient>
+  <linearGradient id="snow" x2=".2" y2="1"><stop stop-color="#f7f8f4"/><stop offset="1" stop-color="#cad8d7"/></linearGradient>
+  <linearGradient id="water" x2="1" y2="1"><stop stop-color="#a9c4c8"/><stop offset="1" stop-color="#789ba5"/></linearGradient>
+  <linearGradient id="header" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#f8faf9"/></linearGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="9" stdDeviation="18" flood-color="#233d43" flood-opacity=".14"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="9"/></filter>
+  <filter id="terrainNoise" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".026" numOctaves="4" seed="27" result="noise"/><feColorMatrix in="noise" type="saturate" values="0" result="mono"/><feComponentTransfer in="mono" result="softNoise"><feFuncA type="table" tableValues="0 .12"/></feComponentTransfer><feBlend in="SourceGraphic" in2="softNoise" mode="multiply"/></filter>
+  <pattern id="grain" width="48" height="48" patternUnits="userSpaceOnUse"><circle cx="5" cy="10" r="1" fill="#47635a" opacity=".12"/><circle cx="34" cy="19" r="1.1" fill="#f5f5eb" opacity=".34"/><circle cx="20" cy="39" r=".8" fill="#314f4b" opacity=".15"/><path d="M0 29l8-2m24 18 11-3m-27-29 7-2" stroke="#fff" stroke-width=".7" opacity=".14"/></pattern>
+  <clipPath id="mapclip"><rect x="0" y="148" width="1920" height="932"/></clipPath>
+  <style>
+    text{font-family:Inter,"Segoe UI",Arial,sans-serif; fill:#17374b} .small{font-size:12px;letter-spacing:.08em} .muted{fill:#72828a} .card{fill:#ffffff;fill-opacity:.94;stroke:#fff;stroke-width:1.3} .contour{fill:none;stroke:#f5f4e9;stroke-width:1.1;opacity:.43} .label{font-size:12px;letter-spacing:.12em;font-weight:650;fill:#405d5a} .micro{font-size:10px;letter-spacing:.14em;fill:#607872;font-weight:700}
+  </style>
+</defs>
+<!-- Premium application shell -->
+<rect width="1920" height="1080" fill="#f4f6f4"/>
+<rect width="1920" height="148" fill="url(#header)"/>
+<path d="M0 147.5H1920" stroke="#e5eae8"/>
+<!-- brand mark -->
+<g transform="translate(43 26)"><circle cx="37" cy="37" r="34" fill="#133e50"/><circle cx="37" cy="37" r="31" fill="url(#forest)"/>
+<path d="M7 37c14-8 20-7 31-16 11 11 19 12 29 5M8 47c16-9 19-7 29-14 9 9 19 12 29 6M10 57c13-7 20-6 27-13 12 12 20 14 29 7" fill="none" stroke="#dce8e0" stroke-width="1.5" opacity=".85"/>
+<path d="M13 53 29 27l10 12 9-11 15 26H51l-9-14-8 7-6-6-8 12z" fill="#fff"/><circle cx="56" cy="22" r="2.4" fill="#fff"/></g>
+<text x="132" y="53" font-size="24" font-weight="760" letter-spacing=".12em">MOUNTAIN RADAR</text>
+<text x="133" y="76" font-size="10.5" font-weight="700" letter-spacing=".22em" fill="#47826d">ALPINE RISK INTELLIGENCE</text>
+<text x="133" y="101" font-size="12.5" fill="#77858b">Know before you go.</text>
+<g transform="translate(685 0)">
+ <text x="0" y="63" font-size="14" font-weight="650" fill="#19394b">Explore</text><rect x="-2" y="83" width="56" height="3" rx="2" fill="#1e7464"/>
+ <text x="90" y="63" font-size="14" fill="#74838a">Route Planner</text><text x="226" y="63" font-size="14" fill="#74838a">Risk Analysis</text>
+ <text x="354" y="63" font-size="14" fill="#74838a">Conditions</text><text x="469" y="63" font-size="14" fill="#74838a">Saved Areas</text>
+</g>
+<g transform="translate(1634 34)"><circle cx="17" cy="17" r="16" fill="#eef3f0"/><path d="M10 16a7 7 0 1 1 2 5l-3 3m8-12v5l3 2" fill="none" stroke="#476c69" stroke-width="1.6" stroke-linecap="round"/><text x="45" y="22" font-size="13" fill="#587079">Today, 09:42</text><circle cx="180" cy="17" r="19" fill="#173e50"/><text x="180" y="22" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">S</text></g>
+<!-- Data status strip -->
+<rect x="0" y="108" width="1920" height="40" fill="#f6f8f6"/>
+<g font-size="11.5" font-weight="560" fill="#45615f">
+ <g transform="translate(44 121)"><circle cx="5" cy="7" r="4" fill="#5f9c79"/><text x="17" y="11">Avalanche data active</text><text x="133" y="11" fill="#cad3cf">·</text><text x="145" y="11" class="muted">Updated 08:55</text></g>
+ <path d="M305 119v18" stroke="#dfe6e2"/>
+ <g transform="translate(328 121)"><circle cx="5" cy="7" r="4" fill="#5f9c79"/><text x="17" y="11">Protected areas active</text></g>
+ <path d="M512 119v18" stroke="#dfe6e2"/>
+ <g transform="translate(536 121)"><circle cx="5" cy="7" r="4" fill="#5f9c79"/><text x="17" y="11">Wildlife data active</text></g>
+ <path d="M699 119v18" stroke="#dfe6e2"/>
+ <g transform="translate(724 121)"><circle cx="5" cy="7" r="4" fill="#5f9c79"/><text x="17" y="11">Weather intelligence active</text></g>
+ <text x="1533" y="133" class="muted" font-size="11">SYSTEM STATUS</text><circle cx="1636" cy="129" r="3" fill="#5c9a77"/><text x="1646" y="133" font-size="11" fill="#527065">Operational</text>
+</g>
+<!-- Map canvas -->
+<g clip-path="url(#mapclip)">
+<rect y="148" width="1920" height="932" fill="url(#sky)"/>
+<!-- distant layered ridges -->
+<path d="M0 293 130 226 228 276 348 184 478 275 597 198 739 272 839 184 975 288 1106 190 1224 265 1377 173 1507 259 1649 197 1793 265 1920 201V638H0Z" fill="#c4d1c9" opacity=".68"/>
+<path d="M0 377 117 317 248 347 375 262 502 343 646 275 779 359 904 273 1043 355 1163 259 1294 356 1416 264 1543 346 1675 276 1800 362 1920 292V694H0Z" fill="#aebfb4" opacity=".75"/>
+<path d="M0 478 130 400 246 436 376 345 505 442 629 350 761 452 889 341 1021 444 1145 338 1278 444 1395 357 1520 440 1656 355 1789 459 1920 380V768H0Z" fill="url(#ridge)"/>
+<!-- alpine snow caps -->
+<path d="m207 425 81-90 49 41 49-95 61 92 45-34 61 93-69-32-27 30-43-19-31 38-46-33-26 28-42-17-36 28z" fill="url(#snow)" opacity=".95"/>
+<path d="m555 354 72-87 47 46 41-69 63 91 54-45 76 99-87-40-41 26-47-35-39 31-50-27-41 25z" fill="url(#snow)"/>
+<path d="m937 410 67-88 45 44 54-84 72 102 46-36 66 101-77-39-46 28-42-32-45 32-43-33-49 28z" fill="url(#snow)"/>
+<path d="m1346 353 57-78 57 44 45-70 65 102 42-35 81 109-92-46-44 29-41-34-43 30-53-32-34 26z" fill="url(#snow)"/>
+<path d="M0 490 138 422 263 456 391 371 510 461 647 370 779 475 902 359 1031 460 1159 355 1292 469 1411 370 1539 458 1677 373 1802 480 1920 399V1080H0Z" fill="url(#forest)"/>
+<!-- valley floors and water -->
+<path d="M0 682c195-42 276 34 435-6s220-14 347 29 239-40 388 2 224 18 354-20 250 19 396-11v404H0Z" fill="#b7c3a7" opacity=".83"/>
+<path d="M0 839c189-47 307 23 453-22 158-48 269 18 398 16 125-2 212-59 343-14 158 55 249-7 364-20 148-17 228 25 362 4v277H0Z" fill="#879f8c" opacity=".43"/>
+<path d="M275 784c116-53 185-65 295-27 87 30 153 17 252-13 104-31 186 26 267 34 89 9 179-47 275-22 88 22 165 40 246 8" fill="none" stroke="url(#water)" stroke-width="13" opacity=".86"/>
+<path d="M283 784c116-53 185-65 295-27 87 30 153 17 252-13 104-31 186 26 267 34 89 9 179-47 275-22 88 22 165 40 246 8" fill="none" stroke="#d4e1de" stroke-width="2" opacity=".7"/>
+<!-- hillshade facets -->
+<path d="M0 490 138 422 263 456 391 371 510 461 647 370 779 475 902 359 1031 460 1159 355 1292 469 1411 370 1539 458 1677 373 1802 480 1920 399 1920 538 1784 519 1652 564 1518 507 1381 564 1253 510 1124 575 1003 513 878 577 745 518 614 585 484 523 352 588 223 530 108 565 0 546Z" fill="#456f67" opacity=".14"/>
+<path d="M0 605 159 535 294 581 418 500 554 583 678 502 812 610 938 489 1066 597 1190 490 1328 600 1456 506 1585 591 1719 502 1845 618 1920 554" fill="none" stroke="#59796e" stroke-width="2" opacity=".28"/>
+<path d="M0 671c134-40 231-49 344-21s208 47 324 8 214-66 333-24 220 53 340 11 210-40 330 4 196 26 249 7" fill="none" stroke="#476c64" stroke-width="1.5" opacity=".24"/>
+<path d="M0 749c134-40 231-49 344-21s208 47 324 8 214-66 333-24 220 53 340 11 210-40 330 4 196 26 249 7" fill="none" stroke="#476c64" stroke-width="1.5" opacity=".22"/>
+<path d="M0 811c134-40 231-49 344-21s208 47 324 8 214-66 333-24 220 53 340 11 210-40 330 4 196 26 249 7" fill="none" stroke="#f5f4e9" stroke-width="1.3" opacity=".42"/>
+<path d="M0 885c134-40 231-49 344-21s208 47 324 8 214-66 333-24 220 53 340 11 210-40 330 4 196 26 249 7" fill="none" stroke="#f5f4e9" stroke-width="1.3" opacity=".42"/>
+<path d="M0 958c134-40 231-49 344-21s208 47 324 8 214-66 333-24 220 53 340 11 210-40 330 4 196 26 249 7" fill="none" stroke="#f5f4e9" stroke-width="1.3" opacity=".42"/>
+<!-- sparse detailed contour stacks -->
+<g class="contour"><path d="M118 415c62-48 123-39 169 2 51 46 94 50 151 6 63-49 113-46 170 1 47 39 89 43 145 2 59-44 111-47 166-1 49 42 98 52 153 7 65-54 115-50 177-3 54 41 109 43 170-2 51-37 102-37 154 4"/><path d="M80 438c62-48 123-39 169 2 51 46 94 50 151 6 63-49 113-46 170 1 47 39 89 43 145 2 59-44 111-47 166-1 49 42 98 52 153 7 65-54 115-50 177-3 54 41 109 43 170-2 51-37 102-37 154 4"/><path d="M46 463c62-48 123-39 169 2 51 46 94 50 151 6 63-49 113-46 170 1 47 39 89 43 145 2 59-44 111-47 166-1 49 42 98 52 153 7 65-54 115-50 177-3 54 41 109 43 170-2 51-37 102-37 154 4"/></g>
+<!-- protected woodland polygon -->
+<path d="M993 577c72-57 184-66 275-25 77 34 111 104 96 184-11 65-69 121-152 128-99 8-211-20-245-96-30-67-21-145 26-191Z" fill="#79a386" opacity=".22" stroke="#4f856d" stroke-width="2" stroke-dasharray="8 7"/>
+<path d="M1094 628c44-34 105-45 163-25 52 18 78 52 72 99-6 42-49 77-102 77-63 0-131-18-152-64-17-36-10-68 19-87Z" fill="#6e9d7c" opacity=".21" stroke="#54866d" stroke-width="1.5" stroke-dasharray="5 6"/>
+<!-- avalanche terrain overlay -->
+<path d="M381 504 497 457l104 65-27 88-118 15-83-53zM718 468l114-72 106 55-6 101-126 53-77-66zM1470 489l105-58 97 62-13 92-120 29-81-54z" fill="#8390a6" opacity=".28" stroke="#63758c" stroke-width="1.4" stroke-dasharray="6 6"/>
+<!-- trail network -->
+<g fill="none" stroke-linecap="round"><path d="M260 916c99-50 141-92 224-106 98-17 127-62 205-70 105-10 123-73 228-60 90 11 139-47 224-31 112 21 134 95 244 91 94-3 167 41 263 17" stroke="#fff" stroke-width="5.5" opacity=".82"/><path d="M260 916c99-50 141-92 224-106 98-17 127-62 205-70 105-10 123-73 228-60 90 11 139-47 224-31 112 21 134 95 244 91 94-3 167 41 263 17" stroke="#537e70" stroke-width="2.1" stroke-dasharray="2 9"/><path d="M454 809c-23-54-43-91-89-130-48-40-43-87-87-128" stroke="#f8f8f2" stroke-width="4.5"/><path d="M454 809c-23-54-43-91-89-130-48-40-43-87-87-128" stroke="#537e70" stroke-width="1.8" stroke-dasharray="2 8"/></g>
+<!-- routes and symbols -->
+<g fill="#294e5d" font-size="12" font-weight="650"><text x="314" y="622" class="label">VAL FERRET</text><text x="686" y="718" class="label">COURMAYEUR</text><text x="1063" y="914" class="label">VAL VENY</text><text x="1461" y="732" class="label">LA THUILE</text><text x="154" y="825" class="micro">MONT BLANC NATURAL RESERVE</text><text x="1180" y="582" class="micro">WILDLIFE QUIET ZONE</text><text x="847" y="537" class="micro">AVALANCHE TERRAIN · 30–35°</text></g>
+<g fill="#edf2ed" stroke="#638477" stroke-width="1.5"><circle cx="607" cy="729" r="5"/><circle cx="935" cy="620" r="5"/><circle cx="1242" cy="839" r="5"/><circle cx="1543" cy="623" r="5"/></g>
+<g font-size="11" fill="#4c6663"><text x="579" y="750">Courmayeur</text><text x="910" y="642">Refugio Bertone</text><text x="1217" y="861">Lago Combal</text></g>
+<!-- location pin and popup -->
+<g filter="url(#shadow)"><rect x="652" y="346" width="346" height="220" rx="18" fill="#fff"/><rect x="652" y="346" width="346" height="5" rx="2.5" fill="#4b8a73"/></g>
+<circle cx="680" cy="378" r="14" fill="#e8f2ec"/><path d="M675 380c4-9 7-10 12-10-2 9-5 12-12 10Zm4 1 8-8" fill="none" stroke="#458168" stroke-width="1.5" stroke-linecap="round"/>
+<text x="706" y="378" font-size="16" font-weight="720">Wildlife Protection Area</text>
+<text x="677" y="410" font-size="12" class="muted">PROTECTED SPECIES</text><text x="677" y="433" font-size="14" font-weight="620">Golden Eagle</text>
+<rect x="836" y="397" width="134" height="24" rx="12" fill="#f5eee0"/><circle cx="850" cy="409" r="3" fill="#ad8a4e"/><text x="860" y="413" font-size="10" font-weight="700" fill="#8b7144">SEASONAL RESTRICTION</text>
+<path d="M677 447h296" stroke="#edf0ed"/><text x="677" y="470" font-size="12" fill="#62747a">Risk level</text><circle cx="751" cy="466" r="3" fill="#72977a"/><text x="762" y="470" font-size="12" font-weight="650" fill="#597963">Informational</text>
+<path d="M677 484h296" stroke="#edf0ed"/><text x="677" y="507" font-size="12" fill="#62747a">Access recommendation</text><text x="944" y="507" text-anchor="end" font-size="12" font-weight="650">Stay on trail</text>
+<text x="677" y="538" font-size="11" class="muted">Protection period · December – April</text>
+<path d="M817 566 833 589 849 566" fill="#fff"/>
+<circle cx="833" cy="558" r="20" fill="#fff" opacity=".45"/><circle cx="833" cy="558" r="10" fill="#fff" stroke="#244e5d" stroke-width="3"/><circle cx="833" cy="558" r="3" fill="#244e5d"/>
+<!-- top-left map search -->
+<g filter="url(#shadow)"><rect x="31" y="174" width="390" height="57" rx="17" fill="#fff" fill-opacity=".96"/></g>
+<circle cx="59" cy="202" r="7" fill="none" stroke="#74858b" stroke-width="1.8"/><path d="m64 207 5 5" stroke="#74858b" stroke-width="1.8" stroke-linecap="round"/><text x="82" y="207" font-size="14" fill="#89969a">Search mountains, routes, places</text><rect x="361" y="188" width="43" height="29" rx="8" fill="#f3f6f4"/><text x="382" y="207" text-anchor="middle" font-size="11" fill="#849196">⌘ K</text>
+<!-- Decision support panels -->
+<g filter="url(#shadow)"><rect x="32" y="252" width="349" height="211" rx="20" class="card"/></g>
+<text x="58" y="284" font-size="14" font-weight="720">Weather Intelligence</text><circle cx="345" cy="278" r="4" fill="#5c9a77"/><text x="354" y="283" text-anchor="end" class="micro">LIVE · COURMAYEUR</text>
+<text x="58" y="330" font-size="39" font-weight="540" letter-spacing="-.045em">12°</text><text x="111" y="329" font-size="17" fill="#7e9189">C</text><text x="148" y="315" font-size="12" font-weight="650">Low thunderstorm risk</text><text x="148" y="335" font-size="11" class="muted">Clear window until 15:00</text>
+<path d="M58 350h297" stroke="#edf0ed"/>
+<g font-size="10" class="micro"><text x="58" y="372">WIND</text><text x="162" y="372">PRECIPITATION</text><text x="267" y="372">VISIBILITY</text></g>
+<g font-size="12.5"><text x="58" y="392" font-weight="650">8 km/h · W</text><text x="162" y="392" font-weight="650">After 15:00</text><text x="267" y="392" font-weight="650">18 km</text></g>
+<rect x="58" y="408" width="297" height="37" rx="10" fill="#f4f7f4"/><circle cx="74" cy="426" r="4" fill="#5d9876"/><text x="87" y="430" font-size="10.5" font-weight="620" fill="#557267">Weather confidence</text><text x="338" y="430" text-anchor="end" font-size="11" font-weight="700" fill="#426b5b">92%</text><rect x="58" y="450" width="297" height="3" rx="1.5" fill="#e2eae4"/><rect x="58" y="450" width="273" height="3" rx="1.5" fill="#73a083"/>
+<!-- Route intelligence -->
+<g filter="url(#shadow)"><rect x="32" y="477" width="349" height="196" rx="20" class="card"/></g>
+<text x="58" y="511" font-size="14" font-weight="720">Route Intelligence</text><rect x="278" y="492" width="77" height="22" rx="11" fill="#edf3ef"/><text x="316" y="507" text-anchor="middle" font-size="9.5" font-weight="700" fill="#628172">TOUR · 04</text>
+<text x="58" y="548" class="micro">DISTANCE</text><text x="165" y="548" class="micro">ELEVATION GAIN</text><text x="273" y="548" class="micro">DIFFICULTY</text>
+<text x="58" y="572" font-size="17" font-weight="680">12.4 km</text><text x="165" y="572" font-size="17" font-weight="680">+840 m</text><rect x="273" y="557" width="78" height="21" rx="10.5" fill="#edf2e9"/><text x="312" y="572" text-anchor="middle" font-size="10" font-weight="700" fill="#63826a">MODERATE</text>
+<path d="M58 590h297" stroke="#edf0ed"/><text x="58" y="612" font-size="11" class="muted">Exposure</text><text x="141" y="612" font-size="11" font-weight="630">North-facing slopes</text><text x="58" y="635" font-size="11" class="muted">Water sources</text><text x="141" y="635" font-size="11" font-weight="630">2 along route</text><text x="58" y="658" font-size="11" class="muted">Emergency shelters</text><text x="175" y="658" font-size="11" font-weight="630">1 within 4 km</text>
+<!-- Risk insights -->
+<g filter="url(#shadow)"><rect x="32" y="687" width="349" height="313" rx="20" class="card"/></g>
+<text x="58" y="721" font-size="14" font-weight="720">Risk Insights</text><rect x="280" y="702" width="75" height="22" rx="11" fill="#eef3ef"/><text x="317" y="717" text-anchor="middle" font-size="9.5" font-weight="700" fill="#658173">ON ROUTE</text>
+<g font-size="11.5">
+ <circle cx="66" cy="752" r="8" fill="#f3efe6"/><text x="66" y="756" text-anchor="middle" font-size="10" fill="#9d8350">!</text><text x="84" y="756" font-weight="620">Avalanche Level 2</text><text x="352" y="756" text-anchor="end" font-size="9.5" fill="#7b8986">MODERATE</text>
+ <path d="M58 770h297" stroke="#edf0ed"/><circle cx="66" cy="788" r="8" fill="#f3efe6"/><text x="66" y="792" text-anchor="middle" font-size="10" fill="#9d8350">!</text><text x="84" y="792" font-weight="600">Steep terrain ahead</text><path d="M58 806h297" stroke="#edf0ed"/>
+ <circle cx="66" cy="824" r="8" fill="#f3efe6"/><text x="66" y="828" text-anchor="middle" font-size="10" fill="#9d8350">!</text><text x="84" y="828" font-weight="600">Thunderstorm risk after 15:00</text><path d="M58 842h297" stroke="#edf0ed"/>
+ <circle cx="66" cy="860" r="8" fill="#f3efe6"/><text x="66" y="864" text-anchor="middle" font-size="10" fill="#9d8350">!</text><text x="84" y="864" font-weight="600">Seasonal wildlife restriction</text><path d="M58 878h297" stroke="#edf0ed"/>
+ <circle cx="66" cy="896" r="8" fill="#e9f2eb"/><path d="m62 896 3 3 5-6" fill="none" stroke="#54896d" stroke-width="1.3" stroke-linecap="round"/><text x="84" y="900" font-weight="600">Drinking water nearby</text><path d="M58 914h297" stroke="#edf0ed"/>
+ <circle cx="66" cy="932" r="8" fill="#e9f2eb"/><path d="m62 932 3 3 5-6" fill="none" stroke="#54896d" stroke-width="1.3" stroke-linecap="round"/><text x="84" y="936" font-weight="600">Emergency shelter · 4 km</text>
+</g>
+<path d="M58 954h297" stroke="#edf0ed"/><text x="58" y="979" font-size="9.5" class="micro">ROUTE CONFIDENCE</text><text x="354" y="979" text-anchor="end" font-size="10" font-weight="700" fill="#55796a">HIGH · 88%</text>
+<!-- Intelligence layer controls -->
+<g filter="url(#shadow)"><rect x="1579" y="174" width="308" height="573" rx="21" class="card"/></g>
+<text x="1607" y="214" font-size="16" font-weight="720">Intelligence Layers</text><circle cx="1852" cy="207" r="16" fill="#f3f6f4"/><path d="M1847 207h10m-5-5v10" stroke="#73857f" stroke-width="1.5" stroke-linecap="round"/>
+<text x="1607" y="248" class="micro">ACTIVE OVERLAYS</text><text x="1859" y="248" text-anchor="end" font-size="9.5" font-weight="650" fill="#73907f">7 ENABLED</text>
+<g font-size="11.5" font-weight="590">
+ <rect x="1602" y="260" width="260" height="42" rx="11" fill="#f6f8f6"/><circle cx="1624" cy="281" r="9" fill="#e3eee6"/><path d="m1620 281 3 3 5-6" fill="none" stroke="#4f8b70" stroke-width="1.6" stroke-linecap="round"/><text x="1642" y="285">Protected Areas</text><rect x="1820" y="273" width="27" height="15" rx="7.5" fill="#73a082"/><circle cx="1839" cy="280.5" r="5.5" fill="#fff"/>
+ <rect x="1602" y="307" width="260" height="42" rx="11" fill="#f6f8f6"/><circle cx="1624" cy="328" r="9" fill="#e3eee6"/><path d="m1620 328 3 3 5-6" fill="none" stroke="#4f8b70" stroke-width="1.6" stroke-linecap="round"/><text x="1642" y="332">Wildlife</text><rect x="1820" y="320" width="27" height="15" rx="7.5" fill="#73a082"/><circle cx="1839" cy="327.5" r="5.5" fill="#fff"/>
+ <rect x="1602" y="354" width="260" height="42" rx="11" fill="#f6f8f6"/><circle cx="1624" cy="375" r="9" fill="#e3eee6"/><path d="m1620 375 3 3 5-6" fill="none" stroke="#4f8b70" stroke-width="1.6" stroke-linecap="round"/><text x="1642" y="379">Avalanche Situation</text><rect x="1820" y="367" width="27" height="15" rx="7.5" fill="#73a082"/><circle cx="1839" cy="374.5" r="5.5" fill="#fff"/>
+ <rect x="1602" y="401" width="260" height="42" rx="11" fill="#f6f8f6"/><circle cx="1624" cy="422" r="9" fill="#e3eee6"/><path d="m1620 422 3 3 5-6" fill="none" stroke="#4f8b70" stroke-width="1.6" stroke-linecap="round"/><text x="1642" y="426">Weather</text><rect x="1820" y="414" width="27" height="15" rx="7.5" fill="#73a082"/><circle cx="1839" cy="421.5" r="5.5" fill="#fff"/>
+ <rect x="1602" y="448" width="260" height="42" rx="11" fill="#f6f8f6"/><circle cx="1624" cy="469" r="9" fill="#e3eee6"/><path d="m1620 469 3 3 5-6" fill="none" stroke="#4f8b70" stroke-width="1.6" stroke-linecap="round"/><text x="1642" y="473">Closures</text><rect x="1820" y="461" width="27" height="15" rx="7.5" fill="#73a082"/><circle cx="1839" cy="468.5" r="5.5" fill="#fff"/>
+ <rect x="1602" y="495" width="260" height="42" rx="11" fill="#f6f8f6"/><circle cx="1624" cy="516" r="9" fill="#e3eee6"/><path d="m1620 516 3 3 5-6" fill="none" stroke="#4f8b70" stroke-width="1.6" stroke-linecap="round"/><text x="1642" y="520">Terrain Risk</text><rect x="1820" y="508" width="27" height="15" rx="7.5" fill="#73a082"/><circle cx="1839" cy="515.5" r="5.5" fill="#fff"/>
+ <rect x="1602" y="542" width="260" height="42" rx="11" fill="#f6f8f6"/><circle cx="1624" cy="563" r="9" fill="#e3eee6"/><path d="m1620 563 3 3 5-6" fill="none" stroke="#4f8b70" stroke-width="1.6" stroke-linecap="round"/><text x="1642" y="567">Infrastructure</text><rect x="1820" y="555" width="27" height="15" rx="7.5" fill="#73a082"/><circle cx="1839" cy="562.5" r="5.5" fill="#fff"/>
+</g>
+<text x="1607" y="614" class="micro">BASEMAP</text>
+<g><rect x="1602" y="625" width="260" height="39" rx="12" fill="#eef3ef"/><rect x="1605" y="628" width="83" height="33" rx="9" fill="#fff" filter="url(#shadow)"/><text x="1646" y="649" text-anchor="middle" font-size="11" font-weight="700">Hybrid</text><text x="1731" y="649" text-anchor="middle" font-size="11" fill="#73847e">Satellite</text><text x="1808" y="649" text-anchor="middle" font-size="11" fill="#73847e">Terrain</text></g>
+<text x="1607" y="704" font-size="10" fill="#74867f">Layer stack synced · 09:42 CET</text>
+<!-- right map controls -->
+<g filter="url(#shadow)"><rect x="1830" y="766" width="57" height="111" rx="17" fill="#fff" fill-opacity=".95"/></g><path d="M1848 801h21m-10-10v20m-10 34h21" stroke="#526d6e" stroke-width="1.8" stroke-linecap="round"/>
+<g filter="url(#shadow)"><rect x="1830" y="891" width="57" height="38" rx="14" fill="#fff" fill-opacity=".95"/></g><circle cx="1858" cy="910" r="9" fill="none" stroke="#526d6e" stroke-width="1.5"/><path d="M1858 896v7m0 14v7m-14-14h7m14 0h7" stroke="#526d6e" stroke-width="1.2"/>
+<!-- central Alpine Risk Engine action -->
+<g filter="url(#shadow)"><rect x="1134" y="950" width="340" height="70" rx="19" fill="#173f50"/><circle cx="1173" cy="985" r="17" fill="#2c6670"/><path d="M1165 986c4-7 8-10 14-10l-3 5 5 5c-4 5-9 6-15 4l4-4z" fill="none" stroke="#e7f1ed" stroke-width="1.5" stroke-linejoin="round"/><text x="1202" y="981" font-size="14" font-weight="700" fill="#fff">Analyze Route</text><text x="1202" y="1001" font-size="10" fill="#b9d0cb">Run Alpine Risk Engine</text><path d="M1435 978h15m-6-6 6 6-6 6" fill="none" stroke="#d6e8e2" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<!-- bottom map scale and legend -->
+<g filter="url(#shadow)"><rect x="1538" y="941" width="349" height="80" rx="18" fill="#fff" fill-opacity=".94"/></g>
+<text x="1563" y="974" class="micro">MAP LEGEND</text>
+<g font-size="10.5" fill="#61746f"><circle cx="1570" cy="997" r="4" fill="#71917a"/><text x="1582" y="1001">Protected</text><rect x="1660" y="993" width="10" height="8" rx="2" fill="#7f8ca1" opacity=".8"/><text x="1677" y="1001">Avalanche</text><path d="M1763 997h20" stroke="#fff" stroke-width="4"/><path d="M1763 997h20" stroke="#618272" stroke-width="1.5" stroke-dasharray="2 3"/><text x="1788" y="1001">Trail</text></g>
+<g transform="translate(62 1008)"><path d="M0 0h68m-68-5v10m68-10v10" stroke="#f8f8f2" stroke-width="4"/><path d="M0 0h68m-68-5v10m68-10v10" stroke="#536f67" stroke-width="1.4"/><text x="78" y="4" font-size="10.5" fill="#536f67">2 km</text></g>
+<text x="28" y="1055" font-size="10" fill="#73847d" letter-spacing=".1em">45°47′ N  ·  6°57′ E</text><text x="1859" y="1056" text-anchor="end" font-size="10" fill="#73847d" letter-spacing=".1em">TERRAIN DATA · ALPINE ARC</text>
+<!-- map texture veil -->
+<rect y="148" width="1920" height="932" fill="url(#grain)" opacity=".28" pointer-events="none"/><rect y="148" width="1920" height="932" fill="#a7b4a8" opacity=".25" filter="url(#terrainNoise)" pointer-events="none"/>
+</g>
+</svg>

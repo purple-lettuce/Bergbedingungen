@@ -23,7 +23,7 @@ Bergbedingungen
 
 - **Mountain Radar** ist der offizielle Produktname (Claim: ALPINE RISK INTELLIGENCE, Slogan: „Know before you go.“).
 - **Bergbedingungen** ist der technische Projektname (Repository). Das Rebranding ist in der Dokumentation vollzogen (README, ROADMAP, DATENQUELLEN, STYLEGUIDE).
-- Offen: In der Anwendung selbst (`index.html`: Seitentitel und Überschrift) steht noch „Bergbedingungen“. Die Umstellung gehört zum Arbeitspaket „Design & Branding“ (siehe Prioritäten, Punkt 10).
+- Offen: In der Anwendung selbst (`index.html`: Seitentitel und Überschrift) steht noch „Bergbedingungen“. Die Umstellung gehört zum Arbeitspaket „Design & Branding“ (siehe Prioritäten, Punkt 10). Der schrittweise Umsetzungsplan (kleine PRs D1–D13) steht in docs/design/DESIGN_MIGRATIONSPLAN.md.
 - Das visuelle Design System (Farben, Typografie, Komponenten) ist in STYLEGUIDE.md beschrieben. Die Umsetzung in der Oberfläche ist noch nicht abgeschlossen.
 
 ---
