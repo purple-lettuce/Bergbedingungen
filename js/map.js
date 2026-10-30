@@ -13,9 +13,6 @@ export var el = {
   list: document.getElementById('list'),
   status: document.getElementById('status'),
   q: document.getElementById('q'),
-  fClosure: document.getElementById('f-closure'),
-  fNotice: document.getElementById('f-notice'),
-  fUpcoming: document.getElementById('f-upcoming'),
   wx: document.getElementById('wx')
 };
 

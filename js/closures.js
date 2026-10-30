@@ -13,7 +13,10 @@ var ACTIVITIES = {1:'Klettern',3:'Reiten',4:'Kutschen',5:'Radfahren',9:'Kraftfah
 
 var TYPE_LABEL = { CLOSURE: 'Sperrung', NOTICE: 'Hinweis' };
 
-var records = new Map();     // uuid -> Datensatz
+// Schalter des Filters im Bedienfeld "Karten & Layer" (js/closures_filter.js)
+export var closureFilter = { closure: true, notice: true, upcoming: true };
+
+var records = new Map();    // uuid -> Datensatz
 var layers = new Map();      // uuid -> L.featureGroup
 var activityNames = Object.assign({}, ACTIVITIES);
 var renderTimer = null;
@@ -105,10 +108,9 @@ function visibleRecords() {
   records.forEach(function (r) {
     var st = statusOf(r);
     if (st === 'expired') return;
-    if (st === 'upcoming' && !el.fUpcoming.checked) return;
+    if (st === 'upcoming' && !closureFilter.upcoming) return;
     var k = kindOf(r);
-    if (k === 'closure' && !el.fClosure.checked) return;
-    if (k === 'notice' && !el.fNotice.checked) return;
+    if (!closureFilter[k]) return;
     if (q) { if ((titleOf(r) + ' ' + descOf(r)).toLowerCase().indexOf(q) === -1) return; }
     else if (!intersects(r, bounds)) return;
     arr.push(r);

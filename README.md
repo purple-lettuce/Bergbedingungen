@@ -157,6 +157,7 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen, Filter und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`, Filter: `panel.addFilter(...)`) |
 | `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil, einklappbare Filter und Legenden, alles per Klick, ohne Fachlogik |
 | `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
+| `js/closures_filter.js` | Filter Sperrungen, Hinweise und Geplant (Abschnitt „Filter Sperrungen & Hinweise“ im Bedienfeld) |
 | `js/avalanche.js` | Lawinenlage aller Quellen (Karte): Datensatz je Region aufbauen, Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Höhenwahl; lädt erst beim ersten Einblenden |
 | `js/avalanche_popup.js` | dieselbe Popup-Komponente für jede Quelle: Lagebericht aus einem Regionsdatensatz, rein (ohne DOM und Leaflet) |
 | `js/avalanche_symbols.js` | gemeinsames Symbolmodell: Gefahrenstufen, Expositionen, Lawinenprobleme, Gefahrenmuster, Höhenangaben, Piktogramme, deutsche Bezeichnungen |

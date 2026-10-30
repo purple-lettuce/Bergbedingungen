@@ -19,6 +19,7 @@ panel.addOverlay('Lawinenlage', avalancheLayer);
 
 // Filter (stehen vor den Legenden)
 export var filters = {
+  closures: panel.addFilter('Filter Sperrungen & Hinweise', layerGroup),
   protectedAreas: panel.addFilter('Filter Schutzgebiete', protectedAreasLayer)
 };
 
