@@ -10,8 +10,8 @@ Referenzmaterial in `docs/design/`:
 | Datei | Inhalt |
 |---|---|
 | `mountain-radar-desktop-mockup.svg` | Desktop-Mockup 1920×1080 (Hauptreferenz dieses Plans) |
-| `logo-app-icon.png` | Quadratisches Icon: „M“ mit Höhenlinien, Verlauf Blau → Grün |
-| `logo-wordmark.jpg` | Rundes Logo mit Wortmarke, Claim und Slogan |
+| `mountain-radar-app-icon-m.svg` | Quadratisches App-Icon (SVG): „M“ mit Bergkamm und Höhenlinien, Verlauf `#16324F` → `#2F6B4F` |
+| `mountain-radar-main-hauptlogo.svg` | Hauptlogo (SVG): rundes Emblem mit Bergsilhouette, Wortmarke, Claim und Slogan, Farben wie im Styleguide |
 | `mountain-radar-design-vision-v1.png` | **Fehlt im Repository** (nicht auf `main`, nicht in anderen Branches). Bitte pushen. Der Plan beruht bis dahin auf dem Mockup und `STYLEGUIDE.md`. Falls die Vision vom Mockup abweicht, wird der Plan angepasst. |
 
 Wichtige Hinweise zum Mockup:
@@ -55,7 +55,7 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 ### Stufe A — Fundament (geringes Risiko)
 
 **D1 — Branding-Text und Favicon**
-- Umfang: `<title>` „Mountain Radar“, Überschrift, Claim und Slogan im Header, Favicon aus `logo-app-icon.png`, Meta-Beschreibung. Kein Layout-Umbau.
+- Umfang: `<title>` „Mountain Radar“, Überschrift, Claim und Slogan im Header, Favicon aus `mountain-radar-app-icon-m.svg`, Meta-Beschreibung. Kein Layout-Umbau.
 - Dateien: `index.html`, ggf. `assets/` oder `favicon`.
 - Akzeptanz: Titel und Header zeigen Mountain Radar. Keine Funktionsänderung.
 - Zugleich erledigt den offenen Punkt aus ROADMAP („Branding in der Anwendung“).
@@ -147,6 +147,6 @@ Wenn ein solches Feature entsteht, bringt es seine Oberfläche gleich im neuen S
 1. Design-Vision-PNG ins Repository legen (fehlt).
 2. Schrift: Inter (Mockup) oder Barlow (heute)?
 3. Farbwerte: Styleguide (`#16324F`, `#2F6B4F`) oder Mockup (`#17374b`, `#1e7464`)? Empfehlung: Styleguide als Basis, Mockup-Töne als Abstufungen.
-4. Logo-Verwendung: Quadratisches Icon als Favicon und App-Icon, rundes Logo mit Wortmarke im Header (das Mockup zeigt eine vereinfachte runde Variante). Für den Header wird ein sauberes SVG benötigt; die vorhandenen Dateien sind Rastergrafiken.
+4. Logo-Verwendung: Die Logos liegen jetzt als SVG vor und nutzen die Styleguide-Farben. Vorschlag: App-Icon als Favicon, Emblem (ohne Text) im Header zusammen mit HTML-Text für Wortmarke und Claim. Das Hauptlogo setzt die Wortmarke als `<text>` mit Montserrat/Fallback-Schriften; für Einsatz außerhalb des Browsers (README, Social Preview) sollte der Text in Pfade umgewandelt werden.
 5. Navigation im Header: nur „Explore“ oder ganz weglassen, bis weitere Bereiche existieren?
 6. Mobile: Bottom-Sheet-Konzept bestätigen, bevor D11 startet.
