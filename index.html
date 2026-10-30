@@ -19,22 +19,22 @@
   <div id="map" role="application" aria-label="Karte mit Sperrungen und Hinweisen"></div>
   <aside>
     <div id="warn" class="status err" hidden role="alert"></div>
-    <section class="card" aria-live="polite">
+    <section class="mr-card" aria-live="polite">
       <h2>Wetter</h2>
       <div id="wx"><span class="muted">Wird geladen …</span></div>
-      <div class="row" style="margin-top:10px">
+      <div class="row mr-mt-md">
         <button id="wx-center" type="button">Für Kartenmitte</button>
         <button id="wx-geo" type="button">Mein Standort</button>
       </div>
-      <p class="muted" style="margin:8px 0 0">Tipp: Auf eine freie Stelle der Karte klicken, um das Wetter dort zu laden.</p>
+      <p class="muted mr-mt-sm mr-mb-0">Tipp: Auf eine freie Stelle der Karte klicken, um das Wetter dort zu laden.</p>
     </section>
 
-    <section class="card">
+    <section class="mr-card">
       <h2>Sperrungen und Hinweise</h2>
       <div class="row">
         <input id="q" type="search" placeholder="Suchen, z. B. Steig, Forst" aria-label="Suchen">
       </div>
-      <div id="status" class="status" style="margin-top:10px" role="status">Karte wird vorbereitet …</div>
+      <div id="status" class="status" role="status">Karte wird vorbereitet …</div>
       <ul id="list"></ul>
     </section>
   </aside>

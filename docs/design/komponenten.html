@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mountain Radar – Komponenten (Referenz)</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="mountain-radar-app-icon-m.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../style.css">
+<style>
+  /* Nur für diese Referenzseite: die App-Seite sperrt die Höhe, hier soll normal gescrollt werden. */
+  html, body { height: auto; }
+  body { display: block; padding: var(--mr-space-lg); max-width: 960px; margin: 0 auto; }
+  h1 { font-size: var(--mr-text-xl); margin: 0 0 var(--mr-space-xs); }
+  h2 { margin-top: var(--mr-space-xl); }
+  code { font-size: var(--mr-text-sm); }
+</style>
+</head>
+<body>
+<h1>Komponenten</h1>
+<p class="muted">Referenz für die gemeinsamen Komponenten aus <code>style.css</code> (Abschnitt „Gemeinsame Komponenten“, D3). Beschreibung: <code>docs/STYLEGUIDE.md</code>. Die Seite folgt dem Hell-/Dunkelmodus des Systems und gehört nicht zur Anwendung.</p>
+
+<h2>.mr-card</h2>
+<div class="mr-stack mr-gap-sm">
+  <div class="mr-card"><p class="mr-label">Standard</p><p class="mr-mt-xs">Fläche mit Rahmen, Radius <code>--mr-radius-md</code>.</p></div>
+  <div class="mr-card mr-card--tight mr-card--raised"><p class="mr-label">--tight, --raised</p><p class="mr-mt-xs">Kleineres Padding und Schatten.</p></div>
+</div>
+
+<h2>.mr-label</h2>
+<p class="mr-label">Aktive Overlays · 2 aktiv</p>
+
+<h2>.mr-badge</h2>
+<div class="mr-cluster">
+  <span class="mr-badge">Neutral</span>
+  <span class="mr-badge mr-badge--closure">Sperrung</span>
+  <span class="mr-badge mr-badge--notice">Hinweis</span>
+  <span class="mr-badge mr-badge--upcoming">Geplant</span>
+  <span class="mr-badge mr-badge--success">Aktuell</span>
+</div>
+
+<h2>.mr-switch</h2>
+<div class="mr-stack mr-gap-xs">
+  <label class="mr-switch"><input type="checkbox" role="switch" id="sw-off"><span class="mr-switch__track" aria-hidden="true"></span><span class="mr-switch__text">Aus</span></label>
+  <label class="mr-switch"><input type="checkbox" role="switch" id="sw-on" checked><span class="mr-switch__track" aria-hidden="true"></span><span class="mr-switch__text">Ein</span></label>
+  <label class="mr-switch"><input type="checkbox" role="switch" disabled><span class="mr-switch__track" aria-hidden="true"></span><span class="mr-switch__text">Deaktiviert</span></label>
+  <label class="mr-switch"><input type="checkbox" role="switch" checked disabled><span class="mr-switch__track" aria-hidden="true"></span><span class="mr-switch__text">Ein, deaktiviert</span></label>
+</div>
+
+<h2>.mr-kv</h2>
+<div class="mr-card">
+  <dl class="mr-kv">
+    <dt>Stand</dt><dd>30.10.2026, 11:07</dd>
+    <dt>Quelle</dt><dd>Euregio-Lawinenreport</dd>
+  </dl>
+  <dl class="mr-kv mr-kv--stacked mr-mt-md">
+    <div class="mr-kv__item"><dt>Wind</dt><dd>12 km/h</dd></div>
+    <div class="mr-kv__item"><dt>Niederschlag</dt><dd>0,4 mm</dd></div>
+  </dl>
+</div>
+
+<h2>.mr-segment</h2>
+<div class="mr-segment" role="radiogroup" aria-label="Beispiel Kartenstil">
+  <label class="mr-segment__opt"><input type="radio" name="seg" value="osm" checked><span>OpenStreetMap</span></label>
+  <label class="mr-segment__opt"><input type="radio" name="seg" value="topo"><span>Topo</span></label>
+  <label class="mr-segment__opt"><input type="radio" name="seg" value="x" disabled><span>Deaktiviert</span></label>
+</div>
+
+<h2>Hilfsklassen</h2>
+<div class="mr-card">
+  <div class="mr-stack mr-gap-sm"><span>.mr-stack</span><span class="mr-text-muted mr-text-sm">.mr-text-muted .mr-text-sm</span></div>
+  <div class="mr-cluster mr-gap-md mr-mt-md"><span>.mr-cluster</span><span class="mr-tabular">1 234,5 (.mr-tabular)</span></div>
+</div>
+</body>
+</html>
