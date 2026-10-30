@@ -282,12 +282,18 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 - [x] Wildlife-Daten im Repository aktualisiert (Lauf „Schutzgebiete aktualisieren“ am 29.10.2026: 685 Gebiete mit Wildlife, 187 Namen)
 - [ ] Darstellung der Wildlife-Einträge verbessern (lange Habitatnamen, Gruppierung)
 
+## Kartenfilter im Bedienfeld „Karten & Layer“ ✅
+
+- [x] Filter Sperrungen, Hinweise und Geplant als Abschnitt „Filter Sperrungen & Hinweise“ ins Bedienfeld verschoben (bestehende Filterlogik in `js/closures.js` unverändert, Suche bleibt im rechten Panel)
+- [x] Checkboxen im rechten Seitenpanel entfernt, es gibt nur noch eine Bedienstelle für Kartenfilter
+
 ---
 
 # 📚 Versionshistorie
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.3 | 2026-10-30 | Filter Sperrungen & Hinweise im Bedienfeld „Karten & Layer“ |
 | 2.2 | 2026-10-29 | Schutzgebiete: Filter, Symbole, Wildlife-Namen |
 | 2.1 | 2026-10-29 | Meilenstein „Mehrländriges Lawinenframework“ |
 | 2.0 | 2026-10-29 | Konsolidation: Alpine Risk Intelligence Roadmap + Mountain Radar Toolbox integriert |

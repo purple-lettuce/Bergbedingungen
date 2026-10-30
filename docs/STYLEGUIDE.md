@@ -111,6 +111,7 @@ Empfohlene Kombination:
 - Funktionale Informationen haben Vorrang vor dekorativen Kartenelementen
 - Warnungen werden farblich und durch Muster sofort erfassbar
 - Layer werden als separate Ebenen strukturiert, nicht als überlagerte „Visuelle Massen“
+- Kartenbezogene Filter werden ausschließlich über das Menü „Karten & Layer“ gesteuert (Abschnitte „Filter …“). Das rechte Seitenpanel enthält keine Filterschalter; die Textsuche bleibt dort.
 
 ---
 

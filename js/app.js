@@ -6,12 +6,13 @@ import { loadWeather } from './weather.js';
 import { loadProtectedAreas } from './protected_areas.js';
 import { initAvalanche } from './avalanche.js';
 import { loadData, render, scheduleRender } from './closures.js';
+import { initClosuresFilter } from './closures_filter.js';
 import { initClosuresLegend } from './closures_legend.js';
 
 // ---------- Ereignisse ----------
 map.on('moveend', scheduleRender);
 map.on('click', function (ev) { loadWeather(ev.latlng.lat, ev.latlng.lng); });
-[el.q, el.fClosure, el.fNotice, el.fUpcoming].forEach(function (n) { n.addEventListener('input', render); });
+el.q.addEventListener('input', render);
 document.getElementById('wx-center').addEventListener('click', function () { var c = map.getCenter(); loadWeather(c.lat, c.lng); });
 document.getElementById('wx-geo').addEventListener('click', function () {
   if (!navigator.geolocation) { el.wx.innerHTML = '<span class="muted">Standort wird von diesem Browser nicht unterstützt.</span>'; return; }
@@ -25,6 +26,7 @@ document.getElementById('wx-geo').addEventListener('click', function () {
 var c0 = map.getCenter();
 loadWeather(c0.lat, c0.lng);
 
+initClosuresFilter();
 initClosuresLegend();
 
 loadProtectedAreas();
