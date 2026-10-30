@@ -344,6 +344,25 @@ Regeln für die Verwendung:
 
 ---
 
+# Header (seit D4)
+
+Der Header ist eine ruhige, weiße App-Shell (Fläche `--mr-surface`, unten 1 px `--mr-line`; im Dunkelmodus dunkle Fläche). Er besteht aus:
+
+- **Emblem** (`docs/design/mountain-radar-emblem.svg`, Ausschnitt aus dem Hauptlogo ohne Schrift, 44 px, mobil 36 px). Dekorativ (`alt=""`), der Name steht im `h1`.
+- **Wortmarke** „Mountain Radar“ als `h1`, gesperrte Großbuchstaben, Inter 600, Farbe `--mr-link` (Deep Alpine Blue, im Dunkelmodus hell).
+- **Claim** „ALPINE RISK INTELLIGENCE“, 12 px, gesperrt, Farbe `--mr-success` (Mountain Green, im Dunkelmodus heller).
+- **Slogan** „Know before you go.“, gedämpft (`--mr-text-muted`); Desktop rechts, mobil in einer eigenen Zeile unter der Wortmarke.
+
+Klassen: `.mr-header`, `.mr-brand` (`__emblem`, `__text`, `__name`, `__claim`), `.mr-header__slogan`. Der Text ist HTML (nicht im Bild), damit er skaliert, übersetzbar ist und die Inter-Schrift verwendet.
+
+Regeln:
+
+- **Keine Navigation, keine Aktionen im Header**, solange es keine weiteren Bereiche gibt. Nichts darf Funktionen vortäuschen (keine toten Links, keine Buttons ohne Funktion, keine Platzhalter). Kommt ein echter Bereich hinzu, wird die Navigation als `nav` mit nur existierenden Zielen ergänzt.
+- Der Header zeigt keine Daten (Uhrzeit, Status): Datenstatus gehört in die Statusleiste (D5).
+- Das Hauptlogo (`mountain-radar-main-hauptlogo.svg`) bleibt für Material außerhalb der App (README, Social Preview). In der App wird nur das Emblem verwendet, weil die Wortmarke im Hauptlogo als SVG-Text mit Fallback-Schriften gesetzt ist.
+
+---
+
 # Visuelle Prioritäten
 
 1. Orientierung vor Dekoration

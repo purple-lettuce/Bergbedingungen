@@ -75,8 +75,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 
 ### Stufe B — Sichtbare Bausteine im bestehenden Layout
 
-**D4 — Header als App-Shell**
-- Umfang: Weißer Header mit Logo, Wortmarke, Claim, Slogan. Navigation nur mit existierenden Zielen („Explore“ aktiv). „Route Planner“, „Risk Analysis“, „Conditions“, „Saved Areas“ **nicht anzeigen**, bis sie existieren (keine toten Links). Avatar und Uhrzeit-Pille entfallen vorerst.
+**D4 — Header als App-Shell** ✅ erledigt (30.10.2026)
+- Umsetzung: Weiße App-Shell mit Emblem (`docs/design/mountain-radar-emblem.svg`, aus dem Hauptlogo abgeleitet), Wortmarke, Claim und Slogan; mobil mitgedacht (Slogan in eigener Zeile). **Ohne Navigation**: Es gibt nur einen Bereich („Explore“ wäre ein toter Eintrag), daher bewusst keine Navigation. Weggelassen gegenüber dem Mockup: Navigation, Uhrzeit-Pille, Avatar. Dokumentation: STYLEGUIDE.md, Abschnitt „Header“. Entscheidungen 4 (Logo-Verwendung) und 5 (Navigation: weglassen) sind damit getroffen.
+- Ursprünglicher Umfang: Weißer Header mit Logo, Wortmarke, Claim, Slogan. Navigation nur mit existierenden Zielen („Explore“ aktiv). „Route Planner“, „Risk Analysis“, „Conditions“, „Saved Areas“ **nicht anzeigen**, bis sie existieren (keine toten Links). Avatar und Uhrzeit-Pille entfallen vorerst.
 - Dateien: `index.html`, `style.css`.
 
 **D5 — Datenstatus-Leiste**
