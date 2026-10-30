@@ -309,6 +309,41 @@ Dateien: `vendor/inter/inter-latin-wght-normal.woff2` und `inter-latin-ext-wght-
 
 ---
 
+# Komponenten (seit D3)
+
+Gemeinsame, wiederverwendbare UI-Bausteine in `style.css`, Abschnitt „Gemeinsame Komponenten (D3)“. Sie bauen ausschließlich auf den Tokens aus „Design Tokens“ auf (keine festen Farben, Radien oder Abstände; erlaubt sind nur Linienstärken von 1–2 px und das Touchziel von 44 px). Namensschema: `.mr-<name>`, `.mr-<name>--<variante>`, `.mr-<name>__<teil>`. Jede Komponente funktioniert hell und dunkel. Sichtbare Referenz mit allen Zuständen: [design/komponenten.html](design/komponenten.html) (über einen Webserver öffnen; gehört nicht zur Anwendung).
+
+| Komponente | Zweck | Einsatz (geplant) | Abhängigkeiten |
+|---|---|---|---|
+| `.mr-card` (`--tight`, `--raised`) | Fläche mit Rahmen, Radius `md`, Innenabstand `md` | Seitenleistenkarten (D6), später schwebende Karten (D10) | `--mr-surface`, `--mr-line`, `--mr-text`, `--mr-radius-md`, `--mr-space-md`, `--mr-shadow-sm` |
+| `.mr-label` | Mikro-Label: 12 px, gesperrte Großbuchstaben, gedämpft | Abschnittstitel, „AKTIVE OVERLAYS · N AKTIV“ (D7), Statuszeilen (D5) | `--mr-text-muted`, `--mr-text-xs`, `--mr-tracking-label` |
+| `.mr-badge` (`--closure`, `--notice`, `--upcoming`, `--success`) | Kurzes Statusschild, Farbe = Rahmen = Text | Popup-Kopf (D8), Listen, Statusleiste (D5) | Statusfarben, `--mr-radius-xs`, `--mr-text-xs` |
+| `.mr-switch` (`__track`, `__text`) | Schalter an/aus auf Basis einer echten Checkbox (`role="switch"`), Tastatur und Screenreader unverändert | Layer-Menü „Intelligence Layers“ (D7) | `--mr-link`, `--mr-line`, `--mr-text-muted`, `--mr-surface`, Radien, Abstände |
+| `.mr-kv` (`--stacked`, `__item`) | Beschriftung und Wert; `dt`/`dd` in zwei Spalten, oder gestapelt im Raster | Wetterwerte (D6), Popups (D8), Statusleiste (D5) | `--mr-text-muted`, `--mr-text-xs`, Abstände |
+| `.mr-segment` (`__opt`) | Auswahl genau einer Option als Radio-Gruppe (`role="radiogroup"`) | Kartenstil OSM/Topo (D7) | `--mr-primary`, `--mr-on-primary`, `--mr-link`, `--mr-bg`, `--mr-line` |
+| `.mr-stack`, `.mr-cluster`, `.mr-gap-*` | Anordnung: Spalte bzw. umbrechende Zeile mit Abstand | überall | Abstands-Tokens |
+| `.mr-mt-*`, `.mr-mb-0` | Abstand oben bzw. unten 0, nur Skalenwerte | ersetzt Inline-Styles | Abstands-Tokens |
+| `.mr-text-muted`, `.mr-text-sm`, `.mr-tabular`, `.mr-visually-hidden` | Text-Hilfen | überall | Text-Tokens |
+
+Regeln für die Verwendung:
+
+- Neue Oberflächenteile verwenden Komponenten und Tokens, keine neuen Inline-Styles. Ausnahme: Werte, die aus Daten kommen (Farbfelder der Schutzgebiets-Legende).
+- Die Komponenten in `.mr-*` ersetzen alte Klassen erst, wenn der jeweilige Bereich umgebaut wird (D5–D9). Bis dahin bleiben die alten Klassen (`.badge`, `.wx-grid`, `.kl-*`, `.status`) unverändert, damit nichts bricht.
+- `.mr-badge` ist mit 12 px bewusst größer als das bisherige `.badge` (11 px, Mindestgröße laut Migrationsplan). Die Umstellung der Listeneinträge auf `.mr-badge` geschieht in D6.
+- Klassen, die von JavaScript neu gesetzt werden (`el.status.className` in `js/map.js`), bekommen keine Helferklassen, sondern eine CSS-Regel (siehe `#status`).
+
+## Migrationsstand
+
+| Bereich | Stand |
+|---|---|
+| Seitenleistenkarten „Wetter“ und „Sperrungen und Hinweise“ (`index.html`) | auf `.mr-card` umgestellt (gleiche Optik wie zuvor) |
+| Inline-Styles in `index.html` (3) und `js/weather.js` (1) | durch `.mr-mt-*`, `.mr-mb-0` bzw. die Regel `#status` ersetzt; Abstände 10 px → 12 px (Skala), 2 px mehr Luft über Schaltflächen und Statuszeile |
+| Layer-Menü (`.kl-*`), Wetterwerte (`.wx-*`), Listenbadges (`.badge`), Legenden (`.pa-*`, `.av-*`), Popups | **bewusst noch nicht migriert** (D5–D9) |
+| Inline-Styles in Popups (`js/closures.js`, `js/protected_areas_popup.js`) | bleiben bis D8 |
+| Inline-Styles mit Datenfarben (`js/protected_areas_legend.js`, `js/protected_areas_filter.js`) | bleiben, da datengetrieben |
+
+---
+
 # Visuelle Prioritäten
 
 1. Orientierung vor Dekoration

@@ -41,7 +41,7 @@ export async function loadWeather(lat, lon) {
       '<div><dt>Nullgradgrenze</dt><dd>' + (fl == null ? '–' : Math.round(fl / 10) * 10 + ' m') + '</dd></div>' +
       '<div><dt>Standorthöhe</dt><dd>' + (d.elevation != null ? Math.round(d.elevation) + ' m' : '–') + '</dd></div>' +
       '</dl><div class="days">' + days + '</div>' +
-      '<p class="muted" style="margin:8px 0 0">Gelände-Höhe laut Wettermodell, kann von der Gipfelhöhe abweichen.</p>';
+      '<p class="muted mr-mt-sm mr-mb-0">Gelände-Höhe laut Wettermodell, kann von der Gipfelhöhe abweichen.</p>';
   } catch (e) {
     if (seq !== wxSeq) return;
     el.wx.innerHTML = '<span class="muted">Wetterdaten sind gerade nicht abrufbar.</span>';

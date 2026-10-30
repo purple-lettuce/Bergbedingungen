@@ -137,6 +137,7 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/test_protected_areas.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage und der Schutzgebiets-Oberfläche (Python und JavaScript im Headless-Browser) |
 | `data/avalanche/` | Lawinenlage: `index.json`, je Quelle `<id>.json` (Bulletins) und `<id>_regions.geojson` (Polygone) für `euregio` und `slf` |
 | `vendor/inter/` | Schrift Inter (variable, SIL OFL 1.1), selbst gehostet, Lizenz in `vendor/inter/OFL.txt` |
+| `docs/design/komponenten.html` | Referenzseite der gemeinsamen UI-Komponenten (`.mr-*`), nur zur Ansicht, nicht Teil der Anwendung |
 | `vendor/albina/` | offizielle ALBINA-Symbole (Gefahrenstufen, Lawinenprobleme), Herkunft in `vendor/albina/README.md` |
 
 ## Aufbau des Programmcodes (`js/`)

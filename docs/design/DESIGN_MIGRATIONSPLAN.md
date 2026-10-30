@@ -68,8 +68,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Risiko: Kontrastverlust. Prüfen mit Kontrast-Check, Warnfarben und Lawinenfarben bleiben unverändert.
 - Entscheidung nötig: Inter (Mockup) oder Barlow (heute). Empfehlung Inter.
 
-**D3 — Gemeinsame Komponenten-CSS**
-- Umfang: Klassen `.mr-card`, `.mr-label` (Mikro-Label), `.mr-badge`, `.mr-switch`, `.mr-kv` (Key-Value-Zeile), `.mr-segment`. Noch nirgends verwendet oder nur auf einer Karte als Test. Inline-Styles aus `index.html` entfernen.
+**D3 — Gemeinsame Komponenten-CSS** ✅ erledigt (30.10.2026)
+- Umsetzung: Abschnitt „Gemeinsame Komponenten“ in `style.css` mit `.mr-card`, `.mr-label`, `.mr-badge`, `.mr-switch`, `.mr-kv`, `.mr-segment` und Hilfsklassen (`.mr-stack`, `.mr-cluster`, `.mr-mt-*`, …). Nur Tokens aus D2. Migriert: Seitenleistenkarten (`.mr-card`) und die Inline-Styles in `index.html` und `js/weather.js`. Dokumentation: STYLEGUIDE.md, Abschnitt „Komponenten“; Referenzseite `docs/design/komponenten.html`.
+- Ursprünglicher Umfang: Klassen `.mr-card`, `.mr-label` (Mikro-Label), `.mr-badge`, `.mr-switch`, `.mr-kv` (Key-Value-Zeile), `.mr-segment`. Noch nirgends verwendet oder nur auf einer Karte als Test. Inline-Styles aus `index.html` entfernen.
 - Dateien: `style.css` (oder `css/components.css`, nur wenn die Datei zu lang wird).
 
 ### Stufe B — Sichtbare Bausteine im bestehenden Layout
