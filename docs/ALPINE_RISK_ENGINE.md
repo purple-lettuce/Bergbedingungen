@@ -334,40 +334,40 @@ Offen.
 
 # Roadmap
 
-Phase 1
+Die maßgeblichen Phasen und der Status stehen in [ROADMAP.md](ROADMAP.md). Zuordnung der Engine-Bausteine:
 
-✅ Schutzgebiete
+Phase 1 (Grundlagen)
 
-✅ Wildlife
+✅ Schutzgebiete (Kartenebene)
 
-✅ Lawinenlage
-
----
-
-Phase 2
-
-Geosphere Integration
+✅ Wildlife (Kartenebene)
 
 DEM Integration
 
 OSM Risikodaten
 
+GPX Import
+
 ---
 
-Phase 3
+Phase 2 (Wetterintegration)
 
-GPX Import
+Geosphere Integration
+
+✅ Lawinenlage (Euregio und Schweiz, Test ab Saisonstart)
+
+---
+
+Phase 3 (Gefahrenmodellierung)
 
 Segmentanalyse
 
----
-
-Phase 4
-
-Erste Alpine Risk Engine
+Erste Alpine Risk Engine (Beta)
 
 ---
 
-Phase 5
+Phase 5 (Production & Optimierung)
+
+Alpine Risk Engine (GA)
 
 KI-gestützte Risikoerklärung. 

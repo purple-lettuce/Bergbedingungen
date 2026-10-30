@@ -20,8 +20,8 @@ Bergbedingungen
 
 | Datenquelle | Status | Verwendung | Priorität |
 |------------|------------|------------|------------|
-| Austrian DEM / DGM | ✅ In Umsetzung | Geländeanalyse | 🔴 Sehr hoch |
-| OpenStreetMap (OSM) | ✅ In Umsetzung | Infrastruktur | 🔴 Sehr hoch |
+| Austrian DEM / DGM | 🟡 Geplant (noch kein Code) | Geländeanalyse | 🔴 Sehr hoch |
+| OpenStreetMap (OSM) | 🟡 Kartenkacheln im Einsatz, Overpass geplant | Infrastruktur | 🔴 Sehr hoch |
 | Digitize The Planet (DTP) | ✅ Produktiv | Schutzgebiete | 🔴 Sehr hoch |
 | Closures | ✅ Produktiv | Sperrungen | 🟡 Mittel |
 | GeoSphere Austria | 🟡 Geplant | Wetterrisiko | 🔴 Sehr hoch |
@@ -93,7 +93,7 @@ Bergbedingungen
 | **Priorität** | 🔴 Sehr hoch |
 | **Roadmap-Phase** | Phase 1 (Grundlagen) |
 | **Zugeordnete Module** | Geländeanalyse, GPX Analyse, Alpine Risk Engine |
-| **Status** | In Umsetzung |
+| **Status** | Geplant (noch kein Code im Repository) |
 | **Abhängigkeiten** | Keine (unabhängig) |
 | **Notizen** | Fundamentales Datenset für alle geometrischen Analysen |
 
@@ -154,7 +154,7 @@ scripts/test_build_geojson.py
 | **Priorität** | 🔴 Sehr hoch |
 | **Roadmap-Phase** | Phase 1 (Grundlagen) |
 | **Zugeordnete Module** | Infrastruktur, GPX Analyse, Alpine Risk Engine |
-| **Status** | In Umsetzung |
+| **Status** | Overpass geplant (noch kein Code im Repository); OSM-Kacheln als Basiskarte im Einsatz |
 | **Abhängigkeiten** | Keine (unabhängig) |
 | **Notizen** | Deckt 80% der relevanten Infrastruktur ab; Datenqualität variabel nach Region |
 
@@ -552,6 +552,7 @@ Alpine Risk Engine (Zielmodul)
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.1 | 2026-10-30 | Status DEM und OSM Overpass mit ROADMAP abgeglichen (geplant, kein Code im Repository) |
 | 2.0 | 2026-10-29 | Konsolidation: Neue strukturierte Datenquellen mit allen Details + alte Workflow-Informationen |
 | 1.0 | 2026-10 | Initial Bergbedingungen Datenquellen |
 

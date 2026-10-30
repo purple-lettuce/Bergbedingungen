@@ -163,7 +163,7 @@ Diese 10 Module sind das Rückgrat der Alpine Risk Intelligence:
 | **Alpine Risk Engine** | Design | 3 (Beta), 5 (GA) | 🔴 Sehr hoch |
 | **Mountain Radar Toolbox** | Website: teilweise (Wetter am Punkt), Mobile: Design | 1-2 (Website), 4-5 (Mobile) | 🟡 Mittel-Hoch |
 
-Die Alpine Risk Engine setzt auf DEM, OSM, Wetterintegration (GeoSphere), Lawinenlage, Unfallanalyse und GPX Analyse auf. Deshalb startet sie erst nach Phase 1-2 mit der Beta in Phase 3. Detailkonzept: ALPINE_RISK_ENGINE.md (deren Phasenliste ist älter und gilt nicht, maßgeblich sind die Phasen dieser Roadmap).
+Die Alpine Risk Engine setzt auf DEM, OSM, Wetterintegration (GeoSphere), Lawinenlage, Unfallanalyse und GPX Analyse auf. Deshalb startet sie erst nach Phase 1-2 mit der Beta in Phase 3. Detailkonzept: ALPINE_RISK_ENGINE.md (Phasenliste dort mit dieser Roadmap abgeglichen).
 
 Datenquellen für alle Module sind in **DATENQUELLEN.md** dokumentiert.
 

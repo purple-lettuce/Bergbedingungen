@@ -86,7 +86,7 @@ Die Dokumentation des Projekts liegt im Ordner [docs/](docs/):
 
 ### Hauptdokumentation (Source of Truth)
 
-- **[docs/ROADMAP.md](docs/ROADMAP.md)** — Alpine Risk Intelligence Roadmap mit 5 Phasen, 9 Kernmodulen, Mountain Radar Toolbox (Website + Mobile), Abhängigkeiten und Akzeptanzkriterien
+- **[docs/ROADMAP.md](docs/ROADMAP.md)** — Alpine Risk Intelligence Roadmap mit 5 Phasen, 10 Kernmodulen, Mountain Radar Toolbox (Website + Mobile), Abhängigkeiten und Akzeptanzkriterien
 - **[docs/DATENQUELLEN.md](docs/DATENQUELLEN.md)** — Vollständiger Katalog aller Datenquellen (20+) mit URLs, Lizenzen, Prioritäten, Roadmap-Phasen, lokalen Dateien und Skripten
 - **[docs/WORKFLOW.md](docs/WORKFLOW.md)** — Arbeitsabläufe, Definition of Done, Dokumentations-Prozesse
 
@@ -246,8 +246,8 @@ static.avalanche.report (CAAML v6)  aws.slf.ch (CAAML v6, V4)  eaws-regions (Pol
 
 Das Projekt befindet sich in der **Entwicklung zur Alpine Risk Intelligence Plattform**:
 
-- ✅ **Phase 1 (Grundlagen):** DEM, OSM, Kartografie teilweise umgesetzt
-- 🟡 **Phase 2 (Wetterintegration):** ALBINA/SLF Lawinenlage in Umsetzung, GeoSphere geplant
+- ✅ **Phase 1 (Grundlagen):** Schutzgebiete, Wildlife, Sperrungen und Wetter am Punkt umgesetzt; DEM, OSM Overpass, GPX und Website Toolbox offen
+- 🟡 **Phase 2 (Wetterintegration):** Lawinenlage für Euregio und Schweiz umgesetzt (Test ab Saisonstart), GeoSphere geplant
 - 🔬 **Phase 3+ (Gefahrenmodellierung, Mobile App, Internationale Expansion):** In Planung
 
 Die Roadmap, Datenquellen und Entwicklungs-Workflows sind vollständig dokumentiert. Neue Arbeitspakete können direkt aus [docs/ROADMAP.md](docs/ROADMAP.md) und [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) abgeleitet werden.
