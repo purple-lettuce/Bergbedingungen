@@ -4,31 +4,39 @@ ALPINE RISK INTELLIGENCE
 
 Know before you go.
 
-Repository:
+Technischer Projektname (Repository):
 Bergbedingungen
-
-Status:
-Übergangsphase vor möglichem Rebranding.
 
 # 🏔️ Mountain Radar Roadmap
 
-> Version: 2.0
+> Version: 2.4 (aktuelle Version siehe Versionshistorie am Ende)
 >
-> Letzte Aktualisierung: Oktober 2026
+> Letzte Aktualisierung: 30.10.2026
 >
-> Dieses Dokument beschreibt die langfristige Vision, die strategische Ausrichtung und die technische Roadmap der Entwicklung von Mountain Radar / Bergbedingungen.
+> Dieses Dokument ist die Single Source of Truth für Vision, Prioritäten, Phasen und Projektstatus von Mountain Radar. Alle Statusangaben stehen in den Abschnitten „Aktuelle Prioritäten“, „Kernmodule“ und „Implementierungs-Checkliste“ und sind dort aufeinander abgestimmt.
 >
 > Technische Details, Datenquellen und APIs sind in DATENQUELLEN.md dokumentiert.
 
 ---
 
+## Branding
+
+- **Mountain Radar** ist der offizielle Produktname (Claim: ALPINE RISK INTELLIGENCE, Slogan: „Know before you go.“).
+- **Bergbedingungen** ist der technische Projektname (Repository). Das Rebranding ist in der Dokumentation vollzogen (README, ROADMAP, DATENQUELLEN, STYLEGUIDE).
+- Offen: In der Anwendung selbst (`index.html`: Seitentitel und Überschrift) steht noch „Bergbedingungen“. Die Umstellung gehört zum Arbeitspaket „Design & Branding“ (siehe Prioritäten, Punkt 10).
+- Das visuelle Design System (Farben, Typografie, Komponenten) ist in STYLEGUIDE.md beschrieben. Die Umsetzung in der Oberfläche ist noch nicht abgeschlossen.
+
+---
+
 ## Dokumentationsregel
 
-Nach Abschluss eines Arbeitspakets müssen folgende Dokumente geprüft werden:
+Nach Abschluss eines Arbeitspakets müssen folgende Dokumente geprüft werden (Ablauf: docs/WORKFLOW.md):
 
 - ROADMAP.md (dieses Dokument)
 - DATENQUELLEN.md
-- docs/WORKFLOW.md
+- IDEENSAMMLUNG.md
+- README.md
+- STYLEGUIDE.md
 
 Die Dokumentation ist die maßgebliche Quelle für den Projektstatus.
 
@@ -83,16 +91,16 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 |------------|------------|------------|
 | 1 | Legende für Schutzgebiete | Erledigt |
 | 2 | Filter nach Schutzgebietstyp | Erledigt (Filter im Bedienfeld „Karten & Layer“, Symbole für Wildlife und Regeln im Popup) |
-| 3 | Lawinenlage | In Arbeit (Euregio und Schweiz umgesetzt, Test mit aktuellen Berichten ab Saisonstart) |
-| 4 | Unfalllayer | Recherche |
-| 5 | Unfall-Heatmap | Konzept |
-| 6 | Digiway Absturzrisiko | Konzept |
-| 7 | GPX Upload & Tourenanalyse | Geplant |
-| 8 | Mountain Radar Toolbox | Planung (Website + Mobile) |
-| 9 | Alpine Risk Engine | Planung (Phase 3) |
-| 10 | Design & UX | Geplant |
-| 11 | PWA & Offline | Zukunft |
-| 12 | Mobile App | Zukunft (Phase 4+) |
+| 3 | Lawinenlage | In Arbeit (Euregio und Schweiz umgesetzt, Test mit aktuellen Berichten ab Saisonstart 2026/27) |
+| 4 | Unfalllayer | Recherche (Phase 3) |
+| 5 | Unfall-Heatmap | Konzept (Phase 3) |
+| 6 | Digiway Absturzrisiko | Konzept (Phase 3) |
+| 7 | GPX Upload & Tourenanalyse | Geplant (Phase 1) |
+| 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1); Mobile: Zukunft (Phase 4-5) |
+| 9 | Alpine Risk Engine | Design (Beta Phase 3, GA Phase 5) |
+| 10 | Design & Branding | Geplant (Styleguide vorhanden, Umsetzung in der Oberfläche und Umbenennung in der Anwendung offen) |
+| 11 | PWA & Offline | Zukunft (nach Phase 4) |
+| 12 | Mobile App | Zukunft (Phase 4) |
 
 ---
 
@@ -102,6 +110,7 @@ Mountain Radar wird in **5 technischen Phasen** entwickelt:
 
 ```
 Phase 1: Grundlagen (Q4 2026 - Q1 2027)
+├─ Bereits umgesetzt: Schutzgebiete, Wildlife, Sperrungen & Hinweise, Wetter am Punkt (Open-Meteo)
 ├─ DEM, OSM, Kartografie
 ├─ Geländeanalyse-Module
 ├─ Website Toolbox (Koordinaten, Höhe, Entfernungen)
@@ -109,14 +118,15 @@ Phase 1: Grundlagen (Q4 2026 - Q1 2027)
 
 Phase 2: Wetterintegration (Q1 - Q2 2027)
 ├─ GeoSphere-Integration
-├─ ALBINA & SLF Lawinenlage
+├─ ALBINA & SLF Lawinenlage (Euregio und Schweiz umgesetzt, Test ab Saisonstart)
 ├─ Tourenwarnungen
 └─ Website Wetter-am-Punkt erweitert
 
 Phase 3: Gefahrenmodellierung (Q2 - Q3 2027)
-├─ Unfallanalyse-Engine
+├─ Unfallanalyse-Engine (Unfalllayer, Heatmap, Digiway Absturzrisiko)
 ├─ Steinschlag- & Muren-Indikatoren
 ├─ Regionale Daten (Tirol)
+├─ Schutzgebiete und Wildlife als Risikomodule
 └─ Alpine Risk Engine (Beta)
 
 Phase 4: Mobile App & Internationale Expansion (Q4 2027 - Q1 2028)
@@ -142,16 +152,18 @@ Diese 10 Module sind das Rückgrat der Alpine Risk Intelligence:
 
 | Modul | Status | Phase | Priorität |
 |---|---|---|---|
-| **Geländeanalyse** | In Arbeit | 1 | 🔴 Sehr hoch |
-| **GPX Analyse** | In Arbeit | 1 | 🔴 Sehr hoch |
-| **Infrastruktur** | In Arbeit | 1 | 🔴 Sehr hoch |
+| **Geländeanalyse** (DEM) | Geplant | 1 | 🔴 Sehr hoch |
+| **GPX Analyse** | Geplant | 1 | 🔴 Sehr hoch |
+| **Infrastruktur** (OSM) | Geplant | 1 | 🔴 Sehr hoch |
 | **Wetterrisiko** | Geplant | 2 | 🔴 Sehr hoch |
-| **Lawinenlage** | In Umsetzung | 2 | 🔴 Sehr hoch |
-| **Unfallanalyse** | Geplant | 3 | 🟠 Hoch |
-| **Schutzgebiete** | Recherche | 3 | 🟡 Mittel |
-| **Wildlife** | Recherche | 3 | 🟡 Mittel |
-| **Alpine Risk Engine** | Design | 3-5 | 🔴 Sehr hoch |
-| **Mountain Radar Toolbox** | Design | 1-5 | 🟡 Mittel-Hoch |
+| **Lawinenlage** | In Arbeit | 2 | 🔴 Sehr hoch |
+| **Unfallanalyse** | Recherche | 3 | 🟠 Hoch |
+| **Schutzgebiete** | Umgesetzt als Kartenebene (Layer, Legende, Filter, Popup mit Regeln); Risikomodul geplant | 1 (Anzeige), 3 (Risikomodul) | 🟡 Mittel |
+| **Wildlife** | Umgesetzt als Teil der Schutzgebiete (Namen, Symbole, Popup); Darstellung wird verbessert, Risikomodul geplant | 1 (Anzeige), 3 (Risikomodul) | 🟡 Mittel |
+| **Alpine Risk Engine** | Design | 3 (Beta), 5 (GA) | 🔴 Sehr hoch |
+| **Mountain Radar Toolbox** | Website: teilweise (Wetter am Punkt), Mobile: Design | 1-2 (Website), 4-5 (Mobile) | 🟡 Mittel-Hoch |
+
+Die Alpine Risk Engine setzt auf DEM, OSM, Wetterintegration (GeoSphere), Lawinenlage, Unfallanalyse und GPX Analyse auf. Deshalb startet sie erst nach Phase 1-2 mit der Beta in Phase 3. Detailkonzept: ALPINE_RISK_ENGINE.md (deren Phasenliste ist älter und gilt nicht, maßgeblich sind die Phasen dieser Roadmap).
 
 Datenquellen für alle Module sind in **DATENQUELLEN.md** dokumentiert.
 
@@ -165,7 +177,7 @@ Datenquellen für alle Module sind in **DATENQUELLEN.md** dokumentiert.
 
 ## Website Toolbox (Phase 1-2)
 
-- **WEB-T1:** Wetter am Punkt ✅ (Existierend, Phase 2)
+- **WEB-T1:** Wetter am Punkt ✅ (vorhanden, Open-Meteo; Erweiterung Phase 2)
 - **WEB-T2:** Koordinaten anzeigen (Phase 1)
 - **WEB-T3:** Höhe anzeigen (Phase 1)
 - **WEB-T4:** Entfernung zum Standort (Phase 1)
@@ -189,11 +201,15 @@ Details finden sich in DATENQUELLEN.md (Abschnitt 11. TOOLBOX-DATENQUELLEN).
 
 # 📋 Implementierungs-Checkliste
 
+Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OSM Overpass, GPX-Parser und Höhenprofil. Diese Punkte sind daher offen.
+
 ### Phase 1 — Status: IN PROGRESS
-- [x] DEM-Integration
-- [x] OSM Overpass API Integration
-- [x] GPX-Parser
-- [x] Höhenprofil-Berechnung
+- [x] Schutzgebiete (Layer, Legende, Filter, Popup mit Regeln), Wildlife (Namen, Symbole), Sperrungen & Hinweise als Kartenebenen
+- [x] Wetter am Punkt (Open-Meteo, WEB-T1)
+- [ ] DEM-Integration
+- [ ] OSM Overpass API Integration
+- [ ] GPX-Parser
+- [ ] Höhenprofil-Berechnung
 - [ ] Wegschwierigkeit-Matching (sac_scale)
 - [ ] Website Toolbox: Koordinaten & Höhe
 - [ ] Website Toolbox: Entfernungsmessungen
@@ -204,17 +220,25 @@ Details finden sich in DATENQUELLEN.md (Abschnitt 11. TOOLBOX-DATENQUELLEN).
 - [x] SLF CAAML-Parser
 - [x] Mehrländriges Lawinenframework (siehe Technische Meilensteine)
 - [ ] GeoSphere API Integration
-- [ ] Lawinenlage-Visualisierung: Euregio und Schweiz umgesetzt, Test mit aktuellen Berichten ab Saisonstart 2026/27 offen
+- [x] Lawinenlage-Visualisierung für Euregio und Schweiz umgesetzt
+- [ ] Lawinenlage: Test mit aktuellen Berichten im Browser ab Saisonstart 2026/27
 - [ ] Tourenwarnungen-Logik
 - [ ] Website Wetter-am-Punkt erweitert
 
 ### Phase 3 — Status: PLANNED
 - [ ] BMI-Daten georeferenzieren
-- [ ] Unfall-Hotspot-Algorithmus
+- [ ] Unfalllayer, Unfall-Heatmap, Unfall-Hotspot-Algorithmus
+- [ ] Digiway Absturzrisiko
 - [ ] Steinschlag-/Muren-Indikatoren
-- [ ] Schutzgebiete-Modul
-- [ ] Wildlife-Modul
+- [ ] Regionale Daten (Tirol)
+- [ ] Schutzgebiete und Wildlife als Risikomodule der Engine (die Kartenebenen sind umgesetzt, siehe Phase 1)
 - [ ] Alpine Risk Engine (Beta)
+
+### Design & Branding — Status: PLANNED (phasenunabhängig)
+- [x] Styleguide (STYLEGUIDE.md)
+- [x] Produktname und Claim in der Dokumentation
+- [ ] Umsetzung des Design Systems in der Oberfläche
+- [ ] Produktname „Mountain Radar“ in der Anwendung (`index.html`: Titel, Überschrift)
 
 ### Phase 4 — Status: FUTURE
 - [ ] Mobile App Framework
@@ -245,12 +269,15 @@ Aus dieser Roadmap können neue Arbeitspakete abgeleitet werden:
 
 **Phase 2 Arbeitspakete:**
 - AP-2.1: GeoSphere Integration
-- AP-2.2: ALBINA & SLF Parser
+- AP-2.2: ALBINA & SLF Parser ✅ (umgesetzt, siehe Technische Meilensteine)
 - AP-2.3: Website Wetter-am-Punkt erweitert
 
 **Phase 3 Arbeitspakete:**
 - AP-3.1: BMI-Daten Georeferenzierung
 - AP-3.2: Alpine Risk Engine (Beta)
+
+**Phasenunabhängig:**
+- AP-D.1: Design & Branding (Design System, Umbenennung in der Anwendung)
 
 **Phase 4+ Arbeitspakete:**
 - AP-4.1: Mobile App Sensor Integration
@@ -293,6 +320,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.4 | 2026-10-30 | Konsistenzprüfung: Status von DEM, GPX, OSM, Schutzgebiete und Wildlife korrigiert, Branding-Abschnitt, Phasen und Prioritäten abgeglichen |
 | 2.3 | 2026-10-30 | Filter Sperrungen & Hinweise im Bedienfeld „Karten & Layer“ |
 | 2.2 | 2026-10-29 | Schutzgebiete: Filter, Symbole, Wildlife-Namen |
 | 2.1 | 2026-10-29 | Meilenstein „Mehrländriges Lawinenframework“ |
@@ -307,6 +335,9 @@ Diese Roadmap ist Teil eines größeren Dokumentationssystems:
 
 - **DATENQUELLEN.md** — Vollständiger Katalog aller Datenquellen (15+) mit URLs, Lizenzen und Phasen
 - **docs/WORKFLOW.md** — Entwicklungs-Workflow und Definition of Done
+- **docs/STYLEGUIDE.md** — Design System von Mountain Radar
+- **docs/ALPINE_RISK_ENGINE.md** — Konzept der Alpine Risk Engine
+- **docs/IDEENSAMMLUNG.md** — Ideen, die noch nicht in der Roadmap stehen
 - **docs/LAWINENLAGE_ANALYSE.md** — Detaillierte Analyse der Lawinenlage-Integration
 - **docs/AVALANCHE_ARCHITECTURE.md** — Lawinen-Framework: Provider, Datenmodell, GeoJSON-Schema, Erweiterung um neue Länder
 - **docs/WILDLIFE_ANALYSE.md** — Analyse und Dokumentation der Wildlife-Daten
