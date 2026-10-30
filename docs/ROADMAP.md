@@ -98,7 +98,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 7 | GPX Upload & Tourenanalyse | Geplant (Phase 1) |
 | 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1); Mobile: Zukunft (Phase 4-5) |
 | 9 | Alpine Risk Engine | Design (Beta Phase 3, GA Phase 5) |
-| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design System in der Oberfläche offen) |
+| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2 umgesetzt, Komponenten und Layout offen) |
 | 11 | PWA & Offline | Zukunft (nach Phase 4) |
 | 12 | Mobile App | Zukunft (Phase 4) |
 
@@ -237,7 +237,8 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 ### Design & Branding — Status: IN PROGRESS (phasenunabhängig)
 - [x] Styleguide (STYLEGUIDE.md)
 - [x] Produktname und Claim in der Dokumentation
-- [ ] Umsetzung des Design Systems in der Oberfläche
+- [x] Design-Tokens und Typografie (D2): `--mr-*`-Tokens, Inter selbst gehostet
+- [ ] Umsetzung des Design Systems in der Oberfläche (weitere Schritte D3–D13 laut DESIGN_MIGRATIONSPLAN.md)
 - [x] Produktname „Mountain Radar“ in der Anwendung (D1: Titel, Meta-Beschreibung, Header, Favicon)
 
 ### Phase 4 — Status: FUTURE
@@ -320,6 +321,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.6 | 2026-10-30 | Design-Migrationsplan D2 (Design-Tokens, Inter selbst gehostet) umgesetzt |
 | 2.5 | 2026-10-30 | Design-Migrationsplan D1 (Branding, Titel, Favicon) umgesetzt |
 | 2.4 | 2026-10-30 | Konsistenzprüfung: Status von DEM, GPX, OSM, Schutzgebiete und Wildlife korrigiert, Branding-Abschnitt, Phasen und Prioritäten abgeglichen |
 | 2.3 | 2026-10-30 | Filter Sperrungen & Hinweise im Bedienfeld „Karten & Layer“ |

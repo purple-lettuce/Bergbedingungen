@@ -80,7 +80,7 @@ Typography soll technisch, klar und lesbar bleiben. Die Sprache ist deutschsprac
 
 ## Empfehlung für UI
 
-- Sans-serif Schriftfamilie, z. B. `Inter`, `Segoe UI`, `Arial`, sans-serif
+- Schriftfamilie: **Inter** (variable, SIL OFL 1.1), selbst gehostet unter `vendor/inter/`. Keine Google Fonts und kein externes Schrift-CDN. Fallback: `system-ui`, `Segoe UI`, `Roboto`, `Arial`, sans-serif
 - klare Zeilenabstände
 - kurze Textblöcke in Popups, Panels und Legenden
 
@@ -253,6 +253,59 @@ Legenden erklären die Bedeutung der Layer und Warnstufen sachlich und schnell. 
 - Orange: erhöhter Hinweis / Vorsicht
 - Rot: kritisch / hohe Gefahr
 - rot-schwarz-karriert: Sperrung / extremer Gefahrenzustand
+
+---
+
+# Design Tokens (seit D2)
+
+Alle Oberflächenwerte stehen als CSS-Variablen `--mr-*` am Anfang von `style.css` (`:root`, Dunkelmodus per `prefers-color-scheme: dark` darunter). Neue Komponenten (ab D3) verwenden **nur** diese Tokens und keine festen Hexwerte, Radien oder Abstände. Die bisherigen Namen (`--bg`, `--panel`, `--fg`, `--muted`, `--line`, `--accent`, `--accent-fg`, `--closure`, `--notice`, `--upcoming`, `--ok`, `--font-body`, `--font-display`) bleiben als Alias auf die neuen Tokens bestehen.
+
+## Farben
+
+| Token | Hell | Dunkel | Verwendung |
+|---|---|---|---|
+| `--mr-primary` | `#16324F` | gleich | Deep Alpine Blue: Header, Bedienfeld-Kopf, Primärbutton |
+| `--mr-primary-hover` | `#17374B` | gleich | Hover von Primärflächen (Abstufung aus dem Mockup) |
+| `--mr-primary-soft` | `#E6EDF4` | `#1D2D3F` | helle Tönung für Flächen (ab D3) |
+| `--mr-on-primary` | `#FFFFFF` | gleich | Text auf Primärflächen |
+| `--mr-secondary` | `#2F6B4F` | gleich | Mountain Green: positive Zustände, Wetter-Pin |
+| `--mr-secondary-bright` | `#1E7464` | gleich | Abstufung (Mockup-Teal) |
+| `--mr-secondary-soft` | `#E7F0EB` | `#1B2D25` | helle Tönung (ab D3) |
+| `--mr-on-secondary` | `#FFFFFF` | gleich | Text auf Sekundärflächen |
+| `--mr-bg` | `#F5F7F6` | `#0E1620` | Seitenhintergrund |
+| `--mr-surface` | `#FFFFFF` | `#16212C` | Karten, Panels, Eingaben |
+| `--mr-line` | `#D8DEE3` | `#2A3947` | Linien, Rahmen |
+| `--mr-text` | `#1B2733` | `#E6ECF1` | Fließtext |
+| `--mr-text-muted` | `#566574` | `#9AA9B6` | Nebentext |
+| `--mr-link` | `#16324F` | `#8DB4DB` | Links, Fokusrahmen, Auswahlelemente (Alias `--accent`) |
+| `--mr-success` | `#2F6B4F` | `#6FBF98` | Status „aktuell“ (Alias `--ok`) |
+| `--mr-closure` / `--mr-notice` / `--mr-upcoming` | `#C2351F` / `#B7791F` / `#3B6EA5` | `#F0705A` / `#E3A93F` / `#7FB0E3` | Warnfarben, **unverändert seit vor D2** |
+
+Die Lawinenfarben (Gefahrenstufen, siehe Abschnitt „Lawinengefahrenstufen“), die Kartenlayer-Farben in `js/` und die festen Farben der hellen Popups gehören nicht zu den Tokens und bleiben unverändert.
+
+Kontraste (WCAG, gerechnet): Text auf Fläche hell 15,2 : 1, dunkel 13,7 : 1; Nebentext 6,0 : 1 bzw. 6,8 : 1; Link 13,1 : 1 bzw. 7,5 : 1; Weiß auf `#16324F` 13,1 : 1; Weiß auf `#2F6B4F` 6,3 : 1. Bekannte Ausnahme: `--mr-notice` (`#B7791F`) erreicht auf Weiß 3,6 : 1 (Warnfarbe, laut Vorgabe unverändert; Entscheidung für eine dunklere Variante bleibt offen).
+
+## Radien, Abstände, Schatten
+
+| Token | Wert | Verwendung heute |
+|---|---|---|
+| `--mr-radius-xs` / `-sm` / `-md` | 4 / 6 / 8 px | Badges / Buttons, Eingaben, Listeneinträge / Karten, Bedienfeld |
+| `--mr-radius-lg` / `-xl` / `-pill` | 12 / 16 / 999 px | vorbereitet für schwebende Karten und Panels (ab D3), noch nicht verwendet |
+| `--mr-space-2xs` … `-2xl` | 2 / 4 / 8 / 12 / 16 / 24 / 32 px | Seitenleiste, Karten, Header, Zeilen und Listen |
+| `--mr-shadow-sm` / `-md` | siehe `style.css` | Bedienfeld (`-sm`); `-md` für schwebende Karten vorbereitet |
+
+Einzelne Zwischenwerte (6 px, 10 px, 5 px Rand) bleiben bewusst als feste Werte, bis die betroffene Komponente in D3 oder später umgebaut wird.
+
+## Typografie
+
+| Token | Wert |
+|---|---|
+| `--mr-font-sans` | `"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif` |
+| `--mr-text-xs` / `-sm` / `-base` / `-md` / `-lg` | 12 / 13 / 14 / 15 / 16 px |
+| `--mr-text-xl` / `--mr-text-display` | 22 px (Titel) / 40 px (Temperatur) |
+| `--mr-leading` / `--mr-tracking-label` | 1,45 / .06em (gesperrte Großbuchstaben nur für Labels und Überschriften) |
+
+Dateien: `vendor/inter/inter-latin-wght-normal.woff2` und `inter-latin-ext-wght-normal.woff2` (Inter 4.x als Variable Font, Gewichte 100 bis 900, über `@fontsource-variable/inter` 5.2.8), Lizenz in `vendor/inter/OFL.txt`. Die Dateien werden per `@font-face` mit `unicode-range` geladen, die lateinische Datei zusätzlich per `preload`.
 
 ---
 

@@ -61,8 +61,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Akzeptanz: Titel und Header zeigen Mountain Radar. Keine Funktionsänderung.
 - Zugleich erledigt den offenen Punkt aus ROADMAP („Branding in der Anwendung“).
 
-**D2 — Design-Tokens und Typografie**
-- Umfang: Tokens in `:root` und Dark Mode ersetzen (Navy, Teal, Salbei, Amber, Glas-Flächen, Radien 12–16 px, Schatten, Abstände). Schrift auf Inter umstellen und **selbst hosten** (kein Google-Fonts-Aufruf, datenschutzfreundlicher). Alte Token-Namen bleiben als Alias, damit nichts bricht.
+**D2 — Design-Tokens und Typografie** ✅ erledigt (30.10.2026)
+- Umsetzung: Token-System `--mr-*` (Farben, Radien, Abstände, Schatten, Typografie) in `style.css`, Alias für alle alten Namen, Inter selbst gehostet unter `vendor/inter/`, Google-Fonts-Aufrufe entfernt. Farben aus dem Styleguide (`#16324F`, `#2F6B4F`), Mockup-Töne nur als Abstufungen. Dokumentation: STYLEGUIDE.md, Abschnitt „Design Tokens“. Entscheidungen 2 (Inter) und 3 (Styleguide-Farben) sind damit getroffen.
+- Ursprünglicher Umfang: Tokens in `:root` und Dark Mode ersetzen (Navy, Teal, Salbei, Amber, Glas-Flächen, Radien 12–16 px, Schatten, Abstände). Schrift auf Inter umstellen und **selbst hosten** (kein Google-Fonts-Aufruf, datenschutzfreundlicher). Alte Token-Namen bleiben als Alias, damit nichts bricht.
 - Dateien: `style.css`, Schriftdateien unter `vendor/` oder `assets/fonts/`.
 - Risiko: Kontrastverlust. Prüfen mit Kontrast-Check, Warnfarben und Lawinenfarben bleiben unverändert.
 - Entscheidung nötig: Inter (Mockup) oder Barlow (heute). Empfehlung Inter.
