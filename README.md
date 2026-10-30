@@ -138,6 +138,7 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/avalanche/` | Lawinenlage: `index.json`, je Quelle `<id>.json` (Bulletins) und `<id>_regions.geojson` (Polygone) für `euregio` und `slf` |
 | `vendor/inter/` | Schrift Inter (variable, SIL OFL 1.1), selbst gehostet, Lizenz in `vendor/inter/OFL.txt` |
 | `docs/design/komponenten.html` | Referenzseite der gemeinsamen UI-Komponenten (`.mr-*`), nur zur Ansicht, nicht Teil der Anwendung |
+| `docs/design/mountain-radar-emblem.svg` | Emblem für den Header der Anwendung (Ausschnitt aus `mountain-radar-main-hauptlogo.svg`, ohne Schrift) |
 | `vendor/albina/` | offizielle ALBINA-Symbole (Gefahrenstufen, Lawinenprobleme), Herkunft in `vendor/albina/README.md` |
 
 ## Aufbau des Programmcodes (`js/`)

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="622 67 356 356" role="img" aria-labelledby="title desc">
+  <title id="title">Mountain Radar Emblem</title>
+  <desc id="desc">Rundes blau-grünes Emblem mit kantiger Bergsilhouette, Höhenlinien und Standortpunkt. Ausschnitt aus dem Hauptlogo ohne Schrift.</desc>
+  <defs>
+    <linearGradient id="terrain" x1="0" y1="0.2" x2="1" y2="0.85">
+      <stop offset="0" stop-color="#16324F"/>
+      <stop offset="1" stop-color="#2F6B4F"/>
+    </linearGradient>
+    <clipPath id="badgeClip">
+      <circle cx="800" cy="245" r="178"/>
+    </clipPath>
+  </defs>
+
+  <!-- Geländemarke -->
+  <circle cx="800" cy="245" r="178" fill="url(#terrain)"/>
+  <g clip-path="url(#badgeClip)" fill="none" stroke="#F7F8F6" stroke-linecap="round" stroke-linejoin="round" opacity=".95">
+    <path d="M594 99 C625 79 638 45 672 38 C704 31 725 60 755 51 C783 43 795 14 830 20 C864 26 873 55 907 51 C936 48 954 29 983 35" stroke-width="4"/>
+    <path d="M588 139 C618 120 635 91 666 86 C699 80 718 104 747 96 C779 87 791 61 823 65 C858 68 875 96 906 91 C936 87 950 68 984 73" stroke-width="4.5"/>
+    <path d="M581 183 C612 162 629 137 661 132 C693 126 711 150 740 141 C773 131 788 107 819 111 C851 115 868 139 899 135 C931 131 952 109 987 115" stroke-width="4"/>
+    <path d="M578 225 C610 205 628 181 655 177 C684 172 703 192 730 183 C760 173 779 153 807 156 C836 159 850 181 882 179 C920 176 944 153 992 159" stroke-width="4.5"/>
+    <path d="M579 270 C610 251 624 229 651 224 C681 218 700 239 727 230 C757 220 776 201 803 204 C834 207 850 230 880 225 C920 219 944 198 991 204" stroke-width="4"/>
+    <path d="M585 313 C614 296 630 277 657 271 C688 264 704 283 733 275 C763 267 782 248 809 252 C840 257 856 279 886 272 C920 264 947 245 986 250" stroke-width="4.5"/>
+    <path d="M598 354 C626 339 643 317 673 312 C701 307 721 325 749 318 C779 310 797 292 824 297 C853 302 870 323 900 315 C929 307 950 292 977 294" stroke-width="4"/>
+  </g>
+
+  <!-- Berg: kräftige, klare Flanken und kantiger Gipfelverlauf -->
+  <path d="M600 330 L679 287 L730 280 L800 176 L818 163 L832 177 L858 217 L883 244 L899 250 L916 237 L932 251 L956 281 L987 310 L1010 326 L984 327 L958 316 L930 294 L910 268 L896 265 L883 274 L862 255 L842 230 L824 198 L816 188 L806 201 L742 296 L719 299 L693 291 L627 336 Z"
+        fill="#F7F8F6" clip-path="url(#badgeClip)"/>
+
+  <!-- Standortpunkt -->
+  <circle cx="901" cy="112" r="11" fill="#F7F8F6"/>
+</svg>
