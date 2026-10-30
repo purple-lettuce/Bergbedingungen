@@ -23,7 +23,7 @@ Bergbedingungen
 
 - **Mountain Radar** ist der offizielle Produktname (Claim: ALPINE RISK INTELLIGENCE, Slogan: „Know before you go.“).
 - **Bergbedingungen** ist der technische Projektname (Repository). Das Rebranding ist in der Dokumentation vollzogen (README, ROADMAP, DATENQUELLEN, STYLEGUIDE).
-- Offen: In der Anwendung selbst (`index.html`: Seitentitel und Überschrift) steht noch „Bergbedingungen“. Die Umstellung gehört zum Arbeitspaket „Design & Branding“ (siehe Prioritäten, Punkt 10). Der schrittweise Umsetzungsplan (kleine PRs D1–D13) steht in docs/design/DESIGN_MIGRATIONSPLAN.md.
+- In der Anwendung tritt der Produktname „Mountain Radar“ auf (Seitentitel, Meta-Beschreibung, Header, Favicon; Design-Migrationsplan D1 erledigt). Weitere Design-Schritte gehören zum Arbeitspaket „Design & Branding“ (siehe Prioritäten, Punkt 10). Der schrittweise Umsetzungsplan (kleine PRs D1–D13) steht in docs/design/DESIGN_MIGRATIONSPLAN.md.
 - Das visuelle Design System (Farben, Typografie, Komponenten) ist in STYLEGUIDE.md beschrieben. Die Umsetzung in der Oberfläche ist noch nicht abgeschlossen.
 
 ---
@@ -98,7 +98,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 7 | GPX Upload & Tourenanalyse | Geplant (Phase 1) |
 | 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1); Mobile: Zukunft (Phase 4-5) |
 | 9 | Alpine Risk Engine | Design (Beta Phase 3, GA Phase 5) |
-| 10 | Design & Branding | Geplant (Styleguide vorhanden, Umsetzung in der Oberfläche und Umbenennung in der Anwendung offen) |
+| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design System in der Oberfläche offen) |
 | 11 | PWA & Offline | Zukunft (nach Phase 4) |
 | 12 | Mobile App | Zukunft (Phase 4) |
 
@@ -234,11 +234,11 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [ ] Schutzgebiete und Wildlife als Risikomodule der Engine (die Kartenebenen sind umgesetzt, siehe Phase 1)
 - [ ] Alpine Risk Engine (Beta)
 
-### Design & Branding — Status: PLANNED (phasenunabhängig)
+### Design & Branding — Status: IN PROGRESS (phasenunabhängig)
 - [x] Styleguide (STYLEGUIDE.md)
 - [x] Produktname und Claim in der Dokumentation
 - [ ] Umsetzung des Design Systems in der Oberfläche
-- [ ] Produktname „Mountain Radar“ in der Anwendung (`index.html`: Titel, Überschrift)
+- [x] Produktname „Mountain Radar“ in der Anwendung (D1: Titel, Meta-Beschreibung, Header, Favicon)
 
 ### Phase 4 — Status: FUTURE
 - [ ] Mobile App Framework
@@ -320,6 +320,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.5 | 2026-10-30 | Design-Migrationsplan D1 (Branding, Titel, Favicon) umgesetzt |
 | 2.4 | 2026-10-30 | Konsistenzprüfung: Status von DEM, GPX, OSM, Schutzgebiete und Wildlife korrigiert, Branding-Abschnitt, Phasen und Prioritäten abgeglichen |
 | 2.3 | 2026-10-30 | Filter Sperrungen & Hinweise im Bedienfeld „Karten & Layer“ |
 | 2.2 | 2026-10-29 | Schutzgebiete: Filter, Symbole, Wildlife-Namen |

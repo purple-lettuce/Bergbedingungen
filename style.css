@@ -46,6 +46,7 @@ header {
   padding: 10px 16px; background: var(--accent); color: var(--accent-fg);
 }
 header h1 { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin: 0; letter-spacing: .02em; text-transform: uppercase; }
+header h1 img { width: 28px; height: 28px; border-radius: 6px; vertical-align: -6px; margin-right: 10px; }
 header p { margin: 0; font-size: 13px; opacity: .9; }
 main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
 #map { min-height: 320px; height: 100%; background: var(--line); }
