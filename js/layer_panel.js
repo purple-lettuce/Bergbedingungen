@@ -37,7 +37,7 @@ export function createLayerPanel(map) {
   function addSection(title, open) {
     var sec = make('section', 'kl-sec');
     var h = make('h3', 'kl-h');
-    var btn = make('button', 'kl-toggle');
+    var btn = make('button', 'kl-toggle mr-label');
     btn.type = 'button';
     btn.textContent = title;
     var content = make('div', 'kl-content');
@@ -50,25 +50,36 @@ export function createLayerPanel(map) {
     return content;
   }
 
-  function addOption(list, type, name, label) {
-    var li = make('li');
-    var lab = make('label', 'kl-opt');
+  // Schalter (D3 .mr-switch) mit unveränderter Checkbox; gibt { label, input, text } zurück.
+  function makeSwitch(extraCls) {
+    var lab = make('label', 'mr-switch ' + (extraCls || ''));
     var input = make('input');
-    input.type = type;
-    if (name) input.name = name;
-    var text = make('span');
-    text.textContent = label;
+    input.type = 'checkbox';
+    input.setAttribute('role', 'switch');
+    var track = make('span', 'mr-switch__track');
+    track.setAttribute('aria-hidden', 'true');
+    var text = make('span', 'mr-switch__text');
     lab.appendChild(input);
+    lab.appendChild(track);
     lab.appendChild(text);
-    li.appendChild(lab);
-    list.appendChild(li);
-    return input;
+    return { label: lab, input: input, text: text };
   }
 
   // Reihenfolge der Abschnitte: Layer, Kartenstil, danach Filter und Legenden in der Reihenfolge ihrer Anmeldung.
-  var layerList = make('ul', 'kl-options');
-  addSection('Layer', true).appendChild(layerList);
-  var styleList = make('ul', 'kl-options');
+  var layerContent = addSection('Layer', true);
+  var summary = make('p', 'mr-label kl-summary');   // „Aktive Overlays · N aktiv“, gezählt aus dem Kartenzustand
+  summary.setAttribute('role', 'status');
+  var layerList = make('ul', 'kl-options mr-stack mr-gap-sm');
+  layerContent.appendChild(summary);
+  layerContent.appendChild(layerList);
+  var overlays = [];
+  function updateSummary() {
+    var n = overlays.filter(function (l) { return map.hasLayer(l); }).length;
+    summary.textContent = 'Aktive Overlays · ' + n + ' aktiv';
+  }
+  var styleList = make('div', 'mr-segment kl-segment');   // Kartenstil als Segment-Control
+  styleList.setAttribute('role', 'radiogroup');
+  styleList.setAttribute('aria-label', 'Kartenstil');
   addSection('Kartenstil', true).appendChild(styleList);
 
   var basemaps = [];
@@ -76,7 +87,15 @@ export function createLayerPanel(map) {
   var panel = {
     // Kartenstil: genau einer ist aktiv.
     addBaseLayer: function (label, layer) {
-      var input = addOption(styleList, 'radio', 'kl-basemap', label);
+      var opt = make('label', 'mr-segment__opt');
+      var input = make('input');
+      input.type = 'radio';
+      input.name = 'kl-basemap';
+      var span = make('span');
+      span.textContent = label;
+      opt.appendChild(input);
+      opt.appendChild(span);
+      styleList.appendChild(opt);
       input.checked = map.hasLayer(layer);
       basemaps.push(layer);
       input.addEventListener('change', function () {
@@ -89,8 +108,25 @@ export function createLayerPanel(map) {
 
     // Ebene: unabhängig ein- und ausblendbar.
     addOverlay: function (label, layer) {
-      var input = addOption(layerList, 'checkbox', null, label);
-      function sync() { input.checked = map.hasLayer(layer); }
+      var li = make('li');
+      var card = make('div', 'mr-card mr-card--tight kl-layer');
+      var sw = makeSwitch('kl-opt');
+      sw.text.textContent = label;
+      var badge = make('span', 'mr-badge');
+      card.appendChild(sw.label);
+      card.appendChild(badge);
+      li.appendChild(card);
+      layerList.appendChild(li);
+      var input = sw.input;
+      overlays.push(layer);
+      function sync() {
+        var on = map.hasLayer(layer);
+        input.checked = on;
+        card.classList.toggle('is-on', on);
+        badge.className = 'mr-badge' + (on ? ' mr-badge--success' : '');
+        badge.textContent = on ? 'Aktiv' : 'Aus';
+        updateSummary();
+      }
       sync();
       input.addEventListener('change', function () {
         if (input.checked) map.addLayer(layer); else map.removeLayer(layer);
@@ -103,7 +139,7 @@ export function createLayerPanel(map) {
     addLegend: function (title, layer) {
       var content = addSection(title, false);
       if (layer) {
-        var hint = make('p', 'kl-off muted');
+        var hint = make('p', 'kl-off mr-card mr-card--tight mr-text-muted mr-text-sm');
         hint.textContent = 'Diese Ebene ist ausgeblendet. Unter „Layer“ einschalten.';
         content.appendChild(hint);
         var sync = function () { hint.hidden = map.hasLayer(layer); };
@@ -128,7 +164,7 @@ export function createLayerPanel(map) {
     addFilter: function (title, layer) {
       var content = addSection(title, false);
       if (layer) {
-        var hint = make('p', 'kl-off muted');
+        var hint = make('p', 'kl-off mr-card mr-card--tight mr-text-muted mr-text-sm');
         hint.textContent = 'Diese Ebene ist ausgeblendet. Der Filter gilt, sobald sie unter „Layer“ eingeschaltet wird.';
         content.appendChild(hint);
         var syncHint = function () { hint.hidden = map.hasLayer(layer); };
@@ -140,13 +176,13 @@ export function createLayerPanel(map) {
       return {
         element: inner,
         setMessage: function (text) {
-          var p = make('p', 'muted');
+          var p = make('p', 'mr-text-muted mr-text-sm mr-m-0');
           p.textContent = text;
           inner.replaceChildren(p);
         },
         setItems: function (items, onChange) {
           var bar = make('div', 'kl-filter-bar');
-          var status = make('span', 'kl-filter-status muted');
+          var status = make('span', 'kl-filter-status mr-text-muted');
           status.setAttribute('role', 'status');
           var all = make('button', 'kl-link');
           all.type = 'button';
@@ -157,7 +193,7 @@ export function createLayerPanel(map) {
           bar.appendChild(status);
           bar.appendChild(all);
           bar.appendChild(none);
-          var list = make('ul', 'kl-options');
+          var list = make('ul', 'kl-options mr-stack mr-gap-xs');
           var inputs = [];
 
           function updateStatus() {
@@ -166,15 +202,13 @@ export function createLayerPanel(map) {
           }
           items.forEach(function (item) {
             var li = make('li');
-            var lab = make('label', 'kl-opt');
-            var input = make('input');
-            input.type = 'checkbox';
+            var sw = makeSwitch('kl-opt');
+            var lab = sw.label;
+            var input = sw.input;
             input.checked = true;
-            lab.appendChild(input);
-            if (item.swatch) lab.appendChild(item.swatch);
-            var text = make('span', 'kl-opt-label');
-            text.textContent = item.label;
-            lab.appendChild(text);
+            if (item.swatch) lab.insertBefore(item.swatch, sw.text);
+            sw.text.classList.add('kl-opt-label');
+            sw.text.textContent = item.label;
             if (item.count !== undefined) {
               var count = make('span', 'kl-count');
               count.textContent = '(' + item.count + ')';
