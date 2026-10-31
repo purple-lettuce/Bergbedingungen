@@ -124,12 +124,12 @@ const categoryName =
     p.category_id
   ] || "Schutzgebiet";
 
-  const popup = areaPopup(p, geojson, categoryName);
+  const popup = areaPopup(p, geojson, categoryName, categoryStyle(p.category_id));
 
   layer.bindPopup(
     popup.html,
-    // lange Listen im Popup scrollen lassen; ohne Zusatzinfos bleibt das Popup unverändert
-    popup.extra ? { maxHeight: 340 } : undefined
+    // className: Popup im Mountain-Radar-Stil (D8a, folgt Hell/Dunkel); lange Listen scrollen lassen
+    popup.extra ? { className: "mr-popup", maxHeight: 340 } : { className: "mr-popup" }
   );
 
 }

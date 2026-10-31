@@ -77,12 +77,14 @@ var GEO = {
 
 test('Popup: Tiere unter Wildlife, Pflanzen und Lebensräume getrennt, Regeln mit Symbol und Art', function () {
   var html = extraPopupHtml({ w: [0, 1, 2, 3, 4], r: [0, 1] }, GEO);
-  var wl = html.indexOf('Wildlife:'), pl = html.indexOf('Pflanzen und Lebensräume:'), ru = html.indexOf('Regeln:');
+  var wl = html.indexOf('>Wildlife<'), pl = html.indexOf('>Pflanzen und Lebensräume<'), ru = html.indexOf('>Regeln<');
   ok(wl !== -1 && pl > wl && ru > pl, 'Reihenfolge Wildlife, Pflanzen, Regeln');
   ok(html.indexOf('🐔</span>Birkhuhn') !== -1 && html.indexOf('🌿</span>Arnika') !== -1 && html.indexOf('🏞️</span>Hochmoore') !== -1, 'Symbole je Eintrag');
   ok(html.indexOf('Fuchs &lt;b&gt;') !== -1, 'Namen maskiert');
   ok(html.indexOf('Fuchs <b>') === -1, 'kein ungeprüftes Markup');
   ok(html.indexOf('pa-rule ban') !== -1 && html.indexOf('pa-rule limit') !== -1, 'Regeln nach Art');
+  ok(html.indexOf('mr-badge--closure">Verbot<') !== -1 && html.indexOf('mr-badge--notice">Eingeschränkt<') !== -1, 'Statusschild je Art (Verbot, Eingeschränkt)');
+  ok(html.indexOf('style=') === -1, 'keine Inline-Styles in Wildlife und Regeln');
   ok(html.indexOf('<span class="pa-season">(01.12.–30.04.)</span>') !== -1, 'Zeitraum in eigener Zeile');
 });
 
@@ -92,13 +94,16 @@ test('Popup: lange Listen gekürzt, Gebiet ohne Angaben bleibt unverändert', fu
   var html = extraPopupHtml({ w: idx }, { wildlife_names: names, wildlife_types: types });
   eq(html.split('<li><span class="pa-ico"').length - 1, WILDLIFE_SHOWN); ok(html.indexOf('und 8 weitere') !== -1, 'Rest als „und n weitere“');
   var p = areaPopup({ name: 'A & B', summary: '<i>x</i>' }, {}, 'Naturpark');
-  eq(p.extra, ''); eq(p.html, '<h3>A &amp; B</h3><p><b>Kategorie:</b> Naturpark</p><p>&lt;i&gt;x&lt;/i&gt;</p>');
+  eq(p.extra, ''); ok(p.html.indexOf('<h3>A &amp; B</h3>') !== -1 && p.html.indexOf('>Naturpark</p>') !== -1 && p.html.indexOf('&lt;i&gt;x&lt;/i&gt;') !== -1, 'Name, Typ, Zusammenfassung maskiert');
+  ok(p.html.indexOf('pa-sw') === -1, 'ohne Stil kein Farbfeld');
+  var st = areaPopup({ name: 'N' }, {}, 'T', { color: '#145a32', fillColor: '#1e8449', fillOpacity: 0.25 }).html;
+  ok(st.indexOf('pa-pop-sw') !== -1 && st.indexOf('border-color:#145a32') !== -1, 'Farbfeld der Kategorie im Kopf');
   eq(extraPopupHtml({ w: [0], r: [0] }, {}), '');                          // ältere Datei ohne Tabellen
 });
 
 test('Popup: Datei ohne Arten (wildlife_types fehlt) zeigt alle unter Wildlife', function () {
   var html = extraPopupHtml({ w: [0, 1] }, { wildlife_names: ['Birkhuhn', 'Arnika'] });
-  ok(html.indexOf('Wildlife:') !== -1 && html.indexOf('Pflanzen und Lebensräume') === -1, 'alle unter Wildlife');
+  ok(html.indexOf('>Wildlife<') !== -1 && html.indexOf('Pflanzen und Lebensräume') === -1, 'alle unter Wildlife');
 });
 
 test('echte Daten: Popups aller Gebiete ohne Fehler, Wildlife mit Symbolen vorhanden', async function () {
