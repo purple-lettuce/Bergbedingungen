@@ -108,7 +108,7 @@ function refreshMarkers() {
 }
 
 function popupOptions() {
-  return { className: 'av-popup', maxWidth: Math.min(340, window.innerWidth - 60), maxHeight: Math.round(window.innerHeight * 0.6) };
+  return { className: 'av-popup mr-popup', maxWidth: Math.min(340, window.innerWidth - 60), maxHeight: Math.round(window.innerHeight * 0.6) };
 }
 
 function popupFor(id) {

@@ -340,8 +340,9 @@ Regeln für die Verwendung:
 | Inline-Styles in `index.html` (3) und `js/weather.js` (1) | durch `.mr-mt-*`, `.mr-mb-0` bzw. die Regel `#status` ersetzt; Abstände 10 px → 12 px (Skala), 2 px mehr Luft über Schaltflächen und Statuszeile |
 | Layer-Panel „Karten & Layer“ (`js/layer_panel.js`) | seit D7 auf D3-Komponenten (siehe „Layer-Panel“); `kl-*`-Klassen bleiben als Haken für Tests und Layout |
 | Schutzgebiets-Popups (`js/protected_areas_popup.js`) | seit D8a auf D3-Komponenten (siehe „Schutzgebiets-Popup“) |
-| Popups der Sperrungen, Lawinenlage und Wetter-Pin (alte `.badge`-Klassen), Legendeninhalte (`.pa-*`, `.av-*`) | **bewusst noch nicht migriert** (D8b, D8c, D9) |
-| Inline-Styles in Popups (`js/closures.js`, Lawinenlage) | bleiben bis D8b/D8c |
+| Lawinenlage-Popups (`js/avalanche_popup.js`) | seit D8b auf dem Gerüst von D8a (siehe „Lawinenlage-Popup“) |
+| Popups der Sperrungen und Wetter-Pin (alte `.badge`-Klassen), Legendeninhalte (`.pa-*`, `.av-*`) | **bewusst noch nicht migriert** (D8c, D9) |
+| Inline-Styles in Popups (`js/closures.js`) | bleiben bis D8c |
 | Inline-Styles in Schutzgebiets-Popups (3× `margin`) | seit D8a entfernt; bleiben nur die Farben des Kopf-Farbfelds (datengetrieben) |
 | Inline-Styles mit Datenfarben (`js/protected_areas_legend.js`, `js/protected_areas_filter.js`) | bleiben, da datengetrieben |
 
@@ -378,6 +379,21 @@ Nur Popups der Schutzgebiete; Inhalt, Reihenfolge und Texte sind unverändert (a
 | Regeln | Zeile mit Themensymbol, `.mr-badge` (Verbot = `--closure`, Eingeschränkt = `--notice`, Erlaubt = `--success`, sonstige ohne Schild), Regeltext, Zeitraum in eigener Zeile; farbiger Rand wie bisher |
 
 Der Styleguide-Wunsch „Kopfbereich in Deep Alpine Blue“ wird bewusst nicht umgesetzt (Informationen strukturieren, nicht dekorieren). Der gemeinsame Rahmen für D8b/D8c (`mr-popup`, `.pa-pop-head`) ist die Vorlage.
+
+# Lawinenlage-Popup (seit D8b)
+
+Migration auf das Gerüst des Schutzgebiets-Popups, keine zweite Variante. Beide Popups tragen `mr-popup` (Fläche, Radius, Schatten, folgt Hell/Dunkel) und `pa-pop` + `mr-stack`. Inhalt, Reihenfolge, Texte, Links, Piktogramme (Gefahrenstufen, Lawinenprobleme, Höhenbereich, Exposition) und alle Berichtszustände (gültig, abgelaufen, kein Bericht) sind unverändert; geprüft für alle Regionen beider Quellen in allen vier Zuständen.
+
+| Bereich | Komponenten |
+|---|---|
+| Rahmen | `className: "av-popup mr-popup"` (Marker und Fläche), Inhalt `.av-pop.pa-pop.mr-stack` |
+| Kopf | `.pa-pop-head`: Gefahrenstufen-Chip (`.av-chip` mit `.av-lv*`) als Symbol, Region (`h3`), Stufenname als Typzeile; darunter Kennung und Quelle gedämpft |
+| Abschnitte | `h4.mr-label` mit Trennlinie (Gültigkeit, Zusammenfassung, Gefahrenstufe nach Höhe, Lawinenprobleme, Lagetexte, Tendenz, Gefahrenmuster) |
+| Lawinenproblem | `.mr-card--tight` mit Kopfzeile (Piktogramm, Name) und `.mr-kv` für Höhenbereich, Exposition, Stabilität, Gefahrenstellen, Größe |
+| Hinweisbox (kein Bericht, abgelaufen) | `.mr-card--tight` mit Rand `--mr-notice` (nur im Popup; die Legende behält ihre Box) |
+| Fußzeile | `.mr-text-muted .mr-text-sm`, Links `--mr-link` |
+
+**Farben:** Die Gefahrenstufenfarben (`.av-lv1` bis `.av-lv5`, Skala der Europäischen Gefahrenskala) und die Chips sind unverändert und haben Vorrang vor Tokens. Die blauen Flächen in Rose und Höhenbereich sind Teil der Piktogramme und bleiben ebenfalls.
 
 # Layer-Panel (seit D7)
 
