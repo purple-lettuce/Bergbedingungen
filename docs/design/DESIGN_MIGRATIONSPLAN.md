@@ -92,8 +92,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Ursprünglicher Umfang: „Wetter“ und „Sperrungen und Hinweise“ auf `.mr-card` (Radius, Schatten, Mikro-Labels, Typografie). Position bleibt in der Seitenleiste.
 - Wetterkarte zeigt zusätzlich Wind, Niederschlag, Sicht, falls Open-Meteo sie liefert (eigener Folge-PR D6b, kleine Datenerweiterung). Keine „Confidence“-Anzeige.
 
-**D7 — Layer-Panel zu „Intelligence Layers“**
-- Umfang: Titel, Zeile „AKTIVE OVERLAYS · N AKTIV“, Schalter statt Checkboxen, Basemap-Auswahl als Segment-Control (heute: OSM / Topo). Filter und Legenden bleiben als einklappbare Abschnitte. Deutsche Beschriftungen beibehalten.
+**D7 — Layer-Panel zu „Intelligence Layers“** ✅ erledigt (31.10.2026)
+- Umsetzung: reine Oberflächenänderung in `js/layer_panel.js` (nur DOM/Klassen) und `style.css`; Schnittstelle zu `js/layers.js`, Layer-, Filter- und Legendenlogik sowie alle `kl-*`-Klassen und IDs unverändert. Ebenen als `.mr-card--tight` mit `.mr-switch` (echte Checkbox, `role="switch"`) und `.mr-badge` „Aktiv“/„Aus“, aktive Ebenen hervorgehoben; Zeile „AKTIVE OVERLAYS · N AKTIV“ (`.mr-label`, gezählt aus dem Kartenzustand); Kartenstil als `.mr-segment`; Filtereinträge als Schalter, „Alle“/„Keine“ als ruhige Textknöpfe; Hinweise zu ausgeblendeten Ebenen als `.mr-card--tight`. Titel „Karten & Layer“ und deutsche Beschriftungen bleiben. Dokumentation: STYLEGUIDE.md („Layer-Panel“).
+- Ursprünglicher Umfang: Titel, Zeile „AKTIVE OVERLAYS · N AKTIV“, Schalter statt Checkboxen, Basemap-Auswahl als Segment-Control (heute: OSM / Topo). Filter und Legenden bleiben als einklappbare Abschnitte. Deutsche Beschriftungen beibehalten.
 - Dateien: `js/layer_panel.js` (nur DOM-Details), `style.css`. Die Schnittstelle zu `js/layers.js` bleibt gleich.
 - Tests: Tastaturbedienung, `aria-*`, Touch-Ziele ≥ 44 px, bestehende Layer-Tests.
 

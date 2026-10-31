@@ -214,21 +214,30 @@ footer a { color: var(--accent); }
 /* Bedienfeld "Karten & Layer" (Kartenelement oben rechts): Layer, Kartenstil und Legenden, alles per Klick */
 [hidden] { display: none !important; }
 .kl-panel { width: min(300px, calc(100vw - 32px)); background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: var(--mr-radius-md); box-shadow: var(--mr-shadow-sm); font-family: var(--font-body); font-size: var(--mr-text-base); }
-.kl-head, .kl-toggle { display: block; width: 100%; min-height: 40px; text-align: left; border: 0; background: transparent; font-family: var(--font-display); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.kl-head, .kl-toggle { display: block; width: 100%; min-height: 40px; text-align: left; border: 0; background: transparent; font-family: var(--font-display); font-size: var(--mr-text-base); font-weight: 600; text-transform: uppercase; letter-spacing: var(--mr-tracking-label); }
 .kl-head { color: var(--mr-on-primary); background: var(--mr-primary); border-radius: calc(var(--mr-radius-md) - 1px); }
 .kl-head:hover { background: var(--mr-primary-hover); }
 .kl-head[aria-expanded="true"] { border-radius: calc(var(--mr-radius-md) - 1px) calc(var(--mr-radius-md) - 1px) 0 0; }
-.kl-toggle { color: var(--muted); padding: 6px 12px; }
+.kl-toggle { padding: var(--mr-space-sm) var(--mr-space-md); }   /* Schrift kommt von .mr-label */
+.kl-toggle:hover { color: var(--mr-text); }
 .kl-head::after, .kl-toggle::after { content: "▾"; float: right; margin-left: 8px; }
 .kl-head[aria-expanded="false"]::after, .kl-toggle[aria-expanded="false"]::after { content: "▸"; }
 .kl-body { max-height: calc(100vh - 190px); overflow-y: auto; overscroll-behavior: contain; }
 .kl-sec + .kl-sec { border-top: 1px solid var(--line); }
 .kl-h { margin: 0; font-size: inherit; }
-.kl-content { padding: 0 12px 10px; }
+.kl-content { display: flex; flex-direction: column; gap: var(--mr-space-sm); padding: 0 var(--mr-space-md) var(--mr-space-md); }
+.kl-summary { margin: 0; }
+/* Layer-Karten: Schalter links, Status rechts; eingeschaltete Ebenen sind hervorgehoben */
+.kl-layer { display: flex; align-items: center; justify-content: space-between; gap: var(--mr-space-sm); }
+.kl-layer .mr-switch { flex: 1; min-width: 0; font-weight: 500; }
+.kl-layer.is-on { border-color: var(--mr-link); background: var(--mr-primary-soft); }
+/* Kartenstil: Segment über die volle Breite, Optionen gleich breit */
+.kl-segment { display: flex; }
+.kl-segment .mr-segment__opt { flex: 1 1 0; }
+.kl-segment .mr-segment__opt span { padding-inline: var(--mr-space-sm); font-size: var(--mr-text-sm); }
 .kl-options { list-style: none; margin: 0; padding: 0; }
-.kl-opt { display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
-.kl-opt input { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
-.kl-off { margin: 0 0 6px; }
+.kl-opt { display: flex; width: 100%; }
+.kl-off { margin: 0; }
 .kl-legend .muted { margin: 0; }
 
 /* Zeilen der Legenden: Farbfeld und Text */
@@ -238,13 +247,14 @@ footer a { color: var(--accent); }
 .pa-sw i { position: absolute; inset: 0; }
 .pa-label { min-width: 0; overflow-wrap: anywhere; }
 /* Filter im Bedienfeld (Abschnitt "Filter Schutzgebiete"): Schalter mit Farbfeld, Name und Anzahl */
-.kl-filter-bar { display: flex; align-items: center; gap: 4px; margin: 0 0 4px; }
-.kl-filter-status { flex: 1; min-width: 0; margin: 0; font-size: 12px; }
-.kl-link { border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 4px 6px; min-height: 32px; }
-.kl-filter .kl-opt { min-height: 32px; }
+.kl-filter .mr-switch { min-height: calc(var(--mr-space-lg) + var(--mr-space-sm)); }
+.kl-filter-bar { display: flex; align-items: center; gap: var(--mr-space-xs); margin: 0 0 var(--mr-space-sm); }
+.kl-filter-status { flex: 1; min-width: 0; margin: 0; font-size: var(--mr-text-xs); }
+.kl-link { border: 0; border-radius: var(--mr-radius-sm); background: transparent; color: var(--mr-link); font: inherit; font-size: var(--mr-text-sm); font-weight: 500; cursor: pointer; padding: var(--mr-space-xs) var(--mr-space-sm); min-height: calc(var(--mr-space-xl) + var(--mr-space-xs)); }
+.kl-link:hover { background: var(--mr-primary-soft); }
 .kl-filter .pa-sw { margin: 0; }
 .kl-opt-label { min-width: 0; overflow-wrap: anywhere; }
-.kl-count { margin-left: auto; padding-left: 4px; font-size: 12px; color: var(--muted); }
+.kl-count { margin-left: auto; padding-left: var(--mr-space-xs); font-size: var(--mr-text-xs); color: var(--mr-text-muted); font-variant-numeric: tabular-nums; }
 .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
 .dot.closure { background: var(--closure); }
 .dot.notice { background: var(--notice); }
@@ -318,7 +328,7 @@ footer a { color: var(--accent); }
 .av-pop .av-list { margin: 4px 0; padding-left: 18px; }
 .av-pop .av-note { margin: 6px 0 0; font-size: 12px; color: #5d6a65; }
 .av-pop .av-core { margin: 4px 0 0; font-size: 12px; font-style: italic; color: #5d6a65; }@media (max-width: 820px) { .kl-body { max-height: calc(60vh - 100px); } }
-@media (pointer: coarse) { .kl-head, .kl-toggle { min-height: 44px; } .kl-opt { min-height: 44px; } }
+@media (pointer: coarse) { .kl-head, .kl-toggle, .kl-link { min-height: 44px; } }
 
 
 /* ==========================================================================

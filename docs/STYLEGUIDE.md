@@ -338,7 +338,8 @@ Regeln für die Verwendung:
 |---|---|
 | Seitenleistenkarten „Wetter“ und „Sperrungen und Hinweise“ (`index.html`, `js/weather.js`, `js/closures.js`) | seit D6 vollständig auf D3-Komponenten (siehe „Seitenleisten-Karten“) |
 | Inline-Styles in `index.html` (3) und `js/weather.js` (1) | durch `.mr-mt-*`, `.mr-mb-0` bzw. die Regel `#status` ersetzt; Abstände 10 px → 12 px (Skala), 2 px mehr Luft über Schaltflächen und Statuszeile |
-| Layer-Menü (`.kl-*`), Popup-Badges (`.badge`), Legenden (`.pa-*`, `.av-*`), Popups | **bewusst noch nicht migriert** (D5–D9) |
+| Layer-Panel „Karten & Layer“ (`js/layer_panel.js`) | seit D7 auf D3-Komponenten (siehe „Layer-Panel“); `kl-*`-Klassen bleiben als Haken für Tests und Layout |
+| Popup-Badges (`.badge`), Legendeninhalte (`.pa-*`, `.av-*`), Popups | **bewusst noch nicht migriert** (D8, D9) |
 | Inline-Styles in Popups (`js/closures.js`, `js/protected_areas_popup.js`) | bleiben bis D8 |
 | Inline-Styles mit Datenfarben (`js/protected_areas_legend.js`, `js/protected_areas_filter.js`) | bleiben, da datengetrieben |
 
@@ -360,6 +361,22 @@ Beide Karten der rechten Seitenleiste bestehen nur aus D3-Komponenten; eigene Re
 | Listeneintrag | `li.mr-card.mr-stack` mit 5 px Typrand (Sperrung/Hinweis), `.mr-badge` im `.mr-cluster`, Hover `--mr-primary-soft`, aktiv mit Umriss |
 
 Nicht Teil dieser Karten und unverändert: Popups (alte `.badge`-Klassen bis D8), „Karten & Layer“, Legenden, Lawinenlage.
+
+# Layer-Panel (seit D7)
+
+Das Bedienfeld „Karten & Layer“ ist nur visuell erneuert; Verhalten, Schnittstelle (`addOverlay`, `addBaseLayer`, `addFilter`, `addLegend`) und Zustände sind unverändert.
+
+| Bereich | Komponenten |
+|---|---|
+| Abschnittstitel (einklappbar) | `button.kl-toggle.mr-label` |
+| Ebenen | je Ebene `.mr-card.mr-card--tight` mit `.mr-switch` (echte Checkbox, `role="switch"`) und `.mr-badge` („Aktiv“ grün / „Aus“ neutral); eingeschaltet: Rahmen `--mr-link`, Fläche `--mr-primary-soft` |
+| Status | `.mr-label` „Aktive Overlays · N aktiv“, gezählt aus `map.hasLayer`; keine neue Datenlogik |
+| Kartenstil | `.mr-segment` (`role="radiogroup"`, Radios unverändert), Optionen gleich breit |
+| Filter | Schalter je Eintrag mit Farbfeld, Name, Anzahl (`.kl-count`); „Alle“/„Keine“ als ruhige Textknöpfe (`.kl-link`); Status „N von M sichtbar“ gedämpft |
+| Hinweis „Ebene ausgeblendet“ | `.mr-card--tight` mit `.mr-text-muted` |
+| Legenden | Inhalt und Logik unverändert (Darstellung bis D9) |
+
+Touch-Ziele: Kopf, Abschnittstitel, Schalter und Segmente mindestens 44 px bei `pointer: coarse`.
 
 # Header (seit D4)
 
