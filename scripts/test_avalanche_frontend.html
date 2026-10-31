@@ -101,7 +101,7 @@ test('echte Daten: jede Quelle in data/avalanche/ ergibt Datensätze mit demselb
 test('popupHtml: dieselbe Funktion rendert Euregio- und SLF-Datensatz vollständig', function () {
   var eu = popupHtml(view('euregio', 'AT-07-01', EUREGIO_BULLETIN)), ch = popupHtml(view('slf', 'CH-1111', SLF_BULLETIN));
   [eu, ch].forEach(function (h) {
-    ok(h.indexOf('<div class="av-pop">') === 0, 'Wurzelelement');
+    ok(h.indexOf('<div class="av-pop pa-pop mr-stack') === 0, 'Wurzelelement mit gemeinsamem Popup-Gerüst (D8a)');
     ['Gültigkeit', 'Gefahrenstufe nach Höhe', 'Lawinenprobleme', 'av-foot'].forEach(function (s) { ok(h.indexOf(s) !== -1, s + ' fehlt'); });
     ok(!/<script|undefined|null|\[object/.test(h), 'keine Rohwerte oder Skripte');
   });

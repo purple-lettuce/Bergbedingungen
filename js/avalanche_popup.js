@@ -32,7 +32,7 @@ function blocksHtml(blocks) {
 }
 
 function section(title, html) {
-  return html ? '<section class="av-sec"><h4>' + esc(title) + '</h4>' + html + '</section>' : '';
+  return html ? '<section class="av-sec mr-stack mr-gap-xs"><h4 class="mr-label">' + esc(title) + '</h4>' + html + '</section>' : '';
 }
 
 function ratingsHtml(bands) {
@@ -62,9 +62,9 @@ function problemHtml(p, previousCore) {
   if (p.frequency) facts.push('<dt>Gefahrenstellen</dt><dd><span>' + esc(FREQUENCY_NAMES[p.frequency] || p.frequency) + '</span></dd>');
   if (p.avalanche_size) facts.push('<dt>Lawinengröße</dt><dd><span>' + esc(SIZE_NAMES[p.avalanche_size] || p.avalanche_size) + '</span></dd>');
   const core = p.core_zone_text && p.core_zone_text !== previousCore ? '<p class="av-core">' + esc(p.core_zone_text) + '</p>' : '';
-  return '<div class="av-problem">' + (model.icon ? img(model.icon, 'av-problem-icon', model.name) : '') +
+  return '<div class="av-problem mr-card mr-card--tight mr-stack mr-gap-xs"><div class="av-problem-head">' + (model.icon ? img(model.icon, 'av-problem-icon', model.name) : '') +
     '<div><b>' + esc(model.name) + '</b>' + (p.period !== 'all_day' ? ' <span class="muted">(' + esc(PERIOD_NAMES[p.period] || p.period) + ')</span>' : '') +
-    '<dl class="av-facts">' + facts.join('') + '</dl>' + core + '</div></div>';
+    '</div></div><dl class="av-facts mr-kv">' + facts.join('') + '</dl>' + core + '</div>';
 }
 
 function problemsHtml(rec) {
@@ -84,7 +84,7 @@ function tendencyHtml(list) {
 }
 
 function footerHtml(rec, source) {
-  return '<p class="av-foot">Gilt für die gesamte Region, nicht für einzelne Hänge. <a href="' + esc(safeUrl(reportUrl(source, rec))) +
+  return '<p class="av-foot mr-text-muted mr-text-sm">Gilt für die gesamte Region, nicht für einzelne Hänge. <a href="' + esc(safeUrl(reportUrl(source, rec))) +
     '" target="_blank" rel="noopener">Lagebericht beim Warndienst</a>. Quelle: <a href="' + esc(safeUrl(source.attribution_url)) +
     '" target="_blank" rel="noopener">' + esc(source.attribution) + '</a>, <a href="' + esc(safeUrl(source.license_url)) +
     '" target="_blank" rel="noopener">' + esc(source.license) + '</a>.</p>';
@@ -94,24 +94,24 @@ function footerHtml(rec, source) {
 export function popupHtml(view) {
   const rec = view.record, source = view.source, status = view.status;
   const title = '<h3>' + esc(rec.region_name) + '</h3>';
-  const ident = '<div class="av-id">' + esc(rec.region_id) + ' · ' + esc(source.name) + '</div>';
+  const ident = '<p class="av-id mr-text-muted mr-text-sm">' + esc(rec.region_id) + ' · ' + esc(source.name) + '</p>';
 
   if (status === 'none') {
-    return '<div class="av-pop">' + title + ident + '<p class="av-warn"><b>Kein aktueller Lagebericht.</b> Für diese Region liegt aktuell kein Bericht vor. ' +
+    return '<div class="av-pop pa-pop mr-stack mr-gap-sm">' + title + ident + '<p class="av-warn mr-card mr-card--tight"><b>Kein aktueller Lagebericht.</b> Für diese Region liegt aktuell kein Bericht vor. ' +
       NO_REPORT_HINT + '</p>' + footerHtml(rec, source) + '</div>';
   }
   if (status === 'expired') {
-    return '<div class="av-pop">' + title + ident + '<p class="av-warn"><b>Kein aktueller Lagebericht.</b> Der letzte Bericht galt bis ' + esc(formatTime(rec.valid_until)) +
+    return '<div class="av-pop pa-pop mr-stack mr-gap-sm">' + title + ident + '<p class="av-warn mr-card mr-card--tight"><b>Kein aktueller Lagebericht.</b> Der letzte Bericht galt bis ' + esc(formatTime(rec.valid_until)) +
       ' Uhr und wird nicht mehr als Gefahrenstufe angezeigt. ' + NO_REPORT_HINT + '</p>' + footerHtml(rec, source) + '</div>';
   }
 
   const maxName = rec.max_level ? 'Gefahrenstufe ' + levelLabel(rec.max_level, rec.max_subdivision) + ' – ' + DANGER_LEVELS[rec.max_level].name
     : (VALUE_NAMES[rec.danger_ratings[0].value] || '');
-  let html = '<div class="av-pop"><div class="av-head">' + levelChip(rec.max_level, rec.max_subdivision) + '<div>' + title + '<div class="av-sub">' +
-    esc(maxName) + (rec.danger_ratings.length > 1 ? ' (höchste im Gebiet)' : '') + '</div></div></div>' + ident;
+  let html = '<div class="av-pop pa-pop mr-stack mr-gap-sm"><div class="av-head pa-pop-head">' + levelChip(rec.max_level, rec.max_subdivision) + '<div class="mr-stack mr-gap-xs">' + title +
+    '<p class="av-sub mr-label pa-pop-type">' + esc(maxName) + (rec.danger_ratings.length > 1 ? ' (höchste im Gebiet)' : '') + '</p></div></div>' + ident;
 
   if (status === 'stale') {
-    html += '<p class="av-warn"><b>Bericht abgelaufen.</b> Ein neuer Lagebericht wird in Kürze geladen, bitte aktuellen Stand beim Warndienst prüfen.</p>';
+    html += '<p class="av-warn mr-card mr-card--tight"><b>Bericht abgelaufen.</b> Ein neuer Lagebericht wird in Kürze geladen, bitte aktuellen Stand beim Warndienst prüfen.</p>';
   }
   let validity = 'Veröffentlicht: <b>' + esc(formatTime(rec.publication_time)) + '</b> Uhr<br>Gültig von <b>' + esc(formatTime(rec.valid_from)) +
     '</b> bis <b>' + esc(formatTime(rec.valid_until)) + '</b> Uhr';
@@ -146,5 +146,5 @@ export function popupHtml(view) {
 
 // Popup für eine Kennung ohne Angaben
 export function unknownRegionHtml(id) {
-  return '<div class="av-pop"><h3>' + esc(id) + '</h3><p>Keine Angaben vorhanden.</p></div>';
+  return '<div class="av-pop pa-pop mr-stack mr-gap-sm"><h3>' + esc(id) + '</h3><p>Keine Angaben vorhanden.</p></div>';
 }
