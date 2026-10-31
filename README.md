@@ -26,6 +26,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 - Layer-basierte Darstellung für schnellere Orientierung auf der Karte
 - Bedienfeld „Karten & Layer” für Kartenstil, Ebenen, Filter und Legenden, per Klick bedienbar (auch auf Touchgeräten)
 - Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste)
+- Datenstatus-Leiste unter dem Header: je Quelle (Sperrungen, Schutzgebiete, Lawinenlage, Wetter) Ladezustand und, wo die Daten einen Zeitstempel liefern, der Datenstand; nur echte Werte
 
 **Geplant (Roadmap Phase 1-2):**
 
@@ -152,6 +153,8 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/map.js` | Leaflet-Karte, Kachelebenen (OpenStreetMap, OpenTopoMap), Ebenengruppen, Warnhinweise sowie gemeinsame Hilfen (`el`, `esc`, `setStatus`) |
 | `js/closures.js` | Sperrungen und Hinweise: `data/closures.json` laden, filtern, auf der Karte und in der Liste darstellen, Popups, Sprung zu einem Eintrag |
 | `js/weather.js` | Wetterwidget mit Open-Meteo und Standortmarker |
+| `js/status_bar.js` | Datenstatus-Leiste unter dem Header: je Quelle Zustand und Text; Module melden mit `setSourceStatus()` |
+| `js/status_bar_logic.js` | reine Logik der Statusleiste: Zustand und Text aus echten Werten (Anzahl, Zeitstempel, Berichtsstatus), getestet mit `scripts/test_status_bar_logic.html` |
 | `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene, Farben nach Kategorie, bindet Popup, Legende und Filter an |
 | `js/protected_areas_popup.js` | Popup der Schutzgebiete als HTML-Text (rein): Kategorie, Beschreibung, Wildlife-Schilder, Regeln mit Symbol |
 | `js/popup_icons.js` | Symbole für die Popups (rein): Wildlife nach Art und Tiername (unbekannt: Pfotensymbol), Regeln nach Thema und Art (Verbot, eingeschränkt, erlaubt) aus dem Wortlaut |

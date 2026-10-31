@@ -2,6 +2,8 @@
 // auf der Karte und in der Liste darstellen.
 
 import { map, el, esc, setStatus, warn, unwarn, FILE_HINT, layerGroup } from './map.js';
+import { setSourceStatus } from './status_bar.js';
+import { closuresStatus } from './status_bar_logic.js';
 import { loadWeather } from './weather.js';
 
 var DATA_URL = 'data/closures.json';
@@ -71,6 +73,8 @@ export async function loadData() {
       dataInfo = isNaN(t) ? '' : t.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' });
     }
     unwarn('data');
+    var st = closuresStatus(rows.length, doc.generated, new Date());
+    setSourceStatus('closures', st.state, st.text);
     if (!rows.length) {
       setStatus('Noch keine Daten vorhanden. Sie werden beim nächsten automatischen Abruf geladen.');
       return;
@@ -78,6 +82,7 @@ export async function loadData() {
     render();
   } catch (e) {
     setStatus('Sperrungen und Hinweise sind gerade nicht verfügbar.', true);
+    setSourceStatus('closures', 'error', 'nicht verfügbar');
     warn('data', 'Die Datei mit den Sperrungen und Hinweisen konnte nicht geladen werden (' + e.message + ').' + FILE_HINT);
   }
 }

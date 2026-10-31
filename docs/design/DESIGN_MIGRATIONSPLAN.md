@@ -80,8 +80,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Ursprünglicher Umfang: Weißer Header mit Logo, Wortmarke, Claim, Slogan. Navigation nur mit existierenden Zielen („Explore“ aktiv). „Route Planner“, „Risk Analysis“, „Conditions“, „Saved Areas“ **nicht anzeigen**, bis sie existieren (keine toten Links). Avatar und Uhrzeit-Pille entfallen vorerst.
 - Dateien: `index.html`, `style.css`.
 
-**D5 — Datenstatus-Leiste**
-- Umfang: Leiste unter dem Header mit Status je Quelle („Sperrungen aktualisiert 08:55“, „Schutzgebiete“, „Lawinenlage“, „Wetter“), Punkt grün/gelb/grau. Nur echte Werte: Zeitstempel aus den Daten bzw. Ladezustand.
+**D5 — Datenstatus-Leiste** ✅ erledigt (31.10.2026)
+- Umsetzung: `js/status_bar.js` (Anzeige, `setSourceStatus`), `js/status_bar_logic.js` (Zustand und Text aus echten Werten, getestet), Hooks in `closures.js`, `protected_areas.js`, `avalanche.js`, `weather.js`; Leiste in `index.html`, Stil in `style.css`. Zeitstempel: Sperrungen (`generated`), Lawinenlage (`publication_time`), Wetter (`current.time`); **Schutzgebiete haben keinen Zeitstempel** und zeigen nur die Anzahl. Die Pipeline wurde nicht geändert (Mini-PR für ein `generated`-Feld der GeoJSON bleibt optional). „System status: Operational“ wurde nicht umgesetzt. Dokumentation: STYLEGUIDE.md („Datenstatus-Leiste“), DATENQUELLEN.md („Zeitstempel und Datenstatus“).
+- Ursprünglicher Umfang: Leiste unter dem Header mit Status je Quelle („Sperrungen aktualisiert 08:55“, „Schutzgebiete“, „Lawinenlage“, „Wetter“), Punkt grün/gelb/grau. Nur echte Werte: Zeitstempel aus den Daten bzw. Ladezustand.
 - Dateien: neues `js/status_bar.js`, kleine Hooks in `closures.js`, `avalanche.js`, `weather.js`, `protected_areas.js`; `index.html`.
 - Voraussetzung: Prüfen, welche Zeitstempel in `data/` bereits stehen. Falls nicht, in separatem Mini-PR die GitHub Action ergänzen.
 - „System status: Operational“ nur, wenn aus echten Ladefehlern ableitbar.

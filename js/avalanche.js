@@ -5,6 +5,8 @@
 // (avalanche_logic.js) sind für alle Quellen dieselben. Aufbau und Erweiterung: docs/AVALANCHE_ARCHITECTURE.md.
 
 import { map, avalancheLayer, warn, unwarn } from './map.js';
+import { setSourceStatus } from './status_bar.js';
+import { avalancheStatus } from './status_bar_logic.js';
 import { esc } from './html.js';
 import { addAvalancheLegend } from './avalanche_legend.js';
 import { dangerLevel, levelChip, levelLabel } from './avalanche_symbols.js';
@@ -124,7 +126,8 @@ async function fetchJson(url) {
 
 function register(entry, bulletinDoc, regionsDoc) {
   var id = entry.id;
-  sources[id] = { meta: bulletinDoc.source, validity: bulletinDoc.validity_period, hasBulletins: bulletinDoc.bulletins.length > 0 };
+  sources[id] = { meta: bulletinDoc.source, validity: bulletinDoc.validity_period, hasBulletins: bulletinDoc.bulletins.length > 0,
+    published: bulletinDoc.bulletins.map(function (b) { return b.publication_time; }).filter(Boolean).sort().pop() || null };
   regionsDoc.features.forEach(function (f) {
     var info = bulletinDoc.regions[f.properties.region_id] || {};
     var bulletin = typeof info.bulletin === 'number' ? bulletinDoc.bulletins[info.bulletin] : null;
@@ -185,12 +188,16 @@ async function load() {
       geoLayer.setStyle(regionStyle);
       refreshMarkers();
     });
+    var info = legendInfo();
+    var st = avalancheStatus(Object.keys(sources).map(function (id, i) { return { status: info.sources[i].status, published: sources[id].published }; }), failed.length, new Date());
+    setSourceStatus('avalanche', st.state, st.text);
     if (failed.length) warn('avalanche', 'Lawinenlage: Quelle nicht geladen (' + failed.join(', ') + ').');
     else unwarn('avalanche');
     return true;
   } catch (err) {
     console.error('Fehler beim Laden der Lawinenlage', err);
     warn('avalanche', 'Die Lawinenlage konnte nicht geladen werden.');
+    setSourceStatus('avalanche', 'error', 'nicht verfügbar');
     return false;
   }
 }
@@ -201,6 +208,7 @@ export function initAvalanche() {
   function start() {
     if (started) return;
     started = true;
+    setSourceStatus('avalanche', 'loading', 'wird geladen …');
     load().then(function (ok) { if (!ok) { started = false; sources = {}; records = {}; features = []; } });
   }
   avalancheLayer.on('add', function () {

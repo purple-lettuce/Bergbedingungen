@@ -43,6 +43,25 @@ Bergbedingungen
 
 ---
 
+# Zeitstempel und Datenstatus (seit D5)
+
+Die Datenstatus-Leiste (siehe STYLEGUIDE.md, „Datenstatus-Leiste“) zeigt nur Werte, die in den geladenen Daten oder im Ladezustand der Module stehen. Was die Quellen tatsächlich hergeben:
+
+| Quelle (Datei) | Zeitstempel | Bedeutung | In der Leiste |
+|---|---|---|---|
+| Sperrungen und Hinweise (`data/closures.json`) | `generated` (UTC, ISO 8601), dazu `count` | Zeitpunkt, zu dem die Datei zuletzt geschrieben wurde. Der Workflow läuft alle 3 Stunden, schreibt aber nur bei geänderten Einträgen oder wenn die Datei älter als 24 Stunden ist (`HEARTBEAT_HOURS` in `scripts/fetch_closures.py`). `generated` ist damit der **Datenstand** (letzte Änderung oder Bestätigung), nicht der Zeitpunkt der letzten Abfrage. Ein Abrufzeitpunkt wird nicht gespeichert. | Anzahl der Einträge und „Stand“; gelb, wenn `generated` älter als 48 Stunden ist (doppelte Heartbeat-Zeit, Hinweis auf stehende Pipeline) |
+| Lawinenlage (`data/avalanche/<quelle>.json`) | `bulletins[].publication_time` (vom Lawinenwarndienst), `validity_period`; zusätzlich `generated` | `publication_time` und `validity_period` stammen vom Warndienst und sind belastbar. `generated` ist nur Änderung oder Wochen-Heartbeat (`HEARTBEAT_DAYS` = 7 in `scripts/fetch_avalanche.py`) und sagt nichts über die Aktualität des Berichts. `index.json` hat keinen Zeitstempel. | Veröffentlichung des neuesten gültigen Berichts; ohne gültigen Bericht „Kein aktueller Bericht · zuletzt <Datum>“ (gelb). Die Daten laden erst beim ersten Einblenden der Ebene, vorher steht „wird beim Einblenden geladen“ |
+| Schutzgebiete (`data/protected_areas_alps.geojson`) | **keiner** | Die geladene Datei ist eine FeatureCollection ohne Zeitfeld (nur `features`, `wildlife_*`, `rule_texts`). `data/protected_areas.json` hat zwar `generated`, ist aber die Rohdatei der Abfrage, wird von der App nicht geladen und ist nicht der Stand der GeoJSON. Das Commit-Datum ist im Browser nicht verfügbar. | nur die Anzahl der Gebiete; **kein** Datum (nichts simuliert) |
+| Wetter (Open-Meteo, Live-Abruf) | `current.time` in der Antwort | Zeitpunkt der aktuellen Werte in Ortszeit des abgefragten Punkts. Die Abfrage ist punktbezogen (Kartenmitte, Klick, Standort) und wird bei jeder neuen Abfrage aktualisiert. | „Stand HH:MM“ aus `current.time`; „nicht abrufbar“ (grau) bei Fehler |
+
+Nicht dargestellt, weil keine belastbare Grundlage existiert:
+
+- „Aktualisiert vor X Min.“: Es gibt nirgends einen gespeicherten Abrufzeitpunkt, nur den Datenstand.
+- Ein Datum für die Schutzgebiete. Abhilfe wäre ein `generated`-Feld in `scripts/build_geojson.py` (eigenes Arbeitspaket an der Datenpipeline, nicht Teil von D5).
+- Kartenkacheln (OpenStreetMap, OpenTopoMap): kein Status außer der bestehenden Warnung bei Ladefehlern.
+
+---
+
 # 1. WETTER & UNWETTERWARNUNGEN
 
 ### GeoSphere Austria (🇦🇹 prioritär)
@@ -552,6 +571,7 @@ Alpine Risk Engine (Zielmodul)
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.1 | 2026-10-31 | Abschnitt „Zeitstempel und Datenstatus“ (D5) |
 | 2.0 | 2026-10-29 | Konsolidation: Neue strukturierte Datenquellen mit allen Details + alte Workflow-Informationen |
 | 1.0 | 2026-10 | Initial Bergbedingungen Datenquellen |
 

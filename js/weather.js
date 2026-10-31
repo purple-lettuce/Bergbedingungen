@@ -1,6 +1,8 @@
 // Wetterwidget (Open-Meteo): Abruf, Darstellung und Standortmarker.
 
 import { map, el, esc } from './map.js';
+import { setSourceStatus } from './status_bar.js';
+import { weatherStatus } from './status_bar_logic.js';
 
 var WX_CODES = {0:'Klar',1:'Überwiegend klar',2:'Wolkig',3:'Bedeckt',45:'Nebel',48:'Reifnebel',51:'Leichter Nieselregen',53:'Nieselregen',55:'Starker Nieselregen',56:'Gefrierender Nieselregen',57:'Gefrierender Nieselregen',61:'Leichter Regen',63:'Regen',65:'Starker Regen',66:'Gefrierender Regen',67:'Gefrierender Regen',71:'Leichter Schneefall',73:'Schneefall',75:'Starker Schneefall',77:'Schneegriesel',80:'Leichte Schauer',81:'Schauer',82:'Starke Schauer',85:'Schneeschauer',86:'Starke Schneeschauer',95:'Gewitter',96:'Gewitter mit Hagel',99:'Gewitter mit starkem Hagel'};
 
@@ -12,6 +14,7 @@ export async function loadWeather(lat, lon) {
   if (wxMarker) wxMarker.setLatLng([lat, lon]);
   else wxMarker = L.marker([lat, lon], { icon: L.divIcon({ className: '', html: '<div class="wxpin"></div>', iconSize: [14, 14], iconAnchor: [7, 7] }), interactive: false, keyboard: false }).addTo(map);
   el.wx.innerHTML = '<span class="muted">Wird geladen …</span>';
+  setSourceStatus('weather', 'loading', 'wird geladen …');
   var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(4) + '&longitude=' + lon.toFixed(4) +
     '&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_gusts_10m,weather_code' +
     '&hourly=freezing_level_height' +
@@ -23,6 +26,8 @@ export async function loadWeather(lat, lon) {
     var d = await res.json();
     if (seq !== wxSeq) return;
     var c = d.current;
+    var st = weatherStatus(c.time);
+    setSourceStatus('weather', st.state, st.text);
     var hIdx = d.hourly.time.indexOf(c.time.slice(0, 13) + ':00');
     var fl = hIdx >= 0 ? d.hourly.freezing_level_height[hIdx] : null;
     var wd = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -45,5 +50,6 @@ export async function loadWeather(lat, lon) {
   } catch (e) {
     if (seq !== wxSeq) return;
     el.wx.innerHTML = '<span class="muted">Wetterdaten sind gerade nicht abrufbar.</span>';
+    setSourceStatus('weather', 'unavailable', 'nicht abrufbar');
   }
 }

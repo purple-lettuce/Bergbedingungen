@@ -1,0 +1,71 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests status_bar_logic.js</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as S from '../js/status_bar_logic.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+
+var NOW = new Date('2026-10-31T09:20:00Z');   // 10:20 in Berlin (Winterzeit)
+
+test('formatStand: heute, früher im Jahr, anderes Jahr, ungültig (Berliner Zeit)', function () {
+  eq(S.formatStand('2026-10-31T05:51:02Z', NOW), 'heute 06:51');
+  eq(S.formatStand('2026-10-29T14:20:43Z', NOW), '29.10., 15:20');
+  eq(S.formatStand('2025-12-01T10:00:00Z', NOW), '01.12.2025, 11:00');
+  eq(S.formatStand('2026-07-15T15:00:00Z', NOW), '15.07., 17:00');   // Sommerzeit
+  eq(S.formatStand('2026-10-30T23:30:00Z', NOW), 'heute 00:30');     // Tageswechsel nach Berliner Zeit
+  eq(S.formatStand('kaputt', NOW), ''); eq(S.formatStand(null, NOW), ''); eq(S.formatStand(undefined, NOW), '');
+});
+
+test('formatDay', function () {
+  eq(S.formatDay('2026-10-31T01:00:00Z', NOW), 'heute'); eq(S.formatDay('2026-05-02T15:00:00Z', NOW), '02.05.');
+  eq(S.formatDay('2025-05-02T15:00:00Z', NOW), '02.05.2025'); eq(S.formatDay('x', NOW), '');
+});
+
+test('closuresStatus: Anzahl, Stand, Einzahl, leer, veraltet', function () {
+  eq(S.closuresStatus(1245, '2026-10-31T05:51:02Z', NOW), { state: 'ok', text: '1.245 Einträge · Stand heute 06:51' });
+  eq(S.closuresStatus(1, '2026-10-31T05:51:02Z', NOW).text, '1 Eintrag · Stand heute 06:51');
+  eq(S.closuresStatus(87, undefined, NOW), { state: 'ok', text: '87 Einträge' });                 // ohne Zeitstempel kein erfundener Wert
+  eq(S.closuresStatus(0, '2026-10-31T05:51:02Z', NOW), { state: 'limited', text: 'Noch keine Einträge' });
+});
+
+test('closuresStatus: älter als 48 h ist eingeschränkt', function () {
+  eq(S.closuresStatus(5, '2026-10-29T09:20:00Z', NOW).state, 'ok');                               // genau 48 h
+  eq(S.closuresStatus(5, '2026-10-29T09:19:59Z', NOW), { state: 'limited', text: '5 Einträge · Stand 29.10., 10:19 · älter als 48 h' });
+});
+
+test('protectedAreasStatus: nur Anzahl, kein Zeitstempel', function () {
+  eq(S.protectedAreasStatus(2551), { state: 'ok', text: '2.551 Gebiete' });
+  eq(S.protectedAreasStatus(1), { state: 'ok', text: '1 Gebiet' });
+  eq(S.protectedAreasStatus(0), { state: 'limited', text: 'Keine Gebiete geladen' });
+});
+
+test('weatherStatus: Uhrzeit aus current.time, sonst ohne Zeit', function () {
+  eq(S.weatherStatus('2026-10-31T10:15'), { state: 'ok', text: 'Stand 10:15' });
+  eq(S.weatherStatus(undefined), { state: 'ok', text: 'Geladen' }); eq(S.weatherStatus('x'), { state: 'ok', text: 'Geladen' });
+});
+
+test('avalancheStatus: gültig, teilweise, abgelaufen, keine Berichte', function () {
+  var valid = { status: 'valid', published: '2026-10-31T05:00:00Z' };
+  eq(S.avalancheStatus([valid], 0, NOW), { state: 'ok', text: 'Bericht heute 06:00' });
+  eq(S.avalancheStatus([valid, { status: 'none', published: null }], 0, NOW).state, 'ok');                 // andere Quelle ohne Bericht: Region fehlt nur
+  eq(S.avalancheStatus([valid], 1, NOW), { state: 'limited', text: 'Bericht heute 06:00 · 1 Quelle nicht geladen' });
+  eq(S.avalancheStatus([{ status: 'valid', published: '2026-10-30T05:00:00Z' }, valid], 0, NOW).text, 'Bericht heute 06:00');   // neuester gültiger
+  eq(S.avalancheStatus([{ status: 'stale', published: '2026-10-30T15:00:00Z' }], 0, NOW), { state: 'limited', text: 'Bericht abgelaufen, neuer steht aus' });
+  eq(S.avalancheStatus([{ status: 'expired', published: '2026-05-02T15:00:00Z' }, { status: 'none', published: null }], 0, NOW), { state: 'limited', text: 'Kein aktueller Bericht · zuletzt 02.05.' });
+  eq(S.avalancheStatus([{ status: 'none', published: null }], 0, NOW), { state: 'limited', text: 'Kein aktueller Bericht' });
+  eq(S.avalancheStatus([{ status: 'none', published: null }], 2, NOW).text, 'Kein aktueller Bericht · 2 Quellen nicht geladen');
+});
+
+var failed = results.filter(function (r) { return !r.ok; });
+document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+</script>

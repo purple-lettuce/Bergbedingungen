@@ -124,6 +124,19 @@ body {
 .mr-brand__name { margin: 0; color: var(--mr-link); font-size: var(--mr-text-xl); font-weight: 600; line-height: 1.2; letter-spacing: calc(var(--mr-tracking-label) * 1.5); text-transform: uppercase; }
 .mr-brand__claim { margin: var(--mr-space-2xs) 0 0; color: var(--mr-success); font-size: var(--mr-text-xs); font-weight: 600; line-height: 1.3; letter-spacing: calc(var(--mr-tracking-label) * 2); }
 .mr-header__slogan { margin: 0; color: var(--mr-text-muted); font-size: var(--mr-text-base); }
+/* Datenstatus-Leiste (D5): Zeile unter dem Header. Punkt = Zustand, Name = .mr-label, Text = echter Wert aus den Daten.
+   Zustände (data-state): ok, limited, unavailable, loading, error. Der Zustand steht zusätzlich als Text für Screenreader. */
+.mr-statusbar { position: relative; flex: none; padding: var(--mr-space-sm) var(--mr-space-xl); background: var(--mr-bg); border-bottom: 1px solid var(--mr-line); }
+.mr-statusbar__list { margin: 0; padding: 0; list-style: none; row-gap: var(--mr-space-xs); }
+.mr-statusbar__item { display: inline-flex; align-items: baseline; gap: var(--mr-space-sm); min-width: 0; }
+.mr-statusbar__dot { align-self: center; flex: none; width: var(--mr-space-sm); height: var(--mr-space-sm); border-radius: var(--mr-radius-pill); background: var(--mr-text-muted); }
+.mr-statusbar__text { color: var(--mr-text); font-size: var(--mr-text-sm); }
+.mr-statusbar__item[data-state="ok"] .mr-statusbar__dot { background: var(--mr-success); }
+.mr-statusbar__item[data-state="limited"] .mr-statusbar__dot { background: var(--mr-notice); }
+.mr-statusbar__item[data-state="error"] .mr-statusbar__dot { background: var(--mr-closure); }
+.mr-statusbar__item[data-state="loading"] .mr-statusbar__dot { background: transparent; box-shadow: inset 0 0 0 2px var(--mr-text-muted); }
+.mr-statusbar__item[data-state="unavailable"] .mr-statusbar__text, .mr-statusbar__item[data-state="loading"] .mr-statusbar__text { color: var(--mr-text-muted); }
+.mr-statusbar:focus-visible { outline: 2px solid var(--mr-link); outline-offset: -2px; }
 main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
 #map { min-height: 320px; height: 100%; background: var(--line); }
 aside { overflow-y: auto; border-left: 1px solid var(--line); background: var(--bg); display: flex; flex-direction: column; gap: var(--mr-space-md); padding: var(--mr-space-md); min-width: 0; }
@@ -184,6 +197,12 @@ footer a { color: var(--accent); }
   .mr-brand__emblem { width: calc(var(--mr-space-xl) + var(--mr-space-md)); height: calc(var(--mr-space-xl) + var(--mr-space-md)); }
   .mr-brand__name { font-size: var(--mr-text-lg); }
   .mr-header__slogan { font-size: var(--mr-text-sm); }
+  .mr-statusbar { padding: var(--mr-space-sm) var(--mr-space-lg); overflow-x: auto; }
+  .mr-statusbar__list { flex-wrap: nowrap; width: max-content; }
+  .mr-statusbar__item { flex: none; white-space: nowrap; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "dot name" "text text"; align-items: center; gap: var(--mr-space-2xs) var(--mr-space-sm); }
+  .mr-statusbar__dot { grid-area: dot; }
+  .mr-statusbar__name { grid-area: name; }
+  .mr-statusbar__text { grid-area: text; }
   html, body { height: auto; min-height: 100%; }
   main { grid-template-columns: minmax(0, 1fr); grid-template-rows: 60vh auto; }
   #map { height: 60vh; }

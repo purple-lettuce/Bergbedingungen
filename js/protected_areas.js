@@ -5,6 +5,8 @@ import { filters } from './layers.js';
 import { addProtectedAreasLegend, protectedAreasLegendFailed } from './protected_areas_legend.js';
 import { bindCategoryFilter } from './protected_areas_filter.js';
 import { areaPopup } from './protected_areas_popup.js';
+import { setSourceStatus } from './status_bar.js';
+import { protectedAreasStatus } from './status_bar_logic.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
 const CATEGORY_NAMES = {
@@ -137,10 +139,13 @@ const categoryName =
     addProtectedAreasLegend(entries);
     bindCategoryFilter(filters.protectedAreas, geoLayer, layersByCategory, entries);
 
+    var st = protectedAreasStatus(geojson.features.length);
+    setSourceStatus('protectedAreas', st.state, st.text);
     console.log("Schutzgebiete geladen:", geojson.features.length);
   } catch (err) {
     console.error("Fehler beim Laden der Schutzgebiete", err);
     protectedAreasLegendFailed();
+    setSourceStatus('protectedAreas', 'unavailable', 'nicht verfügbar');
     filters.protectedAreas.setMessage("Der Filter ist nicht verfügbar, weil die Schutzgebiete nicht geladen werden konnten.");
   }
 }

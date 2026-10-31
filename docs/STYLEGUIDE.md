@@ -363,6 +363,30 @@ Regeln:
 
 ---
 
+# Datenstatus-Leiste (seit D5)
+
+Schmale Zeile direkt unter dem Header (`.mr-statusbar`, Fläche `--mr-bg`, unten 1 px Linie). Sie schafft Vertrauen, indem sie je Datenquelle zeigt, ob und wann Daten geladen wurden. Aufbau je Eintrag: Punkt (Zustand), Name als `.mr-label`, Text mit dem echten Wert; Liste als `.mr-cluster`. Mobil läuft die Leiste einzeilig horizontal (Name über Wert, scrollbar, per Tastatur fokussierbar).
+
+Reihenfolge: Sperrungen & Hinweise, Schutzgebiete, Lawinenlage, Wetter (wie im Menü „Karten & Layer“).
+
+| Zustand (`data-state`) | Punkt | Bedeutung | Beispiel |
+|---|---|---|---|
+| `ok` | grün (`--mr-success`) | erfolgreich geladen | „1.245 Einträge · Stand heute 06:51“ |
+| `limited` | gelb (`--mr-notice`) | geladen, aber eingeschränkt | „Kein aktueller Bericht · zuletzt 02.05.“ |
+| `unavailable` | grau (`--mr-text-muted`) | nicht verfügbar oder noch nicht geladen | „nicht abrufbar“, „wird beim Einblenden geladen“ |
+| `loading` | grauer Ring | wird gerade geladen | „wird geladen …“ |
+| `error` | rot (`--mr-closure`) | Ladefehler, der auch sonst als Fehler angezeigt wird | „nicht verfügbar“ |
+
+Regeln:
+
+- **Nur echte Werte.** Anzahl, Zeitstempel und Berichtsstatus kommen aus den geladenen Daten, sonst steht nichts oder der ehrliche Ladezustand da. Keine Standardtexte, keine geschätzten oder simulierten Zeiten. Fehlt ein Zeitstempel (Schutzgebiete), wird nur die Anzahl gezeigt.
+- **Rot nur dort, wo es heute schon eine rote Fehleranzeige gibt** (Sperrungen: Datei nicht ladbar; Lawinenlage: Quelle nicht ladbar). Fehler ohne rote Anzeige (Wetter, Schutzgebiete) sind grau.
+- Der Zustand steht zusätzlich als Text für Screenreader (`.mr-visually-hidden`); Farbe ist nie der einzige Hinweis, der Wert steht immer daneben.
+- Module melden mit `setSourceStatus(id, state, text)` (`js/status_bar.js`); Zustand und Text berechnet `js/status_bar_logic.js` (rein, getestet mit `scripts/test_status_bar_logic.html`).
+- Welche Quelle welchen Zeitstempel liefert: DATENQUELLEN.md, Abschnitt „Zeitstempel und Datenstatus“.
+
+---
+
 # Visuelle Prioritäten
 
 1. Orientierung vor Dekoration
