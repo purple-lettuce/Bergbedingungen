@@ -33,20 +33,20 @@ export async function loadWeather(lat, lon) {
     var wd = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
     var days = d.daily.time.map(function (t, i) {
       var dt = new Date(t + 'T12:00:00');
-      return '<div class="day"><b>' + (i === 0 ? 'Heute' : wd[dt.getDay()]) + '</b>' +
+      return '<div class="mr-card mr-card--tight day"><b>' + (i === 0 ? 'Heute' : wd[dt.getDay()]) + '</b>' +
         Math.round(d.daily.temperature_2m_max[i]) + '° / ' + Math.round(d.daily.temperature_2m_min[i]) + '°<br>' +
         d.daily.precipitation_sum[i].toFixed(1) + ' mm<br>' +
         'Böen ' + Math.round(d.daily.wind_gusts_10m_max[i]) + '</div>';
     }).join('');
     el.wx.innerHTML =
       '<div class="wx-now"><span class="wx-temp">' + Math.round(c.temperature_2m) + ' °C</span><span class="wx-desc">' + esc(WX_CODES[c.weather_code] || '') + '</span></div>' +
-      '<dl class="wx-grid">' +
-      '<div><dt>Gefühlt</dt><dd>' + Math.round(c.apparent_temperature) + ' °C</dd></div>' +
-      '<div><dt>Wind / Böen</dt><dd>' + Math.round(c.wind_speed_10m) + ' / ' + Math.round(c.wind_gusts_10m) + ' km/h</dd></div>' +
-      '<div><dt>Nullgradgrenze</dt><dd>' + (fl == null ? '–' : Math.round(fl / 10) * 10 + ' m') + '</dd></div>' +
-      '<div><dt>Standorthöhe</dt><dd>' + (d.elevation != null ? Math.round(d.elevation) + ' m' : '–') + '</dd></div>' +
+      '<dl class="mr-kv mr-kv--stacked">' +
+      '<div class="mr-kv__item"><dt>Gefühlt</dt><dd>' + Math.round(c.apparent_temperature) + ' °C</dd></div>' +
+      '<div class="mr-kv__item"><dt>Wind / Böen</dt><dd>' + Math.round(c.wind_speed_10m) + ' / ' + Math.round(c.wind_gusts_10m) + ' km/h</dd></div>' +
+      '<div class="mr-kv__item"><dt>Nullgradgrenze</dt><dd>' + (fl == null ? '–' : Math.round(fl / 10) * 10 + ' m') + '</dd></div>' +
+      '<div class="mr-kv__item"><dt>Standorthöhe</dt><dd>' + (d.elevation != null ? Math.round(d.elevation) + ' m' : '–') + '</dd></div>' +
       '</dl><div class="days">' + days + '</div>' +
-      '<p class="muted mr-mt-sm mr-mb-0">Gelände-Höhe laut Wettermodell, kann von der Gipfelhöhe abweichen.</p>';
+      '<p class="mr-text-muted mr-text-sm mr-m-0">Gelände-Höhe laut Wettermodell, kann von der Gipfelhöhe abweichen.</p>';
   } catch (e) {
     if (seq !== wxSeq) return;
     el.wx.innerHTML = '<span class="muted">Wetterdaten sind gerade nicht abrufbar.</span>';
