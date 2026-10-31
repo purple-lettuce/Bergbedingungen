@@ -275,22 +275,35 @@ footer a { color: var(--accent); }
 .kl-legend a { color: var(--accent); }
 .av-warn { background: #fff3cd; border: 1px solid #e0b43c; border-radius: var(--mr-radius-sm); padding: 6px 8px; color: #1d2623; }
 
-/* Wildlife im Popup der Schutzgebiete: kleine Schilder mit Symbol.
-   Popups bleiben auch im Dunkelmodus hell, deshalb feste Farben statt Themenfarben. */
-.leaflet-popup-content .pa-chips { list-style: none; margin: 0 0 4px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
-.leaflet-popup-content .pa-chips li { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px 1px 5px; border: 1px solid #d9ded9; border-radius: 999px; background: #f3f4f1; color: #1d2623; font-size: 13px; line-height: 1.4; }
-.leaflet-popup-content .pa-chips .pa-ico { font-size: 14px; line-height: 1; }
-.leaflet-popup-content .pa-chips .pa-more { color: #5d6a65; border-style: dashed; padding-left: 7px; }
-
-/* Regeln im Popup der Schutzgebiete: Symbol, Text, farbiger Rand nach Art der Regel (feste Farben, Popups bleiben hell) */
-.leaflet-popup-content .pa-rules { list-style: none; margin: 0 0 4px; padding: 0; }
-.leaflet-popup-content .pa-rule { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 3px; padding: 2px 6px; border-left: 3px solid #d9ded9; border-radius: 2px; background: #f3f4f1; color: #1d2623; font-size: 13px; line-height: 1.4; }
-.leaflet-popup-content .pa-rule.ban { border-left-color: #c2351f; }
-.leaflet-popup-content .pa-rule.limit { border-left-color: #b7791f; }
-.leaflet-popup-content .pa-rule.allow { border-left-color: #2f7d4f; }
-.leaflet-popup-content .pa-rule .pa-ico { flex: none; font-size: 14px; line-height: 1.4; }
-.leaflet-popup-content .pa-rule .pa-rule-text { min-width: 0; overflow-wrap: anywhere; }
-.leaflet-popup-content .pa-rule .pa-season { display: block; color: #5d6a65; font-size: 12px; }
+/* Popup der Schutzgebiete (D8a): Mountain-Radar-Stil mit Tokens, folgt Hell und Dunkel.
+   Nur Popups mit className `mr-popup`; die Popups der Sperrungen, Lawinenlage und Wetter-Pin bleiben bis D8b/D8c unverändert. */
+.mr-popup .leaflet-popup-content-wrapper, .mr-popup .leaflet-popup-tip { background: var(--mr-surface); color: var(--mr-text); }
+.mr-popup .leaflet-popup-content-wrapper { border-radius: var(--mr-radius-md); box-shadow: var(--mr-shadow-md); }
+.mr-popup .leaflet-popup-content { max-width: 20rem; margin: var(--mr-space-md); font-size: var(--mr-text-base); }
+.mr-popup a.leaflet-popup-close-button { color: var(--mr-text-muted); }
+.mr-popup a.leaflet-popup-close-button:hover { color: var(--mr-text); }
+.leaflet-popup-content .pa-pop h3, .leaflet-popup-content .pa-pop h4, .leaflet-popup-content .pa-pop p, .leaflet-popup-content .pa-pop ul { margin: 0; }
+.pa-pop-head { display: flex; align-items: flex-start; gap: var(--mr-space-sm); padding-right: var(--mr-space-md); }
+.pa-pop-head .pa-sw { margin-top: var(--mr-space-2xs); }
+.pa-pop-head h3 { font-size: var(--mr-text-md); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.pa-pop-summary { color: var(--mr-text-muted); font-size: var(--mr-text-sm); line-height: 1.45; }
+.pa-pop-sw { width: var(--mr-space-lg); height: var(--mr-space-md); }
+.leaflet-popup-content .pa-pop section { padding-top: var(--mr-space-sm); border-top: 1px solid var(--mr-line); }
+/* Wildlife: kleine Schilder mit Symbol und Name */
+.pa-chips { list-style: none; padding: 0; }
+.pa-chips li { display: inline-flex; align-items: center; gap: var(--mr-space-xs); padding: var(--mr-space-2xs) var(--mr-space-sm) var(--mr-space-2xs) var(--mr-space-xs); border: 1px solid var(--mr-line); border-radius: var(--mr-radius-pill); background: var(--mr-bg); color: var(--mr-text); font-size: var(--mr-text-sm); line-height: 1.4; }
+.pa-chips .pa-ico { font-size: var(--mr-text-base); line-height: 1; }
+.pa-chips .pa-more { color: var(--mr-text-muted); border-style: dashed; padding-left: var(--mr-space-sm); }
+/* Regeln: Symbol, Statusschild und Text; farbiger Rand nach Art der Regel (Statusfarben, gleiche Zuordnung wie bisher) */
+.pa-rules { list-style: none; padding: 0; }
+.pa-rule { display: flex; align-items: flex-start; gap: var(--mr-space-sm); padding: var(--mr-space-xs) var(--mr-space-sm); border-left: 3px solid var(--mr-line); border-radius: var(--mr-radius-xs); background: var(--mr-bg); font-size: var(--mr-text-sm); line-height: 1.5; }
+.pa-rule.ban { border-left-color: var(--mr-closure); }
+.pa-rule.limit { border-left-color: var(--mr-notice); }
+.pa-rule.allow { border-left-color: var(--mr-success); }
+.pa-rule .pa-ico { flex: none; font-size: var(--mr-text-md); line-height: 1.3; }
+.pa-rule .pa-rule-text { min-width: 0; overflow-wrap: anywhere; }
+.pa-rule .mr-badge { margin-right: var(--mr-space-xs); }
+.pa-rule .pa-season { display: block; color: var(--mr-text-muted); font-size: var(--mr-text-xs); }
 .av-popup .leaflet-popup-content { max-width: none; margin: 12px 14px; }
 .av-pop { font-size: 13px; line-height: 1.4; }
 .av-pop h3 { margin: 0; font-size: 16px; }

@@ -339,8 +339,10 @@ Regeln für die Verwendung:
 | Seitenleistenkarten „Wetter“ und „Sperrungen und Hinweise“ (`index.html`, `js/weather.js`, `js/closures.js`) | seit D6 vollständig auf D3-Komponenten (siehe „Seitenleisten-Karten“) |
 | Inline-Styles in `index.html` (3) und `js/weather.js` (1) | durch `.mr-mt-*`, `.mr-mb-0` bzw. die Regel `#status` ersetzt; Abstände 10 px → 12 px (Skala), 2 px mehr Luft über Schaltflächen und Statuszeile |
 | Layer-Panel „Karten & Layer“ (`js/layer_panel.js`) | seit D7 auf D3-Komponenten (siehe „Layer-Panel“); `kl-*`-Klassen bleiben als Haken für Tests und Layout |
-| Popup-Badges (`.badge`), Legendeninhalte (`.pa-*`, `.av-*`), Popups | **bewusst noch nicht migriert** (D8, D9) |
-| Inline-Styles in Popups (`js/closures.js`, `js/protected_areas_popup.js`) | bleiben bis D8 |
+| Schutzgebiets-Popups (`js/protected_areas_popup.js`) | seit D8a auf D3-Komponenten (siehe „Schutzgebiets-Popup“) |
+| Popups der Sperrungen, Lawinenlage und Wetter-Pin (alte `.badge`-Klassen), Legendeninhalte (`.pa-*`, `.av-*`) | **bewusst noch nicht migriert** (D8b, D8c, D9) |
+| Inline-Styles in Popups (`js/closures.js`, Lawinenlage) | bleiben bis D8b/D8c |
+| Inline-Styles in Schutzgebiets-Popups (3× `margin`) | seit D8a entfernt; bleiben nur die Farben des Kopf-Farbfelds (datengetrieben) |
 | Inline-Styles mit Datenfarben (`js/protected_areas_legend.js`, `js/protected_areas_filter.js`) | bleiben, da datengetrieben |
 
 ---
@@ -361,6 +363,21 @@ Beide Karten der rechten Seitenleiste bestehen nur aus D3-Komponenten; eigene Re
 | Listeneintrag | `li.mr-card.mr-stack` mit 5 px Typrand (Sperrung/Hinweis), `.mr-badge` im `.mr-cluster`, Hover `--mr-primary-soft`, aktiv mit Umriss |
 
 Nicht Teil dieser Karten und unverändert: Popups (alte `.badge`-Klassen bis D8), „Karten & Layer“, Legenden, Lawinenlage.
+
+# Schutzgebiets-Popup (seit D8a)
+
+Nur Popups der Schutzgebiete; Inhalt, Reihenfolge und Texte sind unverändert (alle Namen, Beschreibungen, Wildlife- und Regeltexte aller 2551 Gebiete vorher/nachher gleich geprüft). Das Popup trägt `className: "mr-popup"` und folgt wie die Seitenleiste dem Hell-/Dunkelmodus; die übrigen Popups bleiben bis D8b/D8c hell.
+
+| Bereich | Komponenten |
+|---|---|
+| Rahmen | `.mr-popup` (Fläche `--mr-surface`, Radius `md`, Schatten `--mr-shadow-md`), Inhalt `.pa-pop` + `.mr-stack` |
+| Kopf | Farbfeld der Kategorie (`.pa-sw`, wie in der Legende), Name als `h3`, Schutzgebietstyp als `.mr-label` |
+| Beschreibung | gedämpfter Text (`--mr-text-sm`) |
+| Abschnitte | `h4.mr-label` („Wildlife“, „Pflanzen und Lebensräume“, „Regeln“), getrennt durch eine Linie |
+| Wildlife | `.mr-cluster` aus Schildern mit Symbol und Name; „und n weitere“ gestrichelt |
+| Regeln | Zeile mit Themensymbol, `.mr-badge` (Verbot = `--closure`, Eingeschränkt = `--notice`, Erlaubt = `--success`, sonstige ohne Schild), Regeltext, Zeitraum in eigener Zeile; farbiger Rand wie bisher |
+
+Der Styleguide-Wunsch „Kopfbereich in Deep Alpine Blue“ wird bewusst nicht umgesetzt (Informationen strukturieren, nicht dekorieren). Der gemeinsame Rahmen für D8b/D8c (`mr-popup`, `.pa-pop-head`) ist die Vorlage.
 
 # Layer-Panel (seit D7)
 

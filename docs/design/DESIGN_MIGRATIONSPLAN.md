@@ -99,7 +99,8 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Tests: Tastaturbedienung, `aria-*`, Touch-Ziele ≥ 44 px, bestehende Layer-Tests.
 
 **D8 — Popups vereinheitlichen**
-- Umfang: Gemeinsames Popup-Gerüst (Akzentbalken oben, Icon + Titel, Key-Value-Zeilen, Badges) als Helfer in `js/popup_icons.js` oder neues `js/popup_frame.js`. Umstellung in drei Schritten: D8a Schutzgebiete (Vorbild: Mockup „Wildlife Protection Area“), D8b Lawinenlage, D8c Sperrungen/Wetter-Pin.
+- Umfang: Gemeinsames Popup-Gerüst (Akzentbalken oben, Icon + Titel, Key-Value-Zeilen, Badges) als Helfer in `js/popup_icons.js` oder neues `js/popup_frame.js`. Umstellung in drei Schritten: D8a Schutzgebiete (Vorbild: Mockup „Wildlife Protection Area“) ✅ erledigt (31.10.2026), D8b Lawinenlage, D8c Sperrungen/Wetter-Pin.
+- D8a Umsetzung: nur Schutzgebiets-Popups (`js/protected_areas_popup.js`, ein Parameter und `className: "mr-popup"` in `js/protected_areas.js`, `style.css`). Kopf mit Farbfeld der Kategorie (wie Legende), Name (`h3`) und Typ (`.mr-label`); Abschnitte „Wildlife“, „Pflanzen und Lebensräume“, „Regeln“ mit `.mr-label`-Titel; Wildlife als `.mr-cluster` mit Schildern; Regeln mit Themensymbol, `.mr-badge` („Verbot“, „Eingeschränkt“, „Erlaubt“, gleiche Zuordnung und Farben wie zuvor) und farbigem Rand; alle festen Hex-Farben und die drei Inline-Styles (`margin:6px 0 4px`) entfernt. Das Popup folgt Hell und Dunkel (Tokens). Der gemeinsame Popup-Rahmen als Helfer (`popup_frame.js`) wurde noch nicht angelegt; D8b/D8c nutzen die Klassen `.pa-pop-*`/`mr-popup` als Vorlage. Dokumentation: STYLEGUIDE.md („Schutzgebiets-Popup“).
 - Risiko: Inline-Markup mit `esc()` erhalten (Sicherheit!). Popup-Breite und Scrollen auf Mobil prüfen.
 
 **D9 — Legendenkarte**

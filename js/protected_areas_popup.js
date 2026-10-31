@@ -6,31 +6,47 @@ import { wildlifeIcon, ruleInfo, splitSeason } from './popup_icons.js';
 
 export const WILDLIFE_SHOWN = 12;   // so viele Einträge je Gruppe im Popup, der Rest als "und n weitere"
 
-// Regeln als Liste mit Themensymbol und farbigem Rand (Verbot, eingeschränkt, erlaubt). Der Regeltext bleibt
-// unverändert; ein Zeitraum am Ende steht in einer eigenen Zeile.
+// Art der Regel (aus ruleInfo) als Statusschild: gleiche Einteilung und Farben wie bisher
+// (Verbot = rot, eingeschränkt = gelb, erlaubt = grün); sonstige Regeln bekommen kein Schild.
+const RULE_BADGES = {
+  ban: { cls: "mr-badge--closure", text: "Verbot" },
+  limit: { cls: "mr-badge--notice", text: "Eingeschränkt" },
+  allow: { cls: "mr-badge--success", text: "Erlaubt" }
+};
+
+// Abschnitt im Popup: Mikro-Titel und Inhalt.
+function sectionHtml(title, inner) {
+  return "<section class=\"mr-stack mr-gap-xs\"><h4 class=\"mr-label\">" + esc(title) + "</h4>" + inner + "</section>";
+}
+
+// Regeln als Liste mit Themensymbol, Statusschild und farbigem Rand (Verbot, eingeschränkt, erlaubt). Der Regeltext
+// bleibt unverändert; ein Zeitraum am Ende steht in einer eigenen Zeile.
 function rulesHtml(rules) {
-  return "<p style=\"margin:6px 0 4px\"><b>Regeln:</b></p>" +
-    "<ul class=\"pa-rules\">" +
+  return sectionHtml("Regeln",
+    "<ul class=\"pa-rules mr-stack mr-gap-xs\">" +
     rules.map(function (t) {
       const info = ruleInfo(t);
       const parts = splitSeason(t);
+      const badge = RULE_BADGES[info.kind];
       return "<li class=\"pa-rule " + info.kind + "\"><span class=\"pa-ico\" aria-hidden=\"true\">" + info.icon + "</span>" +
-        "<span class=\"pa-rule-text\">" + esc(parts.main) +
-        (parts.season ? " <span class=\"pa-season\">" + esc(parts.season) + "</span>" : "") + "</span></li>";
+        "<span class=\"pa-rule-text\">" +
+        (badge ? "<span class=\"mr-badge " + badge.cls + "\">" + badge.text + "</span> " : "") +
+        esc(parts.main) +
+        (parts.season ? "<span class=\"pa-season\">" + esc(parts.season) + "</span>" : "") + "</span></li>";
     }).join("") +
-    "</ul>";
+    "</ul>");
 }
 
 // Wildlife als Reihe kleiner Schilder mit Symbol und Name.
 // entries: [{ name, type }], type = Art laut Datenquelle (FAUNA, FLORA, HABITAT) oder null.
 function wildlifeHtml(title, entries, more) {
-  return "<p style=\"margin:6px 0 4px\"><b>" + esc(title) + ":</b></p>" +
-    "<ul class=\"pa-chips\">" +
+  return sectionHtml(title,
+    "<ul class=\"pa-chips mr-cluster mr-gap-xs\">" +
     entries.map(function (e) {
       return "<li><span class=\"pa-ico\" aria-hidden=\"true\">" + wildlifeIcon(e.name, e.type) + "</span>" + esc(e.name) + "</li>";
     }).join("") +
     (more ? "<li class=\"pa-more\">und " + more + " weitere</li>" : "") +
-    "</ul>";
+    "</ul>");
 }
 
 // Wildlife und Regeln aus den Index-Tabellen der GeoJSON-Datei (siehe scripts/build_geojson.py).
@@ -57,13 +73,21 @@ export function extraPopupHtml(p, geojson) {
 }
 
 // Gesamtes Popup eines Schutzgebiets. extra: Wildlife und Regeln (leer bei Gebieten ohne diese Angaben).
-export function areaPopup(p, geojson, categoryName) {
+// Kopf: Farbfeld der Kategorie (wie in der Legende; style = Leaflet-Pfadstil, optional), Name, Schutzgebietstyp.
+export function areaPopup(p, geojson, categoryName, style) {
   const extra = extraPopupHtml(p, geojson);
+  const swatch = style
+    ? "<span class=\"pa-sw pa-pop-sw\" aria-hidden=\"true\" style=\"border-color:" + esc(style.color) + "\">" +
+      "<i style=\"background:" + esc(style.fillColor) + ";opacity:" + esc(Math.min(1, style.fillOpacity * 2.5)) + "\"></i></span>"
+    : "";
   return {
     extra: extra,
-    html: "<h3>" + esc(p.name || "") + "</h3>" +
-      "<p><b>Kategorie:</b> " + esc(categoryName) + "</p>" +
-      (p.summary ? "<p>" + esc(p.summary) + "</p>" : "") +
-      extra
+    html: "<div class=\"pa-pop mr-stack mr-gap-sm\">" +
+      "<div class=\"pa-pop-head\">" + swatch +
+      "<div class=\"mr-stack mr-gap-xs\"><h3>" + esc(p.name || "") + "</h3>" +
+      "<p class=\"mr-label pa-pop-type\">" + esc(categoryName) + "</p></div></div>" +
+      (p.summary ? "<p class=\"pa-pop-summary\">" + esc(p.summary) + "</p>" : "") +
+      extra +
+      "</div>"
   };
 }
