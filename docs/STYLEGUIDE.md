@@ -336,13 +336,30 @@ Regeln für die Verwendung:
 
 | Bereich | Stand |
 |---|---|
-| Seitenleistenkarten „Wetter“ und „Sperrungen und Hinweise“ (`index.html`) | auf `.mr-card` umgestellt (gleiche Optik wie zuvor) |
+| Seitenleistenkarten „Wetter“ und „Sperrungen und Hinweise“ (`index.html`, `js/weather.js`, `js/closures.js`) | seit D6 vollständig auf D3-Komponenten (siehe „Seitenleisten-Karten“) |
 | Inline-Styles in `index.html` (3) und `js/weather.js` (1) | durch `.mr-mt-*`, `.mr-mb-0` bzw. die Regel `#status` ersetzt; Abstände 10 px → 12 px (Skala), 2 px mehr Luft über Schaltflächen und Statuszeile |
-| Layer-Menü (`.kl-*`), Wetterwerte (`.wx-*`), Listenbadges (`.badge`), Legenden (`.pa-*`, `.av-*`), Popups | **bewusst noch nicht migriert** (D5–D9) |
+| Layer-Menü (`.kl-*`), Popup-Badges (`.badge`), Legenden (`.pa-*`, `.av-*`), Popups | **bewusst noch nicht migriert** (D5–D9) |
 | Inline-Styles in Popups (`js/closures.js`, `js/protected_areas_popup.js`) | bleiben bis D8 |
 | Inline-Styles mit Datenfarben (`js/protected_areas_legend.js`, `js/protected_areas_filter.js`) | bleiben, da datengetrieben |
 
 ---
+
+# Seitenleisten-Karten (seit D6)
+
+Beide Karten der rechten Seitenleiste bestehen nur aus D3-Komponenten; eigene Regeln gibt es nur für Textgrößen im Wetterblock und die Listeneinträge.
+
+| Bereich | Komponenten |
+|---|---|
+| Kartenrahmen | `.mr-card` + `.mr-stack` (einheitlicher Abstand statt einzelner Margins) |
+| Titel | `h2.mr-label` („Wetter“, „Sperrungen und Hinweise“) |
+| Wetterwerte (Gefühlt, Wind / Böen, Nullgradgrenze, Standorthöhe) | `.mr-kv.mr-kv--stacked` mit `.mr-kv__item` |
+| Tageskacheln | `.mr-card.mr-card--tight` |
+| Aktionen (Für Kartenmitte, Mein Standort) | `.mr-cluster`, abgesetzt durch `.mr-divider-top`; Hinweistext `.mr-text-muted .mr-text-sm` |
+| Suchfeld | `input[type=search]` in `.mr-card`: Radius `md`, Hintergrund `--mr-bg`, mind. 40 px (44 px bei Touch) |
+| Zählzeile (`#status`) | ruhige Meta-Zeile (gedämpft, ohne Kasten); Fehler (`.status.err`) bleiben als Kasten sichtbar |
+| Listeneintrag | `li.mr-card.mr-stack` mit 5 px Typrand (Sperrung/Hinweis), `.mr-badge` im `.mr-cluster`, Hover `--mr-primary-soft`, aktiv mit Umriss |
+
+Nicht Teil dieser Karten und unverändert: Popups (alte `.badge`-Klassen bis D8), „Karten & Layer“, Legenden, Lawinenlage.
 
 # Header (seit D4)
 

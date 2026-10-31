@@ -181,13 +181,13 @@ export function render() {
 
     if (idx >= LIST_LIMIT) return;
     var li = document.createElement('li');
-    li.className = 'item ' + cls + (r.uuid === activeId ? ' active' : '');
+    li.className = 'mr-card mr-stack mr-gap-xs item ' + cls + (r.uuid === activeId ? ' active' : '');
     li.tabIndex = 0;
     li.dataset.id = r.uuid;
     var d = descOf(r);
     li.innerHTML =
-      '<div class="badges"><span class="badge ' + k + '">' + esc(TYPE_LABEL[r.type] || r.type || 'Eintrag') + '</span>' +
-      (st === 'upcoming' ? '<span class="badge upcoming">Geplant</span>' : '') + '</div>' +
+      '<div class="mr-cluster mr-gap-xs"><span class="mr-badge mr-badge--' + k + '">' + esc(TYPE_LABEL[r.type] || r.type || 'Eintrag') + '</span>' +
+      (st === 'upcoming' ? '<span class="mr-badge mr-badge--upcoming">Geplant</span>' : '') + '</div>' +
       '<h3>' + esc(titleOf(r)) + '</h3>' +
       '<div class="muted">' + esc(periodText(r)) + '</div>' +
       (d ? '<p>' + esc(d.length > 180 ? d.slice(0, 180) + ' …' : d) + '</p>' : '');

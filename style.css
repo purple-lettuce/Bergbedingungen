@@ -141,7 +141,6 @@ main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1
 #map { min-height: 320px; height: 100%; background: var(--line); }
 aside { overflow-y: auto; border-left: 1px solid var(--line); background: var(--bg); display: flex; flex-direction: column; gap: var(--mr-space-md); padding: var(--mr-space-md); min-width: 0; }
 h2 { font-family: var(--font-display); font-size: var(--mr-text-md); font-weight: 600; margin: 0 0 var(--mr-space-sm); text-transform: uppercase; letter-spacing: var(--mr-tracking-label); color: var(--muted); }
-.row { display: flex; gap: var(--mr-space-sm); flex-wrap: wrap; align-items: center; }
 button, input[type=search] {
   font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: var(--mr-radius-sm); padding: 6px 10px;
 }
@@ -154,24 +153,24 @@ input[type=search] { flex: 1; min-width: 120px; }
 /* Wetter */
 .wx-now { display: flex; align-items: baseline; gap: var(--mr-space-md); flex-wrap: wrap; }
 .wx-temp { font-family: var(--font-display); font-size: var(--mr-text-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.wx-desc { color: var(--muted); }
-.wx-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px var(--mr-space-md); margin: 10px 0; font-size: var(--mr-text-base); }
-.wx-grid dt { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
-.wx-grid dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 500; }
-.days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.day { border: 1px solid var(--line); border-radius: var(--mr-radius-sm); padding: 6px; font-size: 12px; text-align: center; font-variant-numeric: tabular-nums; }
-.day b { display: block; font-family: var(--font-display); font-size: 13px; }
+.wx-desc { color: var(--mr-text-muted); font-size: var(--mr-text-lg); }
+.days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--mr-space-sm); }
+.day { font-size: var(--mr-text-xs); line-height: 1.5; text-align: center; font-variant-numeric: tabular-nums; }
+.day b { display: block; margin-bottom: var(--mr-space-xs); font-size: var(--mr-text-sm); }
 .muted { color: var(--muted); font-size: 13px; }
 
 /* Liste */
-#list { display: flex; flex-direction: column; gap: var(--mr-space-sm); margin: 8px 0 0; padding: 0; list-style: none; }
-.item { border: 1px solid var(--line); border-left-width: 5px; border-radius: var(--mr-radius-sm); padding: 8px 10px; background: var(--panel); cursor: pointer; min-width: 0; }
+#list { display: flex; flex-direction: column; gap: var(--mr-space-sm); margin: 0; padding: 0; list-style: none; }
+/* Listeneintrag = .mr-card .mr-stack; hier nur Akzentrand, Zeigerverhalten und Typografie */
+.item { cursor: pointer; }
+.item.mr-card { border-left-width: 5px; }
+.item:hover { background: var(--mr-primary-soft); }
 .item.closure { border-left-color: var(--closure); }
 .item.notice { border-left-color: var(--notice); }
 .item.upcoming { border-left-color: var(--upcoming); }
 .item.active { outline: 2px solid var(--accent); }
-.item h3 { margin: 0 0 2px; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
-.item p { margin: 4px 0 0; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.item h3 { margin: 0; font-size: var(--mr-text-md); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.item p { margin: 0; font-size: var(--mr-text-sm); color: var(--mr-text-muted); overflow-wrap: anywhere; }
 .badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
 .badge { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: var(--mr-radius-xs); border: 1px solid currentColor; }
 .badge.closure { color: var(--closure); }
@@ -179,7 +178,8 @@ input[type=search] { flex: 1; min-width: 120px; }
 .badge.upcoming { color: var(--upcoming); }
 .badge.current { color: var(--ok); }
 .status { padding: var(--mr-space-sm) 10px; border-radius: var(--mr-radius-sm); font-size: var(--mr-text-base); background: var(--panel); border: 1px solid var(--line); }
-#status { margin-top: var(--mr-space-md); } /* nicht per Klasse: map.js setzt className neu */
+/* Zählzeile der Liste: ruhige Meta-Zeile statt Kasten; Fehler (.status.err) bleiben als Kasten sichtbar. Nicht per Klasse, weil map.js className neu setzt. */
+#status:not(.err) { padding: 0; border: 0; border-radius: 0; background: none; color: var(--mr-text-muted); font-size: var(--mr-text-sm); }
 .status.err { border-color: var(--closure); color: var(--closure); }
 .leaflet-popup-content { font-family: var(--font-body); font-size: 14px; max-width: 260px; }
 .leaflet-popup-content h3 { margin: 0 0 4px; font-size: 15px; }
@@ -389,9 +389,18 @@ footer a { color: var(--accent); }
 .mr-mt-md { margin-top: var(--mr-space-md); }
 .mr-mt-lg { margin-top: var(--mr-space-lg); }
 .mr-mb-0 { margin-bottom: 0; }
+.mr-m-0 { margin: 0; }
+.mr-divider-top { padding-top: var(--mr-space-md); border-top: 1px solid var(--mr-line); }
 .mr-text-muted { color: var(--mr-text-muted); }
 .mr-text-sm { font-size: var(--mr-text-sm); }
 .mr-tabular { font-variant-numeric: tabular-nums; }
 .mr-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 @media (pointer: coarse) { .mr-switch, .mr-segment__opt span { min-height: 44px; } }
 @media (forced-colors: active) { .mr-switch__track { border: 1px solid CanvasText; } .mr-segment__opt input:checked + span { outline: 2px solid Highlight; } }
+
+/* Seitenleisten-Karten (D6): Bedienelemente innerhalb von .mr-card (Suchfeld, Schaltflächen) */
+.mr-card input[type=search] { min-height: calc(var(--mr-space-2xl) + var(--mr-space-sm)); padding: var(--mr-space-sm) var(--mr-space-md); border-radius: var(--mr-radius-md); background: var(--mr-bg); }
+.mr-card input[type=search]::placeholder { color: var(--mr-text-muted); opacity: 1; }
+.mr-card button { padding: var(--mr-space-sm) var(--mr-space-md); border-radius: var(--mr-radius-md); font-weight: 500; }
+.mr-card button:hover { border-color: var(--mr-link); }
+@media (pointer: coarse) { .mr-card input[type=search], .mr-card button { min-height: 44px; } }

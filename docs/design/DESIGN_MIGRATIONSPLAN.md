@@ -87,8 +87,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Voraussetzung: Prüfen, welche Zeitstempel in `data/` bereits stehen. Falls nicht, in separatem Mini-PR die GitHub Action ergänzen.
 - „System status: Operational“ nur, wenn aus echten Ladefehlern ableitbar.
 
-**D6 — Seitenleisten-Karten im neuen Stil**
-- Umfang: „Wetter“ und „Sperrungen und Hinweise“ auf `.mr-card` (Radius, Schatten, Mikro-Labels, Typografie). Position bleibt in der Seitenleiste.
+**D6 — Seitenleisten-Karten im neuen Stil** ✅ erledigt (31.10.2026)
+- Umsetzung: reines Visual-Upgrade ohne neue Daten. Karte „Wetter“: `.mr-card` + `.mr-stack`, Titel `.mr-label`, vier Werte als `.mr-kv--stacked`, vier Tageskacheln als `.mr-card--tight`, Trennlinie (`.mr-divider-top`) vor den Schaltflächen. Karte „Sperrungen und Hinweise“: Suchfeld, Zähl-/Datenstandzeile als ruhige Meta-Zeile, Listeneinträge als `.mr-card` mit `.mr-badge` und `.mr-cluster`. Dateien: `index.html`, `js/weather.js`, `js/closures.js` (nur Klassen), `style.css`. Popups, „Karten & Layer“, Legenden, Lawinenlage, Suchlogik und Datenquellen unverändert. Die Wetter-Datenerweiterung (Niederschlag, Sicht) ist **nicht** Teil von D6 und bleibt offen (D6b). Dokumentation: STYLEGUIDE.md („Seitenleisten-Karten“).
+- Ursprünglicher Umfang: „Wetter“ und „Sperrungen und Hinweise“ auf `.mr-card` (Radius, Schatten, Mikro-Labels, Typografie). Position bleibt in der Seitenleiste.
 - Wetterkarte zeigt zusätzlich Wind, Niederschlag, Sicht, falls Open-Meteo sie liefert (eigener Folge-PR D6b, kleine Datenerweiterung). Keine „Confidence“-Anzeige.
 
 **D7 — Layer-Panel zu „Intelligence Layers“**
