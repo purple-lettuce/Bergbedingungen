@@ -51,6 +51,7 @@ export function addAvalancheLegend(info, onAltitude) {
   }).join('; ') + '</p>';
 
   var legend = legends.avalanche;
+  legend.setCompact(info.anyShown ? '<ul class="pa-list av-levels">' + rows + '</ul>' : '');
   legend.setContent('<ul class="av-sources">' + info.sources.map(sourceLine).join('') + '</ul>' + details + attribution);
 
   var select = legend.element.querySelector('#av-alt');

@@ -190,6 +190,24 @@ test('Bedienfeld: Filterabschnitt mit Schaltern, Alle/Keine und Statuszeile', fu
   map.remove(); host.remove();
 });
 
+test('Bedienfeld: Legendenkarte zeigt nur Legenden eingeblendeter Ebenen', function () {
+  var host = document.createElement('div');
+  document.body.appendChild(host);
+  var map = L.map(host).setView([47, 11], 8);
+  var panel = createLayerPanel(map);
+  var a = L.layerGroup().addTo(map), b = L.layerGroup();
+  var la = panel.addLegend('Legende A', a), lb = panel.addLegend('Legende B', b);
+  var card = host.querySelector('.kl-card');
+  ok(card.hidden, 'ohne Inhalt versteckt');
+  la.setCompact('<p>eins</p>'); lb.setCompact('<p>zwei</p>');
+  ok(!card.hidden, 'sichtbar mit Legende einer eingeblendeten Ebene');
+  eq([].map.call(card.querySelectorAll('.kl-card-sec:not([hidden]) .kl-card-title'), function (n) { return n.textContent; }), ['A']);
+  b.addTo(map);
+  eq(card.querySelectorAll('.kl-card-sec:not([hidden])').length, 2);
+  a.remove(); b.remove();
+  ok(card.hidden, 'versteckt, wenn keine Ebene eingeblendet ist');
+  map.remove(); host.remove();
+});
 test('Bedienfeld: Texte der Filtereinträge werden nicht als HTML gesetzt', function () {
   var host = document.createElement('div');
   document.body.appendChild(host);

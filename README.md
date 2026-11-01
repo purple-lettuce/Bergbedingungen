@@ -25,6 +25,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 - Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen, mit Symbolen im Popup und Filter nach Schutzgebietskategorie
 - Layer-basierte Darstellung für schnellere Orientierung auf der Karte
 - Bedienfeld „Karten & Layer” für Kartenstil, Ebenen, Filter und Legenden, per Klick bedienbar (auch auf Touchgeräten)
+- Legendenkarte unten rechts: kompakte Legende, zeigt nur die eingeblendeten Ebenen, einklappbar
 - Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste)
 - Datenstatus-Leiste unter dem Header: je Quelle (Sperrungen, Schutzgebiete, Lawinenlage, Wetter) Ladezustand und, wo die Daten einen Zeitstempel liefern, der Datenstand; nur echte Werte
 
@@ -161,7 +162,7 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/protected_areas_filter.js` | Filterlogik nach Schutzgebietskategorie: blendet die vorhandenen Flächen ein und aus, ohne neu zu laden |
 | `js/protected_areas_legend.js` | Legende der Schutzgebiete (Abschnitt im Bedienfeld „Karten & Layer“): Farben der Kategorien, die in den Daten vorkommen |
 | `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen, Filter und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`, Filter: `panel.addFilter(...)`) |
-| `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil, einklappbare Filter und Legenden, alles per Klick, ohne Fachlogik |
+| `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts): Layer, Kartenstil, einklappbare Filter und Legenden, alles per Klick, ohne Fachlogik; dazu die Legendenkarte unten rechts (nur eingeblendete Ebenen) |
 | `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
 | `js/closures_filter.js` | Filter Sperrungen, Hinweise und Geplant (Abschnitt „Filter Sperrungen & Hinweise“ im Bedienfeld) |
 | `js/avalanche.js` | Lawinenlage aller Quellen (Karte): Datensatz je Region aufbauen, Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Höhenwahl; lädt erst beim ersten Einblenden |

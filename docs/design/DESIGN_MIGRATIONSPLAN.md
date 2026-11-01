@@ -106,8 +106,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Risiko: Inline-Markup mit `esc()` erhalten (Sicherheit!). Popup-Breite und Scrollen auf Mobil prüfen.
 - Hinweis zum Wetter: Wetter-Popup existiert aktuell nicht und wurde daher in D8c nicht migriert. Eine zukünftige Implementierung ist als separates Feature geplant (Weather Intelligence Popup, ROADMAP: Toolbox, WEB-T7). Es ist **kein** D8d.
 
-**D9 — Legendenkarte**
-- Umfang: Kompakte Legende als eigene Karte unten rechts, speist sich aus den vorhandenen Legenden-Modulen (`*_legend.js`), zeigt nur aktive Layer. Im Layer-Panel bleibt die ausführliche Variante.
+**D9 — Legendenkarte** ✅ erledigt (01.11.2026)
+- Umsetzung: `js/layer_panel.js` (Legendenkarte als Leaflet-Control unten rechts, `setCompact` an der Schnittstelle von `addLegend`), kompakte Fassungen in `js/closures_legend.js`, `js/protected_areas_legend.js`, `js/avalanche_legend.js` (Zeilen aus denselben Daten), Stil in `style.css`. Die Karte zeigt nur Legenden eingeblendeter Ebenen (folgt `layer.on('add remove')`), ist leer verborgen und einklappbar (`aria-expanded`). Sie ist zunächst **eingeklappt**: aufgeklappt überdeckt sie am Desktop das Bedienfeld darüber; die endgültige Anordnung gehört zu D10. Lawinenlage erscheint nur bei aktuellem Bericht (Nebensaison: nicht). Test: `scripts/test_protected_areas.html`. Dokumentation: STYLEGUIDE.md („Legendenkarte“).
+- Ursprünglicher Umfang:- Umfang: Kompakte Legende als eigene Karte unten rechts, speist sich aus den vorhandenen Legenden-Modulen (`*_legend.js`), zeigt nur aktive Layer. Im Layer-Panel bleibt die ausführliche Variante.
 
 ### Stufe C — Layout (größtes Risiko, ganz am Ende)
 
