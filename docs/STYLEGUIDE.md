@@ -341,8 +341,9 @@ Regeln für die Verwendung:
 | Layer-Panel „Karten & Layer“ (`js/layer_panel.js`) | seit D7 auf D3-Komponenten (siehe „Layer-Panel“); `kl-*`-Klassen bleiben als Haken für Tests und Layout |
 | Schutzgebiets-Popups (`js/protected_areas_popup.js`) | seit D8a auf D3-Komponenten (siehe „Schutzgebiets-Popup“) |
 | Lawinenlage-Popups (`js/avalanche_popup.js`) | seit D8b auf dem Gerüst von D8a (siehe „Lawinenlage-Popup“) |
-| Popups der Sperrungen und Wetter-Pin (alte `.badge`-Klassen), Legendeninhalte (`.pa-*`, `.av-*`) | **bewusst noch nicht migriert** (D8c, D9) |
-| Inline-Styles in Popups (`js/closures.js`) | bleiben bis D8c |
+| Popups der Sperrungen und Hinweise (`js/closures.js`) | seit D8c auf dem gemeinsamen Popup-System (siehe „Sperrungen- und Hinweise-Popup“); die alten `.badge`-Klassen sind entfernt |
+| Legendeninhalte (`.pa-*`, `.av-*`) | **bewusst noch nicht migriert** (D9) |
+| Inline-Styles in Popups | seit D8c in keinem Popup mehr (außer den datengetriebenen Farben des Kopf-Farbfelds der Schutzgebiete) |
 | Inline-Styles in Schutzgebiets-Popups (3× `margin`) | seit D8a entfernt; bleiben nur die Farben des Kopf-Farbfelds (datengetrieben) |
 | Inline-Styles mit Datenfarben (`js/protected_areas_legend.js`, `js/protected_areas_filter.js`) | bleiben, da datengetrieben |
 
@@ -379,6 +380,20 @@ Nur Popups der Schutzgebiete; Inhalt, Reihenfolge und Texte sind unverändert (a
 | Regeln | Zeile mit Themensymbol, `.mr-badge` (Verbot = `--closure`, Eingeschränkt = `--notice`, Erlaubt = `--success`, sonstige ohne Schild), Regeltext, Zeitraum in eigener Zeile; farbiger Rand wie bisher |
 
 Der Styleguide-Wunsch „Kopfbereich in Deep Alpine Blue“ wird bewusst nicht umgesetzt (Informationen strukturieren, nicht dekorieren). Der gemeinsame Rahmen für D8b/D8c (`mr-popup`, `.pa-pop-head`) ist die Vorlage.
+
+# Sperrungen- und Hinweise-Popup (seit D8c)
+
+Gleiches Gerüst wie die Popups der Schutzgebiete (D8a) und der Lawinenlage (D8b), keine dritte Variante. Alle Popups von Mountain Radar tragen `mr-popup` und folgen Hell und Dunkel. Ein Wetter-Pin-Popup gibt es nicht (der Pin ist nicht anklickbar, die Wetterwerte stehen in der Seitenleisten-Karte); dafür wurde nichts angelegt.
+
+| Bereich | Komponenten |
+|---|---|
+| Rahmen | `className: "mr-popup"`, Inhalt `.pa-pop.mr-stack` |
+| Kopf | `.pa-pop-head`: Statuspunkt (`.dot`, gleiche Farbe wie der Pin auf der Karte: Sperrung `--closure`, Hinweis `--notice`, geplant `--upcoming`) und Titel (`h3`) |
+| Art und Status | `.mr-badge` im `.mr-cluster`: **Sperrung** (`--closure`) oder **Hinweis** (`--notice`), dazu **Aktuell** (`--success`) oder **Geplant** (`--upcoming`) |
+| Beschreibung | Fließtext |
+| Angaben | `.mr-kv` (Zeitraum, Betrifft, Quelle) nur für vorhandene Felder |
+
+**Farben und Status** sind unverändert: dieselben Tokens und dieselbe Zuordnung wie vor D8c (das Schild trägt die Art, nicht den Status; ein geplanter Eintrag zeigt zusätzlich „Geplant“). Die Liste in der Seitenleiste nutzt dieselben Schilder. Die Zeile „Zeitraum“ hat jetzt eine Beschriftung, der Inhalt ist gleich.
 
 # Lawinenlage-Popup (seit D8b)
 
