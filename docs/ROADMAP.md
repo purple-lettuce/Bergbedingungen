@@ -96,7 +96,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 5 | Unfall-Heatmap | Konzept (Phase 3) |
 | 6 | Digiway Absturzrisiko | Konzept (Phase 3) |
 | 7 | GPX Upload & Tourenanalyse | Geplant (Phase 1) |
-| 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1); Mobile: Zukunft (Phase 4-5) |
+| 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1), Weather Intelligence Popup geplant (niedrige Priorität, WEB-T7); Mobile: Zukunft (Phase 4-5) |
 | 9 | Alpine Risk Engine | Design (Beta Phase 3, GA Phase 5) |
 | 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b, Sperrungen- und Hinweise-Popups mit D8c umgesetzt (alle Popups auf dem gemeinsamen System), Legendenkarte mit D9 umgesetzt, Layout offen) |
 | 11 | PWA & Offline | Zukunft (nach Phase 4) |
@@ -183,6 +183,38 @@ Datenquellen für alle Module sind in **DATENQUELLEN.md** dokumentiert.
 - **WEB-T4:** Entfernung zum Standort (Phase 1)
 - **WEB-T5:** Entfernung zwischen zwei Punkten (Phase 1)
 - **WEB-T6:** Höhenprofil entlang Linie (Phase 1)
+- **WEB-T7:** Weather Intelligence Popup 🟡 Geplant (nicht implementiert, Priorität niedriger als die laufende Design-Migration; siehe unten)
+
+### WEB-T7 — Weather Intelligence Popup (geplant)
+
+**Beschreibung:** Beim Klick auf die Karte erscheint optional ein Wetter-Popup direkt an der gewählten Position. Es baut auf dem gemeinsamen Popup-System von D8a–D8c auf (`mr-popup`, `.pa-pop`, `.pa-pop-head`, `.mr-kv`) und zeigt nur reale Wetterdaten, die heute bereits vorhanden sind.
+
+**Status:** Geplant, nicht implementiert. **Priorität:** niedriger als die laufende Design-Migration (D10–D13); Start frühestens danach.
+
+**Einordnung:** Toolbox (WEB-T1 „Wetter am Punkt“ zeigt die Werte heute nur in der Wetter-Karte der Seitenleiste). Bewusst *nicht* unter „Wetterintegration (Phase 2)“: Phase 2 (GeoSphere, „Wetter-am-Punkt erweitert“, Wetterrisiko) bringt neue Daten und Modelle, dieses Feature stellt nur vorhandene Daten an der Kartenposition dar.
+
+**Bereits vorhandene Daten (wiederverwendbar, `js/weather.js`, eine Open-Meteo-Abfrage je Punkt):**
+
+| Anzeige | Quelle in der Antwort | Heute sichtbar in |
+|---|---|---|
+| Temperatur, gefühlte Temperatur | `current.temperature_2m`, `current.apparent_temperature` | Wetter-Karte |
+| Wetterzustand (Text) | `current.weather_code` (Zuordnung `WX_CODES`) | Wetter-Karte |
+| Wind und Böen | `current.wind_speed_10m`, `current.wind_gusts_10m` | Wetter-Karte |
+| Nullgradgrenze | `hourly.freezing_level_height` zur aktuellen Stunde | Wetter-Karte |
+| Standorthöhe (Geländehöhe laut Modell) | `elevation` (mit Hinweis „kann von der Gipfelhöhe abweichen“) | Wetter-Karte |
+| Zeitstempel | `current.time` (heute: Datenstatus-Leiste, „Stand HH:MM“) | Datenstatus-Leiste |
+| Quelle | Open-Meteo (Namensnennung im Fußbereich) | Fußbereich |
+| Niederschlag aktuell | `current.precipitation` (wird bereits abgefragt, aber nirgends angezeigt) | – |
+
+Der Viertagesausblick (`daily.*`) ist ebenfalls vorhanden, gehört aber nicht zum Umfang eines Popups.
+
+**Regeln:**
+- Keine Platzhalter, keine neuen Wettermodelle, keine neuen Datenquellen, keine Erweiterung der Wetterlogik. Fehlende Werte werden weggelassen oder wie heute mit „–“ gezeigt.
+- Keine zweite Abfrage: Der Klick lädt das Wetter heute schon (`map.on('click', …)` in `js/app.js`); das Popup nutzt dieselbe Antwort.
+- Sperrungen, Schutzgebiete und Lawinenlage behalten Vorrang: deren Popups werden nicht verdrängt.
+- Fehlerzustand wie heute („Wetterdaten sind gerade nicht abrufbar“), Zustand und Zeitstempel weiter über die Datenstatus-Leiste.
+
+**Offene Punkte für die Umsetzung:** „Optional“ (Schalter oder dauerhafte Einstellung?); Verhalten bei „Mein Standort“ und „Für Kartenmitte“; ob `current.precipitation` angezeigt wird (bereits abgefragt, aber heute unsichtbar); Abstimmung mit dem Wetter-Pin (heute nicht anklickbar).
 
 ## Mobile Toolbox (Phase 4-5)
 
@@ -213,6 +245,7 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [ ] Wegschwierigkeit-Matching (sac_scale)
 - [ ] Website Toolbox: Koordinaten & Höhe
 - [ ] Website Toolbox: Entfernungsmessungen
+- [ ] Website Toolbox: Weather Intelligence Popup (WEB-T7, geplant, niedrige Priorität, nach der Design-Migration)
 - [ ] Basemap.at Integration
 
 ### Phase 2 — Status: IN PROGRESS
@@ -330,6 +363,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 3.6 | 2026-11-01 | Weather Intelligence Popup (WEB-T7) als geplantes Feature in der Toolbox ergänzt (nur Dokumentation) |
 | 3.5 | 2026-11-01 | Design-Migrationsplan D9 (Legendenkarte) umgesetzt |
 | 3.4 | 2026-11-01 | Design-Migrationsplan D8c (Sperrungen- und Hinweise-Popups) umgesetzt |
 | 3.3 | 2026-10-31 | Design-Migrationsplan D8b (Lawinenlage-Popups) umgesetzt |
