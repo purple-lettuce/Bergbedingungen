@@ -16,6 +16,7 @@ export function addProtectedAreasLegend(entries) {
       '<span class="pa-label">' + esc(e.label) + '</span></li>';
   }).join('');
   legends.protectedAreas.setContent('<ul class="pa-list">' + rows + '</ul>');
+  legends.protectedAreas.setCompact('<ul class="pa-list">' + rows + '</ul>');
 }
 
 export function protectedAreasLegendFailed() {

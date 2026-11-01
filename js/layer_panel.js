@@ -84,6 +84,19 @@ export function createLayerPanel(map) {
 
   var basemaps = [];
 
+  // Legendenkarte (D9): eigenes Kartenelement unten rechts, einklappbar und zunächst zu (aufgeklappt würde sie am Desktop
+  // die Abschnitte des Bedienfelds darüber überdecken; die endgültige Anordnung folgt mit dem Layout in D10)
+  var legendCard = make('div', 'mr-card mr-card--raised kl-card');
+  legendCard.hidden = true;
+  var cardHead = make('button', 'kl-card-head mr-label');
+  cardHead.type = 'button';
+  cardHead.textContent = 'Legende';
+  var cardList = make('div', 'kl-card-list mr-stack');
+  cardList.id = 'kl-card-list';
+  legendCard.appendChild(cardHead);
+  legendCard.appendChild(cardList);
+  bindToggle(cardHead, cardList, false);
+
   var panel = {
     // Kartenstil: genau einer ist aktiv.
     addBaseLayer: function (label, layer) {
@@ -135,9 +148,23 @@ export function createLayerPanel(map) {
     },
 
     // Legende als eingeklappter Abschnitt; mit `layer` weist sie darauf hin, solange die Ebene ausgeblendet ist.
-    // Gibt { element, setContent(html | Node) } zurück.
+    // Gibt { element, setContent(html | Node), setCompact(html | Node) } zurück; setCompact füllt die kompakte
+    // Legendenkarte unten rechts (D9), die nur Legenden eingeblendeter Ebenen zeigt.
     addLegend: function (title, layer) {
       var content = addSection(title, false);
+      var cardSec = make('section', 'kl-card-sec');
+      var cardTitle = make('p', 'mr-label kl-card-title');
+      cardTitle.textContent = title.replace(/^Legende /, '');
+      var cardBody = make('div', 'kl-card-body');
+      cardSec.appendChild(cardTitle);
+      cardSec.appendChild(cardBody);
+      cardSec.hidden = true;
+      cardList.appendChild(cardSec);
+      function syncCard() {
+        cardSec.hidden = !cardBody.hasChildNodes() || (!!layer && !map.hasLayer(layer));
+        legendCard.hidden = !cardList.querySelector('.kl-card-sec:not([hidden])');
+      }
+      if (layer) layer.on('add remove', syncCard);
       if (layer) {
         var hint = make('p', 'kl-off mr-card mr-card--tight mr-text-muted mr-text-sm');
         hint.textContent = 'Diese Ebene ist ausgeblendet. Unter „Layer“ einschalten.';
@@ -153,6 +180,11 @@ export function createLayerPanel(map) {
         setContent: function (c) {
           if (typeof c === 'string') inner.innerHTML = c;
           else inner.replaceChildren(c);
+        },
+        setCompact: function (c) {
+          if (typeof c === 'string') cardBody.innerHTML = c;
+          else cardBody.replaceChildren(c);
+          syncCard();
         }
       };
     },
@@ -243,6 +275,14 @@ export function createLayerPanel(map) {
     return box;
   };
   control.addTo(map);
+
+  var cardControl = L.control({ position: 'bottomright' });
+  cardControl.onAdd = function () {
+    L.DomEvent.disableClickPropagation(legendCard);
+    L.DomEvent.disableScrollPropagation(legendCard);
+    return legendCard;
+  };
+  cardControl.addTo(map);
 
   return panel;
 }

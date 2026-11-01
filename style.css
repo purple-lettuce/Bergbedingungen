@@ -422,3 +422,13 @@ footer a { color: var(--accent); }
 .mr-card button { padding: var(--mr-space-sm) var(--mr-space-md); border-radius: var(--mr-radius-md); font-weight: 500; }
 .mr-card button:hover { border-color: var(--mr-link); }
 @media (pointer: coarse) { .mr-card input[type=search], .mr-card button { min-height: 44px; } }
+
+/* Legendenkarte (D9): kompakte Legende unten rechts, zeigt nur Legenden eingeblendeter Ebenen; die ausführliche Fassung bleibt im Bedienfeld */
+.kl-card { width: min(220px, calc(100vw - 32px)); padding: 0; font-family: var(--font-body); font-size: var(--mr-text-sm); }
+.kl-card-head { display: block; width: 100%; min-height: 36px; padding: var(--mr-space-sm) var(--mr-space-md); border: 0; background: transparent; text-align: left; cursor: pointer; }
+.kl-card-head::after { content: "▾"; float: right; margin-left: var(--mr-space-sm); }
+.kl-card-head[aria-expanded="false"]::after { content: "▸"; }
+.kl-card-list { --mr-gap: var(--mr-space-sm); max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--mr-space-md) var(--mr-space-md); }
+.kl-card-title { margin: 0 0 var(--mr-space-xs); }
+.kl-card .pa-list li { padding: 1px 0; }
+@media (pointer: coarse) { .kl-card-head { min-height: 44px; } }
