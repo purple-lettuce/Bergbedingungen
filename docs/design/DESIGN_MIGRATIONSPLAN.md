@@ -105,8 +105,9 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - D8a Umsetzung: nur Schutzgebiets-Popups (`js/protected_areas_popup.js`, ein Parameter und `className: "mr-popup"` in `js/protected_areas.js`, `style.css`). Kopf mit Farbfeld der Kategorie (wie Legende), Name (`h3`) und Typ (`.mr-label`); Abschnitte „Wildlife“, „Pflanzen und Lebensräume“, „Regeln“ mit `.mr-label`-Titel; Wildlife als `.mr-cluster` mit Schildern; Regeln mit Themensymbol, `.mr-badge` („Verbot“, „Eingeschränkt“, „Erlaubt“, gleiche Zuordnung und Farben wie zuvor) und farbigem Rand; alle festen Hex-Farben und die drei Inline-Styles (`margin:6px 0 4px`) entfernt. Das Popup folgt Hell und Dunkel (Tokens). Der gemeinsame Popup-Rahmen als Helfer (`popup_frame.js`) wurde noch nicht angelegt; D8b/D8c nutzen die Klassen `.pa-pop-*`/`mr-popup` als Vorlage. Dokumentation: STYLEGUIDE.md („Schutzgebiets-Popup“).
 - Risiko: Inline-Markup mit `esc()` erhalten (Sicherheit!). Popup-Breite und Scrollen auf Mobil prüfen.
 
-**D9 — Legendenkarte**
-- Umfang: Kompakte Legende als eigene Karte unten rechts, speist sich aus den vorhandenen Legenden-Modulen (`*_legend.js`), zeigt nur aktive Layer. Im Layer-Panel bleibt die ausführliche Variante.
+**D9 — Legendenkarte** ✅ erledigt (01.11.2026)
+- Umsetzung: `js/layer_panel.js` (Legendenkarte als Leaflet-Control unten rechts, `setCompact` an der Schnittstelle von `addLegend`), kompakte Fassungen in `js/closures_legend.js`, `js/protected_areas_legend.js`, `js/avalanche_legend.js` (Zeilen aus denselben Daten), Stil in `style.css`. Die Karte zeigt nur Legenden eingeblendeter Ebenen (folgt `layer.on('add remove')`), ist leer verborgen und einklappbar (`aria-expanded`). Sie ist zunächst **eingeklappt**: aufgeklappt überdeckt sie am Desktop das Bedienfeld darüber; die endgültige Anordnung gehört zu D10. Lawinenlage erscheint nur bei aktuellem Bericht (Nebensaison: nicht). Test: `scripts/test_protected_areas.html`. Dokumentation: STYLEGUIDE.md („Legendenkarte“).
+- Ursprünglicher Umfang:- Umfang: Kompakte Legende als eigene Karte unten rechts, speist sich aus den vorhandenen Legenden-Modulen (`*_legend.js`), zeigt nur aktive Layer. Im Layer-Panel bleibt die ausführliche Variante.
 
 ### Stufe C — Layout (größtes Risiko, ganz am Ende)
 

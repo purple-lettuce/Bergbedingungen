@@ -342,7 +342,7 @@ Regeln für die Verwendung:
 | Schutzgebiets-Popups (`js/protected_areas_popup.js`) | seit D8a auf D3-Komponenten (siehe „Schutzgebiets-Popup“) |
 | Lawinenlage-Popups (`js/avalanche_popup.js`) | seit D8b auf dem Gerüst von D8a (siehe „Lawinenlage-Popup“) |
 | Popups der Sperrungen und Hinweise (`js/closures.js`) | seit D8c auf dem gemeinsamen Popup-System (siehe „Sperrungen- und Hinweise-Popup“); die alten `.badge`-Klassen sind entfernt |
-| Legendeninhalte (`.pa-*`, `.av-*`) | **bewusst noch nicht migriert** (D9) |
+| Legendeninhalte (`.pa-*`, `.av-*`) | Zeilen unverändert; seit D9 zusätzlich als kompakte Legendenkarte (siehe „Legendenkarte“), die Farbfelder selbst sind bewusst nicht migriert |
 | Inline-Styles in Popups | seit D8c in keinem Popup mehr (außer den datengetriebenen Farben des Kopf-Farbfelds der Schutzgebiete) |
 | Inline-Styles in Schutzgebiets-Popups (3× `margin`) | seit D8a entfernt; bleiben nur die Farben des Kopf-Farbfelds (datengetrieben) |
 | Inline-Styles mit Datenfarben (`js/protected_areas_legend.js`, `js/protected_areas_filter.js`) | bleiben, da datengetrieben |
@@ -422,9 +422,13 @@ Das Bedienfeld „Karten & Layer“ ist nur visuell erneuert; Verhalten, Schnitt
 | Kartenstil | `.mr-segment` (`role="radiogroup"`, Radios unverändert), Optionen gleich breit |
 | Filter | Schalter je Eintrag mit Farbfeld, Name, Anzahl (`.kl-count`); „Alle“/„Keine“ als ruhige Textknöpfe (`.kl-link`); Status „N von M sichtbar“ gedämpft |
 | Hinweis „Ebene ausgeblendet“ | `.mr-card--tight` mit `.mr-text-muted` |
-| Legenden | Inhalt und Logik unverändert (Darstellung bis D9) |
+| Legenden | ausführliche Fassung als einklappbare Abschnitte, Inhalt und Logik unverändert; kompakte Fassung als Legendenkarte (siehe unten) |
 
 Touch-Ziele: Kopf, Abschnittstitel, Schalter und Segmente mindestens 44 px bei `pointer: coarse`.
+
+## Legendenkarte (seit D9)
+
+Kompakte Legende als eigenes Kartenelement unten rechts (`.mr-card.mr-card--raised.kl-card`, Leaflet-Control `bottomright`). Sie zeigt nur die Legenden **eingeblendeter** Ebenen (Abschnitt je Ebene mit `.mr-label`-Titel und denselben Zeilen `.pa-list` wie die ausführliche Legende) und ist ganz verborgen, wenn keine Ebene Inhalt hat. Der Kopf „Legende“ ist ein Knopf mit `aria-expanded`/`aria-controls`; die Karte ist zunächst eingeklappt, weil sie aufgeklappt am Desktop Abschnitte des Bedienfelds überdecken würde (endgültige Anordnung mit dem Layout, D10). Schnittstelle: `addLegend(...)` liefert zusätzlich `setCompact(html | Node)`; die Legenden-Module füllen sie aus denselben Daten wie die ausführliche Fassung. Lawinenlage: nur die Gefahrenstufen, und nur wenn ein aktueller Bericht vorliegt. Im Bedienfeld bleibt die ausführliche Variante mit Quellen, Hinweisen und Höhenwahl.
 
 # Header (seit D4)
 

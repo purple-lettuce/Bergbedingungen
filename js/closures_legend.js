@@ -9,4 +9,10 @@ export function initClosuresLegend() {
     '<li><span class="dot notice"></span><span class="pa-label">Hinweis</span></li>' +
     '<li><span class="dot upcoming"></span><span class="pa-label">Geplant (gilt erst ab einem späteren Datum)</span></li>' +
     '</ul>');
+  legends.closures.setCompact(
+    '<ul class="pa-list">' +
+    '<li><span class="dot closure"></span><span class="pa-label">Sperrung</span></li>' +
+    '<li><span class="dot notice"></span><span class="pa-label">Hinweis</span></li>' +
+    '<li><span class="dot upcoming"></span><span class="pa-label">Geplant</span></li>' +
+    '</ul>');
 }
