@@ -171,12 +171,6 @@ input[type=search] { flex: 1; min-width: 120px; }
 .item.active { outline: 2px solid var(--accent); }
 .item h3 { margin: 0; font-size: var(--mr-text-md); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
 .item p { margin: 0; font-size: var(--mr-text-sm); color: var(--mr-text-muted); overflow-wrap: anywhere; }
-.badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
-.badge { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: var(--mr-radius-xs); border: 1px solid currentColor; }
-.badge.closure { color: var(--closure); }
-.badge.notice { color: var(--notice); }
-.badge.upcoming { color: var(--upcoming); }
-.badge.current { color: var(--ok); }
 .status { padding: var(--mr-space-sm) 10px; border-radius: var(--mr-radius-sm); font-size: var(--mr-text-base); background: var(--panel); border: 1px solid var(--line); }
 /* Zählzeile der Liste: ruhige Meta-Zeile statt Kasten; Fehler (.status.err) bleiben als Kasten sichtbar. Nicht per Klasse, weil map.js className neu setzt. */
 #status:not(.err) { padding: 0; border: 0; border-radius: 0; background: none; color: var(--mr-text-muted); font-size: var(--mr-text-sm); }
@@ -285,6 +279,7 @@ footer a { color: var(--accent); }
 .leaflet-popup-content .pa-pop h3, .leaflet-popup-content .pa-pop h4, .leaflet-popup-content .pa-pop p, .leaflet-popup-content .pa-pop ul { margin: 0; }
 .pa-pop-head { display: flex; align-items: flex-start; gap: var(--mr-space-sm); padding-right: var(--mr-space-md); }
 .pa-pop-head .pa-sw { margin-top: var(--mr-space-2xs); }
+.pa-pop-head .dot { margin-top: var(--mr-space-xs); }   /* Statuspunkt der Sperrungen und Hinweise, gleiche Farben wie der Pin auf der Karte */
 .pa-pop-head h3 { font-size: var(--mr-text-md); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
 .pa-pop-summary { color: var(--mr-text-muted); font-size: var(--mr-text-sm); line-height: 1.45; }
 .pa-pop-sw { width: var(--mr-space-lg); height: var(--mr-space-md); }

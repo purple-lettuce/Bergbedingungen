@@ -98,7 +98,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 7 | GPX Upload & Tourenanalyse | Geplant (Phase 1) |
 | 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1); Mobile: Zukunft (Phase 4-5) |
 | 9 | Alpine Risk Engine | Design (Beta Phase 3, GA Phase 5) |
-| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b umgesetzt, übrige Popups und Layout offen) |
+| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b, Sperrungen- und Hinweise-Popups mit D8c umgesetzt (alle Popups auf dem gemeinsamen System), Legendenkarte und Layout offen) |
 | 11 | PWA & Offline | Zukunft (nach Phase 4) |
 | 12 | Mobile App | Zukunft (Phase 4) |
 
@@ -245,7 +245,8 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] Layer-Panel „Karten & Layer“ im neuen Stil (D7): Schalter, Segment-Control, Layer-Karten mit Status
 - [x] Schutzgebiets-Popups im neuen Stil (D8a): Kopf, Regeln mit Statusschild, Wildlife, folgt Hell/Dunkel
 - [x] Lawinenlage-Popups auf das gemeinsame Popup-System migriert (D8b): gleiche Gerüst-Klassen wie D8a, Lawinenfarben unverändert
-- [ ] Umsetzung des Design Systems in der Oberfläche (weitere Schritte D8c–D13 laut DESIGN_MIGRATIONSPLAN.md)
+- [x] Sperrungen- und Hinweise-Popups auf das gemeinsame Popup-System migriert (D8c); ein Wetter-Pin-Popup existiert nicht
+- [ ] Umsetzung des Design Systems in der Oberfläche (weitere Schritte D9–D13 laut DESIGN_MIGRATIONSPLAN.md)
 - [x] Produktname „Mountain Radar“ in der Anwendung (D1: Titel, Meta-Beschreibung, Header, Favicon)
 
 ### Phase 4 — Status: FUTURE
@@ -328,6 +329,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 3.4 | 2026-11-01 | Design-Migrationsplan D8c (Sperrungen- und Hinweise-Popups) umgesetzt |
 | 3.3 | 2026-10-31 | Design-Migrationsplan D8b (Lawinenlage-Popups) umgesetzt |
 | 3.2 | 2026-10-31 | Design-Migrationsplan D8a (Schutzgebiets-Popups) umgesetzt |
 | 3.1 | 2026-10-31 | Design-Migrationsplan D7 (Layer-Panel „Intelligence Layers“) umgesetzt |

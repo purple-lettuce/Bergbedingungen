@@ -130,20 +130,26 @@ function visibleRecords() {
   });
   return arr;
 }
+// Popup einer Sperrung oder eines Hinweises: gemeinsames Popup-Gerüst (D8a/D8b: .pa-pop, .pa-pop-head, .mr-kv, .mr-badge).
+// Farbe und Statusfeld bleiben wie bisher: Punkt und Schild in Sperrungs-, Hinweis- oder Geplant-Farbe, "Aktuell" in Erfolgsfarbe.
 function popupHtml(r) {
   var k = kindOf(r), st = statusOf(r);
-  var h = '<h3>' + esc(titleOf(r)) + '</h3>';
-  h += '<div class="badges"><span class="badge ' + k + '">' + esc(TYPE_LABEL[r.type] || r.type || 'Eintrag') + '</span>';
-  h += st === 'upcoming' ? '<span class="badge upcoming">Geplant</span>' : '<span class="badge current">Aktuell</span>';
-  h += '</div>';
+  var cls = st === 'upcoming' ? 'upcoming' : k;
+  var h = '<div class="pa-pop mr-stack mr-gap-sm">';
+  h += '<div class="pa-pop-head"><span class="dot ' + cls + '" aria-hidden="true"></span><div class="mr-stack mr-gap-xs"><h3>' + esc(titleOf(r)) + '</h3>';
+  h += '<div class="mr-cluster mr-gap-xs"><span class="mr-badge mr-badge--' + k + '">' + esc(TYPE_LABEL[r.type] || r.type || 'Eintrag') + '</span>';
+  h += st === 'upcoming' ? '<span class="mr-badge mr-badge--upcoming">Geplant</span>' : '<span class="mr-badge mr-badge--success">Aktuell</span>';
+  h += '</div></div></div>';
   var d = descOf(r);
-  if (d) h += '<p style="margin:4px 0">' + esc(d) + '</p>';
+  if (d) h += '<p>' + esc(d) + '</p>';
+  var rows = [];
   var per = periodText(r);
-  if (per) h += '<div class="muted">' + esc(per) + '</div>';
+  if (per) rows.push('<dt>Zeitraum</dt><dd>' + esc(per) + '</dd>');
   var act = activitiesText(r);
-  if (act) h += '<div class="muted">Betrifft: ' + esc(act) + '</div>';
-  if (r.responsible_organization && r.responsible_organization.name) h += '<div class="muted">Quelle: ' + esc(r.responsible_organization.name) + '</div>';
-  return h;
+  if (act) rows.push('<dt>Betrifft</dt><dd>' + esc(act) + '</dd>');
+  if (r.responsible_organization && r.responsible_organization.name) rows.push('<dt>Quelle</dt><dd>' + esc(r.responsible_organization.name) + '</dd>');
+  if (rows.length) h += '<section><dl class="mr-kv">' + rows.join('') + '</dl></section>';
+  return h + '</div>';
 }
 function pinIcon(cls) {
   return L.divIcon({ className: '', html: '<div class="pin ' + cls + '"></div>', iconSize: [16, 16], iconAnchor: [8, 8] });
@@ -174,8 +180,10 @@ export function render() {
       if (detailed) L.marker([c[1], c[0]], { icon: pinIcon(cls), title: titleOf(r) }).addTo(fg);
       else L.circleMarker([c[1], c[0]], { radius: 6, color: '#ffffff', weight: 2, fillColor: colorOf(cls), fillOpacity: 1 }).addTo(fg);
     }
-    fg.bindPopup(function () { return popupHtml(r); });
-    fg.on('popupopen', function () { setActive(r.uuid, true); });
+    fg.bindPopup(function () { return popupHtml(r); }, { className: 'mr-popup' });
+    // Das Popup ist höher als früher und löst beim Öffnen öfter einen Autopan aus; dessen moveend darf das Popup nicht
+    // durch ein Neuzeichnen der Ebene wieder schließen (gleiche Schonfrist wie nach einem Klick in der Liste).
+    fg.on('popupopen', function () { holdUntil = Date.now() + 700; setActive(r.uuid, true); });
     fg.addTo(layerGroup);
     layers.set(r.uuid, fg);
 
