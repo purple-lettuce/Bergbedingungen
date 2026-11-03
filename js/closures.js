@@ -5,6 +5,7 @@ import { map, el, esc, setStatus, warn, unwarn, FILE_HINT, layerGroup } from './
 import { setSourceStatus } from './status_bar.js';
 import { closuresStatus } from './status_bar_logic.js';
 import { loadWeather } from './weather.js';
+import { floatingInsets } from './layout.js';
 
 var DATA_URL = 'data/closures.json';
 var LINE_LIMIT = 150;   // bis zu dieser Anzahl im Ausschnitt werden Linien gezeichnet, darüber nur Punkte
@@ -231,7 +232,8 @@ function focusRecord(id) {
   activeId = id;
   holdUntil = Date.now() + 500;
   var c = centroidOf(r);
-  if (r.bbox) map.fitBounds([[r.bbox[1], r.bbox[0]], [r.bbox[3], r.bbox[2]]], { maxZoom: 15, padding: [40, 40], animate: false });
+  var ins = floatingInsets(map);   // schwebende Karten (D10) verdecken Streifen am Rand: dorthin nicht zoomen
+  if (r.bbox) map.fitBounds([[r.bbox[1], r.bbox[0]], [r.bbox[3], r.bbox[2]]], { maxZoom: 15, paddingTopLeft: [40 + ins.left, 40], paddingBottomRight: [40 + ins.right, 40], animate: false });
   else if (c) map.setView([c[1], c[0]], 14, { animate: false });
   render();
   var fg = layers.get(id);

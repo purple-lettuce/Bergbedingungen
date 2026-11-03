@@ -8,6 +8,7 @@ import { initAvalanche } from './avalanche.js';
 import { loadData, render, scheduleRender } from './closures.js';
 import { initClosuresFilter } from './closures_filter.js';
 import { initClosuresLegend } from './closures_legend.js';
+import { initFloatingLayout } from './layout.js';
 
 // ---------- Ereignisse ----------
 map.on('moveend', scheduleRender);
@@ -23,6 +24,7 @@ document.getElementById('wx-geo').addEventListener('click', function () {
 });
 
 // ---------- Start ----------
+initFloatingLayout(map);
 var c0 = map.getCenter();
 loadWeather(c0.lat, c0.lng);
 

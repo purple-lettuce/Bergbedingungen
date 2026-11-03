@@ -1,0 +1,116 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests Layout mit schwebenden Karten (D10)</title>
+<pre id="result">läuft …</pre>
+<div id="frames"></div>
+<script>
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Lädt die echte Anwendung (index.html) in Rahmen unterschiedlicher Breite, damit die Medienabfragen (1200 px, 820 px) greifen,
+// und prüft Anordnung, Überlagerung, Zoom und Autopan der Popups. Braucht keine Netzwerkantwort (Kacheln und Wetter dürfen fehlen).
+// Nicht geprüft werden kann hier der Wechsel über die 1200 px bei laufender Seite: Der Headless-Browser wertet Medienabfragen nur
+// bei Bildern aus, die er kaum zeichnet. Das ist im echten Browser zu prüfen (siehe PR).
+var results = [];
+function ok(name, cond, detail) { results.push({ name: name, ok: !!cond, error: cond ? '' : 'nicht erfüllt' + (detail ? ': ' + detail : '') }); }
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+// Wartet, bis die Bedingung gilt (höchstens ms): Der Headless-Browser zeichnet nur selten Bilder, Animationen und Medienabfragen brauchen dann Zeit.
+async function until(cond, ms) { for (var t = 0; t < (ms || 8000); t += 200) { if (cond()) return true; await wait(200); } return cond(); }
+function rect(doc, sel) { var e = doc.querySelector(sel); if (!e) return null; var r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; }
+function overlap(a, b) { return a.l < b.r - 0.5 && b.l < a.r - 0.5 && a.t < b.b - 0.5 && b.t < a.b - 0.5; }
+function fmt(r) { return r ? [r.l, r.t, r.r, r.b].map(Math.round).join(',') : 'fehlt'; }
+
+function openFrame(w, h) {
+  return new Promise(function (resolve) {
+    var f = document.createElement('iframe');
+    f.style.cssText = 'display:block;border:0;width:' + w + 'px;height:' + h + 'px';
+    f.src = '../index.html';
+    f.addEventListener('load', function () { wait(2500).then(function () { resolve(f); }); });
+    document.getElementById('frames').appendChild(f);
+  });
+}
+// Zoom- und Schwenkanimationen aus, damit das Ergebnis nicht davon abhängt, wie viele Bilder der Headless-Browser zeichnet (der Abstand beim Autopan bleibt derselbe).
+function noAnimation(f, map) {
+  var L = f.contentWindow.L, panBy = L.Map.prototype.panBy;
+  map.options.zoomAnimation = false; map._zoomAnimated = false;
+  L.Map.prototype.panBy = function (offset, options) { return panBy.call(this, offset, L.extend({}, options, { animate: false })); };
+}
+function appMap(f) { return f.contentWindow.eval("import(" + JSON.stringify(new URL('../js/map.js', location.href).href) + ")"); }
+
+async function desktop() {
+  var f = await openFrame(1440, 900), d = f.contentDocument, w = f.contentWindow, M = await appMap(f), map = M.map;
+  noAnimation(f, map);
+  var main = rect(d, 'main'), m = rect(d, '#map');
+  ok('Desktop: Karte füllt den ganzen Bereich unter der Statusleiste', Math.abs(m.w - main.w) < 1 && Math.abs(m.h - main.h) < 1, fmt(m) + ' vs ' + fmt(main));
+  ok('Desktop: Karte deutlich breiter als vorher (1040 px neben der festen Seitenleiste)', m.w > 1400, 'Breite ' + m.w);
+  ok('Desktop: Leaflet kennt die Kartengröße', map.getSize().x === d.getElementById('map').clientWidth && map.getSize().y === d.getElementById('map').clientHeight);
+
+  var cards = Array.prototype.map.call(d.querySelectorAll('main > aside > .mr-card'), function (e) { var r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; });
+  var panel = rect(d, '.kl-panel'), legend = rect(d, '.kl-card'), zoom = rect(d, '.leaflet-control-zoom'), dock = rect(d, '.kl-dock');
+  ok('Desktop: Wetter und Sperrungen sind schwebende Karten innerhalb der Karte', cards.length === 2 && cards.every(function (c) { return c.l >= m.l && c.r <= m.r && c.b <= m.b + 0.5; }));
+  ok('Desktop: die beiden Seitenleistenkarten überlappen sich nicht', cards.length === 2 && cards[0].b <= cards[1].t + 0.5);
+  var legendEl = d.querySelector('.kl-card');
+  ok('Desktop: Legendenkarte steht im Dock unter dem Bedienfeld', legendEl && legendEl.parentElement.classList.contains('kl-dock') && !legendEl.hidden && panel.b <= legend.t + 0.5, fmt(panel) + ' / ' + fmt(legend));
+  ok('Desktop: Legendenkarte ist im Dock zunächst offen', !d.getElementById('kl-card-list').hidden);
+  ok('Desktop: Bedienfeld und Legendenkarte überlappen sich nicht und liegen in der Karte', !overlap(panel, legend) && legend.b <= m.b && panel.t >= m.t && dock.r <= m.r, fmt(panel) + ' / ' + fmt(legend));
+  ok('Desktop: Bedienfeld und Legendenkarte gleich breit', Math.abs(panel.w - legend.w) < 1, panel.w + ' / ' + legend.w);
+  ok('Desktop: Karten links und rechts überlappen sich nicht', cards.every(function (c) { return c.r <= dock.l && !overlap({ l: c.l, t: c.t, r: c.r, b: c.b }, panel); }));
+  ok('Desktop: Zoom steht rechts neben der linken Spalte', zoom && cards.every(function (c) { return zoom.l >= c.r; }), fmt(zoom));
+
+  var z0 = map.getZoom();
+  d.querySelector('.leaflet-control-zoom-in').click();
+  await until(function () { return map.getZoom() === z0 + 1; });
+  ok('Desktop: Zoom + funktioniert', map.getZoom() === z0 + 1, z0 + ' -> ' + map.getZoom());
+  d.querySelector('.leaflet-control-zoom-out').click();
+  await until(function () { return map.getZoom() === z0; });
+  ok('Desktop: Zoom - funktioniert', map.getZoom() === z0, String(map.getZoom()));
+
+  // Layerlogik: Schalter im Bedienfeld blendet die Ebene aus und wieder ein
+  var sw = d.querySelectorAll('.kl-layer input')[1];
+  var had = map.hasLayer(M.protectedAreasLayer);
+  sw.click();
+  var after = map.hasLayer(M.protectedAreasLayer);
+  sw.click();
+  ok('Desktop: Layer-Schalter wirkt wie zuvor', had && !after && map.hasLayer(M.protectedAreasLayer));
+
+  // Autopan: Popup an Stellen unter der linken Spalte und unter dem Dock; es darf danach keine Karte berühren
+  for (var side of ['links', 'rechts']) {
+    map.setView([47.2, 11.4], 10, { animate: false });
+    var pt = side === 'links' ? [160, 420] : [m.w - 120, 420];
+    var pop = w.L.popup({ className: 'mr-popup', maxWidth: 300 }).setLatLng(map.containerPointToLatLng(pt)).setContent('<div style="width:260px;height:120px">Test</div>').openOn(map);
+    function blockedNow() { var p = pop.getElement().getBoundingClientRect(), q = { l: p.left, t: p.top, r: p.right, b: p.bottom }; return cards.some(function (c) { return overlap(q, c); }) || overlap(q, panel) || overlap(q, legend); }
+    await until(function () { return !blockedNow(); });
+    var p = pop.getElement().getBoundingClientRect(), blocked = blockedNow();
+    ok('Desktop: Autopan hält das Popup (Ankerpunkt ' + side + ') frei von den schwebenden Karten', !blocked && p.top >= m.t && p.bottom <= m.b, 'Popup ' + [p.left, p.top, p.right, p.bottom].map(Math.round).join(','));
+    map.closePopup();
+  }
+  f.remove();
+}
+
+async function medium() {   // 820 bis 1199 px: bisheriges Layout
+  var f = await openFrame(1000, 800), d = f.contentDocument, M = await appMap(f);
+  var m = rect(d, '#map'), side = rect(d, 'main > aside');
+  ok('1000 px: bisheriges Layout (Karte neben fester Seitenleiste)', Math.abs(m.w - 600) < 2 && Math.abs(side.w - 400) < 2 && !d.querySelector('main > aside').style.position && d.defaultView.getComputedStyle(d.querySelector('main > aside')).position === 'static', fmt(m));
+  var legendEl = d.querySelector('.kl-card');
+  ok('1000 px: Legendenkarte ist ein eigenes Kartenelement unten rechts, zunächst zu', legendEl && !legendEl.closest('.kl-dock') && !!legendEl.closest('.leaflet-bottom.leaflet-right') && d.getElementById('kl-card-list').hidden);
+  ok('1000 px: Leaflet kennt die Kartengröße', M.map.getSize().x === d.getElementById('map').clientWidth);
+  f.remove();
+}
+
+async function mobile() {   // unter 820 px: bisheriges Layout
+  var f = await openFrame(390, 844), d = f.contentDocument, M = await appMap(f), cs = f.contentWindow.getComputedStyle.bind(f.contentWindow);
+  var m = rect(d, '#map'), side = rect(d, 'main > aside');
+  ok('Mobil: Karte 60 vh, Seitenleiste darunter', Math.abs(m.h - 844 * 0.6) < 2 && side.t >= m.b - 1, fmt(m) + ' / ' + fmt(side));
+  ok('Mobil: keine schwebenden Karten (Seitenleiste im Fluss)', cs(d.querySelector('main > aside')).position === 'static' && cs(d.getElementById('map')).position === 'relative');
+  var legendEl = d.querySelector('.kl-card');
+  ok('Mobil: Legendenkarte unten rechts als Kartenelement, zunächst zu', !legendEl.closest('.kl-dock') && d.getElementById('kl-card-list').hidden);
+  ok('Mobil: Bedienfeld zunächst zu', d.getElementById('kl-body').hidden);
+  ok('Mobil: Leaflet kennt die Kartengröße', M.map.getSize().x === d.getElementById('map').clientWidth);
+  f.remove();
+}
+
+(async function () {
+  try { await desktop(); await medium(); await mobile(); }
+  catch (e) { results.push({ name: 'Testlauf', ok: false, error: String(e && e.message || e) }); }
+  var failed = results.filter(function (r) { return !r.ok; });
+  document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+})();
+</script>

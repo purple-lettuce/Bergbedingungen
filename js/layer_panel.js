@@ -2,6 +2,8 @@
 // Alles wird per Klick bedient (kein Hover), auch auf Touchgeräten. Das Feld kennt keine Fachlogik:
 // Ebenen, Kartenstile, Filter und Legenden werden in js/layers.js eingetragen.
 
+import { isFloating, onFloatingChange } from './layout.js';
+
 var MOBILE_QUERY = '(max-width: 820px)';   // wie im Stylesheet: Seitenleiste unter der Karte
 var counter = 0;
 
@@ -84,10 +86,15 @@ export function createLayerPanel(map) {
 
   var basemaps = [];
 
-  // Legendenkarte (D9): eigenes Kartenelement unten rechts, einklappbar und zunächst zu (aufgeklappt würde sie am Desktop
-  // die Abschnitte des Bedienfelds darüber überdecken; die endgültige Anordnung folgt mit dem Layout in D10)
+  // Legendenkarte (D9): eigene Karte, einklappbar; sie zeigt nur Legenden eingeblendeter Ebenen.
   var legendCard = make('div', 'mr-card mr-card--raised kl-card');
   legendCard.hidden = true;
+  // Anordnung (D10): Im Layout mit schwebenden Karten sitzt die Legende im selben Dock wie das Bedienfeld, direkt darunter
+  // (dort kann sie das Bedienfeld nicht überdecken); sonst bleibt sie als eigenes Kartenelement unten rechts.
+  var dock = make('div', 'kl-dock');
+  var cardHost = make('div', 'kl-card-host');
+  dock.appendChild(box);
+  function placeLegend() { (isFloating() ? dock : cardHost).appendChild(legendCard); }
   var cardHead = make('button', 'kl-card-head mr-label');
   cardHead.type = 'button';
   cardHead.textContent = 'Legende';
@@ -95,7 +102,9 @@ export function createLayerPanel(map) {
   cardList.id = 'kl-card-list';
   legendCard.appendChild(cardHead);
   legendCard.appendChild(cardList);
-  bindToggle(cardHead, cardList, false);
+  bindToggle(cardHead, cardList, isFloating());   // im Dock zunächst offen, als Kartenelement unten rechts zunächst zu
+  placeLegend();
+  onFloatingChange(placeLegend);
 
   var panel = {
     // Kartenstil: genau einer ist aktiv.
@@ -270,17 +279,17 @@ export function createLayerPanel(map) {
 
   var control = L.control({ position: 'topright' });
   control.onAdd = function () {
-    L.DomEvent.disableClickPropagation(box);
-    L.DomEvent.disableScrollPropagation(box);
-    return box;
+    L.DomEvent.disableClickPropagation(dock);
+    L.DomEvent.disableScrollPropagation(dock);
+    return dock;
   };
   control.addTo(map);
 
   var cardControl = L.control({ position: 'bottomright' });
   cardControl.onAdd = function () {
-    L.DomEvent.disableClickPropagation(legendCard);
-    L.DomEvent.disableScrollPropagation(legendCard);
-    return legendCard;
+    L.DomEvent.disableClickPropagation(cardHost);
+    L.DomEvent.disableScrollPropagation(cardHost);
+    return cardHost;
   };
   cardControl.addTo(map);
 
