@@ -46,7 +46,7 @@ Wichtige Hinweise zum Mockup:
 | Suche | Filter der Sperrungsliste | Globale Suche (Berge, Routen, Orte), ⌘K | mittel–groß | Geocoding nur mit eigener Quelle |
 | Karte | OSM/OpenTopoMap bunt | Gedämpfte, grüntonige Karte, Basemap „Hybrid/Satellit/Terrain“ | mittel | Kachellizenzen; Satellit wäre neue Quelle |
 | Route / Risiko / CTA | nicht vorhanden | Route Intelligence, Risk Insights, „Analyze Route“ | groß | GPX-Import, Risk Engine (Phase 1–3) |
-| Mobile | Gestapelt, Karte 60 vh | nicht gezeigt | mittel | eigener Entwurf nötig |
+| Mobile | Gestapelt, Karte 60 vh (bis D10) | nicht gezeigt; seit D11 Bottom Sheet, Karte füllt den Bildschirm | mittel | erledigt (D11) |
 
 ## 4. Priorisierter Migrationsplan
 
@@ -118,8 +118,11 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Ursprünglicher Umfang: Karte füllt den Bereich unter der Statusleiste. Seitenleiste wird zur schwebenden Spalte links (Glas, `backdrop-filter` mit Fallback), Layer-Panel rechts, Zoom-Control und Maßstab neu positioniert, Popups mit `autoPanPadding` gegen Überdeckung. Unter 1200 px bleibt das heutige Layout.
 - Risiko: Karten überdecken Kartenfläche, Leaflet-Größe (`invalidateSize`), Performance von `backdrop-filter`. Feature-Flag per CSS-Klasse `body.mr-floating`, um zurückzurollen.
 
-**D11 — Mobile-Entwurf und Umsetzung**
-- Umfang: Erst Entwurf (Skizze) abstimmen, dann Umsetzung: Bottom-Sheet statt Seitenleiste, Layer-Panel als Sheet, Statusleiste einzeilig scrollbar. Ersetzt den 820-px-Breakpoint.
+**D11 — Mobile Layout und Bottom Sheet** ✅ erledigt (03.11.2026)
+- Umsetzung: Nur bis 820 px Breite (Desktop ab 821 px unverändert, Geometrie und berechnete Stile gegen `main` bei 1440, 1200, 1199, 1000 und 821 px verglichen). Die Karte füllt den Raum unter Header und Statusleiste, die Seite scrollt nie. Die Seitenleiste (`aside`) **ist** das Bottom Sheet (`js/sheet.js`, Berechnung in `js/sheet_logic.js`): Zustände peek, half, full, Bedienung per Wischen am Griff, Tippen, Pfeiltasten, Esc; Wetter und Sperrungen unverändert darin, Fußzeile am Ende. „Karten & Layer“ ist mobil ein Knopf oben rechts und aufgeklappt ein Sheet über der Karte mit Abdunklung (`js/layer_panel.js`, `style.css`). Statusleiste einzeilig, scrollt für sich. Popups: Breite und Höhe auf die freie Karte begrenzt, Inhalt scrollt, Autopan-Ränder und Schließen-Knopf angepasst (`js/layout.js`). Alle Bedienelemente mindestens 44 px. `js/layout.js` (`floatingInsets` → `coveredInsets`, `initFloatingLayout` → `initLayout`) wurde um das mobile Layout erweitert; `js/closures.js` ruft vor dem Sprung zu einem Listeneintrag `revealMap()` auf (Sheet auf peek). Dokumentation: STYLEGUIDE.md („Mobiles Layout und Bottom Sheet“) mit allen Entscheidungen. Tests: `scripts/test_layout.html` (mobil bei 390 und 320 px), `scripts/test_sheet_logic.html`.
+- Entscheidung 6 (Bottom-Sheet-Konzept) ist mit dem Arbeitspaket getroffen: ein Sheet mit drei Zuständen statt Seitenleiste, Layer-Panel als Sheet über der Karte, kein zweites Panel.
+- Bewusst nicht umgesetzt: Sicherheitsabstände für Notch und Home-Indikator, Ziehen am Inhalt (nur am Griff), Slogan bis 560 px (ausgeblendet statt in eigener Zeile), Anpassung für Smartphones quer über 820 px (klassisches Layout wie bisher), neue Inhalte oder Funktionen (kein Zusammenfassungstext im Peek-Zustand).
+- Ursprünglicher Umfang: Erst Entwurf (Skizze) abstimmen, dann Umsetzung: Bottom-Sheet statt Seitenleiste, Layer-Panel als Sheet, Statusleiste einzeilig scrollbar. Ersetzt den 820-px-Breakpoint.
 
 **D12 — Gedämpfte Kartenoptik (optional)**
 - Umfang: Sanfte Tönung der Kacheln per CSS-Filter, damit Overlays (Schutzgebiete, Lawinen) besser hervortreten. Satellit/Hybrid nur, wenn eine lizenzkonforme Kachelquelle gewählt wird (eigene Entscheidung, siehe DATENQUELLEN).
@@ -164,4 +167,4 @@ Wenn ein solches Feature entsteht, bringt es seine Oberfläche gleich im neuen S
 3. Farbwerte: Styleguide (`#16324F`, `#2F6B4F`) oder Mockup (`#17374b`, `#1e7464`)? Empfehlung: Styleguide als Basis, Mockup-Töne als Abstufungen.
 4. Logo-Verwendung: Die Logos liegen jetzt als SVG vor und nutzen die Styleguide-Farben. Vorschlag: App-Icon als Favicon, Emblem (ohne Text) im Header zusammen mit HTML-Text für Wortmarke und Claim. Das Hauptlogo setzt die Wortmarke als `<text>` mit Montserrat/Fallback-Schriften; für Einsatz außerhalb des Browsers (README, Social Preview) sollte der Text in Pfade umgewandelt werden.
 5. Navigation im Header: nur „Explore“ oder ganz weglassen, bis weitere Bereiche existieren?
-6. Mobile: Bottom-Sheet-Konzept bestätigen, bevor D11 startet.
+6. ~~Mobile: Bottom-Sheet-Konzept bestätigen, bevor D11 startet.~~ Entschieden mit D11: Bottom Sheet mit drei Zuständen, Layer-Panel als Sheet über der Karte.

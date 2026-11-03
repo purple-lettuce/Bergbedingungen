@@ -1,0 +1,63 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests sheet_logic.js (Bottom Sheet, D11)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as S from '../js/sheet_logic.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+
+test('sheetHeights: Smartphone 390 × 746 (Karte), Peek 56', function () {
+  eq(S.sheetHeights(746, 56), { peek: 56, half: 373, full: 690 });
+});
+
+test('sheetHeights: Zustände sind geordnet und passen in die Karte, auch bei kleinen Höhen', function () {
+  [[746, 56], [543, 56], [300, 56], [260, 120], [120, 56], [746, 200]].forEach(function (a) {
+    var h = S.sheetHeights(a[0], a[1]);
+    if (!(h.peek <= h.half && h.half <= h.full && h.full <= a[0])) throw new Error('Reihenfolge verletzt bei ' + a + ': ' + JSON.stringify(h));
+  });
+});
+
+test('sheetHeights: Warnhinweis macht den Peek-Streifen höher, die übrigen Zustände bleiben nutzbar', function () {
+  var h = S.sheetHeights(746, 140);
+  eq(h.peek, 140); if (h.half < h.peek + 88) throw new Error('half zu niedrig: ' + h.half); if (h.full < h.half) throw new Error('full zu niedrig');
+});
+
+test('sheetHeights: full lässt oben den Kartenstreifen TOP_GAP frei', function () {
+  eq(S.sheetHeights(746, 56).full, 746 - S.TOP_GAP);
+});
+
+test('snapState: langsames Loslassen rastet am nächsten Zustand ein', function () {
+  var h = S.sheetHeights(746, 56);
+  eq(S.snapState(60, 0, h), 'peek'); eq(S.snapState(200, 0.1, h), 'peek'); eq(S.snapState(250, 0, h), 'half');
+  eq(S.snapState(400, -0.2, h), 'half'); eq(S.snapState(600, 0, h), 'full'); eq(S.snapState(690, 0, h), 'full');
+});
+
+test('snapState: schnelle Wischgeste geht in Richtung der Geste zum nächsten Zustand', function () {
+  var h = S.sheetHeights(746, 56);
+  eq(S.snapState(120, 1.2, h), 'half');    // kurz nach oben gewischt, noch nahe an peek
+  eq(S.snapState(380, 1.2, h), 'full');
+  eq(S.snapState(380, -1.2, h), 'peek');   // von half nach unten gewischt
+  eq(S.snapState(690, -1.2, h), 'half');
+  eq(S.snapState(56, -1.2, h), 'peek'); eq(S.snapState(690, 1.2, h), 'full');   // Anschlag
+});
+
+test('stepState: ein Schritt mit Anschlag an beiden Enden', function () {
+  eq(S.stepState('peek', 1), 'half'); eq(S.stepState('half', 1), 'full'); eq(S.stepState('full', 1), 'full');
+  eq(S.stepState('full', -1), 'half'); eq(S.stepState('half', -1), 'peek'); eq(S.stepState('peek', -1), 'peek');
+});
+
+test('toggleState: peek öffnet auf half, alles andere schließt', function () {
+  eq(S.toggleState('peek'), 'half'); eq(S.toggleState('half'), 'peek'); eq(S.toggleState('full'), 'peek');
+});
+
+document.getElementById('result').textContent = JSON.stringify({ passed: results.filter(function (r) { return r.ok; }).length, failed: results.filter(function (r) { return !r.ok; }).length, results: results });
+</script>

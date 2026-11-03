@@ -292,7 +292,9 @@ Kontraste (WCAG, gerechnet): Text auf Fläche hell 15,2 : 1, dunkel 13,7 : 1; Ne
 | `--mr-radius-xs` / `-sm` / `-md` | 4 / 6 / 8 px | Badges / Buttons, Eingaben, Listeneinträge / Karten, Bedienfeld |
 | `--mr-radius-lg` / `-xl` / `-pill` | 12 / 16 / 999 px | vorbereitet für schwebende Karten und Panels (ab D3), noch nicht verwendet |
 | `--mr-space-2xs` … `-2xl` | 2 / 4 / 8 / 12 / 16 / 24 / 32 px | Seitenleiste, Karten, Header, Zeilen und Listen |
-| `--mr-shadow-sm` / `-md` | siehe `style.css` | Bedienfeld (`-sm`); `-md` für schwebende Karten vorbereitet |
+| `--mr-shadow-sm` / `-md` | siehe `style.css` | Bedienfeld (`-sm`); `-md` für schwebende Karten (D10) |
+| `--mr-shadow-up` | `0 -4px 16px` (hell .18, dunkel .6) | Schatten nach oben für Sheets am unteren Rand (D11) |
+| `--mr-scrim` | `rgba(0,0,0,.45)` (dunkel .65) | Abdunklung hinter dem Layer-Sheet (D11) |
 
 Einzelne Zwischenwerte (6 px, 10 px, 5 px Rand) bleiben bewusst als feste Werte, bis die betroffene Komponente in D3 oder später umgebaut wird.
 
@@ -424,7 +426,7 @@ Das Bedienfeld „Karten & Layer“ ist nur visuell erneuert; Verhalten, Schnitt
 | Hinweis „Ebene ausgeblendet“ | `.mr-card--tight` mit `.mr-text-muted` |
 | Legenden | ausführliche Fassung als einklappbare Abschnitte, Inhalt und Logik unverändert; kompakte Fassung als Legendenkarte (siehe unten) |
 
-Touch-Ziele: Kopf, Abschnittstitel, Schalter und Segmente mindestens 44 px bei `pointer: coarse`.
+Touch-Ziele: Kopf, Abschnittstitel, Schalter und Segmente mindestens 44 px bei `pointer: coarse` und im mobilen Layout (bis 820 px) immer; die Filterschalter (.kl-filter .mr-switch) sind seit D11 ebenfalls 44 px hoch (vorher 24 px). Mobile Darstellung des Bedienfelds: siehe 
 
 ## Legendenkarte (seit D9)
 
@@ -432,7 +434,7 @@ Kompakte Legende als eigenes Kartenelement unten rechts (`.mr-card.mr-card--rais
 
 # Layout mit schwebenden Karten (seit D10)
 
-Ab 1200 px Breite und mit `<body class="mr-floating">` ist die Karte die ganze Fläche zwischen Statusleiste und Fußzeile (`#map` absolut in `main`), alle weiteren Bedienelemente schweben darüber. Darunter gilt das bisherige Layout (Karte neben 400-px-Seitenleiste, unter 820 px gestapelt). Zurückrollen: Klasse aus `index.html` entfernen. Mobile ist bewusst unverändert (D11).
+Ab 1200 px Breite und mit `<body class="mr-floating">` ist die Karte die ganze Fläche zwischen Statusleiste und Fußzeile (`#map` absolut in `main`), alle weiteren Bedienelemente schweben darüber. Darunter gilt das klassische Layout (821 bis 1199 px: Karte neben 400-px-Seitenleiste); bis 820 px gilt das mobile Layout (siehe „Mobiles Layout und Bottom Sheet“, D11). Zurückrollen: Klasse aus `index.html` entfernen.
 
 | Bereich | Umsetzung |
 |---|---|
@@ -454,6 +456,46 @@ Regeln:
 - **Neue schwebende Elemente** gehören in die linke Spalte oder in das Dock, nie als eigenes Kartenelement an den Rand (Überlagerung).
 - Test: `scripts/test_layout.html` (in `scripts/run_js_tests.py`) prüft Anordnung, Überlagerung, Zoom und Autopan bei 1440, 1000 und 390 px. Der Wechsel über 1200 px bei laufender Seite wird im Headless-Browser nicht ausgewertet und ist von Hand zu prüfen.
 
+# Mobiles Layout und Bottom Sheet (seit D11)
+
+Bis 820 px Breite (Smartphones und Tablets hochkant; gleiche Grenze in `style.css` und `MOBILE_QUERY` in `js/layout.js`) wirkt Mountain Radar wie eine Karten-App: Die Karte füllt den Raum unter Header und Statusleiste, es gibt keinen Seitenscroll. Desktop (ab 821 px) ist unverändert. Rückbau: `git revert` des D11-Commits (kein Schalter wie bei D10, weil der alte Mobilzustand mit gestapelter Seitenleiste ersetzt wurde).
+
+| Bereich | Umsetzung |
+|---|---|
+| Seite | `body` 100 dvh, `html, body, main` mit `overflow: clip` (Rückfall `hidden`): Die Seite scrollt nie, auch nicht programmatisch (`scrollIntoView`). `#map` absolut in `main`. |
+| Header | kompakt (Emblem 36 px); Slogan bis 560 px ausgeblendet. |
+| Statusleiste | eine Zeile, mind. 44 px, scrollt für sich (siehe „Datenstatus-Leiste“). |
+| Seitenleiste | `main > aside` ist das **Bottom Sheet** (`js/sheet.js`): Wetter und Sperrungen unverändert darin, Fußzeile (Quellenangaben) am Ende des Sheets. |
+| Bedienfeld „Karten & Layer“ | Knopf oben rechts (`.kl-head`, 44 px); aufgeklappt ein **Sheet über der Karte** (`.kl-dock.is-open`), unten, volle Breite, höchstens 85 % hoch, Abdunklung `--mr-scrim` dahinter, Kopf mit „✕“. Schließen: Kopf, Tippen auf die Abdunklung, Esc. Der Inhalt (Layer, Kartenstil, Filter, Legenden) ist unverändert und scrollt im Sheet. |
+| Legendenkarte | bleibt Kartenelement unten rechts, zunächst zu; steht über dem Bottom Sheet, höchstens 30 vh hoch. |
+| Zoom | 44-px-Knöpfe oben links; im Zustand „full“ ausgeblendet (die Karte ist dann verdeckt). |
+| Popups | `.mr-popup`: höchstens Kartenbreite minus Rand, Höhe auf den freien Kartenbereich begrenzt (`--mr-popup-max-h`), Inhalt scrollt im Popup, Schließen-Knopf 44 px. |
+
+**Bottom Sheet:** Drei Zustände (`main[data-sheet]`, Höhe in `--mr-sheet-h`):
+
+| Zustand | Höhe | Zweck |
+|---|---|---|
+| `peek` | nur Griff und Titel „Wetter und Sperrungen“ (56 px; höher, solange ein Warnhinweis `#warn` sichtbar ist, der bleibt immer lesbar) | Start; die Karte bleibt das dominierende Element |
+| `half` | halbe Kartenhöhe (mind. Peek + 88 px) | Wetter und Anfang der Liste |
+| `full` | Kartenhöhe minus 56 px (oben bleibt ein Kartenstreifen für den Layer-Knopf) | Liste lesen, suchen |
+
+Bedienung: Wischen am Griff (rastet am nächsten Zustand ein, bei schneller Geste in Richtung der Geste), Tippen auf den Griff (`peek` ↔ `half`), Pfeiltasten am Griff, Esc. Der Griff ist ein `button` mit `aria-expanded`/`aria-controls`; im Zustand `peek` sind die Karten und die Fußzeile `inert` (nicht fokussierbar, nicht vorlesbar). Der Inhalt scrollt im Sheet, der Griff bleibt oben (`position: sticky`). Berechnung der Höhen und Zustände: `js/sheet_logic.js` (rein, getestet).
+
+**Entscheidungen:**
+
+- **Die Seitenleiste ist das Sheet, kein zweites Panel:** Es wird nichts dupliziert oder neu gebaut; `aside` bekommt nur eine andere Rolle. Keine neue Funktion, keine neuen Daten, kein neuer Inhalt.
+- **Höhe statt `transform`:** Das Sheet ändert seine Höhe (Übergang 0,25 s, bei `prefers-reduced-motion` keiner). So scrollt der Inhalt in jedem Zustand und nichts liegt unerreichbar unter dem Bildschirmrand.
+- **Ziehen nur am Griff:** Der Inhalt scrollt normal; eine Wischgeste im Inhalt bewegt das Sheet nicht (kein Konflikt zwischen Scrollen und Ziehen).
+- **Die Karte hat Vorrang:** Ein Klick auf einen Eintrag der Liste lässt das Sheet auf `peek` zurückgehen, bevor die Karte dorthin zoomt und das Popup öffnet. Die Ränder für Zoom und Autopan stammen aus der Zielhöhe des Sheets (nicht aus der Höhe mitten im Übergang).
+- **Popups:** `js/layout.js` hält die Ränder für Autopan (oben 106 px für Zoom und Knopf, unten Sheet plus Legendenkarte und Quellenangabe) und die Höhe des Popup-Inhalts aktuell, auch wenn sich die Quellenangabe ändert (z. B. bei eingeblendeter Lawinenlage).
+- **Fußzeile im Sheet:** Die Quellenangaben sind lang (bis zu 10 Zeilen) und würden unter der Karte Platz wegnehmen. Mobil stehen sie am Ende des Sheets, die Kartenquelle (OSM/Leaflet) bleibt als Leaflet-Attribution über dem Sheet. Beim Wechsel über 820 px zieht die Fußzeile zurück unter die Karte.
+- **Bedienfeld verschiebt sich:** Mobil sitzt `.kl-dock` in `main` (nicht im Leaflet-Kartenelement), damit die Abdunklung das Bottom Sheet überdeckt (Stapelreihenfolge); beim Wechsel zurück zieht es wieder ins Kartenelement.
+- **Touch-Ziele 44 px immer** (nicht nur bei `pointer: coarse`): Schalter, Segmente, Abschnittstitel, Filter-Schalter, „Alle“/„Keine“, Schaltflächen und Suchfeld im Sheet, Griff, Layer-Knopf, Legendenkopf, Zoom, Schließen-Knopf der Popups, Statusleiste. **Ausnahme:** Links im Fließtext (Quellenangaben, Links in Popups, Leaflet-Attribution) sind Inline-Links (WCAG 2.5.8, Ausnahme „im Satz“).
+
+**Bewusst unverändert:** Inhalte, Reihenfolge und Texte von Wetter, Sperrungen, Suche, Layern, Filtern, Legenden und Popups; Datenmodelle, APIs, Layer-, Such-, Wetter-, Schutzgebiets- und Lawinenlogik; Desktop (ab 821 px; Geometrie und berechnete Stile gegen `main` verglichen); der Kartenstil (D12) und die Suche (D13). Nicht gelöst: Smartphones quer mit mehr als 820 px Breite nutzen das klassische Layout wie zuvor. Sehr niedrige mobile Fenster (z. B. 667 × 375 quer) sind nutzbar, aber eng: Popups scrollen dort stark und die Legendenkarte kann sie teilweise überdecken. Sicherheitsabstände (Notch, Home-Indikator) sind nicht umgesetzt (`viewport-fit=cover` fehlt bewusst).
+
+Test: `scripts/test_layout.html` (Anordnung, Überlauf, Zustände inkl. Wischgeste, Layer-Sheet, Touch-Ziele, Popup-Lage bei 390 und 320 px, Grenze 820/821 px) und `scripts/test_sheet_logic.html` (Berechnung), beide in `scripts/run_js_tests.py`.
+
 ---
 
 # Header (seit D4)
@@ -463,7 +505,7 @@ Der Header ist eine ruhige, weiße App-Shell (Fläche `--mr-surface`, unten 1 px
 - **Emblem** (`docs/design/mountain-radar-emblem.svg`, Ausschnitt aus dem Hauptlogo ohne Schrift, 44 px, mobil 36 px). Dekorativ (`alt=""`), der Name steht im `h1`.
 - **Wortmarke** „Mountain Radar“ als `h1`, gesperrte Großbuchstaben, Inter 600, Farbe `--mr-link` (Deep Alpine Blue, im Dunkelmodus hell).
 - **Claim** „ALPINE RISK INTELLIGENCE“, 12 px, gesperrt, Farbe `--mr-success` (Mountain Green, im Dunkelmodus heller).
-- **Slogan** „Know before you go.“, gedämpft (`--mr-text-muted`); Desktop rechts, mobil in einer eigenen Zeile unter der Wortmarke.
+- **Slogan** „Know before you go.“, gedämpft (`--mr-text-muted`); rechts im Header, auf Smartphones (bis 560 px) ausgeblendet, damit die Karte mehr Platz hat (D11; Name und Claim bleiben).
 
 Klassen: `.mr-header`, `.mr-brand` (`__emblem`, `__text`, `__name`, `__claim`), `.mr-header__slogan`. Der Text ist HTML (nicht im Bild), damit er skaliert, übersetzbar ist und die Inter-Schrift verwendet.
 
@@ -477,7 +519,7 @@ Regeln:
 
 # Datenstatus-Leiste (seit D5)
 
-Schmale Zeile direkt unter dem Header (`.mr-statusbar`, Fläche `--mr-bg`, unten 1 px Linie). Sie schafft Vertrauen, indem sie je Datenquelle zeigt, ob und wann Daten geladen wurden. Aufbau je Eintrag: Punkt (Zustand), Name als `.mr-label`, Text mit dem echten Wert; Liste als `.mr-cluster`. Mobil läuft die Leiste einzeilig horizontal (Name über Wert, scrollbar, per Tastatur fokussierbar).
+Schmale Zeile direkt unter dem Header (`.mr-statusbar`, Fläche `--mr-bg`, unten 1 px Linie). Sie schafft Vertrauen, indem sie je Datenquelle zeigt, ob und wann Daten geladen wurden. Aufbau je Eintrag: Punkt (Zustand), Name als `.mr-label`, Text mit dem echten Wert; Liste als `.mr-cluster`. Mobil (bis 820 px, D11) läuft die Leiste einzeilig horizontal (Punkt, Name und Wert nebeneinander, mind. 44 px hoch, die Leiste selbst scrollt, nie die Seite; ein ausgeblendeter rechter Rand zeigt, dass sie weiterläuft; per Tastatur fokussierbar).
 
 Reihenfolge: Sperrungen & Hinweise, Schutzgebiete, Lawinenlage, Wetter (wie im Menü „Karten & Layer“).
 

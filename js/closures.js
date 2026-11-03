@@ -5,7 +5,8 @@ import { map, el, esc, setStatus, warn, unwarn, FILE_HINT, layerGroup } from './
 import { setSourceStatus } from './status_bar.js';
 import { closuresStatus } from './status_bar_logic.js';
 import { loadWeather } from './weather.js';
-import { floatingInsets } from './layout.js';
+import { coveredInsets } from './layout.js';
+import { revealMap, getSheetState } from './sheet.js';
 
 var DATA_URL = 'data/closures.json';
 var LINE_LIMIT = 150;   // bis zu dieser Anzahl im Ausschnitt werden Linien gezeichnet, darüber nur Punkte
@@ -223,7 +224,7 @@ function setActive(id, scroll) {
   Array.prototype.forEach.call(el.list.children, function (li) {
     var on = li.dataset.id === id;
     li.classList.toggle('active', on);
-    if (on && scroll) li.scrollIntoView({ block: 'nearest' });
+    if (on && scroll && getSheetState() !== 'peek') li.scrollIntoView({ block: 'nearest' });   // mobil im Zustand 'peek' ist die Liste verdeckt, dort nichts verschieben
   });
 }
 function focusRecord(id) {
@@ -232,8 +233,9 @@ function focusRecord(id) {
   activeId = id;
   holdUntil = Date.now() + 500;
   var c = centroidOf(r);
-  var ins = floatingInsets(map);   // schwebende Karten (D10) verdecken Streifen am Rand: dorthin nicht zoomen
-  if (r.bbox) map.fitBounds([[r.bbox[1], r.bbox[0]], [r.bbox[3], r.bbox[2]]], { maxZoom: 15, paddingTopLeft: [40 + ins.left, 40], paddingBottomRight: [40 + ins.right, 40], animate: false });
+  revealMap();   // mobil (D11) gibt das Bottom Sheet die Karte frei, bevor die Ränder berechnet werden
+  var ins = coveredInsets(map);   // schwebende Karten (D10) und das Bottom Sheet (D11) verdecken Streifen am Rand: dorthin nicht zoomen
+  if (r.bbox) map.fitBounds([[r.bbox[1], r.bbox[0]], [r.bbox[3], r.bbox[2]]], { maxZoom: 15, paddingTopLeft: [40 + ins.left, 40 + ins.top], paddingBottomRight: [40 + ins.right, 40 + ins.bottom], animate: false });
   else if (c) map.setView([c[1], c[0]], 14, { animate: false });
   render();
   var fg = layers.get(id);

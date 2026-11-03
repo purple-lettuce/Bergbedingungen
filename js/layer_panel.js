@@ -2,9 +2,8 @@
 // Alles wird per Klick bedient (kein Hover), auch auf Touchgeräten. Das Feld kennt keine Fachlogik:
 // Ebenen, Kartenstile, Filter und Legenden werden in js/layers.js eingetragen.
 
-import { isFloating, onFloatingChange } from './layout.js';
+import { isFloating, onFloatingChange, isMobile, onMobileChange } from './layout.js';
 
-var MOBILE_QUERY = '(max-width: 820px)';   // wie im Stylesheet: Seitenleiste unter der Karte
 var counter = 0;
 
 function make(tag, cls) {
@@ -13,15 +12,18 @@ function make(tag, cls) {
   return n;
 }
 
-// Knopf klappt das Ziel ein und aus; aria-expanded und hidden bleiben synchron.
-function bindToggle(btn, target, open) {
+// Knopf klappt das Ziel ein und aus; aria-expanded und hidden bleiben synchron. Gibt den Setzer zurück: set(show).
+// Mit onChange(show) kann der Aufrufer auf jeden Wechsel reagieren.
+function bindToggle(btn, target, open, onChange) {
   btn.setAttribute('aria-controls', target.id);
   function set(show) {
     target.hidden = !show;
     btn.setAttribute('aria-expanded', String(show));
+    if (onChange) onChange(show);
   }
   set(open);
   btn.addEventListener('click', function () { set(target.hidden); });
+  return set;
 }
 
 export function createLayerPanel(map) {
@@ -33,7 +35,8 @@ export function createLayerPanel(map) {
   body.id = 'kl-body';
   box.appendChild(head);
   box.appendChild(body);
-  bindToggle(head, body, !window.matchMedia(MOBILE_QUERY).matches);   // am Handy zunächst zu, damit die Karte frei bleibt
+  var dock = make('div', 'kl-dock');   // Behälter im Kartenelement; mobil (D11) das Sheet über der Karte (Klasse `is-open`, Stil in style.css)
+  var setPanel = bindToggle(head, body, !isMobile(), function (show) { dock.classList.toggle('is-open', show); });   // am Handy zunächst zu, damit die Karte frei bleibt
 
   // Ein einklappbarer Abschnitt; gibt den Inhaltsbereich zurück.
   function addSection(title, open) {
@@ -91,7 +94,6 @@ export function createLayerPanel(map) {
   legendCard.hidden = true;
   // Anordnung (D10): Im Layout mit schwebenden Karten sitzt die Legende im selben Dock wie das Bedienfeld, direkt darunter
   // (dort kann sie das Bedienfeld nicht überdecken); sonst bleibt sie als eigenes Kartenelement unten rechts.
-  var dock = make('div', 'kl-dock');
   var cardHost = make('div', 'kl-card-host');
   dock.appendChild(box);
   function placeLegend() { (isFloating() ? dock : cardHost).appendChild(legendCard); }
@@ -284,6 +286,21 @@ export function createLayerPanel(map) {
     return dock;
   };
   control.addTo(map);
+
+  // Mobil (D11) sitzt das Bedienfeld nicht im Leaflet-Kartenelement, sondern in `main` über allem anderen: als Knopf oben rechts,
+  // aufgeklappt als Sheet mit abgedunkeltem Hintergrund über der Seitenleiste. Beim Wechsel über 820 px zieht es um und klappt passend auf oder zu.
+  var dockHome = dock.parentNode;
+  function placeDock() {
+    var host = document.querySelector('main');   // ohne Seitengerüst (z. B. Testseiten) bleibt das Bedienfeld im Kartenelement
+    if (isMobile() && host) { host.appendChild(dock); setPanel(false); }
+    else { dockHome.insertBefore(dock, dockHome.firstChild); setPanel(!isMobile()); }
+  }
+  placeDock();
+  onMobileChange(placeDock);
+  dock.addEventListener('click', function (ev) { if (ev.target === dock && isMobile()) setPanel(false); });   // Tippen auf den abgedunkelten Hintergrund
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && isMobile() && !body.hidden) { setPanel(false); head.focus(); }
+  });
 
   var cardControl = L.control({ position: 'bottomright' });
   cardControl.onAdd = function () {
