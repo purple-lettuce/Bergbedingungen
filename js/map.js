@@ -41,7 +41,7 @@ export var FILE_HINT = location.protocol === 'file:'
 // ---------- Kachelebenen ----------
 var tileErrors = 0, tileOk = 0;
 export var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18,
+  maxZoom: 18, className: 'mr-basemap mr-basemap--osm',   // Klassen nur für die gedämpfte Kartenoptik (D12, style.css)
   attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).on('tileerror', function () {
   tileErrors++;
@@ -51,7 +51,7 @@ export var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   if (tileOk === 1) unwarn('tiles');
 }).addTo(map);
 export var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-  maxZoom: 17, subdomains: 'abc',
+  maxZoom: 17, subdomains: 'abc', className: 'mr-basemap mr-basemap--topo',
   attribution: 'Kartendaten © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, SRTM | Darstellung © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
 });
 
