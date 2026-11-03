@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Führt die JavaScript-Tests (scripts/test_*.html: Lawinenlage, Schutzgebiete, Datenstatus-Leiste) in einem Headless-Browser aus.
+"""Führt die JavaScript-Tests (scripts/test_*.html: Lawinenlage, Schutzgebiete, Datenstatus-Leiste, Layout) in einem Headless-Browser aus.
 
 Gebraucht wird Chrome, Chromium oder Edge. Ohne Browser endet das Skript mit Hinweis (Exit 0), mit
 --require-browser mit Fehler. Aufruf: python3 scripts/run_js_tests.py [--require-browser]
@@ -16,7 +16,7 @@ import tempfile
 import threading
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html", "test_protected_areas.html", "test_status_bar_logic.html"]
+PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html", "test_protected_areas.html", "test_status_bar_logic.html", "test_layout.html"]
 CANDIDATES = [
     os.environ.get("BROWSER", ""),
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
@@ -65,7 +65,7 @@ def run_page(browser, url):
     import html
     with tempfile.TemporaryDirectory() as profile:
         cmd = [browser, "--headless=new", "--disable-gpu", "--no-sandbox", "--no-first-run", "--user-data-dir=" + profile,
-               "--virtual-time-budget=10000", "--dump-dom", url]
+               "--virtual-time-budget=60000", "--dump-dom", url]
         try:
             out = subprocess.run(cmd, capture_output=True, timeout=120).stdout.decode("utf-8", "replace")
         except subprocess.TimeoutExpired:

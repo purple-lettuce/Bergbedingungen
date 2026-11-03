@@ -1,4 +1,5 @@
 /* Mountain Radar – Layout: Kartenfläche links, Seitenleiste mit Wetter, Filter und Trefferliste rechts; mobil untereinander.
+   Ab 1200 px füllt die Karte die ganze Fläche und die Karten schweben darüber (D10, Abschnitt am Ende der Datei).
    Design-Fundament (D2): Alle Farben, Schrift, Radien und Abstände kommen aus den Tokens `--mr-*` unten.
    Dokumentation: docs/STYLEGUIDE.md, Abschnitt „Design Tokens“. */
 
@@ -138,7 +139,7 @@ body {
 .mr-statusbar__item[data-state="unavailable"] .mr-statusbar__text, .mr-statusbar__item[data-state="loading"] .mr-statusbar__text { color: var(--mr-text-muted); }
 .mr-statusbar:focus-visible { outline: 2px solid var(--mr-link); outline-offset: -2px; }
 main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
-#map { min-height: 320px; height: 100%; background: var(--line); }
+#map { position: relative; min-height: 320px; height: 100%; background: var(--line); }   /* ausdrücklich, sonst setzt Leaflet inline `position: relative` und überschreibt die Positionierung im Layout mit schwebenden Karten */
 aside { overflow-y: auto; border-left: 1px solid var(--line); background: var(--bg); display: flex; flex-direction: column; gap: var(--mr-space-md); padding: var(--mr-space-md); min-width: 0; }
 h2 { font-family: var(--font-display); font-size: var(--mr-text-md); font-weight: 600; margin: 0 0 var(--mr-space-sm); text-transform: uppercase; letter-spacing: var(--mr-tracking-label); color: var(--muted); }
 button, input[type=search] {
@@ -432,3 +433,46 @@ footer a { color: var(--accent); }
 .kl-card-title { margin: 0 0 var(--mr-space-xs); }
 .kl-card .pa-list li { padding: 1px 0; }
 @media (pointer: coarse) { .kl-card-head { min-height: 44px; } }
+
+/* ==========================================================================
+   Layout mit schwebenden Karten (D10)
+   Nur ab 1200 px Breite und mit `body.mr-floating` (Rückbau: Klasse aus index.html entfernen). Darunter gilt das bisherige Layout (D11 folgt).
+   Die Karte füllt den ganzen Bereich zwischen Statusleiste und Fußzeile. Links schwebt die Spalte aus Wetter und Sperrungen und Hinweisen,
+   rechts das Dock aus Bedienfeld „Karten & Layer“ und Legendenkarte (js/layer_panel.js, js/layout.js). Flächen bleiben deckend (keine Glasoptik),
+   damit Text auf jeder Kartenfarbe lesbar ist. Alles nur Tokens, hell und dunkel.
+   ========================================================================== */
+@media (min-width: 1200px) {
+  body.mr-floating {
+    --mr-float-gap: var(--mr-space-lg);
+    --mr-float-side-w: 360px;
+    --mr-float-dock-w: 320px;
+  }
+  .mr-floating main { position: relative; display: block; overflow: hidden; }
+  .mr-floating #map { position: absolute; inset: 0; z-index: 0; height: auto; min-height: 0; }
+
+  /* Linke Spalte: durchsichtiger Rahmen über der Karte, nur die Karten darin fangen Mausereignisse (die Karte bleibt dazwischen bedienbar) */
+  .mr-floating aside { position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; width: calc(var(--mr-float-side-w) + 2 * var(--mr-float-gap)); padding: var(--mr-float-gap); gap: var(--mr-float-gap); border: 0; background: none; pointer-events: none; overflow-y: auto; scrollbar-width: thin; }
+  .mr-floating aside > .mr-card, .mr-floating aside > .status { pointer-events: auto; box-shadow: var(--mr-shadow-md); }
+  .mr-floating aside > .mr-card { flex: none; border-radius: var(--mr-radius-lg); }
+  /* Die Liste füllt den Rest der Spalte und scrollt für sich; die Karte „Sperrungen und Hinweise“ ist nur so hoch wie nötig */
+  .mr-floating aside > .mr-card:last-child { flex: 0 1 auto; min-height: calc(var(--mr-space-2xl) * 5); }
+  .mr-floating aside > .mr-card:last-child #q, .mr-floating aside > .mr-card:last-child #status { flex: none; }
+  .mr-floating #list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--mr-space-xs); margin: calc(-1 * var(--mr-space-xs)); }   /* Rand für Fokus- und Auswahlrahmen der Einträge */
+
+  /* Kartensteuerung: Zoom rechts neben der linken Spalte, Dock rechts über der Quellenangabe */
+  .mr-floating .leaflet-top.leaflet-left { left: calc(var(--mr-float-side-w) + 2 * var(--mr-float-gap)); }
+  .mr-floating .leaflet-top.leaflet-left .leaflet-control { margin: var(--mr-float-gap) 0 0; }
+  .mr-floating .leaflet-top.leaflet-right { bottom: var(--mr-space-xl); }
+  .mr-floating .kl-dock { display: flex; flex-direction: column; gap: var(--mr-float-gap); width: var(--mr-float-dock-w); max-height: calc(100% - var(--mr-float-gap)); margin: var(--mr-float-gap) var(--mr-float-gap) 0 0; pointer-events: none; }
+  .mr-floating .kl-dock > * { pointer-events: auto; }
+
+  /* Bedienfeld und Legendenkarte: gleiche Breite, gleiche Fläche, gleicher Kopf. Das Bedienfeld gibt bei Platzmangel nach (scrollt), die Legende bleibt sichtbar. */
+  .mr-floating .kl-panel, .mr-floating .kl-card { width: 100%; flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; border-radius: var(--mr-radius-lg); box-shadow: var(--mr-shadow-md); }
+  .mr-floating .kl-panel { min-height: calc(var(--mr-space-2xl) * 5); }
+  .mr-floating .kl-body { flex: 1 1 auto; min-height: 0; max-height: none; }
+  .mr-floating .kl-head, .mr-floating .kl-card-head { flex: none; min-height: 40px; padding: 6px 10px; color: var(--mr-on-primary); background: var(--mr-primary); border-radius: calc(var(--mr-radius-lg) - 1px); font-family: var(--font-display); font-size: var(--mr-text-base); font-weight: 600; line-height: inherit; letter-spacing: var(--mr-tracking-label); text-transform: uppercase; }
+  .mr-floating .kl-head:hover, .mr-floating .kl-card-head:hover { background: var(--mr-primary-hover); }
+  .mr-floating .kl-head[aria-expanded="true"], .mr-floating .kl-card-head[aria-expanded="true"] { border-radius: calc(var(--mr-radius-lg) - 1px) calc(var(--mr-radius-lg) - 1px) 0 0; }
+  .mr-floating .kl-card-list { flex: 1 1 auto; min-height: 0; max-height: min(30vh, 240px); padding-top: var(--mr-space-md); }
+}
+@media (min-width: 1200px) and (pointer: coarse) { .mr-floating .kl-head, .mr-floating .kl-card-head { min-height: 44px; } }

@@ -428,7 +428,33 @@ Touch-Ziele: Kopf, Abschnittstitel, Schalter und Segmente mindestens 44 px bei `
 
 ## Legendenkarte (seit D9)
 
-Kompakte Legende als eigenes Kartenelement unten rechts (`.mr-card.mr-card--raised.kl-card`, Leaflet-Control `bottomright`). Sie zeigt nur die Legenden **eingeblendeter** Ebenen (Abschnitt je Ebene mit `.mr-label`-Titel und denselben Zeilen `.pa-list` wie die ausführliche Legende) und ist ganz verborgen, wenn keine Ebene Inhalt hat. Der Kopf „Legende“ ist ein Knopf mit `aria-expanded`/`aria-controls`; die Karte ist zunächst eingeklappt, weil sie aufgeklappt am Desktop Abschnitte des Bedienfelds überdecken würde (endgültige Anordnung mit dem Layout, D10). Schnittstelle: `addLegend(...)` liefert zusätzlich `setCompact(html | Node)`; die Legenden-Module füllen sie aus denselben Daten wie die ausführliche Fassung. Lawinenlage: nur die Gefahrenstufen, und nur wenn ein aktueller Bericht vorliegt. Im Bedienfeld bleibt die ausführliche Variante mit Quellen, Hinweisen und Höhenwahl.
+Kompakte Legende als eigenes Kartenelement unten rechts (`.mr-card.mr-card--raised.kl-card`, Leaflet-Control `bottomright`). Sie zeigt nur die Legenden **eingeblendeter** Ebenen (Abschnitt je Ebene mit `.mr-label`-Titel und denselben Zeilen `.pa-list` wie die ausführliche Legende) und ist ganz verborgen, wenn keine Ebene Inhalt hat. Der Kopf „Legende“ ist ein Knopf mit `aria-expanded`/`aria-controls`; die Karte ist unter 1200 px zunächst eingeklappt, weil sie dort aufgeklappt Abschnitte des Bedienfelds überdecken würde; ab 1200 px steht sie im Dock unter dem Bedienfeld und ist zunächst offen (siehe „Layout mit schwebenden Karten“, D10). Schnittstelle: `addLegend(...)` liefert zusätzlich `setCompact(html | Node)`; die Legenden-Module füllen sie aus denselben Daten wie die ausführliche Fassung. Lawinenlage: nur die Gefahrenstufen, und nur wenn ein aktueller Bericht vorliegt. Im Bedienfeld bleibt die ausführliche Variante mit Quellen, Hinweisen und Höhenwahl.
+
+# Layout mit schwebenden Karten (seit D10)
+
+Ab 1200 px Breite und mit `<body class="mr-floating">` ist die Karte die ganze Fläche zwischen Statusleiste und Fußzeile (`#map` absolut in `main`), alle weiteren Bedienelemente schweben darüber. Darunter gilt das bisherige Layout (Karte neben 400-px-Seitenleiste, unter 820 px gestapelt). Zurückrollen: Klasse aus `index.html` entfernen. Mobile ist bewusst unverändert (D11).
+
+| Bereich | Umsetzung |
+|---|---|
+| Linke Spalte | `main > aside`, 360 px, Abstand `--mr-space-lg` zum Rand und zwischen den Karten; Rahmen ohne Fläche und ohne Mausereignisse (`pointer-events: none`), nur die Karten fangen sie, die Karte dazwischen bleibt bedienbar. Karten: `.mr-card` mit `--mr-radius-lg` und `--mr-shadow-md`. Wetter hat feste Höhe, „Sperrungen und Hinweise“ ist so hoch wie nötig, die Liste scrollt in der Karte. |
+| Dock rechts | `.kl-dock` (ein Leaflet-Control `topright`, 320 px): Bedienfeld `.kl-panel` und Legendenkarte `.kl-card` untereinander. |
+| Zoom | rechts neben der linken Spalte. |
+| Quellenangabe | Leaflet-Attribution bleibt unten rechts; das Dock endet darüber. |
+| Fußzeile | unverändert unter der Karte. |
+
+**Strategie Bedienfeld und Legende:** Beide sind gekoppelt (ein Dock) und gleich gestaltet: gleiche Breite, Fläche (`--mr-surface`, Rahmen, `--mr-radius-lg`, `--mr-shadow-md`) und gleiche Kopfzeile (`--mr-primary`, Mikro-Label-Schrift, Pfeil). Das Bedienfeld gibt bei Platzmangel nach (scrollt), die Legende bleibt sichtbar; so können sie sich nicht überlagern, ohne die Höhen fest zu verdrahten. Die Legendenkarte ist im Dock zunächst offen und weiter einklappbar. Schnittstelle (`addLegend`, `setCompact`, …) und Verhalten bleiben gleich; `js/layer_panel.js` verschiebt das Legendenelement beim Wechsel über 1200 px zwischen Dock und eigenem Kartenelement unten rechts.
+
+Regeln:
+
+- **Flächen deckend**, kein `backdrop-filter`, keine Transparenz: Text ist auf jeder Kartenfarbe lesbar (AA), Hell und Dunkel nur über Tokens.
+- **Popups und Autopan:** `js/layout.js` setzt `autoPanPaddingTopLeft`/`BottomRight` für alle Popups auf die Breite der verdeckten Streifen (über `L.Popup.mergeOptions`, gilt auch für gebundene Popups). Der Sprung zu einem Listeneintrag hält denselben Abstand. Neue Popups brauchen dafür nichts.
+- **Kartengröße:** Leaflet folgt der Fenstergröße; zusätzlich ruft ein `ResizeObserver` `invalidateSize({ pan: false })`, wenn sich der Container ohne Fensterereignis ändert.
+- **Position von Leaflet:** `#map` hat im Stylesheet ausdrücklich `position: relative`, sonst setzt Leaflet es inline und überschreibt die Positionierung im neuen Layout.
+- **Kein Maßstab:** Die Anwendung hat keinen; er wird nicht nachgerüstet, solange es keine eigene Funktion dafür gibt.
+- **Neue schwebende Elemente** gehören in die linke Spalte oder in das Dock, nie als eigenes Kartenelement an den Rand (Überlagerung).
+- Test: `scripts/test_layout.html` (in `scripts/run_js_tests.py`) prüft Anordnung, Überlagerung, Zoom und Autopan bei 1440, 1000 und 390 px. Der Wechsel über 1200 px bei laufender Seite wird im Headless-Browser nicht ausgewertet und ist von Hand zu prüfen.
+
+---
 
 # Header (seit D4)
 
