@@ -533,9 +533,31 @@ Klassen: `.mr-header`, `.mr-brand` (`__emblem`, `__text`, `__name`, `__claim`), 
 
 Regeln:
 
-- **Keine Navigation, keine Aktionen im Header**, solange es keine weiteren Bereiche gibt. Nichts darf Funktionen vortäuschen (keine toten Links, keine Buttons ohne Funktion, keine Platzhalter). Kommt ein echter Bereich hinzu, wird die Navigation als `nav` mit nur existierenden Zielen ergänzt.
+- **Keine Navigation, keine Aktionen im Header**, solange es keine weiteren Bereiche gibt. Einzige Ausnahme ist die globale Suche (seit D13, siehe „Globale Suche“), weil sie eine echte Funktion ist. Nichts darf Funktionen vortäuschen (keine toten Links, keine Buttons ohne Funktion, keine Platzhalter). Kommt ein echter Bereich hinzu, wird die Navigation als `nav` mit nur existierenden Zielen ergänzt.
 - Der Header zeigt keine Daten (Uhrzeit, Status): Datenstatus gehört in die Statusleiste (D5).
 - Das Hauptlogo (`mountain-radar-main-hauptlogo.svg`) bleibt für Material außerhalb der App (README, Social Preview). In der App wird nur das Emblem verwendet, weil die Wortmarke im Hauptlogo als SVG-Text mit Fallback-Schriften gesetzt ist.
+
+---
+
+# Globale Suche (seit D13)
+
+Die globale Suche ist ein Suchfeld im Header mit gruppierter Trefferliste. Sie arbeitet **nur mit bereits geladenen Daten**: kein Netzwerkzugriff, keine Ortssuche, keine Gipfel- oder Adresssuche, kein Geocoding, kein Nominatim.
+
+**Platz (Entscheidung):** im Header, zwischen Wortmarke und Slogan (Desktop, max. 420 px breit); mobil (bis 820 px) in einer eigenen Zeile unter Name und Claim, volle Breite. Begründung: Der Header ist in jedem Layout sichtbar (schwebende Karten ab 1200 px, klassisches Layout, Bottom Sheet), konkurriert mit keiner Karte und keinem Bedienelement der Karte und verdeckt keine Kartenfläche. Verworfen: Seitenleiste (mobil im Zustand „peek“ verdeckt), Kartenelement oben links (Zoom und schwebende Karten, mobil Zoom und Layer-Knopf). Das bestehende Textfeld „Sperrungen und Hinweise“ in der Seitenleiste bleibt unverändert: Es filtert Liste und Karte, die globale Suche springt zu einem Treffer.
+
+**Durchsucht wird:** Schutzgebiete (Name und Kategorie; Flächen gleichen Namens und gleicher Kategorie sind ein Treffer), Sperrungen (Name und Beschreibung, Typ `CLOSURE`) und Hinweise (Name und Beschreibung, Typ `NOTICE`). Abgelaufene Einträge sind wie in der Liste ausgenommen, geplante (noch nicht gültige) Einträge erscheinen mit „Geplant“. Die Schalter im Filter („Sperrungen“, „Hinweise“, „Geplant“) und das Textfeld der Liste beeinflussen die Suche nicht. **Nicht durchsucht:** Lawinenlage (Warnregionen, keine Orte), Wetter, Regeln und Wildlife der Schutzgebiete, Orte, Gipfel, Routen, Adressen.
+
+**Vergleich:** ohne Groß-/Kleinschreibung und Akzente („otztal“ findet „Ötztal“, „weisseck“ findet „Weißeck“); alle Wörter müssen vorkommen; ab 2 Zeichen. Reihenfolge je Gruppe: Name beginnt mit der Eingabe, Name enthält sie, alle Wörter im Namen, Wörter in Name und Zusatztext; dann kürzerer Name, dann alphabetisch.
+
+**Trefferliste:** Gruppen „Schutzgebiete“, „Sperrungen“, „Hinweise“ (Mikro-Titel `.mr-label` mit Gesamtzahl), je Gruppe höchstens 5 Treffer und die Zeile „und n weitere, Suchbegriff genauer eingeben“. Treffer: Name (Inter 600) und eine Zeile Meta (Kategorie bzw. Zeitraum, gedämpft). Leere Gruppen entfallen. Leere Eingabe: Hinweistext mit Mindestlänge. Ohne Treffer: „Keine Treffer für …“. Daten noch nicht geladen: „Noch nicht geladen: …“. Fläche `--mr-surface`, Rand `--mr-line`, Schatten `--mr-shadow-md`, über Karte, Dock und Sheet (`z-index: 2000`), höchstens 70 vh (mobil 60 vh), scrollt für sich.
+
+**Klick auf Treffer:** vorhandenes Verhalten. Sperrung oder Hinweis: derselbe Sprung wie ein Klick in der Liste (`focusRecord`: Ausschnitt, Popup, Wetter für den Ort; ist der Eintrag durch Filter oder Listenfilter ausgeblendet, öffnet ein eigenes Popup mit demselben Inhalt). Schutzgebiet: Ausschnitt auf die Flächen, Popup mit demselben Inhalt wie ein Klick auf die Fläche (auch wenn Kategorie oder Ebene ausgeblendet sind; die Ebenen werden nicht verändert). Der Ausschnitt hält Abstand zu schwebenden Karten und Bottom Sheet (`fitPadded` in `js/layout.js`, mobil gibt `revealMap()` zuvor die Karte frei).
+
+**Bedienung:** Combobox mit Listbox (`role="combobox"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`, Gruppen als `role="group"`). Fokus oder Tippen öffnet die Liste; Pfeil ab/auf wählt (mit Umlauf), Enter öffnet den gewählten Treffer (ohne Auswahl den ersten), Esc schließt die Liste und lässt den Text stehen (zweites Esc leert das Feld, nativ). Klick oder Tipp auf einen Treffer öffnet ihn; danach verliert das Feld den Fokus (mobil verschwindet die Tastatur). Der Fokus bleibt beim Klick in die Liste im Feld. Mobil mindestens 44 px für Feld und Treffer. **Kein ⌘K, keine Command Palette, kein globaler Tastaturkürzel** (ein Hinweis darauf erst mit echtem Shortcut).
+
+Klassen: `.mr-search` (`__input`, `__panel`, `__note`, `__list`, `__group`, `__head`, `__items`, `__option`, `__title`, `__meta`, `__more`). Module: `js/search.js` (Oberfläche, ohne Fachdaten), `js/search_logic.js` (reine Logik, `scripts/test_search_logic.html`); die Datenquellen liefern `closures.js` und `protected_areas.js`.
+
+**Später (nicht Teil von D13):** Orts-, Gipfel- und Adresssuche brauchen Geocoding (z. B. Nominatim mit Nutzungsrichtlinie oder eine eigene Gipfeldatenquelle). Das ist eine neue Datenquelle mit Lizenz- und Datenschutzfrage und ein eigenes Arbeitspaket; die Quellen-Schnittstelle in `js/search.js` (`{ id, label, search(q), open(id) }`) nimmt eine weitere Gruppe ohne Umbau auf.
 
 ---
 

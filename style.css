@@ -136,6 +136,23 @@ body {
 .mr-brand__name { margin: 0; color: var(--mr-link); font-size: var(--mr-text-xl); font-weight: 600; line-height: 1.2; letter-spacing: calc(var(--mr-tracking-label) * 1.5); text-transform: uppercase; }
 .mr-brand__claim { margin: var(--mr-space-2xs) 0 0; color: var(--mr-success); font-size: var(--mr-text-xs); font-weight: 600; line-height: 1.3; letter-spacing: calc(var(--mr-tracking-label) * 2); }
 .mr-header__slogan { margin: 0; color: var(--mr-text-muted); font-size: var(--mr-text-base); }
+
+/* Globale Suche (D13): Suchfeld im Header, Trefferliste klappt darunter auf (über Karte, Dock und Sheet) */
+.mr-search { position: relative; flex: 1 1 280px; max-width: 420px; min-width: 0; }
+.mr-search__input { display: block; width: 100%; min-width: 0; min-height: calc(var(--mr-space-2xl) + var(--mr-space-sm)); padding: var(--mr-space-sm) var(--mr-space-md); border-radius: var(--mr-radius-md); background: var(--mr-bg); font-size: var(--mr-text-base); }
+.mr-search__input::placeholder { color: var(--mr-text-muted); opacity: 1; }
+.mr-search__panel { position: absolute; z-index: 2000; top: calc(100% + var(--mr-space-xs)); left: 0; right: 0; max-height: min(70vh, 480px); overflow-y: auto; overscroll-behavior: contain; padding: var(--mr-space-sm); background: var(--mr-surface); color: var(--mr-text); border: 1px solid var(--mr-line); border-radius: var(--mr-radius-md); box-shadow: var(--mr-shadow-md); }
+.mr-search__note { margin: 0; padding: var(--mr-space-xs) var(--mr-space-sm); color: var(--mr-text-muted); font-size: var(--mr-text-sm); }
+.mr-search__note:empty { display: none; }
+.mr-search__list, .mr-search__items { margin: 0; padding: 0; list-style: none; }
+.mr-search__group + .mr-search__group { margin-top: var(--mr-space-sm); }
+.mr-search__head { margin: 0; padding: var(--mr-space-xs) var(--mr-space-sm); }
+.mr-search__option { display: flex; flex-direction: column; gap: var(--mr-space-2xs); padding: var(--mr-space-sm); border-radius: var(--mr-radius-sm); cursor: pointer; }
+.mr-search__option:hover, .mr-search__option.is-active { background: var(--mr-primary-soft); }
+.mr-search__option.is-active { outline: 2px solid var(--mr-link); outline-offset: -2px; }
+.mr-search__title { font-size: var(--mr-text-base); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.mr-search__meta { color: var(--mr-text-muted); font-size: var(--mr-text-sm); overflow-wrap: anywhere; }
+.mr-search__more { padding: var(--mr-space-xs) var(--mr-space-sm); color: var(--mr-text-muted); font-size: var(--mr-text-sm); }
 /* Datenstatus-Leiste (D5): Zeile unter dem Header. Punkt = Zustand, Name = .mr-label, Text = echter Wert aus den Daten.
    Zustände (data-state): ok, limited, unavailable, loading, error. Der Zustand steht zusätzlich als Text für Screenreader. */
 .mr-statusbar { position: relative; flex: none; padding: var(--mr-space-sm) var(--mr-space-xl); background: var(--mr-bg); border-bottom: 1px solid var(--mr-line); }
@@ -492,6 +509,10 @@ footer a { color: var(--accent); }
   .mr-brand__emblem { width: calc(var(--mr-space-xl) + var(--mr-space-md)); height: calc(var(--mr-space-xl) + var(--mr-space-md)); }
   .mr-brand__name { font-size: var(--mr-text-lg); }
   .mr-header__slogan { font-size: var(--mr-text-sm); }
+  .mr-search { order: 3; flex: 1 0 100%; max-width: none; }   /* eigene Zeile unter Name und Slogan */
+  .mr-search__input { min-height: 44px; }
+  .mr-search__option { min-height: 44px; justify-content: center; }
+  .mr-search__panel { max-height: 60vh; }
 
   /* Statusleiste: eine Zeile, die Leiste selbst scrollt seitlich (nie die Seite) */
   .mr-statusbar { display: flex; align-items: center; min-height: 44px; padding: 0 var(--mr-space-lg); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; }

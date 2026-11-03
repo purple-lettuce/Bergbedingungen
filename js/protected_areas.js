@@ -1,6 +1,9 @@
 // Schutzgebiete (Naturschutzgebiete, Naturparks, Schongebiete ...) als GeoJSON-Ebene.
 
-import { protectedAreasLayer } from './map.js';
+import { map, protectedAreasLayer } from './map.js';
+import { fitPadded } from './layout.js';
+import { revealMap } from './sheet.js';
+import { createIndex, searchIndex } from './search_logic.js';
 import { filters } from './layers.js';
 import { addProtectedAreasLegend, protectedAreasLegendFailed } from './protected_areas_legend.js';
 import { bindCategoryFilter } from './protected_areas_filter.js';
@@ -87,6 +90,37 @@ function categoryStyle(category) {
   };
 }
 
+// ---------- Globale Suche (D13) ----------
+// Je Name und Kategorie ein Eintrag (ein Gebiet besteht oft aus mehreren Flächen); durchsucht werden Name und Kategorie.
+var areasByKey = new Map();   // Schlüssel -> { id, title, extra, meta, layers, popup }
+var searchIndexData = null;
+
+function showProtectedArea(id) {
+  var a = areasByKey.get(id);
+  if (!a) return;
+  var b = null;
+  a.layers.forEach(function (l) {
+    var lb = l.getBounds();
+    if (b) b.extend(lb); else b = L.latLngBounds(lb.getSouthWest(), lb.getNorthEast());
+  });
+  if (!b || !b.isValid()) return;
+  revealMap();   // mobil (D11) gibt das Bottom Sheet die Karte frei, bevor die Ränder berechnet werden
+  fitPadded(map, b, 14);
+  // Eigenes Popup mit demselben Inhalt wie das der Fläche: funktioniert auch, wenn die Kategorie oder die Ebene ausgeblendet ist.
+  L.popup(a.popup.extra ? { className: "mr-popup", maxHeight: 340 } : { className: "mr-popup" })
+    .setLatLng(b.getCenter()).setContent(a.popup.html).openOn(map);
+}
+
+export var protectedAreasSearchSource = {
+  id: "protectedAreas", label: "Schutzgebiete",
+  search: function (q) {
+    if (!searchIndexData) return { loaded: false, total: 0, items: [] };
+    var res = searchIndex(searchIndexData, q);
+    return { loaded: true, total: res.total, items: res.items.map(function (e) { return { id: e.id, title: e.title, meta: e.meta }; }) };
+  },
+  open: showProtectedArea
+};
+
 // Legendeneinträge aus den geladenen Daten: nur Kategorien, die tatsächlich vorkommen.
 function legendEntries(geojson) {
   const counts = {};
@@ -126,6 +160,13 @@ const categoryName =
 
   const popup = areaPopup(p, geojson, categoryName, categoryStyle(p.category_id));
 
+  if (p.name) {
+    const key = p.name + "|" + p.category_id;
+    let a = areasByKey.get(key);
+    if (!a) { a = { id: key, title: p.name, extra: categoryName, meta: categoryName, layers: [], popup: popup }; areasByKey.set(key, a); }
+    a.layers.push(layer);
+  }
+
   layer.bindPopup(
     popup.html,
     // className: Popup im Mountain-Radar-Stil (D8a, folgt Hell/Dunkel); lange Listen scrollen lassen
@@ -134,6 +175,8 @@ const categoryName =
 
 }
     }).addTo(protectedAreasLayer);
+
+    searchIndexData = createIndex(Array.from(areasByKey.values()));
 
     const entries = legendEntries(geojson);
     addProtectedAreasLegend(entries);

@@ -1,15 +1,16 @@
-// Einstieg: verbindet Karte, Wetter, Sperrungen, Schutzgebiete und Lawinenlage,
+// Einstieg: verbindet Karte, Wetter, Sperrungen, Schutzgebiete, Lawinenlage und globale Suche,
 // registriert die Ereignisse und startet das Laden in der ursprünglichen Reihenfolge.
 
 import { map, el } from './map.js';
 import { loadWeather } from './weather.js';
-import { loadProtectedAreas } from './protected_areas.js';
+import { loadProtectedAreas, protectedAreasSearchSource } from './protected_areas.js';
 import { initAvalanche } from './avalanche.js';
-import { loadData, render, scheduleRender } from './closures.js';
+import { loadData, render, scheduleRender, closuresSearchSource } from './closures.js';
 import { initClosuresFilter } from './closures_filter.js';
 import { initClosuresLegend } from './closures_legend.js';
 import { initLayout } from './layout.js';
 import { initSheet } from './sheet.js';
+import { initSearch } from './search.js';
 
 // ---------- Ereignisse ----------
 map.on('moveend', scheduleRender);
@@ -29,6 +30,8 @@ initLayout(map);
 initSheet(map);
 var c0 = map.getCenter();
 loadWeather(c0.lat, c0.lng);
+
+initSearch([protectedAreasSearchSource, closuresSearchSource('closure', 'Sperrungen'), closuresSearchSource('notice', 'Hinweise')]);
 
 initClosuresFilter();
 initClosuresLegend();
