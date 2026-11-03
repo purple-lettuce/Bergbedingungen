@@ -1,0 +1,73 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests search_logic.js (globale Suche, D13)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as S from '../js/search_logic.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function ids(res) { return res.items.map(function (e) { return e.id; }); }
+
+var index = S.createIndex([
+  { id: 'a', title: 'Naturpark Ötztal', extra: 'Naturpark' },
+  { id: 'b', title: 'Ötztaler Urweg', extra: 'Wanderweg Sperre wegen Steinschlag' },
+  { id: 'c', title: 'Sperre Schutzsteig Nasskamm', extra: 'Der Schutzsteig ist gesperrt.' },
+  { id: 'd', title: 'Weißeck', extra: '' },
+  { id: 'e', title: 'Nasskamm-Steig', extra: 'Sperre' }
+]);
+
+test('normalize: Kleinbuchstaben, ohne Akzente, ß zu ss', function () {
+  eq(S.normalize('Ötztal Weißeck Café'), 'otztal weisseck cafe');
+  eq(S.normalize(null), '');
+});
+
+test('Anfragen unter MIN_CHARS liefern nichts', function () {
+  eq(S.searchIndex(index, 'ö'), { total: 0, items: [] });
+  eq(S.searchIndex(index, '   '), { total: 0, items: [] });
+});
+
+test('Umlaute und Groß-/Kleinschreibung: "otztal" findet "Ötztal"', function () {
+  eq(ids(S.searchIndex(index, 'otztal')), ['b', 'a']);   // b beginnt mit der Anfrage, a enthält sie
+  eq(ids(S.searchIndex(index, 'ÖTZTAL')), ['b', 'a']);
+});
+
+test('ß: "weisseck" findet "Weißeck"', function () {
+  eq(ids(S.searchIndex(index, 'weisseck')), ['d']);
+});
+
+test('Rang: Titel beginnt mit der Anfrage vor Titel enthält vor Zusatztext', function () {
+  eq(ids(S.searchIndex(index, 'sperre')), ['c', 'e', 'b']);
+});
+
+test('mehrere Wörter müssen alle vorkommen (Titel und Zusatztext zusammen)', function () {
+  eq(ids(S.searchIndex(index, 'nasskamm steig')), ['e', 'c']);
+  eq(ids(S.searchIndex(index, 'urweg steinschlag')), ['b']);
+  eq(ids(S.searchIndex(index, 'urweg gletscher')), []);
+});
+
+test('limit und total: total zählt alle Treffer, items höchstens limit', function () {
+  var r = S.searchIndex(index, 'sperre', { limit: 2 });
+  eq(r.total, 3); eq(r.items.length, 2);
+});
+
+test('accept sortiert Einträge vorab aus', function () {
+  var r = S.searchIndex(index, 'sperre', { accept: function (e) { return e.id !== 'c'; } });
+  eq(ids(r), ['e', 'b']); eq(r.total, 2);
+});
+
+test('Standardgrenze je Gruppe', function () {
+  var many = S.createIndex(Array.from({ length: 12 }, function (_, i) { return { id: i, title: 'Steig ' + i }; }));
+  var r = S.searchIndex(many, 'steig');
+  eq(r.total, 12); eq(r.items.length, S.GROUP_LIMIT);
+});
+
+document.getElementById('result').textContent = JSON.stringify({ passed: results.filter(function (r) { return r.ok; }).length, failed: results.filter(function (r) { return !r.ok; }).length, results: results });
+</script>

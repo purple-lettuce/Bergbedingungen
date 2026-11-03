@@ -5,8 +5,9 @@ import { map, el, esc, setStatus, warn, unwarn, FILE_HINT, layerGroup } from './
 import { setSourceStatus } from './status_bar.js';
 import { closuresStatus } from './status_bar_logic.js';
 import { loadWeather } from './weather.js';
-import { coveredInsets } from './layout.js';
+import { fitPadded } from './layout.js';
 import { revealMap, getSheetState } from './sheet.js';
+import { createIndex, searchIndex } from './search_logic.js';
 
 var DATA_URL = 'data/closures.json';
 var LINE_LIMIT = 150;   // bis zu dieser Anzahl im Ausschnitt werden Linien gezeichnet, darüber nur Punkte
@@ -27,6 +28,7 @@ var renderTimer = null;
 var holdUntil = 0;     // nach einem Sprung zu einem Eintrag nicht sofort neu zeichnen
 var dataInfo = '';
 var activeId = null;
+var searchIndexData = null;   // Index der globalen Suche (D13), entsteht nach dem Laden
 
 function todayIso() {
   var d = new Date();
@@ -70,6 +72,9 @@ export async function loadData() {
     var rows = doc.results || [];
     if (doc.activities) Object.keys(doc.activities).forEach(function (id) { activityNames[id] = doc.activities[id]; });
     rows.forEach(function (r) { records.set(r.uuid, r); });
+    searchIndexData = createIndex(rows.map(function (r) {
+      return { id: r.uuid, title: titleOf(r), extra: descOf(r), kind: kindOf(r) };
+    }));
     if (doc.generated) {
       var t = new Date(doc.generated);
       dataInfo = isNaN(t) ? '' : t.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' });
@@ -234,11 +239,35 @@ function focusRecord(id) {
   holdUntil = Date.now() + 500;
   var c = centroidOf(r);
   revealMap();   // mobil (D11) gibt das Bottom Sheet die Karte frei, bevor die Ränder berechnet werden
-  var ins = coveredInsets(map);   // schwebende Karten (D10) und das Bottom Sheet (D11) verdecken Streifen am Rand: dorthin nicht zoomen
-  if (r.bbox) map.fitBounds([[r.bbox[1], r.bbox[0]], [r.bbox[3], r.bbox[2]]], { maxZoom: 15, paddingTopLeft: [40 + ins.left, 40 + ins.top], paddingBottomRight: [40 + ins.right, 40 + ins.bottom], animate: false });
+  // schwebende Karten (D10) und das Bottom Sheet (D11) verdecken Streifen am Rand: dorthin nicht zoomen (fitPadded)
+  if (r.bbox) fitPadded(map, [[r.bbox[1], r.bbox[0]], [r.bbox[3], r.bbox[2]]], 15);
   else if (c) map.setView([c[1], c[0]], 14, { animate: false });
   render();
   var fg = layers.get(id);
   if (fg && c) fg.openPopup(L.latLng(c[1], c[0]));
+  else if (c) L.popup({ className: 'mr-popup' }).setLatLng(L.latLng(c[1], c[0])).setContent(popupHtml(r)).openOn(map);   // durch Filter oder Textfeld der Liste ausgeblendet (Sprung aus der globalen Suche)
   if (c) loadWeather(c[1], c[0]);
+}
+
+// ---------- Globale Suche (D13) ----------
+// Quelle für js/search.js: Sperrungen und Hinweise sind zwei Gruppen derselben Datensätze (Typ CLOSURE bzw. NOTICE).
+// Abgelaufene Einträge gehören nicht dazu (wie in der Liste); Schalter des Filters und Textfeld der Liste gelten für die Suche nicht.
+export function closuresSearchSource(kind, label) {
+  return {
+    id: kind, label: label,
+    search: function (q) {
+      if (!searchIndexData) return { loaded: false, total: 0, items: [] };
+      var res = searchIndex(searchIndexData, q, {
+        accept: function (e) { return e.kind === kind && statusOf(records.get(e.id)) !== 'expired'; }
+      });
+      return {
+        loaded: true, total: res.total,
+        items: res.items.map(function (e) {
+          var r = records.get(e.id);
+          return { id: e.id, title: e.title, meta: (statusOf(r) === 'upcoming' ? 'Geplant · ' : '') + periodText(r) };
+        })
+      };
+    },
+    open: focusRecord
+  };
 }

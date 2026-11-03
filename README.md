@@ -29,6 +29,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 - Am Desktop (ab 1200 px) füllt die Karte die ganze Fläche; Wetter und Sperrungen schweben links, Bedienfeld und Legendenkarte rechts in einem Dock (unter 1200 px bleibt das bisherige Layout)
 - Auf dem Smartphone (bis 820 px) füllt die Karte den Bildschirm; Wetter und Sperrungen sind ein Bottom Sheet (Griff antippen oder wischen: zu, halb, voll), „Karten & Layer“ öffnet als Sheet über der Karte, die Statusleiste läuft einzeilig
 - Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste)
+- Globale Suche im Header: Schutzgebiete, Sperrungen und Hinweise aus den geladenen Daten, Treffer in Gruppen, per Tastatur bedienbar, Klick springt zur Karte (keine Ortssuche)
 - Datenstatus-Leiste unter dem Header: je Quelle (Sperrungen, Schutzgebiete, Lawinenlage, Wetter) Ladezustand und, wo die Daten einen Zeitstempel liefern, der Datenstand; nur echte Werte
 
 **Geplant (Roadmap Phase 1-2):**
@@ -168,6 +169,8 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/layout.js` | Layout mit schwebenden Karten (ab 1200 px, Klasse `mr-floating` am `body`) und mobiles Layout (bis 820 px): Layout-Zustand, Abstand und Höhe der Popups (Autopan) gegenüber schwebenden Karten und Bottom Sheet, Kartengröße bei Layoutänderungen; getestet mit `scripts/test_layout.html` |
 | `js/sheet.js` | Bottom Sheet (mobil, bis 820 px): Seitenleiste als Sheet mit den Zuständen peek, half, full (Griff, Wischen, Tastatur), Fußzeile am Ende des Sheets; ohne Fachlogik |
 | `js/sheet_logic.js` | Bottom Sheet: reine Berechnung von Höhen und Zuständen; getestet mit `scripts/test_sheet_logic.html` |
+| `js/search.js` | Globale Suche (Header): Suchfeld, gruppierte Trefferliste, Tastaturbedienung; ohne Fachdaten, Quellen kommen aus `closures.js` und `protected_areas.js` |
+| `js/search_logic.js` | Globale Suche: Index und Suche (ohne Akzente, ab 2 Zeichen, Rang); getestet mit `scripts/test_search_logic.html` |
 | `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
 | `js/closures_filter.js` | Filter Sperrungen, Hinweise und Geplant (Abschnitt „Filter Sperrungen & Hinweise“ im Bedienfeld) |
 | `js/avalanche.js` | Lawinenlage aller Quellen (Karte): Datensatz je Region aufbauen, Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Höhenwahl; lädt erst beim ersten Einblenden |

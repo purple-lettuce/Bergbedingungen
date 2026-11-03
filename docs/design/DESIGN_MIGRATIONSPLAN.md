@@ -43,7 +43,7 @@ Wichtige Hinweise zum Mockup:
 | Wetter-Karte | Temperatur + Tage | Temperatur, Wind, Niederschlag, Sicht | klein–mittel | Open-Meteo-Felder prüfen |
 | Popups | Funktional, schlichte Optik | Kopfzeile mit Icon, Akzentbalken, Key-Value-Zeilen, Badges | mittel | ein gemeinsames Popup-Gerüst |
 | Legende | Im Layer-Panel | Eigene Karte unten rechts | klein | Legenden-Module vorhanden |
-| Suche | Filter der Sperrungsliste | Globale Suche (Berge, Routen, Orte), ⌘K | mittel–groß | Geocoding nur mit eigener Quelle |
+| Suche | Filter der Sperrungsliste | Globale Suche (Berge, Routen, Orte), ⌘K | mittel–groß | Geocoding nur mit eigener Quelle. D13 erledigt: Phase 1 über Schutzgebiete, Sperrungen und Hinweise im Header, ohne ⌘K und Ortssuche |
 | Karte | OSM/OpenTopoMap bunt (seit D12 per Sättigungsfilter gedämpft) | Gedämpfte, grüntonige Karte, Basemap „Hybrid/Satellit/Terrain“ | mittel | Kachellizenzen; Satellit wäre neue Quelle |
 | Route / Risiko / CTA | nicht vorhanden | Route Intelligence, Risk Insights, „Analyze Route“ | groß | GPX-Import, Risk Engine (Phase 1–3) |
 | Mobile | Gestapelt, Karte 60 vh (bis D10) | nicht gezeigt; seit D11 Bottom Sheet, Karte füllt den Bildschirm | mittel | erledigt (D11) |
@@ -129,12 +129,15 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Bewusst nicht umgesetzt: Satellit/Hybrid und neue Kartenquellen (nur mit eigener Lizenzentscheidung), Änderungen an Layerfarben oder -daten, einstellbare Stärke. Beobachtung: Bei aktiver Lawinenlage (Stufe 1 grün, 55 % Deckkraft) überdeckt die Lawinenfläche die Grundkarte weitgehend; die Dämpfung hilft dort vor allem bei Topo. Eine Anpassung der Lawinenfarben ist laut Styleguide ausgeschlossen.
 - Ursprünglicher Umfang: Sanfte Tönung der Kacheln per CSS-Filter, damit Overlays (Schutzgebiete, Lawinen) besser hervortreten. Satellit/Hybrid nur, wenn eine lizenzkonforme Kachelquelle gewählt wird (eigene Entscheidung, siehe DATENQUELLEN).
 
-**D13 — Globale Suche (optional)**
-- Umfang: Suchfeld oben links wie im Mockup. Zunächst nur Filter über Sperrungen und Schutzgebiete. Orts-Suche erfordert Geocoding (z. B. Nominatim mit Nutzungsrichtlinie) und ist ein eigenes Arbeitspaket. ⌘K-Hinweis erst mit echtem Shortcut.
+**D13 — Globale Suche (Phase 1)** ✅ erledigt (03.11.2026)
+- Umsetzung: Suchfeld **im Header** (zwischen Wortmarke und Slogan, mobil eigene Zeile), Entscheidung und Begründung im STYLEGUIDE („Globale Suche“). Durchsucht werden Schutzgebiete (Name, Kategorie), Sperrungen und Hinweise (Name, Beschreibung) aus den bereits geladenen Daten; Treffer in drei Gruppen, je Gruppe 5 mit Gesamtzahl. Klick, Tipp oder Enter springt mit dem vorhandenen Verhalten zur Karte (Sperrungen: `focusRecord` der Liste; Schutzgebiete: Ausschnitt und dasselbe Popup wie beim Klick auf die Fläche). Bedienung per Tastatur (Pfeile, Enter, Esc) als Combobox mit Listbox. Neue Dateien: `js/search.js` (Oberfläche), `js/search_logic.js` (Index und Suche), `scripts/test_search_logic.html` (Test, in `scripts/run_js_tests.py`); `js/layout.js` erhielt `fitPadded` (gemeinsamer Ansichtswechsel mit Abstand zu überdeckenden Karten). Dokumentation: STYLEGUIDE.md („Globale Suche“).
+- Bewusst nicht umgesetzt: Geocoding, Nominatim, Orts-, Gipfel-, Adress- und Routensuche, jede externe Anfrage, neue Datenquellen, ⌘K oder Command Palette, Suche in Lawinenlage, Wetter, Regeln und Wildlife, Hervorhebung der Fundstelle im Text, Neuaufbau der Trefferliste nach spätem Laden der Daten (der Hinweis „Noch nicht geladen“ erscheint, bis die Eingabe sich ändert), Zusammenführung mit dem Textfeld der Liste in der Seitenleiste (bleibt ein Filter für Liste und Karte).
+- Spätere Ausbaustufe: Orts- und Gipfelsuche per Geocoding (Nominatim nur mit Nutzungsrichtlinie, besser eigene oder lizenzfreie Quelle), als eigene Gruppe über dieselbe Quellen-Schnittstelle; erfordert Entscheidung zu Lizenz, Datenschutz (Eingaben gehen an einen Dienst) und Last.
+- Ursprünglicher Umfang: Suchfeld oben links wie im Mockup. Zunächst nur Filter über Sperrungen und Schutzgebiete. Orts-Suche erfordert Geocoding (z. B. Nominatim mit Nutzungsrichtlinie) und ist ein eigenes Arbeitspaket. ⌘K-Hinweis erst mit echtem Shortcut.
 
 ### Empfohlene Reihenfolge
 
-D1 → D2 → D3 → D4 → D5 → D6 → D7 → D8a/b/c → D9 → D10 → D11 → D12 → (D13)
+D1 → D2 → D3 → D4 → D5 → D6 → D7 → D8a/b/c → D9 → D10 → D11 → D12 → D13
 
 D1 bis D3 liefern schon einen sichtbaren Markenauftritt. Nach D9 sieht die App der Vision im Detail ähnlich, bevor das riskante Layout (D10) angefasst wird.
 

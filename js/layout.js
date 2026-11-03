@@ -48,6 +48,12 @@ export function coveredInsets(map) {
   return out;
 }
 
+// Ansicht auf einen Ausschnitt setzen, ohne ihn unter überdeckende Karten oder das Sheet zu legen (Liste der Sperrungen, globale Suche).
+export function fitPadded(map, bounds, maxZoom) {
+  var ins = coveredInsets(map);
+  map.fitBounds(bounds, { maxZoom: maxZoom, paddingTopLeft: [40 + ins.left, 40 + ins.top], paddingBottomRight: [40 + ins.right, 40 + ins.bottom], animate: false });
+}
+
 // Popups nach dem Autopan nicht unter überdeckenden Karten stehen lassen: Standardabstand für alle Popups setzen
 // (Popups erben ihn über das Prototyp-Objekt der Optionen, auch bereits gebundene). Mobil begrenzt `--mr-popup-max-h`
 // zusätzlich die Höhe des Popup-Inhalts auf den freien Teil der Karte; der Inhalt scrollt dann im Popup.
