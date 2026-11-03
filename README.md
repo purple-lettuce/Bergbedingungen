@@ -27,6 +27,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 - Bedienfeld „Karten & Layer” für Kartenstil, Ebenen, Filter und Legenden, per Klick bedienbar (auch auf Touchgeräten)
 - Legendenkarte unten rechts: kompakte Legende, zeigt nur die eingeblendeten Ebenen, einklappbar
 - Am Desktop (ab 1200 px) füllt die Karte die ganze Fläche; Wetter und Sperrungen schweben links, Bedienfeld und Legendenkarte rechts in einem Dock (unter 1200 px bleibt das bisherige Layout)
+- Auf dem Smartphone (bis 820 px) füllt die Karte den Bildschirm; Wetter und Sperrungen sind ein Bottom Sheet (Griff antippen oder wischen: zu, halb, voll), „Karten & Layer“ öffnet als Sheet über der Karte, die Statusleiste läuft einzeilig
 - Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste)
 - Datenstatus-Leiste unter dem Header: je Quelle (Sperrungen, Schutzgebiete, Lawinenlage, Wetter) Ladezustand und, wo die Daten einen Zeitstempel liefern, der Datenstand; nur echte Werte
 
@@ -137,7 +138,7 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/wildlife_entities.json` | aufgelöste Schutzgüter: Kennung → Name, Kennung → Art (`FAUNA`, `FLORA`, `HABITAT`) und Verknüpfung → Kennung, nur aus der Digitize API |
 | `data/wildlife_probe.json` | Diagnosebericht der Wildlife-Auflösung (was die API geliefert hat, was fehlt) |
 | `scripts/avalanche_providers.py`, `scripts/avalanche_sources.py`, `scripts/avalanche_model.py`, `scripts/avalanche_schema.py`, `scripts/fetch_avalanche.py` | Lawinen-Framework: Provider je Quelle, Registry, Normalisierung, Standardmodell und GeoJSON-Schema, zentrale Pipeline ([docs/AVALANCHE_ARCHITECTURE.md](docs/AVALANCHE_ARCHITECTURE.md)) |
-| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/test_protected_areas.html`, `scripts/test_layout.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage, der Schutzgebiets-Oberfläche und des Layouts (Python und JavaScript im Headless-Browser) |
+| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/test_protected_areas.html`, `scripts/test_layout.html`, `scripts/test_sheet_logic.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage, der Schutzgebiets-Oberfläche, des Layouts und des Bottom Sheets (Python und JavaScript im Headless-Browser) |
 | `data/avalanche/` | Lawinenlage: `index.json`, je Quelle `<id>.json` (Bulletins) und `<id>_regions.geojson` (Polygone) für `euregio` und `slf` |
 | `vendor/inter/` | Schrift Inter (variable, SIL OFL 1.1), selbst gehostet, Lizenz in `vendor/inter/OFL.txt` |
 | `docs/design/komponenten.html` | Referenzseite der gemeinsamen UI-Komponenten (`.mr-*`), nur zur Ansicht, nicht Teil der Anwendung |
@@ -163,8 +164,10 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/protected_areas_filter.js` | Filterlogik nach Schutzgebietskategorie: blendet die vorhandenen Flächen ein und aus, ohne neu zu laden |
 | `js/protected_areas_legend.js` | Legende der Schutzgebiete (Abschnitt im Bedienfeld „Karten & Layer“): Farben der Kategorien, die in den Daten vorkommen |
 | `js/layers.js` | Register des Bedienfelds „Karten & Layer“: meldet Kartenstile, Ebenen, Filter und Legenden an (neue Ebene: eine Zeile `panel.addOverlay(...)`, Filter: `panel.addFilter(...)`) |
-| `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts, ab 1200 px zusammen mit der Legendenkarte in einem Dock): Layer, Kartenstil, einklappbare Filter und Legenden, alles per Klick, ohne Fachlogik; dazu die Legendenkarte (nur eingeblendete Ebenen; unter 1200 px eigenes Element unten rechts) |
-| `js/layout.js` | Layout mit schwebenden Karten (ab 1200 px, Klasse `mr-floating` am `body`): Layout-Zustand, Abstand der Popups (Autopan) und Ansichtswechsel zu den schwebenden Karten, Kartengröße bei Layoutänderungen; getestet mit `scripts/test_layout.html` |
+| `js/layer_panel.js` | Bedienfeld „Karten & Layer“ (Kartenelement oben rechts, ab 1200 px zusammen mit der Legendenkarte in einem Dock, mobil ein Knopf oben rechts, aufgeklappt ein Sheet über der Karte): Layer, Kartenstil, einklappbare Filter und Legenden, alles per Klick, ohne Fachlogik; dazu die Legendenkarte (nur eingeblendete Ebenen; unter 1200 px eigenes Element unten rechts) |
+| `js/layout.js` | Layout mit schwebenden Karten (ab 1200 px, Klasse `mr-floating` am `body`) und mobiles Layout (bis 820 px): Layout-Zustand, Abstand und Höhe der Popups (Autopan) gegenüber schwebenden Karten und Bottom Sheet, Kartengröße bei Layoutänderungen; getestet mit `scripts/test_layout.html` |
+| `js/sheet.js` | Bottom Sheet (mobil, bis 820 px): Seitenleiste als Sheet mit den Zuständen peek, half, full (Griff, Wischen, Tastatur), Fußzeile am Ende des Sheets; ohne Fachlogik |
+| `js/sheet_logic.js` | Bottom Sheet: reine Berechnung von Höhen und Zuständen; getestet mit `scripts/test_sheet_logic.html` |
 | `js/closures_legend.js` | Legende der Sperrungen und Hinweise (Abschnitt im Bedienfeld) |
 | `js/closures_filter.js` | Filter Sperrungen, Hinweise und Geplant (Abschnitt „Filter Sperrungen & Hinweise“ im Bedienfeld) |
 | `js/avalanche.js` | Lawinenlage aller Quellen (Karte): Datensatz je Region aufbauen, Polygone nach Gefahrenstufe einfärben (Stufe 5 als Schachbrett), Regionssymbol mit Stufe, Höhenwahl; lädt erst beim ersten Einblenden |
@@ -178,7 +181,7 @@ geladen und steht als globales `L` zur Verfügung.
 Abhängigkeiten: `app.js` → alle anderen; `closures.js` → `map.js`, `weather.js`; `weather.js` → `map.js`;
 `protected_areas.js` → `map.js`, `layers.js`, `protected_areas_legend.js`, `protected_areas_filter.js`, `protected_areas_popup.js`; `protected_areas_popup.js` → `html.js`, `popup_icons.js`; `avalanche.js` → `map.js`, `html.js`, `avalanche_legend.js`, `avalanche_symbols.js`, `avalanche_logic.js`, `avalanche_model.js`, `avalanche_popup.js`;
 `avalanche_popup.js` → `html.js`, `avalanche_symbols.js`, `avalanche_logic.js`; `avalanche_symbols.js` → `html.js`;
-`avalanche_legend.js` → `html.js`, `layers.js`, `avalanche_logic.js`, `avalanche_symbols.js`; `layers.js` → `map.js`, `layer_panel.js`; die Legendenmodule `protected_areas_legend.js` und `closures_legend.js` → `layers.js`. `map.js` → `html.js`. `layer_panel.js`, `closures.js` und `app.js` → `layout.js`. `html.js`, `layout.js`, `popup_icons.js`, `protected_areas_filter.js`, `avalanche_logic.js` und `avalanche_model.js` hängen von keiner
+`avalanche_legend.js` → `html.js`, `layers.js`, `avalanche_logic.js`, `avalanche_symbols.js`; `layers.js` → `map.js`, `layer_panel.js`; die Legendenmodule `protected_areas_legend.js` und `closures_legend.js` → `layers.js`. `map.js` → `html.js`. `layer_panel.js`, `closures.js`, `sheet.js` und `app.js` → `layout.js`. `sheet.js` → `sheet_logic.js`; `closures.js` und `app.js` → `sheet.js`. `html.js`, `layout.js`, `sheet_logic.js`, `popup_icons.js`, `protected_areas_filter.js`, `avalanche_logic.js` und `avalanche_model.js` hängen von keiner
 anderen Datei ab.
 
 Hinweis: Wegen der Module muss die Seite über einen Webserver (zum Beispiel GitHub Pages) geöffnet

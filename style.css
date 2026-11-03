@@ -1,5 +1,6 @@
-/* Mountain Radar – Layout: Kartenfläche links, Seitenleiste mit Wetter, Filter und Trefferliste rechts; mobil untereinander.
-   Ab 1200 px füllt die Karte die ganze Fläche und die Karten schweben darüber (D10, Abschnitt am Ende der Datei).
+/* Mountain Radar – Layout: Kartenfläche links, Seitenleiste mit Wetter, Filter und Trefferliste rechts.
+   Ab 1200 px füllt die Karte die ganze Fläche und die Karten schweben darüber (D10); bis 820 px füllt sie den Raum unter der
+   Statusleiste und die Seitenleiste ist ein Bottom Sheet (D11). Beide Abschnitte stehen am Ende der Datei.
    Design-Fundament (D2): Alle Farben, Schrift, Radien und Abstände kommen aus den Tokens `--mr-*` unten.
    Dokumentation: docs/STYLEGUIDE.md, Abschnitt „Design Tokens“. */
 
@@ -60,6 +61,8 @@
   /* Schatten */
   --mr-shadow-sm: 0 1px 4px rgba(0,0,0,.25);
   --mr-shadow-md: 0 4px 16px rgba(0,0,0,.18);
+  --mr-shadow-up: 0 -4px 16px rgba(0,0,0,.18);   /* Bottom Sheet (D11): Schatten nach oben */
+  --mr-scrim: rgba(0,0,0,.45);                   /* Abdunklung hinter einem Sheet (D11) */
 
   /* Typografie */
   --mr-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -103,6 +106,8 @@
     --mr-upcoming: #7FB0E3;
     --mr-success: #6FBF98;
     --mr-shadow-sm: 0 1px 4px rgba(0,0,0,.6);
+    --mr-shadow-up: 0 -4px 16px rgba(0,0,0,.6);
+    --mr-scrim: rgba(0,0,0,.65);
     color-scheme: dark;
   }
 }
@@ -186,23 +191,6 @@ input[type=search] { flex: 1; min-width: 120px; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .leaflet-tile-pane { filter: brightness(.82) contrast(1.05); } }
 footer { font-size: 12px; color: var(--muted); padding: 8px 16px; border-top: 1px solid var(--line); background: var(--panel); }
 footer a { color: var(--accent); }
-@media (max-width: 820px) {
-  body { height: auto; }
-  .mr-header { flex-wrap: wrap; justify-content: flex-start; padding: var(--mr-space-md) var(--mr-space-lg); }
-  .mr-brand__emblem { width: calc(var(--mr-space-xl) + var(--mr-space-md)); height: calc(var(--mr-space-xl) + var(--mr-space-md)); }
-  .mr-brand__name { font-size: var(--mr-text-lg); }
-  .mr-header__slogan { font-size: var(--mr-text-sm); }
-  .mr-statusbar { padding: var(--mr-space-sm) var(--mr-space-lg); overflow-x: auto; }
-  .mr-statusbar__list { flex-wrap: nowrap; width: max-content; }
-  .mr-statusbar__item { flex: none; white-space: nowrap; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "dot name" "text text"; align-items: center; gap: var(--mr-space-2xs) var(--mr-space-sm); }
-  .mr-statusbar__dot { grid-area: dot; }
-  .mr-statusbar__name { grid-area: name; }
-  .mr-statusbar__text { grid-area: text; }
-  html, body { height: auto; min-height: 100%; }
-  main { grid-template-columns: minmax(0, 1fr); grid-template-rows: 60vh auto; }
-  #map { height: 60vh; }
-  aside { border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
-}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
 
@@ -336,7 +324,6 @@ footer a { color: var(--accent); }
 .av-pop .av-list { margin: 0; padding-left: var(--mr-space-lg); }
 .av-pop .av-note { font-size: var(--mr-text-xs); color: var(--mr-text-muted); }
 .av-pop .av-core { font-size: var(--mr-text-xs); font-style: italic; color: var(--mr-text-muted); }
-@media (max-width: 820px) { .kl-body { max-height: calc(60vh - 100px); } }
 @media (pointer: coarse) { .kl-head, .kl-toggle, .kl-link { min-height: 44px; } }
 
 
@@ -476,3 +463,77 @@ footer a { color: var(--accent); }
   .mr-floating .kl-card-list { flex: 1 1 auto; min-height: 0; max-height: min(30vh, 240px); padding-top: var(--mr-space-md); }
 }
 @media (min-width: 1200px) and (pointer: coarse) { .mr-floating .kl-head, .mr-floating .kl-card-head { min-height: 44px; } }
+
+/* ==========================================================================
+   Mobil (D11): bis 820 px Breite (gleiche Grenze wie MOBILE_QUERY in js/layout.js)
+   Die Karte füllt den Raum unter der Statusleiste, kein Seitenscroll. Die Seitenleiste (`aside`) ist ein Bottom Sheet (js/sheet.js):
+   Griff und Titel stehen immer, Zustand und Höhe kommen aus `--mr-sheet-h` und `main[data-sheet]` (peek, half, full). Das Bedienfeld
+   „Karten & Layer“ ist ein Knopf oben rechts und aufgeklappt ein Sheet über der Karte (js/layer_panel.js, Klasse `is-open`).
+   Inhalte von Seitenleiste, Bedienfeld, Legenden und Popups sind unverändert, nur Anordnung und Größen. Alles nur Tokens, hell und dunkel.
+   Touch-Ziele sind hier immer mindestens 44 px (nicht nur bei `pointer: coarse`), damit das Layout auch ohne Touch-Erkennung gleich bleibt.
+   ========================================================================== */
+.mr-sheet__handle { display: none; }   /* nur mobil sichtbar; js/sheet.js legt den Griff immer an */
+
+@media (max-width: 820px) {
+  /* Die Seite scrollt nie: `clip` (Rückfall `hidden`) lässt auch programmatisches Scrollen, z. B. scrollIntoView, nicht zu */
+  html, body, main { overflow: hidden; overflow: clip; }
+  body { height: 100%; height: 100dvh; }
+
+  /* Header kompakt; der Slogan folgt auf Smartphones nicht mehr in einer eigenen Zeile (siehe unten) */
+  .mr-header { flex-wrap: wrap; justify-content: space-between; padding: var(--mr-space-sm) var(--mr-space-lg); }
+  .mr-brand__emblem { width: calc(var(--mr-space-xl) + var(--mr-space-md)); height: calc(var(--mr-space-xl) + var(--mr-space-md)); }
+  .mr-brand__name { font-size: var(--mr-text-lg); }
+  .mr-header__slogan { font-size: var(--mr-text-sm); }
+
+  /* Statusleiste: eine Zeile, die Leiste selbst scrollt seitlich (nie die Seite) */
+  .mr-statusbar { display: flex; align-items: center; min-height: 44px; padding: 0 var(--mr-space-lg); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .mr-statusbar::-webkit-scrollbar { display: none; }
+  .mr-statusbar__list { --mr-gap: var(--mr-space-xl); flex: none; flex-wrap: nowrap; width: max-content; padding-right: var(--mr-space-xl); }
+  .mr-statusbar { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--mr-space-xl)), transparent); mask-image: linear-gradient(to right, #000 calc(100% - var(--mr-space-xl)), transparent); }   /* blendet den rechten Rand aus: Hinweis, dass die Leiste weiterläuft */
+  .mr-statusbar__item { flex: none; white-space: nowrap; }
+
+  /* Karte füllt den Rest; das Sheet liegt darüber */
+  main { position: relative; display: block; }
+  #map { position: absolute; inset: 0; z-index: 0; height: auto; min-height: 0; }
+
+  /* Bottom Sheet = Seitenleiste. Die Höhe setzt js/sheet.js; der Griff bleibt beim Scrollen oben stehen. */
+  aside { position: absolute; z-index: 10; left: 0; right: 0; bottom: 0; height: var(--mr-sheet-h, 56px); padding: 0 var(--mr-space-md) var(--mr-space-md); gap: var(--mr-space-md); overflow-y: auto; overscroll-behavior: contain; border: 0; border-top: 1px solid var(--mr-line); border-radius: var(--mr-radius-xl) var(--mr-radius-xl) 0 0; background: var(--mr-bg); box-shadow: var(--mr-shadow-up); transition: height .25s ease; }
+  main.is-dragging aside, main.is-dragging .leaflet-bottom { transition: none; }
+  .mr-sheet__handle { position: sticky; top: 0; z-index: 2; display: flex; flex: none; flex-direction: column; align-items: center; justify-content: center; gap: var(--mr-space-xs); width: calc(100% + 2 * var(--mr-space-md)); min-height: 56px; margin: 0 calc(-1 * var(--mr-space-md)); padding: var(--mr-space-sm) var(--mr-space-md); border: 0; border-radius: var(--mr-radius-xl) var(--mr-radius-xl) 0 0; background: var(--mr-bg); color: var(--mr-text-muted); touch-action: none; cursor: grab; }
+  .mr-sheet__handle:focus-visible { outline-offset: -4px; }
+  .mr-sheet__grabber { width: calc(var(--mr-space-2xl) + var(--mr-space-sm)); height: var(--mr-space-xs); border-radius: var(--mr-radius-pill); background: var(--mr-text-muted); }
+  aside > footer { flex: none; margin: 0 calc(-1 * var(--mr-space-md)) calc(-1 * var(--mr-space-md)); padding: var(--mr-space-md); background: var(--mr-surface); }
+
+  /* Quellenangabe und Legendenkarte stehen über dem Sheet; im Zustand „full“ ist unten kein Platz mehr */
+  .leaflet-bottom { bottom: var(--mr-sheet-h, 0px); transition: bottom .25s ease; }
+  main[data-sheet="full"] .leaflet-bottom, main[data-sheet="full"] .leaflet-top.leaflet-left { visibility: hidden; }
+  .kl-card { width: min(260px, calc(100vw - 32px)); }
+  .kl-card-list { max-height: 30vh; }
+
+  /* Zoom: 44 px */
+  .leaflet-bar a, .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }
+
+  /* Bedienfeld: Knopf oben rechts */
+  .kl-dock { position: absolute; z-index: 20; top: var(--mr-space-sm); right: var(--mr-space-sm); margin: 0; }
+  .kl-panel { width: auto; border-radius: var(--mr-radius-xl); box-shadow: var(--mr-shadow-md); }
+  .kl-head { min-height: 44px; padding: 0 var(--mr-space-lg); border-radius: calc(var(--mr-radius-xl) - 1px); }
+  .kl-head[aria-expanded="false"]::after { content: ""; margin: 0; }
+  /* Bedienfeld aufgeklappt: Sheet über der Karte, dahinter abgedunkelt (Tippen auf die Abdunklung schließt, siehe layer_panel.js) */
+  .kl-dock.is-open { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; justify-content: flex-end; background: var(--mr-scrim); }
+  .kl-dock.is-open .kl-panel { display: flex; flex-direction: column; width: 100%; max-height: 85%; border-width: 1px 0 0; border-radius: var(--mr-radius-xl) var(--mr-radius-xl) 0 0; box-shadow: var(--mr-shadow-up); }
+  .kl-dock.is-open .kl-head { flex: none; border-radius: calc(var(--mr-radius-xl) - 1px) calc(var(--mr-radius-xl) - 1px) 0 0; }
+  .kl-dock.is-open .kl-head::after { content: "✕"; }
+  .kl-dock.is-open .kl-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; }
+
+  /* Popups: nie breiter oder höher als die Karte; der Inhalt scrollt im Popup (Höhe aus js/layout.js) */
+  .leaflet-popup.mr-popup .leaflet-popup-content { max-width: calc(100vw - 58px); max-height: var(--mr-popup-max-h, none); overflow-y: auto; overscroll-behavior: contain; }
+  .leaflet-popup.mr-popup a.leaflet-popup-close-button { width: 44px; height: 44px; padding: 0; font-size: 28px; line-height: 44px; }
+  .pa-pop-head { padding-right: var(--mr-space-2xl); }   /* Platz für den 44-px-Schließknopf */
+
+  /* Touch-Ziele mindestens 44 px */
+  .mr-switch, .kl-filter .mr-switch, .mr-segment__opt span, .kl-toggle, .kl-card-head, .mr-card input[type=search], .mr-card button, .kl-legend .av-alt select { min-height: 44px; }
+  .kl-link { min-width: 44px; min-height: 44px; }
+}
+@media (max-width: 560px) {
+  .mr-header__slogan { display: none; }   /* Smartphone: Karte vor Slogan; der Name und der Claim bleiben */
+}

@@ -1,12 +1,12 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Tests Layout mit schwebenden Karten (D10)</title>
+<title>Tests Layout: schwebende Karten (D10) und Bottom Sheet (D11)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
 // Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
 // Lädt die echte Anwendung (index.html) in Rahmen unterschiedlicher Breite, damit die Medienabfragen (1200 px, 820 px) greifen,
-// und prüft Anordnung, Überlagerung, Zoom und Autopan der Popups. Braucht keine Netzwerkantwort (Kacheln und Wetter dürfen fehlen).
+// und prüft Anordnung, Überlagerung, Zoom und Autopan der Popups sowie mobil (390 und 320 px) Bottom Sheet, Layer-Sheet, Überlauf und Touch-Ziele. Braucht keine Netzwerkantwort (Kacheln und Wetter dürfen fehlen).
 // Nicht geprüft werden kann hier der Wechsel über die 1200 px bei laufender Seite: Der Headless-Browser wertet Medienabfragen nur
 // bei Bildern aus, die er kaum zeichnet. Das ist im echten Browser zu prüfen (siehe PR).
 var results = [];
@@ -85,7 +85,7 @@ async function desktop() {
   f.remove();
 }
 
-async function medium() {   // 820 bis 1199 px: bisheriges Layout
+async function medium() {   // 821 bis 1199 px: klassisches Layout
   var f = await openFrame(1000, 800), d = f.contentDocument, M = await appMap(f);
   var m = rect(d, '#map'), side = rect(d, 'main > aside');
   ok('1000 px: bisheriges Layout (Karte neben fester Seitenleiste)', Math.abs(m.w - 600) < 2 && Math.abs(side.w - 400) < 2 && !d.querySelector('main > aside').style.position && d.defaultView.getComputedStyle(d.querySelector('main > aside')).position === 'static', fmt(m));
@@ -95,20 +95,98 @@ async function medium() {   // 820 bis 1199 px: bisheriges Layout
   f.remove();
 }
 
-async function mobile() {   // unter 820 px: bisheriges Layout
-  var f = await openFrame(390, 844), d = f.contentDocument, M = await appMap(f), cs = f.contentWindow.getComputedStyle.bind(f.contentWindow);
-  var m = rect(d, '#map'), side = rect(d, 'main > aside');
-  ok('Mobil: Karte 60 vh, Seitenleiste darunter', Math.abs(m.h - 844 * 0.6) < 2 && side.t >= m.b - 1, fmt(m) + ' / ' + fmt(side));
-  ok('Mobil: keine schwebenden Karten (Seitenleiste im Fluss)', cs(d.querySelector('main > aside')).position === 'static' && cs(d.getElementById('map')).position === 'relative');
-  var legendEl = d.querySelector('.kl-card');
-  ok('Mobil: Legendenkarte unten rechts als Kartenelement, zunächst zu', !legendEl.closest('.kl-dock') && d.getElementById('kl-card-list').hidden);
-  ok('Mobil: Bedienfeld zunächst zu', d.getElementById('kl-body').hidden);
-  ok('Mobil: Leaflet kennt die Kartengröße', M.map.getSize().x === d.getElementById('map').clientWidth);
+// Touch-Ziele: sichtbare, bedienbare Elemente müssen mindestens 44 × 44 px groß sein (Schalter und Auswahl über ihr Label, nicht über das versteckte Eingabefeld).
+// Nicht geprüft: Fließtext-Links (Quellenangaben, Popup-Links) – für Links im Satz gilt die Ausnahme von WCAG 2.5.8.
+function smallTargets(d) {
+  var out = [];
+  ['button', 'select', 'input[type=search]', '.mr-switch', '.mr-segment__opt', '.leaflet-bar a', '.leaflet-popup-close-button', '.mr-statusbar', '.item'].forEach(function (s) {
+    Array.prototype.forEach.call(d.querySelectorAll(s), function (e) {
+      if (e.closest('[hidden],[inert]')) return;
+      var r = e.getBoundingClientRect();
+      if (!r.width || !r.height || d.defaultView.getComputedStyle(e).visibility === 'hidden') return;
+      if (r.width < 43.5 || r.height < 43.5) out.push(s + ' ' + Math.round(r.width) + '×' + Math.round(r.height));
+    });
+  });
+  return out;
+}
+function noOverflow(d) { var de = d.documentElement; return de.scrollWidth <= de.clientWidth && d.body.scrollWidth <= de.clientWidth; }
+function pointer(f, el, type, y) { el.dispatchEvent(new f.contentWindow.PointerEvent(type, { bubbles: true, pointerId: 7, pointerType: 'touch', clientX: 100, clientY: y, button: 0 })); }
+
+async function mobile(w, h) {   // bis 820 px: Karte füllt den Raum, Seitenleiste ist ein Bottom Sheet, Bedienfeld ein Sheet über der Karte (D11)
+  var f = await openFrame(w, h), d = f.contentDocument, M = await appMap(f), map = M.map, cs = f.contentWindow.getComputedStyle.bind(f.contentWindow), t = w + ' px: ';
+  noAnimation(f, map);
+  var st = d.createElement('style'); st.textContent = '* { transition: none !important; }'; d.head.appendChild(st);   // das Sheet fährt per CSS-Übergang; der Headless-Browser zeichnet kaum Bilder
+  map.invalidateSize({ pan: false });   // wie der ResizeObserver der Anwendung; der Headless-Browser führt ihn nur verzögert aus
+  await wait(300);
+  var main = rect(d, 'main'), m = rect(d, '#map'), aside = d.querySelector('main > aside'), handle = d.querySelector('.mr-sheet__handle');
+  ok(t + 'Karte füllt den ganzen Bereich unter der Statusleiste', Math.abs(m.w - main.w) < 1 && Math.abs(m.h - main.h) < 1 && cs(d.getElementById('map')).position === 'absolute', fmt(m) + ' vs ' + fmt(main));
+  ok(t + 'Karte ist deutlich höher als vorher (60 vh)', m.h > h * 0.7, 'Höhe ' + m.h);
+  ok(t + 'Seite scrollt nicht (kein horizontaler Überlauf, Höhe passt)', noOverflow(d) && d.documentElement.scrollHeight <= d.documentElement.clientHeight);
+  ok(t + 'Leaflet kennt die Kartengröße', map.getSize().x === d.getElementById('map').clientWidth && map.getSize().y === d.getElementById('map').clientHeight);
+
+  var s = rect(d, 'main > aside');
+  ok(t + 'Seitenleiste ist ein Bottom Sheet am unteren Rand (Zustand peek, Griff sichtbar)', cs(aside).position === 'absolute' && Math.abs(s.b - main.b) < 1 && s.h <= 80 && d.querySelector('main').dataset.sheet === 'peek' && cs(handle).display !== 'none' && handle.getAttribute('aria-expanded') === 'false', fmt(s));
+  ok(t + 'Wetter und Sperrungen liegen im Sheet, verdeckter Inhalt ist inert', d.querySelectorAll('main > aside > .mr-card').length === 2 && d.querySelectorAll('main > aside > .mr-card[inert]').length === 2);
+  ok(t + 'Quellenangaben (Fußzeile) stehen am Ende des Sheets', d.querySelector('footer').parentElement === aside && aside.lastElementChild === d.querySelector('footer'));
+  var one = d.querySelector('.mr-statusbar'), items = one.querySelectorAll('.mr-statusbar__item'), tops = Array.prototype.map.call(items, function (e) { return Math.round(e.getBoundingClientRect().top); });
+  ok(t + 'Statusleiste einzeilig, scrollt für sich', tops.every(function (y) { return y === tops[0]; }) && cs(one).overflowX === 'auto' && one.scrollWidth > one.clientWidth, tops.join(','));
+
+  var legendEl = d.querySelector('.kl-card'), lg = rect(d, '.kl-card'), bottomCtl = rect(d, '.leaflet-bottom.leaflet-right');
+  ok(t + 'Legendenkarte liegt als Kartenelement über dem Sheet, zunächst zu', !legendEl.closest('.kl-dock') && d.getElementById('kl-card-list').hidden && bottomCtl.b <= s.t + 1, fmt(bottomCtl) + ' / ' + fmt(s));
+  var tg = smallTargets(d); ok(t + 'Touch-Ziele (Griff, Zoom, Layer-Knopf, Legende) mindestens 44 px', !tg.length, tg.join('; '));
+
+  // Zustände des Sheets: Tippen, Wischen, Tastatur
+  function sheetH() { return d.querySelector('main > aside').getBoundingClientRect().height; }
+  handle.click();
+  ok(t + 'Tippen auf den Griff öffnet auf half (halbe Kartenhöhe)', d.querySelector('main').dataset.sheet === 'half' && Math.abs(sheetH() - main.h * 0.5) < 2 && handle.getAttribute('aria-expanded') === 'true', sheetH() + ' / ' + main.h);
+  ok(t + 'half: Inhalt erreichbar (nicht mehr inert), Seite scrollt nicht', d.querySelectorAll('main > aside [inert]').length === 0 && noOverflow(d));
+  tg = smallTargets(d); ok(t + 'Touch-Ziele im Sheet (half) mindestens 44 px', !tg.length, tg.join('; '));
+  pointer(f, handle, 'pointerdown', 500); pointer(f, handle, 'pointermove', 400); pointer(f, handle, 'pointermove', 100); pointer(f, handle, 'pointerup', 100);
+  ok(t + 'Wischen nach oben öffnet auf full, oben bleibt ein Kartenstreifen', d.querySelector('main').dataset.sheet === 'full' && rect(d, 'main > aside').t - main.t >= 50, d.querySelector('main').dataset.sheet);
+  handle.dispatchEvent(new f.contentWindow.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  ok(t + 'Pfeil runter: full → half', d.querySelector('main').dataset.sheet === 'half');
+  pointer(f, handle, 'pointerdown', 300); pointer(f, handle, 'pointermove', 400); pointer(f, handle, 'pointermove', 900); pointer(f, handle, 'pointerup', 900);
+  ok(t + 'Wischen nach unten schließt auf peek', d.querySelector('main').dataset.sheet === 'peek' && sheetH() <= 80);
+
+  // Bedienfeld „Karten & Layer“: Knopf oben rechts, aufgeklappt ein Sheet über der Karte
+  var dock = d.querySelector('.kl-dock'), head = d.querySelector('.kl-head'), r0 = rect(d, '.kl-dock');
+  ok(t + 'Bedienfeld zunächst zu, als Knopf oben rechts in der Karte', dock.parentElement === d.querySelector('main') && d.getElementById('kl-body').hidden && Math.abs(r0.r - main.r) < 16 && r0.t - main.t < 16 && r0.h >= 43.5, fmt(r0));
+  head.click();
+  var p1 = rect(d, '.kl-panel');
+  ok(t + 'Layer-Sheet: unten, volle Breite, höchstens 85 % hoch, Abdunklung dahinter', dock.classList.contains('is-open') && Math.abs(p1.w - w) < 1 && Math.abs(p1.b - h) < 1 && p1.h <= h * 0.86 && cs(dock).position === 'fixed', fmt(p1));
+  Array.prototype.forEach.call(d.querySelectorAll('.kl-toggle[aria-expanded=false]'), function (b) { b.click(); });
+  tg = smallTargets(d); ok(t + 'Touch-Ziele im Layer-Sheet (alle Abschnitte offen) mindestens 44 px', !tg.length, tg.join('; '));
+  ok(t + 'Layer-Sheet: kein Seitenüberlauf, Inhalt scrollt im Sheet', noOverflow(d) && d.querySelector('.kl-body').scrollHeight > d.querySelector('.kl-body').clientHeight);
+  var had = map.hasLayer(M.protectedAreasLayer), sw = d.querySelectorAll('.kl-layer input')[1];
+  sw.click(); var off = !map.hasLayer(M.protectedAreasLayer); sw.click();
+  ok(t + 'Layer-Bedienung wirkt wie zuvor (Schalter blendet die Ebene aus und ein)', had && off && map.hasLayer(M.protectedAreasLayer));
+  d.dispatchEvent(new f.contentWindow.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  ok(t + 'Esc schließt das Layer-Sheet', !dock.classList.contains('is-open') && d.getElementById('kl-body').hidden);
+  head.click(); dock.click();
+  ok(t + 'Tippen auf die Abdunklung schließt das Layer-Sheet', !dock.classList.contains('is-open'));
+
+  // Popup: bleibt in der Karte, über dem Sheet, scrollt bei großer Höhe
+  map.setView([47.2, 11.4], 10, { animate: false });
+  var pop = f.contentWindow.L.popup({ className: 'mr-popup', maxWidth: 400 }).setLatLng(map.getCenter()).setContent('<div class="pa-pop"><div class="pa-pop-head"><h3>Test</h3></div>' + new Array(60).join('<p>Zeile mit Text, der umbrechen kann, damit das Popup sehr hoch wird.</p>') + '</div>').openOn(map);
+  await until(function () { var e = pop.getElement(); return e && e.getBoundingClientRect().height > 0; });
+  await wait(600);
+  var pw = pop.getElement().querySelector('.leaflet-popup-content-wrapper').getBoundingClientRect(), pc = pop.getElement().querySelector('.leaflet-popup-content'), as = rect(d, 'main > aside');
+  ok(t + 'Popup liegt innerhalb der Kartenbreite', pw.left >= 0 && pw.right <= w + 0.5, Math.round(pw.left) + '..' + Math.round(pw.right));
+  ok(t + 'Hohes Popup bleibt über dem Sheet und scrollt im Popup', pw.top >= m.t - 1 && pw.bottom <= as.t + 1 && pc.scrollHeight > pc.clientHeight && cs(pc).overflowY === 'auto', Math.round(pw.top) + '..' + Math.round(pw.bottom) + ' / Sheet ' + Math.round(as.t));
+  tg = smallTargets(d); ok(t + 'Schließen-Knopf des Popups mindestens 44 px', !tg.length, tg.join('; '));
+  map.closePopup();
   f.remove();
 }
 
+async function boundary() {   // 820 px ist die letzte mobile Breite, 821 px das klassische Layout
+  var a = await openFrame(820, 800), b = await openFrame(821, 800);
+  var cs = function (f) { return f.contentWindow.getComputedStyle(f.contentDocument.querySelector('main > aside')).position; };
+  ok('820 px: Sheet (mobil)', cs(a) === 'absolute' && !!a.contentDocument.querySelector('main').dataset.sheet);
+  ok('821 px: klassisches Layout (Seitenleiste im Fluss, kein Sheet)', cs(b) === 'static' && !b.contentDocument.querySelector('main').dataset.sheet && b.contentDocument.querySelector('footer').parentElement === b.contentDocument.body);
+  a.remove(); b.remove();
+}
 (async function () {
-  try { await desktop(); await medium(); await mobile(); }
+  try { await desktop(); await medium(); await boundary(); await mobile(390, 844); await mobile(320, 640); }
   catch (e) { results.push({ name: 'Testlauf', ok: false, error: String(e && e.message || e) }); }
   var failed = results.filter(function (r) { return !r.ok; });
   document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });

@@ -11,7 +11,7 @@ Bergbedingungen
 
 > Version: 2.4 (aktuelle Version siehe Versionshistorie am Ende)
 >
-> Letzte Aktualisierung: 30.10.2026
+> Letzte Aktualisierung: 03.11.2026
 >
 > Dieses Dokument ist die Single Source of Truth für Vision, Prioritäten, Phasen und Projektstatus von Mountain Radar. Alle Statusangaben stehen in den Abschnitten „Aktuelle Prioritäten“, „Kernmodule“ und „Implementierungs-Checkliste“ und sind dort aufeinander abgestimmt.
 >
@@ -98,7 +98,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 7 | GPX Upload & Tourenanalyse | Geplant (Phase 1) |
 | 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1), Weather Intelligence Popup geplant (niedrige Priorität, WEB-T7); Mobile: Zukunft (Phase 4-5) |
 | 9 | Alpine Risk Engine | Design (Beta Phase 3, GA Phase 5) |
-| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b, Sperrungen- und Hinweise-Popups mit D8c umgesetzt (alle Popups auf dem gemeinsamen System), Legendenkarte mit D9 umgesetzt, vollflächige Karte mit schwebenden Karten ab 1200 px mit D10 umgesetzt, Mobile (D11) offen) |
+| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b, Sperrungen- und Hinweise-Popups mit D8c umgesetzt (alle Popups auf dem gemeinsamen System), Legendenkarte mit D9 umgesetzt, vollflächige Karte mit schwebenden Karten ab 1200 px mit D10, mobiles Layout mit Bottom Sheet bis 820 px mit D11 umgesetzt; D12 und D13 offen) |
 | 11 | PWA & Offline | Zukunft (nach Phase 4) |
 | 12 | Mobile App | Zukunft (Phase 4) |
 
@@ -189,7 +189,7 @@ Datenquellen für alle Module sind in **DATENQUELLEN.md** dokumentiert.
 
 **Beschreibung:** Beim Klick auf die Karte erscheint optional ein Wetter-Popup direkt an der gewählten Position. Es baut auf dem gemeinsamen Popup-System von D8a–D8c auf (`mr-popup`, `.pa-pop`, `.pa-pop-head`, `.mr-kv`) und zeigt nur reale Wetterdaten, die heute bereits vorhanden sind.
 
-**Status:** Geplant, nicht implementiert. **Priorität:** niedriger als die laufende Design-Migration (D11–D13); Start frühestens danach.
+**Status:** Geplant, nicht implementiert. **Priorität:** niedriger als die laufende Design-Migration (D12–D13); Start frühestens danach.
 
 **Einordnung:** Toolbox (WEB-T1 „Wetter am Punkt“ zeigt die Werte heute nur in der Wetter-Karte der Seitenleiste). Bewusst *nicht* unter „Wetterintegration (Phase 2)“: Phase 2 (GeoSphere, „Wetter-am-Punkt erweitert“, Wetterrisiko) bringt neue Daten und Modelle, dieses Feature stellt nur vorhandene Daten an der Kartenposition dar.
 
@@ -281,7 +281,8 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] Sperrungen- und Hinweise-Popups auf das gemeinsame Popup-System migriert (D8c); ein Wetter-Pin-Popup existiert nicht
 - [x] Legendenkarte unten rechts (D9): kompakte Legende, zeigt nur eingeblendete Ebenen, einklappbar
 - [x] Vollflächige Karte mit schwebenden Karten (D10, Desktop ≥ 1200 px): Wetter und Sperrungen links, Bedienfeld und Legendenkarte rechts in einem Dock (keine Überlagerung), Popups mit Autopan-Abstand
-- [ ] Umsetzung des Design Systems in der Oberfläche (weitere Schritte D11–D13 laut DESIGN_MIGRATIONSPLAN.md)
+- [x] Mobiles Layout und Bottom Sheet (D11, bis 820 px): Karte füllt den Bildschirm, Seitenleiste als Bottom Sheet (peek, half, full), „Karten & Layer“ als Sheet über der Karte, einzeilige Statusleiste, Popups begrenzt und scrollbar, Touch-Ziele mind. 44 px; Desktop unverändert
+- [ ] Umsetzung des Design Systems in der Oberfläche (weitere Schritte D12–D13 laut DESIGN_MIGRATIONSPLAN.md)
 - [x] Produktname „Mountain Radar“ in der Anwendung (D1: Titel, Meta-Beschreibung, Header, Favicon)
 
 ### Phase 4 — Status: FUTURE
@@ -364,6 +365,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 3.8 | 2026-11-03 | Design-Migrationsplan D11 (mobiles Layout mit Bottom Sheet, bis 820 px) umgesetzt |
 | 3.7 | 2026-11-03 | Design-Migrationsplan D10 (vollflächige Karte, schwebende Karten ab 1200 px) umgesetzt |
 | 3.6 | 2026-11-01 | Weather Intelligence Popup (WEB-T7) als geplantes Feature in der Toolbox ergänzt (nur Dokumentation) |
 | 3.5 | 2026-11-01 | Design-Migrationsplan D9 (Legendenkarte) umgesetzt |
