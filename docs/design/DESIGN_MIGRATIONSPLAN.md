@@ -44,7 +44,7 @@ Wichtige Hinweise zum Mockup:
 | Popups | Funktional, schlichte Optik | Kopfzeile mit Icon, Akzentbalken, Key-Value-Zeilen, Badges | mittel | ein gemeinsames Popup-Gerüst |
 | Legende | Im Layer-Panel | Eigene Karte unten rechts | klein | Legenden-Module vorhanden |
 | Suche | Filter der Sperrungsliste | Globale Suche (Berge, Routen, Orte), ⌘K | mittel–groß | Geocoding nur mit eigener Quelle |
-| Karte | OSM/OpenTopoMap bunt | Gedämpfte, grüntonige Karte, Basemap „Hybrid/Satellit/Terrain“ | mittel | Kachellizenzen; Satellit wäre neue Quelle |
+| Karte | OSM/OpenTopoMap bunt (seit D12 per Sättigungsfilter gedämpft) | Gedämpfte, grüntonige Karte, Basemap „Hybrid/Satellit/Terrain“ | mittel | Kachellizenzen; Satellit wäre neue Quelle |
 | Route / Risiko / CTA | nicht vorhanden | Route Intelligence, Risk Insights, „Analyze Route“ | groß | GPX-Import, Risk Engine (Phase 1–3) |
 | Mobile | Gestapelt, Karte 60 vh (bis D10) | nicht gezeigt; seit D11 Bottom Sheet, Karte füllt den Bildschirm | mittel | erledigt (D11) |
 
@@ -124,15 +124,17 @@ Prinzipien: Jeder PR ist allein mergebar und rückbaubar, ändert nur einen Bere
 - Bewusst nicht umgesetzt: Sicherheitsabstände für Notch und Home-Indikator, Ziehen am Inhalt (nur am Griff), Slogan bis 560 px (ausgeblendet statt in eigener Zeile), Anpassung für Smartphones quer über 820 px (klassisches Layout wie bisher), neue Inhalte oder Funktionen (kein Zusammenfassungstext im Peek-Zustand).
 - Ursprünglicher Umfang: Erst Entwurf (Skizze) abstimmen, dann Umsetzung: Bottom-Sheet statt Seitenleiste, Layer-Panel als Sheet, Statusleiste einzeilig scrollbar. Ersetzt den 820-px-Breakpoint.
 
-**D12 — Gedämpfte Kartenoptik (optional)**
-- Umfang: Sanfte Tönung der Kacheln per CSS-Filter, damit Overlays (Schutzgebiete, Lawinen) besser hervortreten. Satellit/Hybrid nur, wenn eine lizenzkonforme Kachelquelle gewählt wird (eigene Entscheidung, siehe DATENQUELLEN).
+**D12 — Gedämpfte Kartenoptik** ✅ erledigt (03.11.2026)
+- Umsetzung: CSS-Filter je Grundkarte (OSM und Topo), Hell und Dunkel getrennt, als Tokens `--mr-map-filter-osm` / `--mr-map-filter-topo` in `style.css`; Hook: `className` der Kachelebenen in `js/map.js`. Hell: `saturate(.55)` bzw. `.5` mit minimaler Aufhellung, ohne Kontrastfilter; Dunkel: wie zuvor `brightness(.82) contrast(1.05)` plus `saturate`. Der bisherige Dunkelfilter auf der Tile-Pane wurde in dieselben Tokens überführt. Overlays, Pins, Popups und Bedienelemente bleiben unberührt (eigene Panes), ebenso Lawinen- und Warnfarben. Messung: +1 bis 2 ms je Frame beim Verschieben (Software-Rendering), keine JS-Fehler. Vorher/Nachher-Bilder: `docs/design/d12/`. Dokumentation: STYLEGUIDE.md („Gedämpfte Kartenoptik“).
+- Bewusst nicht umgesetzt: Satellit/Hybrid und neue Kartenquellen (nur mit eigener Lizenzentscheidung), Änderungen an Layerfarben oder -daten, einstellbare Stärke. Beobachtung: Bei aktiver Lawinenlage (Stufe 1 grün, 55 % Deckkraft) überdeckt die Lawinenfläche die Grundkarte weitgehend; die Dämpfung hilft dort vor allem bei Topo. Eine Anpassung der Lawinenfarben ist laut Styleguide ausgeschlossen.
+- Ursprünglicher Umfang: Sanfte Tönung der Kacheln per CSS-Filter, damit Overlays (Schutzgebiete, Lawinen) besser hervortreten. Satellit/Hybrid nur, wenn eine lizenzkonforme Kachelquelle gewählt wird (eigene Entscheidung, siehe DATENQUELLEN).
 
 **D13 — Globale Suche (optional)**
 - Umfang: Suchfeld oben links wie im Mockup. Zunächst nur Filter über Sperrungen und Schutzgebiete. Orts-Suche erfordert Geocoding (z. B. Nominatim mit Nutzungsrichtlinie) und ist ein eigenes Arbeitspaket. ⌘K-Hinweis erst mit echtem Shortcut.
 
 ### Empfohlene Reihenfolge
 
-D1 → D2 → D3 → D4 → D5 → D6 → D7 → D8a/b/c → D9 → D10 → D11 → (D12, D13)
+D1 → D2 → D3 → D4 → D5 → D6 → D7 → D8a/b/c → D9 → D10 → D11 → D12 → (D13)
 
 D1 bis D3 liefern schon einen sichtbaren Markenauftritt. Nach D9 sieht die App der Vision im Detail ähnlich, bevor das riskante Layout (D10) angefasst wird.
 

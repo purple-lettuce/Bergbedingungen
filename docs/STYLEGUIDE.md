@@ -94,7 +94,7 @@ Die Karte soll als operative Arbeitsfläche dienen. Sie darf nicht überladen wi
 
 ## Stilmerkmale
 
-- ruhige Basisfarben für Hintergrundkarten
+- ruhige Basisfarben für Hintergrundkarten (seit D12 per Sättigungsfilter, siehe „Gedämpfte Kartenoptik“)
 - hohe Lesbarkeit von Labels und Linien
 - klare Trennung zwischen Layern und Objekten
 - visuelle Signale nur dort, wo sie für Sicherheit und Nutzung relevant sind
@@ -431,6 +431,28 @@ Touch-Ziele: Kopf, Abschnittstitel, Schalter und Segmente mindestens 44 px bei `
 ## Legendenkarte (seit D9)
 
 Kompakte Legende als eigenes Kartenelement unten rechts (`.mr-card.mr-card--raised.kl-card`, Leaflet-Control `bottomright`). Sie zeigt nur die Legenden **eingeblendeter** Ebenen (Abschnitt je Ebene mit `.mr-label`-Titel und denselben Zeilen `.pa-list` wie die ausführliche Legende) und ist ganz verborgen, wenn keine Ebene Inhalt hat. Der Kopf „Legende“ ist ein Knopf mit `aria-expanded`/`aria-controls`; die Karte ist unter 1200 px zunächst eingeklappt, weil sie dort aufgeklappt Abschnitte des Bedienfelds überdecken würde; ab 1200 px steht sie im Dock unter dem Bedienfeld und ist zunächst offen (siehe „Layout mit schwebenden Karten“, D10). Schnittstelle: `addLegend(...)` liefert zusätzlich `setCompact(html | Node)`; die Legenden-Module füllen sie aus denselben Daten wie die ausführliche Fassung. Lawinenlage: nur die Gefahrenstufen, und nur wenn ein aktueller Bericht vorliegt. Im Bedienfeld bleibt die ausführliche Variante mit Quellen, Hinweisen und Höhenwahl.
+
+# Gedämpfte Kartenoptik (seit D12)
+
+Die Grundkarte tritt zurück, damit Schutzgebiete, Lawinenlage und Sperrungen die Aufmerksamkeit bekommen. Umsetzung nur per CSS-Filter auf den Kacheln der Grundkarte: keine neue Kartenquelle, keine Satelliten- oder Hybridkarte, keine Änderung an Layerdaten, Layerfarben oder Lawinenfarben.
+
+| Baustein | Beschreibung |
+|---|---|
+| Hook | `className` der beiden Kachelebenen in `js/map.js`: `mr-basemap mr-basemap--osm` und `mr-basemap mr-basemap--topo` (Leaflet setzt sie am Container der Kachelebene) |
+| Filter | Tokens `--mr-map-filter-osm` und `--mr-map-filter-topo` in `style.css`, einzeln für Hell und Dunkel; angewendet in `.mr-basemap--osm` und `.mr-basemap--topo` |
+| Hell | OSM `saturate(.55) brightness(1.02)`, Topo `saturate(.5) brightness(1.03)` |
+| Dunkel | OSM `saturate(.55) brightness(.82) contrast(1.05)`, Topo `saturate(.5) brightness(.82) contrast(1.05)` (Helligkeit und Kontrast wie vor D12, neu ist die Sättigung) |
+
+Regeln:
+
+- **Warum Sättigung:** Sie nimmt der Karte die Buntheit (OSM-Grünflächen, Topo-Höhenfarben und Schummerung), ohne Helligkeitsunterschiede zu verändern. Labels, Straßen und Höhenlinien unterscheiden sich vor allem durch Helligkeit und bleiben dadurch lesbar. Topo ist von Haus aus deutlich bunter und wird stärker gedämpft.
+- **Kein Kontrastfilter im Hellmodus, kein Weichzeichner:** Der Kontrast der Beschriftung bleibt erhalten. Im Dunkelmodus bleibt `contrast(1.05)` aus der Zeit vor D12.
+- **Nur die Grundkarte:** Der Filter liegt auf den Kachelebenen, nicht auf dem Kartencontainer oder der Tile-Pane. Overlays, Pins, Popups und Bedienelemente haben eigene Panes und werden nicht verändert.
+- **Neue Grundkarte:** erhält dieselbe Klassenform (`mr-basemap mr-basemap--<name>`) und ein Filtertoken für Hell und Dunkel; ohne Filtertoken bleibt sie ungedämpft.
+- **Leistung:** Ein Filter je Kachelebene (eine Compositing-Ebene). Gemessen in Headless-Chrome mit Software-Rendering beim Verschieben der Karte: im Mittel +1 bis 2 ms je Frame (rund 17 auf 19 ms), keine Ruckler. Rückbau: Tokens auf `none` setzen.
+- **Nachweis:** Vorher/Nachher-Bilder (Hell und Dunkel, OSM und Topo, mit Schutzgebieten, Sperrungen und Lawinenlage) in `docs/design/d12/`.
+
+Nicht umgesetzt: Dämpfung der Overlays selbst (Layerfarben bleiben), Kartenstil „Hybrid/Satellit“, einstellbare Stärke.
 
 # Layout mit schwebenden Karten (seit D10)
 
