@@ -1,6 +1,6 @@
-<!doctype html>
+﻿<!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1)</title>
+<title>Tests Landing Page (LP1, LP2)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -48,9 +48,11 @@ async function small(w, h) {
 
 async function lowWindow() {
   var f = await openFrame('../index.html', 667, 300), d = f.contentDocument, de = d.documentElement;
-  ok('Niedriges Fenster (667 × 300): Seite scrollt, Aktion ist erreichbar', de.scrollHeight > 300 ? (f.contentWindow.scrollTo(0, de.scrollHeight), f.contentWindow.scrollY > 0) : true);
+  var scrolls = de.scrollHeight > 300 && (f.contentWindow.scrollTo(0, de.scrollHeight), f.contentWindow.scrollY > 0);
+  f.contentWindow.scrollTo(0, 0);
+  ok('Niedriges Fenster (667 × 300): Seite scrollt, Aktion ist erreichbar', scrolls || de.scrollHeight <= 300);
   var b = d.querySelector('.mr-button').getBoundingClientRect();
-  ok('Niedriges Fenster: Aktion nach dem Scrollen sichtbar', b.top >= 0 && b.bottom <= 300, 'oben ' + Math.round(b.top) + ', unten ' + Math.round(b.bottom));
+  ok('Niedriges Fenster: Aktion nach dem Zurückscrollen an den Anfang sichtbar', b.top >= 0 && b.bottom <= 300, 'oben ' + Math.round(b.top) + ', unten ' + Math.round(b.bottom));
 }
 
 async function appBackLink() {
@@ -58,8 +60,27 @@ async function appBackLink() {
   ok('Anwendung: Marke im Header führt zur Startseite', a && a.getAttribute('href') === './' && text(d, 'a.mr-brand .mr-brand__name') === 'Mountain Radar');
 }
 
+async function whatIs() {
+  var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
+  ok('LP2: Abschnitt „Was ist Mountain Radar?“ existiert', text(d, '#lp2-was') === 'Was ist Mountain Radar?');
+  var cards = Array.prototype.map.call(d.querySelectorAll('.mr-feature-grid h3'), function (h) { return h.textContent.trim(); });
+  ok('LP2: genau die fünf vorhandenen Bereiche', JSON.stringify(cards) === JSON.stringify(['Wetter', 'Lawinenlage', 'Schutzgebiete', 'Wildlife', 'Sperrungen & Hinweise']), cards.join(', '));
+  ok('LP2: Zielgruppen vorhanden', d.querySelectorAll('.mr-pills li').length === 5);
+  var all = d.querySelector('main').textContent;
+  ['Risk Engine', 'GPX', 'Terrain', 'Route Intelligence', 'automatisch', 'Roadmap', 'bald', 'geplant', 'künftig', 'Zukunft'].forEach(function (w) {
+    ok('LP2: keine Zukunfts- oder Nicht-Funktion erwähnt: ' + w, all.toLowerCase().indexOf(w.toLowerCase()) === -1);
+  });
+  ok('LP2: weiterhin genau eine Aktion', d.querySelectorAll('a, button').length === 1);
+  ok('LP2: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
+  var cs = f.contentWindow.getComputedStyle(d.querySelector('.mr-feature-grid .mr-card'));
+  ok('LP2: Karten nutzen Token-Fläche', cs.backgroundColor !== 'rgba(0, 0, 0, 0)');
+}
+async function whatIsSmall(w) {
+  var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
+  ok('LP2 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
+}
 (async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); }
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await whatIsSmall(390); await whatIsSmall(320); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });

@@ -581,8 +581,10 @@ Die Startseite `index.html` ist ein ruhiger Hero ohne JavaScript; die Kartenanwe
 
 - Nur Tokens und Komponenten aus diesem Styleguide, kein zweites Designsystem; die Regeln stehen im Abschnitt „Landing (LP1)“ von `style.css` und gelten nur mit `<body class="mr-landing">`. Sie nehmen die Regeln der Anwendung zurück (Seite scrollt nie, Karte füllt den Raum), damit die Seite bei niedrigen Fenstern scrollen kann.
 - Hell und Dunkel folgen `prefers-color-scheme` über die Tokens, ohne eigene Dunkelwerte.
-- Neue Abschnitte (LP2 ff.) kommen unter den Hero; der Hero behält genau einen Link zur Karte.
-- Test: `scripts/test_landing.html` (in `scripts/run_js_tests.py`) prüft Marke, Claim, Slogan, genau eine Aktion mit erreichbarem Ziel, keine Skripte, Überlauf bei 1440, 390 und 320 px, niedriges Fenster und den Rückweg aus der Anwendung.
+- Neue Abschnitte kommen unter den Hero; der Hero behält genau einen Link zur Karte, die Seite insgesamt genau eine Aktion.
+
+**Abschnitte seit LP2** (Regeln im Abschnitt „Landing (LP2)“ von `style.css`): `.mr-section` (`--alt` = Fläche `--mr-surface`) mit `.mr-section__inner` (max. 1080 px), Titel `.mr-section__title` (`h2`, 22 px) und Einleitung `.mr-section__lead` (`--mr-text-lg`, gedämpft, max. 56 Zeichen breit). „Was ist Mountain Radar?“ zeigt fünf `.mr-card.mr-card--raised` mit `.mr-label` als Titel (`h3`) in `.mr-feature-grid` (umbrechendes Raster, mobil eine Spalte); „Für wen?“ zeigt die Zielgruppen als `.mr-card--tight` in `.mr-pills` (`.mr-cluster`). Karten sind reine Information, ohne Link und ohne Schalter. Inhaltsregel: nur Funktionen, die die Anwendung heute hat; Risk Engine, GPX, Geländeanalyse, Routenanalyse und automatische Risikobewertung gehören zu LP4. Hero und Abschnitte stehen gemeinsam in `<main>`; `.mr-landing main` nimmt das Kartenraster der Anwendung zurück.
+- Test: `scripts/test_landing.html` (in `scripts/run_js_tests.py`) prüft Marke, Claim, Slogan, die LP2-Abschnitte (fünf Bereiche, Zielgruppen, keine Zukunftsbegriffe), genau eine Aktion mit erreichbarem Ziel, keine Skripte, Überlauf bei 1440, 390 und 320 px, niedriges Fenster und den Rückweg aus der Anwendung.
 
 ---
 
