@@ -1,6 +1,6 @@
 ﻿<!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1, LP2)</title>
+<title>Tests Landing Page (LP1, LP2, LP3)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -63,7 +63,7 @@ async function appBackLink() {
 async function whatIs() {
   var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
   ok('LP2: Abschnitt „Was ist Mountain Radar?“ existiert', text(d, '#lp2-was') === 'Was ist Mountain Radar?');
-  var cards = Array.prototype.map.call(d.querySelectorAll('.mr-feature-grid h3'), function (h) { return h.textContent.trim(); });
+  var cards = Array.prototype.map.call(d.querySelectorAll('#lp2-was ~ .mr-feature-grid h3'), function (h) { return h.textContent.trim(); });
   ok('LP2: genau die fünf vorhandenen Bereiche', JSON.stringify(cards) === JSON.stringify(['Wetter', 'Lawinenlage', 'Schutzgebiete', 'Wildlife', 'Sperrungen & Hinweise']), cards.join(', '));
   ok('LP2: Zielgruppen vorhanden', d.querySelectorAll('.mr-pills li').length === 5);
   var all = d.querySelector('main').textContent;
@@ -75,12 +75,27 @@ async function whatIs() {
   var cs = f.contentWindow.getComputedStyle(d.querySelector('.mr-feature-grid .mr-card'));
   ok('LP2: Karten nutzen Token-Fläche', cs.backgroundColor !== 'rgba(0, 0, 0, 0)');
 }
-async function whatIsSmall(w) {
+async function sources() {
+  var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
+  var sec = d.querySelector('#lp3-quellen').closest('section');
+  ok('LP3: Abschnitt „Aktuelle Informationsquellen“ existiert', text(d, '#lp3-quellen') === 'Aktuelle Informationsquellen');
+  var cards = Array.prototype.map.call(sec.querySelectorAll('.mr-feature-grid h3'), function (h) { return h.textContent.trim(); });
+  ok('LP3: genau die fünf vorhandenen Bereiche', JSON.stringify(cards) === JSON.stringify(['Wetter', 'Lawinenlage', 'Schutzgebiete', 'Wildlife', 'Sperrungen & Hinweise']), cards.join(', '));
+  var empty = Array.prototype.filter.call(sec.querySelectorAll('.mr-feature-grid li'), function (li) { var p = li.querySelector('p'); return !p || !p.textContent.trim(); });
+  ok('LP3: jede Karte hat Titel und Beschreibung', empty.length === 0);
+  var t = sec.textContent.toLowerCase();
+  ['Risk Engine', 'GPX', 'Terrain', 'Route', 'automatisch', 'Roadmap', 'bald', 'geplant', 'künftig', 'Zukunft', 'Coming', 'Risikobewertung'].forEach(function (w) {
+    ok('LP3: keine Zukunfts- oder Nicht-Funktion erwähnt: ' + w, t.indexOf(w.toLowerCase()) === -1);
+  });
+  ok('LP3: keine Aktion im Abschnitt', sec.querySelectorAll('a, button').length === 0);
+  ok('LP3: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP3: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
+}async function whatIsSmall(w) {
   var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
-  ok('LP2 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
+  ok('LP2/LP3 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
 }
 (async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await whatIsSmall(390); await whatIsSmall(320); }
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await whatIsSmall(390); await whatIsSmall(320); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
