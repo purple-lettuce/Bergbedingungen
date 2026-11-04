@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mountain Radar – Alpine Risk Intelligence</title>
+<meta name="description" content="Mountain Radar – ALPINE RISK INTELLIGENCE. Know before you go. Sperrungen, Hinweise, Schutzgebiete, Wetter und Lawinenlage für den Alpenraum auf einer Karte.">
+<link rel="icon" href="docs/design/mountain-radar-app-icon-m.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="preload" href="vendor/inter/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="mr-floating">
+<header class="mr-header">
+  <a class="mr-brand" href="./" title="Zur Startseite">
+    <img class="mr-brand__emblem" src="docs/design/mountain-radar-emblem.svg" alt="" width="44" height="44">
+    <div class="mr-brand__text">
+      <h1 class="mr-brand__name">Mountain Radar</h1>
+      <p class="mr-brand__claim">ALPINE RISK INTELLIGENCE</p>
+    </div>
+  </a>
+  <div class="mr-search" role="search">
+    <input id="gs" class="mr-search__input" type="search" role="combobox" aria-expanded="false" aria-controls="gs-panel" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Suchen: Schutzgebiet, Sperrung, Hinweis" aria-label="Schutzgebiete, Sperrungen und Hinweise suchen">
+    <div id="gs-panel" class="mr-search__panel" hidden>
+      <p id="gs-note" class="mr-search__note" role="status"></p>
+      <ul id="gs-list" class="mr-search__list" role="listbox" aria-label="Suchtreffer"></ul>
+    </div>
+  </div>
+  <p class="mr-header__slogan">Know before you go.</p>
+</header>
+<section class="mr-statusbar" aria-label="Datenstatus" tabindex="0">
+  <ul class="mr-cluster mr-gap-lg mr-statusbar__list" id="statusbar-list"></ul>
+</section>
+<main>
+  <div id="map" role="application" aria-label="Karte mit Sperrungen und Hinweisen"></div>
+  <aside>
+    <div id="warn" class="status err" hidden role="alert"></div>
+    <section class="mr-card mr-stack" aria-live="polite">
+      <h2 class="mr-label">Wetter</h2>
+      <div id="wx" class="mr-stack"><span class="muted">Wird geladen …</span></div>
+      <div class="mr-stack mr-gap-sm mr-divider-top">
+        <div class="mr-cluster">
+          <button id="wx-center" type="button">Für Kartenmitte</button>
+          <button id="wx-geo" type="button">Mein Standort</button>
+        </div>
+        <p class="mr-text-muted mr-text-sm mr-m-0">Tipp: Auf eine freie Stelle der Karte klicken, um das Wetter dort zu laden.</p>
+      </div>
+    </section>
+
+    <section class="mr-card mr-stack">
+      <h2 class="mr-label">Sperrungen und Hinweise</h2>
+      <input id="q" type="search" placeholder="Suchen, z. B. Steig, Forst" aria-label="Suchen">
+      <div id="status" class="status" role="status">Karte wird vorbereitet …</div>
+      <ul id="list"></ul>
+    </section>
+  </aside>
+</main>
+<footer>
+  Kartendaten © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap-Mitwirkende</a> ·
+  Sperrungen und Hinweise: <a href="https://platform.digitizetheplanet.org/en/api/docs/" target="_blank" rel="noopener">Digitize the Planet e.V.</a> (CC0) ·
+  Wetter: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> ·
+  Lawinenlage: <a href="https://lawinen.report/more/open-data" target="_blank" rel="noopener">Lawinenwarndienste Tirol, Südtirol und Trentino (Euregio-Lawinenreport)</a> und <a href="https://www.slf.ch" target="_blank" rel="noopener">WSL-Institut für Schnee- und Lawinenforschung SLF</a> (jeweils CC BY 4.0).
+  Die Angaben ersetzen keine Tourenplanung vor Ort. Aktuelle Lage bei Hütte, Gemeinde oder Behörde prüfen.
+</footer>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

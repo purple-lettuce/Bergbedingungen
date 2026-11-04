@@ -1,0 +1,67 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests Landing Page (LP1)</title>
+<pre id="result">läuft …</pre>
+<div id="frames"></div>
+<script>
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Lädt die Startseite (index.html) in Rahmen unterschiedlicher Breite und prüft Marke, Claim, Slogan, genau einen Link zur Karte (der auf eine vorhandene Seite zeigt),
+// fehlenden Überlauf und dass die Seite keine Skripte braucht. Außerdem: Die Anwendung (app.html) führt über die Marke zurück zur Startseite.
+var results = [];
+function ok(name, cond, detail) { results.push({ name: name, ok: !!cond, error: cond ? '' : 'nicht erfüllt' + (detail ? ': ' + detail : '') }); }
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function openFrame(src, w, h) {
+  return new Promise(function (resolve) {
+    var f = document.createElement('iframe');
+    f.style.cssText = 'display:block;border:0;width:' + w + 'px;height:' + h + 'px';
+    f.src = src;
+    f.addEventListener('load', function () { wait(500).then(function () { resolve(f); }); });
+    document.getElementById('frames').appendChild(f);
+  });
+}
+function text(d, sel) { var e = d.querySelector(sel); return e ? e.textContent.replace(/\s+/g, ' ').trim() : null; }
+
+async function landing() {
+  var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
+  ok('Marke: Emblem und Name als h1', d.querySelector('.mr-header img.mr-brand__emblem') && text(d, 'h1.mr-brand__name') === 'Mountain Radar');
+  ok('Claim sichtbar', text(d, '.mr-brand__claim') === 'ALPINE RISK INTELLIGENCE');
+  ok('Slogan sichtbar', text(d, '.mr-hero__title') === 'Know before you go.');
+  var links = d.querySelectorAll('a, button');
+  ok('genau eine Aktion: Link „Zur Karte“', links.length === 1 && links[0].textContent.trim() === 'Zur Karte' && links[0].getAttribute('href') === 'app.html', links.length + ' Aktionen');
+  var res = await fetch(new URL(links[0].getAttribute('href'), f.contentWindow.location.href));
+  ok('Ziel des Links ist erreichbar', res.ok, 'Status ' + res.status);
+  ok('Seite braucht kein JavaScript', d.querySelectorAll('script').length === 0);
+  ok('Die einzige Überschrift 1. Ebene ist der Produktname', d.querySelectorAll('h1').length === 1);
+  var b = d.querySelector('.mr-button').getBoundingClientRect();
+  ok('Aktion ist im ersten Bildschirm sichtbar (1440 × 900)', b.bottom <= 900 && b.height >= 44, 'unten ' + Math.round(b.bottom) + ', Höhe ' + Math.round(b.height));
+  ok('Kein waagerechter Überlauf (1440 px)', d.documentElement.scrollWidth <= 1440);
+}
+
+async function small(w, h) {
+  var f = await openFrame('../index.html', w, h), d = f.contentDocument, de = d.documentElement;
+  var b = d.querySelector('.mr-button').getBoundingClientRect();
+  ok(w + ' px: kein waagerechter Überlauf', de.scrollWidth <= w, 'Breite ' + de.scrollWidth);
+  ok(w + ' px: Aktion liegt im Bildschirm und ist mindestens 44 px hoch', b.left >= 0 && b.right <= w && b.bottom <= h && b.height >= 44, Math.round(b.left) + '–' + Math.round(b.right) + ', unten ' + Math.round(b.bottom));
+  var t = d.querySelector('.mr-hero__title').getBoundingClientRect();
+  ok(w + ' px: Slogan liegt im Bildschirm', t.left >= 0 && t.right <= w);
+}
+
+async function lowWindow() {
+  var f = await openFrame('../index.html', 667, 300), d = f.contentDocument, de = d.documentElement;
+  ok('Niedriges Fenster (667 × 300): Seite scrollt, Aktion ist erreichbar', de.scrollHeight > 300 ? (f.contentWindow.scrollTo(0, de.scrollHeight), f.contentWindow.scrollY > 0) : true);
+  var b = d.querySelector('.mr-button').getBoundingClientRect();
+  ok('Niedriges Fenster: Aktion nach dem Scrollen sichtbar', b.top >= 0 && b.bottom <= 300, 'oben ' + Math.round(b.top) + ', unten ' + Math.round(b.bottom));
+}
+
+async function appBackLink() {
+  var f = await openFrame('../app.html', 1440, 900), d = f.contentDocument, a = d.querySelector('a.mr-brand');
+  ok('Anwendung: Marke im Header führt zur Startseite', a && a.getAttribute('href') === './' && text(d, 'a.mr-brand .mr-brand__name') === 'Mountain Radar');
+}
+
+(async function () {
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); }
+  catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
+  var passed = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+})();
+</script>

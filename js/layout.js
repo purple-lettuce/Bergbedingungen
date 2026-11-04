@@ -1,7 +1,7 @@
 // Layout (D10, D11): Das Modul kennt keine Fachlogik; es sagt, welches Layout gilt, und hält Leaflet passend dazu
 // (Kartengröße, Abstand von Popups und Ansichtswechseln zu allem, was die Karte überdeckt).
 //  - Ab 1200 px und mit der Klasse `mr-floating` am body füllt die Karte die ganze Fläche, Seitenleistenkarten und Bedienfeld
-//    schweben darüber (D10). Zurückrollen: Klasse `mr-floating` aus index.html entfernen.
+//    schweben darüber (D10). Zurückrollen: Klasse `mr-floating` aus app.html entfernen.
 //  - Bis 820 px gilt das mobile Layout (D11): Die Karte füllt den Raum unter der Statusleiste, die Seitenleiste ist ein Bottom Sheet
 //    (js/sheet.js), das Bedienfeld „Karten & Layer“ ein Sheet über der Karte (js/layer_panel.js).
 //  - Dazwischen gilt das klassische Layout (Karte neben fester Seitenleiste).
