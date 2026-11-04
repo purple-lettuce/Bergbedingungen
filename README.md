@@ -20,7 +20,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 
 **Aktuell implementiert:**
 
-- Startseite (Landing Page, LP1–LP4) mit Produktname, Claim, Slogan, dem Link „Zur Karte“ zur Kartenanwendung (`app.html`), der Erklärung „Was ist Mountain Radar?“, den Zielgruppen und den aktuellen Informationsquellen und der Vision „Alpine Risk Intelligence“ (als noch nicht verfügbar gekennzeichnet)
+- Startseite (Landing Page, LP1–LP5) mit Produktname, Claim, Slogan, dem Link „Zur Karte“ zur Kartenanwendung (`app.html`), der Erklärung „Was ist Mountain Radar?“, den Zielgruppen und den aktuellen Informationsquellen und der Vision „Alpine Risk Intelligence“ (als noch nicht verfügbar gekennzeichnet) sowie den Datenquellen mit Hinweis zur Tourenplanung
 - Karte mit relevanten Inhalten für alpine Regionen
 - Anzeige von Sperrungen und Hinweisen aus aktuellen Daten
 - Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen, mit Symbolen im Popup und Filter nach Schutzgebietskategorie

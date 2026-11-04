@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 bis LP4 erledigt, LP5–LP8 geplant)
+> Status: In Arbeit (LP1 bis LP5 erledigt, LP6–LP8 geplant)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -220,7 +220,7 @@ Umsetzung (LP4):
 
 # LP5 – Datenquellen & Transparenz
 
-Status: Geplant
+Status: Erledigt (04.11.2026)
 
 Ziel:
 
@@ -238,6 +238,13 @@ Verweise auf:
 
 DATENQUELLEN.md
 
+
+Umsetzung (LP5):
+
+- Abschnitt „Datenquellen & Transparenz“ nach „Alpine Risk Intelligence“: sechs Infokarten (`.mr-source-grid`, bestehende Bausteine) mit Bereich, fett der Quelle und einem Satz zur Aktualität. Danach der Abschnitt „Hinweis“ (Fläche `--alt`): Mountain Radar ersetzt keine Tourenplanung vor Ort; Datenquellen können sich ändern; aktuelle Informationen immer prüfen.
+- Genannte Quellen (alle in der Anwendung genutzt, siehe Fußzeile von `app.html`): Open-Meteo (Wetter), Lawinenwarndienste Tirol, Südtirol und Trentino (Euregio) sowie WSL-Institut für Schnee- und Lawinenforschung SLF (Lawinenlage), Digitize the Planet e.V. (Schutzgebiete, Wildlife, Sperrungen & Hinweise), OpenStreetMap-Mitwirkende und OpenTopoMap (Kartengrundlage, im Plan als „OSM“ vorgesehen).
+- Bewusst nicht genannt: GeoSphere Austria, Meteostat, Meteomatics, Austrian DEM, Basemap.at, Tirol Data Hub, Météo-France, AINEVA, ARSO, SLF-Forschungsdaten, BMI Alpinpolizei, Kuratorium für Alpine Sicherheit, Digiway, Browser- und Sensor-APIs, SunCalc (alle geplant, in Recherche oder nicht Datenquelle der Anwendung). Keine Lizenzangaben: Die Lizenz der Schutzgebiete und Sperrungen aus Digitize the Planet ist laut DATENQUELLEN.md nicht abschließend recherchiert, die Namensnennung steht in der Anwendung. Die Aktualitätsangaben entsprechen den Abschnitten „Zeitstempel und Datenstatus“ und den Aktualisierungsintervallen in DATENQUELLEN.md.
+- Kein Link auf DATENQUELLEN.md: Die Seite behält genau eine Aktion („Zur Karte“). Test: `scripts/test_landing.html`.
 ---
 
 # LP6 – Produktvision

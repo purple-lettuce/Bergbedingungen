@@ -1,6 +1,6 @@
-﻿<!doctype html>
+<!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1 bis LP4)</title>
+<title>Tests Landing Page (LP1 bis LP5)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -116,12 +116,32 @@ async function sources() {
   var cs = f.contentWindow.getComputedStyle(sec.querySelector('.mr-vision-grid .mr-card'));
   ok('LP4: Karten nutzen Token-Fläche', cs.backgroundColor !== 'rgba(0, 0, 0, 0)');
 }
-async function whatIsSmall(w) {
+async function datasources() {
+  var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
+  var sec = d.querySelector('#lp5-daten').closest('section');
+  ok('LP5: Abschnitt „Datenquellen & Transparenz“ existiert', text(d, '#lp5-daten') === 'Datenquellen & Transparenz');
+  var cards = Array.prototype.map.call(sec.querySelectorAll('.mr-source-grid h3'), function (h) { return h.textContent.trim(); });
+  ok('LP5: die fünf Bereiche plus Kartengrundlage', JSON.stringify(cards) === JSON.stringify(['Wetter', 'Lawinenlage', 'Schutzgebiete', 'Wildlife', 'Sperrungen & Hinweise', 'Kartengrundlage']), cards.join(', '));
+  var named = Array.prototype.every.call(sec.querySelectorAll('.mr-source-grid li'), function (li) { return li.querySelector('strong'); });
+  ok('LP5: jede Karte nennt eine Quelle', named);
+  var names = Array.prototype.map.call(sec.querySelectorAll('strong'), function (s) { return s.textContent.trim(); });
+  var allowed = ['Open-Meteo', 'Lawinenwarndienste Tirol, Südtirol und Trentino (Euregio)', 'WSL-Institut für Schnee- und Lawinenforschung SLF', 'Digitize the Planet e.V.', 'OpenStreetMap-Mitwirkende', 'OpenTopoMap'];
+  ok('LP5: nur reale, in der Anwendung genutzte Quellen', names.every(function (n) { return allowed.indexOf(n) !== -1; }), names.join(' | '));
+  var t = (sec.textContent + d.querySelector('#lp5-hinweis').closest('section').textContent).toLowerCase();
+  ['GeoSphere', 'Meteostat', 'Meteomatics', 'Météo-France', 'AINEVA', 'ARSO', 'Basemap', 'Alpinpolizei', 'Kuratorium', 'Tirol Data Hub', 'GPX', 'Risk Engine', 'geplant', 'künftig', 'Partner'].forEach(function (w) {
+    ok('LP5: nicht erwähnt: ' + w, t.indexOf(w.toLowerCase()) === -1);
+  });
+  var hint = Array.prototype.map.call(d.querySelectorAll('#lp5-hinweis ~ .mr-notice-list li, .mr-notice-list li'), function (li) { return li.textContent.trim(); });
+  ok('LP5: Hinweis (kein Ersatz für Tourenplanung, Quellen ändern sich, prüfen)', hint.length === 3 && /ersetzt keine Tourenplanung vor Ort/.test(hint[0]) && /können sich ändern/.test(hint[1]) && /immer geprüft/.test(hint[2]), hint.join(' | '));
+  ok('LP5: keine Aktion in den Abschnitten', sec.querySelectorAll('a, button').length === 0 && d.querySelectorAll('.mr-notice-list a, .mr-notice-list button').length === 0);
+  ok('LP5: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP5: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
+}async function whatIsSmall(w) {
   var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
-  ok('LP2–LP4 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
+  ok('LP2–LP5 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
 }
 (async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await whatIsSmall(390); await whatIsSmall(320); }
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await whatIsSmall(390); await whatIsSmall(320); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
