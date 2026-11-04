@@ -323,6 +323,7 @@ Gemeinsame, wiederverwendbare UI-Bausteine in `style.css`, Abschnitt „Gemeinsa
 | `.mr-switch` (`__track`, `__text`) | Schalter an/aus auf Basis einer echten Checkbox (`role="switch"`), Tastatur und Screenreader unverändert | Layer-Menü „Intelligence Layers“ (D7) | `--mr-link`, `--mr-line`, `--mr-text-muted`, `--mr-surface`, Radien, Abstände |
 | `.mr-kv` (`--stacked`, `__item`) | Beschriftung und Wert; `dt`/`dd` in zwei Spalten, oder gestapelt im Raster | Wetterwerte (D6), Popups (D8), Statusleiste (D5) | `--mr-text-muted`, `--mr-text-xs`, Abstände |
 | `.mr-segment` (`__opt`) | Auswahl genau einer Option als Radio-Gruppe (`role="radiogroup"`) | Kartenstil OSM/Topo (D7) | `--mr-primary`, `--mr-on-primary`, `--mr-link`, `--mr-bg`, `--mr-line` |
+| `.mr-button` (`--primary`) | Link, der wie ein Primärbutton aussieht (Navigation, nicht Aktion auf der Karte): Deep Alpine Blue, weiße Schrift, mind. 44 px hoch, Rand `--mr-link` | Landing Page (LP1) | `--mr-primary`, `--mr-primary-hover`, `--mr-on-primary`, `--mr-link`, `--mr-radius-md`, Abstände |
 | `.mr-stack`, `.mr-cluster`, `.mr-gap-*` | Anordnung: Spalte bzw. umbrechende Zeile mit Abstand | überall | Abstands-Tokens |
 | `.mr-mt-*`, `.mr-mb-0` | Abstand oben bzw. unten 0, nur Skalenwerte | ersetzt Inline-Styles | Abstands-Tokens |
 | `.mr-text-muted`, `.mr-text-sm`, `.mr-tabular`, `.mr-visually-hidden` | Text-Hilfen | überall | Text-Tokens |
@@ -338,8 +339,8 @@ Regeln für die Verwendung:
 
 | Bereich | Stand |
 |---|---|
-| Seitenleistenkarten „Wetter“ und „Sperrungen und Hinweise“ (`index.html`, `js/weather.js`, `js/closures.js`) | seit D6 vollständig auf D3-Komponenten (siehe „Seitenleisten-Karten“) |
-| Inline-Styles in `index.html` (3) und `js/weather.js` (1) | durch `.mr-mt-*`, `.mr-mb-0` bzw. die Regel `#status` ersetzt; Abstände 10 px → 12 px (Skala), 2 px mehr Luft über Schaltflächen und Statuszeile |
+| Seitenleistenkarten „Wetter“ und „Sperrungen und Hinweise“ (`app.html`, `js/weather.js`, `js/closures.js`) | seit D6 vollständig auf D3-Komponenten (siehe „Seitenleisten-Karten“) |
+| Inline-Styles in `app.html` (3) und `js/weather.js` (1) | durch `.mr-mt-*`, `.mr-mb-0` bzw. die Regel `#status` ersetzt; Abstände 10 px → 12 px (Skala), 2 px mehr Luft über Schaltflächen und Statuszeile |
 | Layer-Panel „Karten & Layer“ (`js/layer_panel.js`) | seit D7 auf D3-Komponenten (siehe „Layer-Panel“); `kl-*`-Klassen bleiben als Haken für Tests und Layout |
 | Schutzgebiets-Popups (`js/protected_areas_popup.js`) | seit D8a auf D3-Komponenten (siehe „Schutzgebiets-Popup“) |
 | Lawinenlage-Popups (`js/avalanche_popup.js`) | seit D8b auf dem Gerüst von D8a (siehe „Lawinenlage-Popup“) |
@@ -456,7 +457,7 @@ Nicht umgesetzt: Dämpfung der Overlays selbst (Layerfarben bleiben), Kartenstil
 
 # Layout mit schwebenden Karten (seit D10)
 
-Ab 1200 px Breite und mit `<body class="mr-floating">` ist die Karte die ganze Fläche zwischen Statusleiste und Fußzeile (`#map` absolut in `main`), alle weiteren Bedienelemente schweben darüber. Darunter gilt das klassische Layout (821 bis 1199 px: Karte neben 400-px-Seitenleiste); bis 820 px gilt das mobile Layout (siehe „Mobiles Layout und Bottom Sheet“, D11). Zurückrollen: Klasse aus `index.html` entfernen.
+Ab 1200 px Breite und mit `<body class="mr-floating">` ist die Karte die ganze Fläche zwischen Statusleiste und Fußzeile (`#map` absolut in `main`), alle weiteren Bedienelemente schweben darüber. Darunter gilt das klassische Layout (821 bis 1199 px: Karte neben 400-px-Seitenleiste); bis 820 px gilt das mobile Layout (siehe „Mobiles Layout und Bottom Sheet“, D11). Zurückrollen: Klasse aus `app.html` entfernen.
 
 | Bereich | Umsetzung |
 |---|---|
@@ -533,7 +534,7 @@ Klassen: `.mr-header`, `.mr-brand` (`__emblem`, `__text`, `__name`, `__claim`), 
 
 Regeln:
 
-- **Keine Navigation, keine Aktionen im Header**, solange es keine weiteren Bereiche gibt. Einzige Ausnahme ist die globale Suche (seit D13, siehe „Globale Suche“), weil sie eine echte Funktion ist. Nichts darf Funktionen vortäuschen (keine toten Links, keine Buttons ohne Funktion, keine Platzhalter). Kommt ein echter Bereich hinzu, wird die Navigation als `nav` mit nur existierenden Zielen ergänzt.
+- **Keine Navigation, keine Aktionen im Header**, solange es keine weiteren Bereiche gibt. Ausnahmen: die globale Suche (seit D13, siehe „Globale Suche“), weil sie eine echte Funktion ist, und die Marke selbst, die in der Anwendung als Link zur Startseite dient (seit LP1, `a.mr-brand`, Ziel `./`). Die Startseite verwendet denselben Header ohne Suche und ohne Slogan (siehe „Landing Page“). Nichts darf Funktionen vortäuschen (keine toten Links, keine Buttons ohne Funktion, keine Platzhalter). Kommt ein echter Bereich hinzu, wird die Navigation als `nav` mit nur existierenden Zielen ergänzt.
 - Der Header zeigt keine Daten (Uhrzeit, Status): Datenstatus gehört in die Statusleiste (D5).
 - Das Hauptlogo (`mountain-radar-main-hauptlogo.svg`) bleibt für Material außerhalb der App (README, Social Preview). In der App wird nur das Emblem verwendet, weil die Wortmarke im Hauptlogo als SVG-Text mit Fallback-Schriften gesetzt ist.
 
@@ -558,6 +559,30 @@ Die globale Suche ist ein Suchfeld im Header mit gruppierter Trefferliste. Sie a
 Klassen: `.mr-search` (`__input`, `__panel`, `__note`, `__list`, `__group`, `__head`, `__items`, `__option`, `__title`, `__meta`, `__more`). Module: `js/search.js` (Oberfläche, ohne Fachdaten), `js/search_logic.js` (reine Logik, `scripts/test_search_logic.html`); die Datenquellen liefern `closures.js` und `protected_areas.js`.
 
 **Später (nicht Teil von D13):** Orts-, Gipfel- und Adresssuche brauchen Geocoding (z. B. Nominatim mit Nutzungsrichtlinie oder eine eigene Gipfeldatenquelle). Das ist eine neue Datenquelle mit Lizenz- und Datenschutzfrage und ein eigenes Arbeitspaket; die Quellen-Schnittstelle in `js/search.js` (`{ id, label, search(q), open(id) }`) nimmt eine weitere Gruppe ohne Umbau auf.
+
+---
+
+# Landing Page (seit LP1)
+
+Die Startseite `index.html` ist ein ruhiger Hero ohne JavaScript; die Kartenanwendung liegt seit LP1 unter `app.html`. LP1 ist ein Struktur- und Layoutpaket: ein Hero, ein Link, sonst nichts. Alles Weitere (Produkterklärung, Funktionen, Datenquellen, Vision) gehört zu LP2 bis LP6 und steht bewusst nicht auf der Seite.
+
+**Nutzerführung:** Startseite (`index.html`) → Link „Zur Karte“ → Anwendung (`app.html`). Zurück führt die Marke (Emblem und Name) im Header der Anwendung; sie ist ein echter Link nach `./`. Die Adresse der Seite (Wurzel) zeigt jetzt die Startseite; wer die Karte direkt will, nutzt `app.html`.
+
+| Bereich | Umsetzung |
+|---|---|
+| Header | Derselbe Header wie in der Anwendung (`.mr-header`, `.mr-brand`: Emblem, Wortmarke als `h1`, Claim), ohne Suche und ohne Slogan. Er ist die **einzige** Markenführung der Seite; der Hero wiederholt weder Logo noch Namen noch Claim. |
+| Slogan | „Know before you go.“ als große Überschrift (`.mr-hero__title`, `h2`, Inter 600, 56 px Desktop, 40 px bis 820 px, aus `--mr-text-display` abgeleitet) |
+| Einleitung | ein Satz, gedämpft (`.mr-hero__lead`, `--mr-text-xl`, mobil `--mr-text-lg`): „Die aktuelle Lage für deine Tour im Alpenraum – gebündelt auf einer Karte.“ Keine Funktionsliste, keine technischen Details. |
+| Aktion | genau ein Link „Zur Karte“ (`.mr-button.mr-button--primary`, siehe Komponenten); bis 560 px volle Breite. Keine zweite Aktion, keine Demo, keine Registrierung. |
+| Fläche | `--mr-bg` mit einem weichen Verlauf aus `--mr-primary-soft` oben rechts; Text links, bündig mit der Marke; viel freie Fläche. Der Hero füllt die Höhe zwischen Header und Fußzeile und zentriert den Block senkrecht. |
+| Fußzeile | der Hinweis aus der Anwendung: „Die Angaben ersetzen keine Tourenplanung vor Ort. Aktuelle Lage bei Hütte, Gemeinde oder Behörde prüfen.“ (keine Quellenangaben, die gehören zu LP5) |
+
+**Regeln:**
+
+- Nur Tokens und Komponenten aus diesem Styleguide, kein zweites Designsystem; die Regeln stehen im Abschnitt „Landing (LP1)“ von `style.css` und gelten nur mit `<body class="mr-landing">`. Sie nehmen die Regeln der Anwendung zurück (Seite scrollt nie, Karte füllt den Raum), damit die Seite bei niedrigen Fenstern scrollen kann.
+- Hell und Dunkel folgen `prefers-color-scheme` über die Tokens, ohne eigene Dunkelwerte.
+- Neue Abschnitte (LP2 ff.) kommen unter den Hero; der Hero behält genau einen Link zur Karte.
+- Test: `scripts/test_landing.html` (in `scripts/run_js_tests.py`) prüft Marke, Claim, Slogan, genau eine Aktion mit erreichbarem Ziel, keine Skripte, Überlauf bei 1440, 390 und 320 px, niedriges Fenster und den Rückweg aus der Anwendung.
 
 ---
 

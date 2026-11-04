@@ -5,7 +5,7 @@
 <div id="frames"></div>
 <script>
 // Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
-// Lädt die echte Anwendung (index.html) in Rahmen unterschiedlicher Breite, damit die Medienabfragen (1200 px, 820 px) greifen,
+// Lädt die echte Anwendung (app.html) in Rahmen unterschiedlicher Breite, damit die Medienabfragen (1200 px, 820 px) greifen,
 // und prüft Anordnung, Überlagerung, Zoom und Autopan der Popups sowie mobil (390 und 320 px) Bottom Sheet, Layer-Sheet, Überlauf und Touch-Ziele. Braucht keine Netzwerkantwort (Kacheln und Wetter dürfen fehlen).
 // Nicht geprüft werden kann hier der Wechsel über die 1200 px bei laufender Seite: Der Headless-Browser wertet Medienabfragen nur
 // bei Bildern aus, die er kaum zeichnet. Das ist im echten Browser zu prüfen (siehe PR).
@@ -22,7 +22,7 @@ function openFrame(w, h) {
   return new Promise(function (resolve) {
     var f = document.createElement('iframe');
     f.style.cssText = 'display:block;border:0;width:' + w + 'px;height:' + h + 'px';
-    f.src = '../index.html';
+    f.src = '../app.html';
     f.addEventListener('load', function () { wait(2500).then(function () { resolve(f); }); });
     document.getElementById('frames').appendChild(f);
   });

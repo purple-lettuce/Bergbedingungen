@@ -278,7 +278,7 @@ Stufe 3 sieht deshalb für jede Quelle gleich aus (Farbe `#ff9900`, Klasse `av-l
 
 **Zwingende Unterschiede in der Darstellung gibt es nicht.** Alle Unterschiede sind Unterschiede der Daten (Abschnitt 10). Der Test `popupHtml: Unterschiede ergeben sich nur aus den Daten, nicht aus der Quelle` belegt es: Derselbe Berichtsinhalt unter zwei Quellen ergibt dasselbe Popup bis auf Quellenname, Namensnennung und Links.
 
-Namensnennung, Lizenz und Link zum Lagebericht kommen aus den Metadaten der Quelle (`source` in `<id>.json`), nicht aus dem Programmcode. Ausnahme, bewusst offen: Der Seitenfuß in `index.html` nennt die Quellen von Hand.
+Namensnennung, Lizenz und Link zum Lagebericht kommen aus den Metadaten der Quelle (`source` in `<id>.json`), nicht aus dem Programmcode. Ausnahme, bewusst offen: Der Seitenfuß in `app.html` nennt die Quellen von Hand.
 
 ## 7.3 Karte und Legende
 
@@ -326,7 +326,7 @@ Beispiel Frankreich. Voraussetzung: Lizenz und Nutzungsbedingungen des **ursprü
 5. **Prüfen** mit `python3 scripts/fetch_avalanche.py france`. Die Pipeline meldet Regionen ohne Polygon, Schemaverstöße und Mehrfachbulletins. Zum Test mit früheren Berichten: Umgebungsvariablen `AVALANCHE_URL_FRANCE` und `AVALANCHE_DATA_DIR`.
 6. **Tests ergänzen** (`scripts/test_avalanche_framework.py` nach dem Muster von `FranceLikeProvider`): Fixture mit echtem Bericht, Abbildung auf das Modell, Schema, Region ohne Bericht.
 7. **Frontend:** keine Änderung. `index.json` führt die Quelle auf, Popup, Legende, Namensnennung, Stufen und Symbole kommen aus den Daten. Kennt die Quelle ein Lawinenproblem, das in `PROBLEM_TYPES` fehlt, erscheint es mit der Kennung. Dann `PROBLEM_TYPES` (und gegebenenfalls ein Piktogramm) ergänzen, das ist die einzige Frontend-Stelle für neue Begriffe.
-8. **Dokumentation:** [DATENQUELLEN.md](DATENQUELLEN.md) (Quelle, Lizenz), Abschnitt 10 dieses Dokuments (Unterschiede), [ROADMAP.md](ROADMAP.md), README. Der Seitenfuß in `index.html` nennt die Quelle von Hand.
+8. **Dokumentation:** [DATENQUELLEN.md](DATENQUELLEN.md) (Quelle, Lizenz), Abschnitt 10 dieses Dokuments (Unterschiede), [ROADMAP.md](ROADMAP.md), README. Der Seitenfuß in `app.html` nennt die Quelle von Hand.
 
 Aufwand je Land bei einem CAAML-Dienst: Metadaten und Test, bei einem anderen Format zusätzlich `parse_bulletins`.
 
@@ -406,4 +406,4 @@ Nichts davon ist umgesetzt. Das Framework ist so geschnitten, dass es ohne Umbau
 - **Schemaversion 2.** `mountain-radar/avalanche/2` löst `/1` ab (Property-Namen der Geometrie-Ebene, `main_date` im Datensatz). Das Frontend prüft die Version nicht, Dateien und Frontend werden gemeinsam ausgeliefert.
 - **Zwei Ebenen im GeoJSON** statt eines vollständigen Features je Region: kleine, selten wechselnde Geometrie-Datei, Berichte getrennt (Abschnitt 6).
 - **Eingabeformat der Items.** `parse_bulletins` liefert Modellbulletins, nicht CAAML. Dadurch braucht ein Dienst ohne CAAML keinen Umweg über ein Zwischenformat.
-- **Grenzen:** Ein Provider je Quelle mit einer Sprache. Der Seitenfuß in `index.html` nennt die Quellen von Hand. Neue Begriffe (Lawinenprobleme, Gefahrenmuster) einer neuen Quelle müssen in `avalanche_symbols.js` ergänzt werden. Ein Test mit aktuellen Berichten steht bis zum Saisonstart 2026/27 aus (siehe [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md) Abschnitt 11).
+- **Grenzen:** Ein Provider je Quelle mit einer Sprache. Der Seitenfuß in `app.html` nennt die Quellen von Hand. Neue Begriffe (Lawinenprobleme, Gefahrenmuster) einer neuen Quelle müssen in `avalanche_symbols.js` ergänzt werden. Ein Test mit aktuellen Berichten steht bis zum Saisonstart 2026/27 aus (siehe [LAWINENLAGE_ANALYSE.md](LAWINENLAGE_ANALYSE.md) Abschnitt 11).

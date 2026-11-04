@@ -20,6 +20,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 
 **Aktuell implementiert:**
 
+- Startseite (Landing Page, LP1) mit Produktname, Claim, Slogan und dem Link „Zur Karte“ zur Kartenanwendung (`app.html`)
 - Karte mit relevanten Inhalten für alpine Regionen
 - Anzeige von Sperrungen und Hinweisen aus aktuellen Daten
 - Schutzgebietskarten mit Kategorien, Regeln und Wildlife-Informationen, mit Symbolen im Popup und Filter nach Schutzgebietskategorie
@@ -130,7 +131,8 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 
 | Datei / Ordner | Inhalt |
 | --- | --- |
-| `index.html`, `style.css` | Einstieg und Styling der Oberfläche |
+| `index.html` | Startseite (Landing Page, LP1): Produktname, Claim, Slogan und der Link „Zur Karte“ |
+| `app.html`, `style.css` | Kartenanwendung und Styling von Startseite und Anwendung |
 | `js/` | Frontend-Programmcode der Map-Anwendung |
 | `scripts/fetch_closures.py` | Abruf von Sperrungen und Hinweisen |
 | `data/closures.json` | aktuelle Sperrungen und Hinweise |

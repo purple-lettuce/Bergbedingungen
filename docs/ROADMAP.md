@@ -11,7 +11,7 @@ Bergbedingungen
 
 > Version: 2.4 (aktuelle Version siehe Versionshistorie am Ende)
 >
-> Letzte Aktualisierung: 03.11.2026
+> Letzte Aktualisierung: 04.11.2026
 >
 > Dieses Dokument ist die Single Source of Truth für Vision, Prioritäten, Phasen und Projektstatus von Mountain Radar. Alle Statusangaben stehen in den Abschnitten „Aktuelle Prioritäten“, „Kernmodule“ und „Implementierungs-Checkliste“ und sind dort aufeinander abgestimmt.
 >
@@ -101,6 +101,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b, Sperrungen- und Hinweise-Popups mit D8c umgesetzt (alle Popups auf dem gemeinsamen System), Legendenkarte mit D9 umgesetzt, vollflächige Karte mit schwebenden Karten ab 1200 px mit D10, mobiles Layout mit Bottom Sheet bis 820 px mit D11, gedämpfte Kartenoptik mit D12, globale Suche Phase 1 mit D13 umgesetzt; Design-Migration D1–D13 abgeschlossen, weitere Design-Schritte nur mit neuem Arbeitspaket) |
 | 11 | PWA & Offline | Zukunft (nach Phase 4) |
 | 12 | Mobile App | Zukunft (Phase 4) |
+| 13 | Landing Experience | In Arbeit (LP1 Hero & Landing-Struktur erledigt: Startseite `index.html`, Karte unter `app.html`; weitere Pakete siehe docs/LANDINGPAGE_PLAN.md) |
 
 ---
 
@@ -288,6 +289,9 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [ ] Globale Suche Phase 2: Orts-, Gipfel- und Adresssuche per Geocoding (eigenes Arbeitspaket, neue Datenquelle mit Lizenz- und Datenschutzentscheidung)
 - [x] Produktname „Mountain Radar“ in der Anwendung (D1: Titel, Meta-Beschreibung, Header, Favicon)
 
+### Landing Experience — Status: IN PROGRESS (phasenunabhängig, Plan: docs/LANDINGPAGE_PLAN.md)
+- [x] LP1 Hero & Landing-Struktur: Startseite `index.html` mit Marke, Claim, Slogan, kurzer Einleitung und genau einem Link „Zur Karte“; Kartenanwendung unter `app.html`, Rückweg über die Marke im Header
+
 ### Phase 4 — Status: FUTURE
 - [ ] Mobile App Framework
 - [ ] Smartphone Sensor Integration
@@ -368,6 +372,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.1 | 2026-11-04 | Landing Experience: LP1 (Hero & Landing-Struktur) umgesetzt, Startseite `index.html`, Anwendung nach `app.html` verschoben |
 | 4.0 | 2026-11-03 | Design-Migrationsplan D13 (globale Suche, Phase 1) umgesetzt, Design-Migration D1–D13 abgeschlossen |
 | 3.9 | 2026-11-03 | Design-Migrationsplan D12 (gedämpfte Kartenoptik) umgesetzt |
 | 3.8 | 2026-11-03 | Design-Migrationsplan D11 (mobiles Layout mit Bottom Sheet, bis 820 px) umgesetzt |
@@ -400,6 +405,7 @@ Diese Roadmap ist Teil eines größeren Dokumentationssystems:
 - **DATENQUELLEN.md** — Vollständiger Katalog aller Datenquellen (15+) mit URLs, Lizenzen und Phasen
 - **docs/WORKFLOW.md** — Entwicklungs-Workflow und Definition of Done
 - **docs/STYLEGUIDE.md** — Design System von Mountain Radar
+- **docs/LANDINGPAGE_PLAN.md** — Plan der Landing Experience (LP1–LP8)
 - **docs/ALPINE_RISK_ENGINE.md** — Konzept der Alpine Risk Engine
 - **docs/IDEENSAMMLUNG.md** — Ideen, die noch nicht in der Roadmap stehen
 - **docs/LAWINENLAGE_ANALYSE.md** — Detaillierte Analyse der Lawinenlage-Integration

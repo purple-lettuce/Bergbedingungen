@@ -323,7 +323,7 @@ Die Schritte für ein neues Land stehen in [AVALANCHE_ARCHITECTURE.md](AVALANCHE
 1. Provider-Klasse in `scripts/avalanche_providers.py` (Metadaten wie `id`, `bulletin_url`, `region_codes`, `geometry_codes`, Lizenz, Namensnennung, `empty_ok`; bei Formaten ohne CAAML v6 zusätzlich `parse_bulletins`, optional `fetch_names`) und eine Zeile in `PROVIDERS` in `scripts/avalanche_sources.py`.
 2. Polygone prüfen: `python3 scripts/fetch_avalanche.py <id>` meldet Regionen ohne Polygon und Verstöße gegen das Schema.
 3. Tests ergänzen (`scripts/test_avalanche_framework.py`, `scripts/test_avalanche_model.py`), mit einem echten Bulletin der Quelle als Fixture.
-4. Frontend: keine Änderung nötig, `index.json` führt die Quelle auf. Legende und Popup übernehmen Namen, Lizenz, Hinweise und Status. Der Footer in `index.html` nennt die Quelle von Hand.
+4. Frontend: keine Änderung nötig, `index.json` führt die Quelle auf. Legende und Popup übernehmen Namen, Lizenz, Hinweise und Status. Der Footer in `app.html` nennt die Quelle von Hand.
 5. Dokumentation: [DATENQUELLEN.md](DATENQUELLEN.md), [AVALANCHE_ARCHITECTURE.md](AVALANCHE_ARCHITECTURE.md) (Abschnitt 10), ROADMAP.
 
 ---

@@ -2,7 +2,7 @@
 
 ## Project shape
 
-This is a static, German-language map application. `index.html` loads the vendored Leaflet library as a classic script, then loads `js/app.js` as an ES module. `js/map.js` creates the shared map and exports common DOM/status helpers and Leaflet layers; `js/layers.js` registers layers, base maps and legends in the "Karten & Layer" panel (`js/layer_panel.js`); `app.js` connects UI events and starts the feature loaders. The other modules render closures and notices, weather, and protected areas.
+This is a static, German-language map application. `app.html` (the map application; `index.html` is the static landing page without scripts) loads the vendored Leaflet library as a classic script, then loads `js/app.js` as an ES module. `js/map.js` creates the shared map and exports common DOM/status helpers and Leaflet layers; `js/layers.js` registers layers, base maps and legends in the "Karten & Layer" panel (`js/layer_panel.js`); `app.js` connects UI events and starts the feature loaders. The other modules render closures and notices, weather, and protected areas.
 
 The browser fetches committed files under `data/` for closures and protected areas. Closure data is fetched from Digitize the Planet by `scripts/fetch_closures.py` in `.github/workflows/update-data.yml` every three hours; the browser does not call that API. Weather is fetched directly from Open-Meteo. The protected-area data pipeline is `fetch_protected_areas.py` → `fetch_protected_area_details_v2.py` → `build_geojson.py`. Avalanche conditions (Euregio and Switzerland) come from `scripts/fetch_avalanche.py` (twice daily workflow `update-avalanche.yml`) into `data/avalanche/` (one common data model for all sources, new country = one entry in `scripts/avalanche_sources.py`); see `docs/LAWINENLAGE_ANALYSE.md`. The browser never calls the avalanche services directly. JS tests: `python3 scripts/run_js_tests.py` (needs Chrome or Edge).
 
@@ -16,7 +16,7 @@ Serve the site from the repository root so ES modules and data files load correc
 python -m http.server 8000
 ```
 
-Open `http://localhost:8000`. Do not test by opening `index.html` as a `file://` URL.
+Open `http://localhost:8000`. Do not test by opening `app.html` as a `file://` URL.
 
 Run the data scripts from the repository root when intentionally refreshing their outputs:
 
