@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 bis LP3 erledigt, LP4–LP8 geplant)
+> Status: In Arbeit (LP1 bis LP4 erledigt, LP5–LP8 geplant)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -192,7 +192,7 @@ Umsetzung (LP3):
 
 # LP4 – Alpine Risk Intelligence
 
-Status: Geplant
+Status: Erledigt (04.11.2026)
 
 Ziel:
 
@@ -208,6 +208,13 @@ Erklären:
 Wichtig:
 
 Vision klar von aktueller Funktionalität trennen.
+
+Umsetzung (LP4):
+
+- Abschnitt „Alpine Risk Intelligence“ nach „Aktuelle Informationsquellen“ (Fläche `--alt`). Drei kurze Erklärungen: warum Informationen allein nicht genügen, warum Kontext wichtig ist, warum Wetter, Lawinenlage und Schutzgebiete zusammen betrachtet werden sollten.
+- Erwähnte Zukunftsthemen: GPX-Analyse, Risikoanalyse, Terrain Intelligence, Alpine Risk Engine.
+- Trennung von der heutigen Funktionalität: eigener Abschnitt, Zwischenüberschrift „Vision“ mit Kennzeichen „Noch nicht verfügbar“, jede Zukunftskarte beginnt mit „Ziel:“ und steht in einfacher (nicht angehobener) Karte, die heutigen Karten in LP2/LP3 bleiben angehoben. Ein Schlusssatz verweist auf die heutigen Informationsquellen. Die Zukunftsthemen kommen nirgends sonst auf der Seite vor.
+- Keine KI-Begriffe, keine Marketingsprache, keine Aktion, kein JavaScript. Test: `scripts/test_landing.html`.
 
 ---
 

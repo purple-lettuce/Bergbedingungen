@@ -1,6 +1,6 @@
 ﻿<!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1, LP2, LP3)</title>
+<title>Tests Landing Page (LP1 bis LP4)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -66,7 +66,7 @@ async function whatIs() {
   var cards = Array.prototype.map.call(d.querySelectorAll('#lp2-was ~ .mr-feature-grid h3'), function (h) { return h.textContent.trim(); });
   ok('LP2: genau die fünf vorhandenen Bereiche', JSON.stringify(cards) === JSON.stringify(['Wetter', 'Lawinenlage', 'Schutzgebiete', 'Wildlife', 'Sperrungen & Hinweise']), cards.join(', '));
   ok('LP2: Zielgruppen vorhanden', d.querySelectorAll('.mr-pills li').length === 5);
-  var all = d.querySelector('main').textContent;
+  var all = d.querySelector('#lp2-was').closest('section').textContent + d.querySelector('#lp2-fuer-wen').closest('section').textContent;
   ['Risk Engine', 'GPX', 'Terrain', 'Route Intelligence', 'automatisch', 'Roadmap', 'bald', 'geplant', 'künftig', 'Zukunft'].forEach(function (w) {
     ok('LP2: keine Zukunfts- oder Nicht-Funktion erwähnt: ' + w, all.toLowerCase().indexOf(w.toLowerCase()) === -1);
   });
@@ -90,12 +90,38 @@ async function sources() {
   ok('LP3: keine Aktion im Abschnitt', sec.querySelectorAll('a, button').length === 0);
   ok('LP3: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
   ok('LP3: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
-}async function whatIsSmall(w) {
+}async function vision() {
+  var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
+  var sec = d.querySelector('#lp4-ari').closest('section');
+  ok('LP4: Abschnitt „Alpine Risk Intelligence“ existiert', text(d, '#lp4-ari') === 'Alpine Risk Intelligence');
+  var themes = Array.prototype.map.call(sec.querySelectorAll('.mr-vision-grid h3'), function (h) { return h.textContent.trim(); });
+  ok('LP4: genau die vier Zukunftsthemen', JSON.stringify(themes) === JSON.stringify(['GPX-Analyse', 'Risikoanalyse', 'Terrain Intelligence', 'Alpine Risk Engine']), themes.join(', '));
+  var heads = Array.prototype.map.call(sec.querySelectorAll('.mr-vision-text h3'), function (h) { return h.textContent.trim(); });
+  ok('LP4: die drei Erklärungen (Informationen allein, Kontext, zusammen)', heads.length === 3, heads.join(' | '));
+  var badge = sec.querySelector('.mr-badge');
+  ok('LP4: Vision ist als „Noch nicht verfügbar“ gekennzeichnet, vor den Zukunftsthemen', badge && badge.textContent.trim() === 'Noch nicht verfügbar' && (badge.compareDocumentPosition(sec.querySelector('.mr-vision-grid')) & 4));
+  var cards = sec.querySelectorAll('.mr-vision-grid p');
+  var allGoal = cards.length === 4 && Array.prototype.every.call(cards, function (p) { return p.textContent.trim().indexOf('Ziel:') === 0; });
+  ok('LP4: jedes Zukunftsthema ist als Ziel formuliert', allGoal);
+  ok('LP4: Zukunftsthemen stehen nur in diesem Abschnitt', Array.prototype.every.call(d.querySelectorAll('section'), function (s) { return s === sec || !/GPX|Risk Engine|Terrain|Risikoanalyse/.test(s.textContent); }));
+  ok('LP4: Zukunftskarten unterscheiden sich von den aktuellen (nicht raised)', sec.querySelectorAll('.mr-card--raised').length === 0);
+  var t = sec.textContent;
+  ok('LP4: kein KI-Hype (KI, Künstliche Intelligenz)', !/\bKI\b|künstliche/i.test(t.replace(/Intelligence/g, '')));
+  ['revolution', 'smart', 'einzigartig', 'bahnbrechend', 'machine learning', 'jetzt', 'ab sofort', 'bereits heute'].forEach(function (w) {
+    ok('LP4: keine Hype- oder Gegenwartsformulierung: ' + w, t.toLowerCase().indexOf(w) === -1);
+  });
+  ok('LP4: keine Aktion im Abschnitt', sec.querySelectorAll('a, button').length === 0);
+  ok('LP4: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP4: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
+  var cs = f.contentWindow.getComputedStyle(sec.querySelector('.mr-vision-grid .mr-card'));
+  ok('LP4: Karten nutzen Token-Fläche', cs.backgroundColor !== 'rgba(0, 0, 0, 0)');
+}
+async function whatIsSmall(w) {
   var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
-  ok('LP2/LP3 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
+  ok('LP2–LP4 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
 }
 (async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await whatIsSmall(390); await whatIsSmall(320); }
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await whatIsSmall(390); await whatIsSmall(320); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
