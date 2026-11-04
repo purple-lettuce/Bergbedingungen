@@ -1,4 +1,4 @@
-﻿/* Mountain Radar – Layout: Kartenfläche links, Seitenleiste mit Wetter, Filter und Trefferliste rechts.
+/* Mountain Radar – Layout: Kartenfläche links, Seitenleiste mit Wetter, Filter und Trefferliste rechts.
    Ab 1200 px füllt die Karte die ganze Fläche und die Karten schweben darüber (D10); bis 820 px füllt sie den Raum unter der
    Statusleiste und die Seitenleiste ist ein Bottom Sheet (D11). Beide Abschnitte stehen am Ende der Datei.
    Design-Fundament (D2): Alle Farben, Schrift, Radien und Abstände kommen aus den Tokens `--mr-*` unten.
@@ -609,6 +609,9 @@ html:has(body.mr-landing) { overflow: visible; }
 .mr-vision-text .mr-label { color: var(--mr-text); }
 .mr-vision-text .mr-label:not(:first-of-type) { margin-top: var(--mr-space-md); }
 .mr-vision-grid .mr-label { color: var(--mr-text); }
+.mr-notice-list { --mr-gap: var(--mr-space-sm); margin: 0; padding: 0; list-style: none; }
+.mr-source-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.mr-source-grid .mr-card strong { color: var(--mr-text); font-weight: 600; }
 @media (max-width: 820px) {
   .mr-section { padding: var(--mr-space-xl) var(--mr-space-lg); }
 }
