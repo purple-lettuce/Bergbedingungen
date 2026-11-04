@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 bis LP5 erledigt, LP6–LP8 geplant)
+> Status: In Arbeit (LP1 bis LP6 erledigt, LP7–LP8 geplant)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -249,7 +249,7 @@ Umsetzung (LP5):
 
 # LP6 – Produktvision
 
-Status: Geplant
+Status: Erledigt (04.11.2026)
 
 Ziel:
 
@@ -265,6 +265,14 @@ Themen:
 - Transparenz
 - alpine Entscheidungen
 
+Umsetzung (LP6):
+
+- Abschnitt „Produktvision“ nach „Hinweis“ (normale Fläche, damit er sich von der Fläche `--alt` des Hinweises abhebt). Eine Einleitungszeile („Warum es Mountain Radar gibt.“), vier kurze Themen (`.mr-vision-text`, bestehende Bausteine, keine neue Komponente) und ein Schlusssatz mit dem Slogan.
+- Themen: Bessere Entscheidungen im alpinen Raum, Transparenz, Risikobewusstsein, Zugang zu Informationen. Sie sind in Du-Form formuliert („Du sollst sehen, woher eine Angabe kommt“), nicht als Leistungsversprechen des Produkts.
+- Slogan: „Know before you go.“ steht im Hero als Überschrift und schließt die Vision als Gedanke dahinter ab („erst informieren, dann losgehen“). Er wird nicht als Werbezeile wiederholt.
+- **Transportierte Produktbotschaft:** Mountain Radar existiert, damit du vor einer Tour die wichtigen Informationen kennst, weißt, woher sie kommen und wie aktuell sie sind, und die Entscheidung danach selbst triffst. Es will die Beurteilung vorbereiten, nicht ersetzen; es verspricht keine Sicherheit.
+- Bewusst vermieden: Superlative, „innovativ/einzigartig/führend“, Investoren- und Startup-Sprache, KI-Begriffe, Sicherheitsversprechen, Zukunftsfunktionen (GPX, Risk Engine, Terrain stehen nur in LP4), erfundene Gründungsgeschichte oder Zahlen. Keine Aktion, kein JavaScript. Test: `scripts/test_landing.html`.
+- Der Punkt „Einstieg in die Karte“ der Informationsarchitektur ist der Link im Hero (LP1); LP6 ergänzt keine zweite Aktion. Navigation bleibt LP7.
 ---
 
 # LP7 – Navigation
