@@ -605,6 +605,10 @@ html:has(body.mr-landing) { overflow: visible; }
 .mr-feature-grid .mr-card { --mr-gap: var(--mr-space-sm); padding: var(--mr-space-lg); }
 .mr-feature-grid .mr-label { color: var(--mr-text); }
 .mr-pills .mr-card { background: var(--mr-bg); font-weight: 500; }
+.mr-vision-text { --mr-gap: var(--mr-space-sm); }
+.mr-vision-text .mr-label { color: var(--mr-text); }
+.mr-vision-text .mr-label:not(:first-of-type) { margin-top: var(--mr-space-md); }
+.mr-vision-grid .mr-label { color: var(--mr-text); }
 @media (max-width: 820px) {
   .mr-section { padding: var(--mr-space-xl) var(--mr-space-lg); }
 }
