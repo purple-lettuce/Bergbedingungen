@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1 bis LP6)</title>
+<title>Tests Landing Page (LP1 bis LP7)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -26,8 +26,8 @@ async function landing() {
   ok('Marke: Emblem und Name als h1', d.querySelector('.mr-header img.mr-brand__emblem') && text(d, 'h1.mr-brand__name') === 'Mountain Radar');
   ok('Claim sichtbar', text(d, '.mr-brand__claim') === 'ALPINE RISK INTELLIGENCE');
   ok('Slogan sichtbar', text(d, '.mr-hero__title') === 'Know before you go.');
-  var links = d.querySelectorAll('a, button');
-  ok('genau eine Aktion: Link „Zur Karte“', links.length === 1 && links[0].textContent.trim() === 'Zur Karte' && links[0].getAttribute('href') === 'app.html', links.length + ' Aktionen');
+  var links = d.querySelectorAll('main a, main button');
+  ok('Inhalt: genau eine Aktion, Link „Zur Karte“', links.length === 1 && links[0].textContent.trim() === 'Zur Karte' && links[0].getAttribute('href') === 'app.html', links.length + ' Aktionen');
   var res = await fetch(new URL(links[0].getAttribute('href'), f.contentWindow.location.href));
   ok('Ziel des Links ist erreichbar', res.ok, 'Status ' + res.status);
   ok('Seite braucht kein JavaScript', d.querySelectorAll('script').length === 0);
@@ -70,7 +70,7 @@ async function whatIs() {
   ['Risk Engine', 'GPX', 'Terrain', 'Route Intelligence', 'automatisch', 'Roadmap', 'bald', 'geplant', 'künftig', 'Zukunft'].forEach(function (w) {
     ok('LP2: keine Zukunfts- oder Nicht-Funktion erwähnt: ' + w, all.toLowerCase().indexOf(w.toLowerCase()) === -1);
   });
-  ok('LP2: weiterhin genau eine Aktion', d.querySelectorAll('a, button').length === 1);
+  ok('LP2: weiterhin genau eine Aktion im Inhalt', d.querySelectorAll('main a, main button').length === 1);
   ok('LP2: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
   var cs = f.contentWindow.getComputedStyle(d.querySelector('.mr-feature-grid .mr-card'));
   ok('LP2: Karten nutzen Token-Fläche', cs.backgroundColor !== 'rgba(0, 0, 0, 0)');
@@ -88,7 +88,7 @@ async function sources() {
     ok('LP3: keine Zukunfts- oder Nicht-Funktion erwähnt: ' + w, t.indexOf(w.toLowerCase()) === -1);
   });
   ok('LP3: keine Aktion im Abschnitt', sec.querySelectorAll('a, button').length === 0);
-  ok('LP3: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP3: weiterhin genau eine Aktion im Inhalt', d.querySelectorAll('main a, main button').length === 1);
   ok('LP3: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
 }async function vision() {
   var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
@@ -111,7 +111,7 @@ async function sources() {
     ok('LP4: keine Hype- oder Gegenwartsformulierung: ' + w, t.toLowerCase().indexOf(w) === -1);
   });
   ok('LP4: keine Aktion im Abschnitt', sec.querySelectorAll('a, button').length === 0);
-  ok('LP4: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP4: weiterhin genau eine Aktion im Inhalt', d.querySelectorAll('main a, main button').length === 1);
   ok('LP4: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
   var cs = f.contentWindow.getComputedStyle(sec.querySelector('.mr-vision-grid .mr-card'));
   ok('LP4: Karten nutzen Token-Fläche', cs.backgroundColor !== 'rgba(0, 0, 0, 0)');
@@ -134,7 +134,7 @@ async function datasources() {
   var hint = Array.prototype.map.call(d.querySelectorAll('#lp5-hinweis ~ .mr-notice-list li, .mr-notice-list li'), function (li) { return li.textContent.trim(); });
   ok('LP5: Hinweis (kein Ersatz für Tourenplanung, Quellen ändern sich, prüfen)', hint.length === 3 && /ersetzt keine Tourenplanung vor Ort/.test(hint[0]) && /können sich ändern/.test(hint[1]) && /immer geprüft/.test(hint[2]), hint.join(' | '));
   ok('LP5: keine Aktion in den Abschnitten', sec.querySelectorAll('a, button').length === 0 && d.querySelectorAll('.mr-notice-list a, .mr-notice-list button').length === 0);
-  ok('LP5: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP5: weiterhin genau eine Aktion im Inhalt', d.querySelectorAll('main a, main button').length === 1);
   ok('LP5: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
 }async function productVision() {
   var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
@@ -151,14 +151,44 @@ async function datasources() {
     ok('LP6: keine Floskel oder Übertreibung: ' + w.trim(), t.indexOf(w) === -1);
   });
   ok('LP6: keine Aktion im Abschnitt', sec.querySelectorAll('a, button').length === 0);
-  ok('LP6: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP6: weiterhin genau eine Aktion im Inhalt', d.querySelectorAll('main a, main button').length === 1);
   ok('LP6: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
-}async function whatIsSmall(w) {
+}async function navigation(w, h) {
+  var f = await openFrame('../index.html', w, h), d = f.contentDocument, de = d.documentElement, tag = 'LP7 ' + w + ' px: ';
+  var links = Array.prototype.slice.call(d.querySelectorAll('header nav a'));
+  var names = links.map(function (a) { return a.textContent.trim(); });
+  ok(tag + 'Navigation: Karte, Alpine Risk Intelligence, Datenquellen, Über Mountain Radar', JSON.stringify(names) === JSON.stringify(['Karte', 'Alpine Risk Intelligence', 'Datenquellen', 'Über Mountain Radar']), names.join(' | '));
+  ok(tag + 'Navigation ist beschriftet und liegt im Header', d.querySelectorAll('header nav[aria-label]').length === 1);
+  var dead = [];
+  for (var i = 0; i < links.length; i++) {
+    var href = links[i].getAttribute('href');
+    if (href.charAt(0) === '#') { if (!d.getElementById(href.slice(1))) dead.push(href); }
+    else { var r = await fetch(new URL(href, f.contentWindow.location.href)); if (!r.ok) dead.push(href); }
+  }
+  ok(tag + 'keine toten Links (Anker und Seiten vorhanden)', dead.length === 0, dead.join(', '));
+  var empty = Array.prototype.filter.call(d.querySelectorAll('a'), function (a) { return !a.getAttribute('href') || a.getAttribute('href') === '#'; });
+  ok(tag + 'kein leerer Link', empty.length === 0);
+  var targets = links.filter(function (a) { return a.getAttribute('href').charAt(0) === '#'; }).map(function (a) { return d.getElementById(a.getAttribute('href').slice(1)); });
+  ok(tag + 'Anker zeigen auf vorhandene Abschnittsüberschriften', targets.length === 3 && targets.every(function (e) { return e && e.tagName === 'H2'; }));
+  var fits = links.every(function (a) { var b = a.getBoundingClientRect(); return b.height >= 44 && b.left >= 0 && b.right <= w; });
+  ok(tag + 'Links mindestens 44 px hoch und im Bildschirm', fits);
+  ok(tag + 'kein waagerechter Überlauf', de.scrollWidth <= w, 'Breite ' + de.scrollWidth);
+  links[1].click(); await wait(1200);
+  var top = d.getElementById('lp4-ari').getBoundingClientRect().top;
+  ok(tag + 'Klick springt zum Abschnitt', top >= -2 && top < h, 'oben ' + Math.round(top));
+}
+async function navigationDark() {
+  // Dunkel folgt über die Tokens (prefers-color-scheme in style.css): Die Navigationsregeln dürfen keine festen Farben enthalten.
+  var css = await (await fetch('../style.css')).text();
+  var rules = css.split('\n').filter(function (l) { return /^\.mr-nav|^\s+\.mr-nav/.test(l); }).join('\n');
+  ok('LP7 dunkel: Navigation nutzt nur Tokens (keine festen Farben)', rules.length > 0 && !/#[0-9a-f]{3,8}\b|rgb\(|hsl\(/i.test(rules), rules.length + ' Zeichen');
+}
+async function whatIsSmall(w) {
   var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
   ok('LP2–LP6 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
 }
 (async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); }
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); await navigation(1440, 900); await navigation(390, 844); await navigation(320, 640); await navigationDark(); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });

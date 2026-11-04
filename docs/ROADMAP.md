@@ -101,7 +101,7 @@ Neue Funktionen sollen möglichst als Layer oder Kartenanalyse eingebunden werde
 | 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b, Sperrungen- und Hinweise-Popups mit D8c umgesetzt (alle Popups auf dem gemeinsamen System), Legendenkarte mit D9 umgesetzt, vollflächige Karte mit schwebenden Karten ab 1200 px mit D10, mobiles Layout mit Bottom Sheet bis 820 px mit D11, gedämpfte Kartenoptik mit D12, globale Suche Phase 1 mit D13 umgesetzt; Design-Migration D1–D13 abgeschlossen, weitere Design-Schritte nur mit neuem Arbeitspaket) |
 | 11 | PWA & Offline | Zukunft (nach Phase 4) |
 | 12 | Mobile App | Zukunft (Phase 4) |
-| 13 | Landing Experience | In Arbeit (LP1 Hero & Landing-Struktur, LP2 „Was ist Mountain Radar?“, LP3 „Aktuelle Informationsquellen“, LP4 „Alpine Risk Intelligence“, LP5 „Datenquellen & Transparenz“ und LP6 „Produktvision“ erledigt: Startseite `index.html`, Karte unter `app.html`; weitere Pakete siehe docs/LANDINGPAGE_PLAN.md) |
+| 13 | Landing Experience | In Arbeit (LP1 Hero & Landing-Struktur, LP2 „Was ist Mountain Radar?“, LP3 „Aktuelle Informationsquellen“, LP4 „Alpine Risk Intelligence“, LP5 „Datenquellen & Transparenz“, LP6 „Produktvision“ und LP7 „Navigation & Unterseiten“ erledigt: Startseite `index.html`, Karte unter `app.html`; weitere Pakete siehe docs/LANDINGPAGE_PLAN.md) |
 
 ---
 
@@ -295,7 +295,8 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] LP3 Aktuelle Informationsquellen: Abschnitt mit fünf Infokarten (Wetter, Lawinenlage, Schutzgebiete, Wildlife, Sperrungen & Hinweise), je Titel und kurze Beschreibung; nur reale Funktionen, bestehendes Designsystem, ohne JavaScript
 - [x] LP4 Alpine Risk Intelligence: Abschnitt mit drei Erklärungen und den Zukunftsthemen GPX-Analyse, Risikoanalyse, Terrain Intelligence und Alpine Risk Engine, ausdrücklich als „Vision – noch nicht verfügbar“ von den heutigen Funktionen getrennt; ohne JavaScript
 - [x] LP5 Datenquellen & Transparenz: Abschnitt mit den realen Quellen je Bereich (Open-Meteo, Euregio-Lawinenwarndienste und SLF, Digitize the Planet, OpenStreetMap/OpenTopoMap) und dem Hinweis „ersetzt keine Tourenplanung vor Ort, Quellen können sich ändern, Aktuelles prüfen“; keine geplanten Quellen; ohne JavaScript
-- [x] LP6 Produktvision: Abschnitt 
+- [x] LP6 Produktvision: Abschnitt „Produktvision“ (warum es Mountain Radar gibt: bessere Entscheidungen, Transparenz, Risikobewusstsein, Zugang zu Informationen) mit dem Slogan als Schlussgedanken; ohne Versprechen, ohne JavaScript
+- [x] LP7 Navigation & Unterseiten: Hauptnavigation im Header der Startseite (Karte, Alpine Risk Intelligence, Datenquellen, Über Mountain Radar) als reine Links auf `app.html` und die vorhandenen Abschnitte; bewusst keine neuen Unterseiten, keine Inhalte doppelt; ohne JavaScript
 ### Phase 4 — Status: FUTURE
 - [ ] Mobile App Framework
 - [ ] Smartphone Sensor Integration
@@ -376,6 +377,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.7 | 2026-11-04 | Landing Experience: LP7 (Navigation & Unterseiten) umgesetzt |
 | 4.6 | 2026-11-04 | Landing Experience: LP6 (Produktvision) umgesetzt |
 | 4.5 | 2026-11-04 | Landing Experience: LP5 (Datenquellen & Transparenz) umgesetzt |
 | 4.4 | 2026-11-04 | Landing Experience: LP4 (Alpine Risk Intelligence) umgesetzt |

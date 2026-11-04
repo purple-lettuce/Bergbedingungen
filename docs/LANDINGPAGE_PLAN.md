@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 bis LP6 erledigt, LP7–LP8 geplant)
+> Status: In Arbeit (LP1 bis LP7 erledigt, LP8 geplant)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -130,7 +130,7 @@ Umsetzung (LP1):
 - Startseite `index.html` (ohne JavaScript), Kartenanwendung unter `app.html`. Nutzerführung: Startseite → „Zur Karte“ → Anwendung; zurück über die Marke im Header der Anwendung.
 - Derselbe Header wie in der Anwendung (Emblem, Name, Claim) ist die einzige Markenführung; der Hero zeigt den Slogan als Überschrift, einen Satz Einleitung und genau einen Link „Zur Karte“.
 - Details, Regeln und Test: STYLEGUIDE.md, Abschnitt „Landing Page (seit LP1)“.
-- Bewusst nicht Teil von LP1 (bleibt bei den jeweiligen Paketen): Produkterklärung (LP2), aktuelle Funktionen (LP3), Vision und GPX (LP4), Datenquellen (LP5), Produktvision (LP6), Navigation (LP7), SEO und Sharing (LP8).
+- Bewusst nicht Teil von LP1 (bleibt bei den jeweiligen Paketen): Produkterklärung (LP2), aktuelle Funktionen (LP3), Vision und GPX (LP4), Datenquellen (LP5), Produktvision (LP6), Navigation (LP7, erledigt), SEO und Sharing (LP8).
 
 ---
 
@@ -275,16 +275,29 @@ Umsetzung (LP6):
 - Der Punkt „Einstieg in die Karte“ der Informationsarchitektur ist der Link im Hero (LP1); LP6 ergänzt keine zweite Aktion. Navigation bleibt LP7.
 ---
 
-# LP7 – Navigation
+# LP7 – Navigation & Unterseiten
 
-Status: Geplant
+Status: Erledigt (04.11.2026)
 
-Mögliche Einstiegsseiten:
+Ziel:
 
+Die Landing Page erhält eine klare Informationsarchitektur.
+
+Mögliche Bereiche:
+
+- Startseite
 - Karte
 - Alpine Risk Intelligence
 - Datenquellen
 - Über Mountain Radar
+
+Umsetzung (LP7):
+
+- Hauptnavigation (`nav.mr-nav`, beschriftet „Hauptnavigation“) im Header der Startseite mit vier Einträgen: **Karte** (`app.html`), **Alpine Risk Intelligence** (`#lp4-ari`), **Datenquellen** (`#lp5-daten`), **Über Mountain Radar** (`#lp2-was`). „Startseite“ ist die Seite selbst und braucht keinen eigenen Eintrag.
+- **Keine neuen Unterseiten.** Alle Inhalte (LP2–LP6) sind kurz und stehen schon als Abschnitte auf der Startseite; eigene Seiten wären Duplikate oder Platzhalter. Die Navigation verweist deshalb auf die vorhandenen Abschnitte, nichts wird verdoppelt. „Über Mountain Radar“ führt zu „Was ist Mountain Radar?“; die Produktvision folgt weiter unten auf derselben Seite.
+- Reine Links, kein JavaScript, kein Menü-Schalter: Auf kleinen Bildschirmen (≤ 820 px) steht die Navigation unter der Marke und bricht um, alle Ziele mindestens 44 px hoch. Hell/Dunkel über die Tokens, keine festen Farben. „Karte“ ist als Hauptziel hervorgehoben.
+- Bei niedrigen Fenstern (≤ 480 px Höhe) wird der Hero enger gesetzt, damit „Zur Karte“ trotz Navigation sichtbar bleibt.
+- Die Regel „genau eine Aktion“ gilt jetzt für den Inhalt (`main`): Hero-Link „Zur Karte“; die Navigation im Header ist die einzige weitere Linkgruppe. Test: `scripts/test_landing.html` (Einträge, keine toten oder leeren Links, Anker auf Überschriften, Größe, Überlauf bei 1440/390/320 px, Sprung zum Abschnitt).
 
 Voraussetzung:
 
