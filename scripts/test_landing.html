@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1 bis LP5)</title>
+<title>Tests Landing Page (LP1 bis LP6)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -136,12 +136,29 @@ async function datasources() {
   ok('LP5: keine Aktion in den Abschnitten', sec.querySelectorAll('a, button').length === 0 && d.querySelectorAll('.mr-notice-list a, .mr-notice-list button').length === 0);
   ok('LP5: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
   ok('LP5: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
+}async function productVision() {
+  var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument;
+  var sec = d.querySelector('#lp6-vision').closest('section');
+  ok('LP6: Abschnitt „Produktvision“ existiert', text(d, '#lp6-vision') === 'Produktvision');
+  var heads = Array.prototype.map.call(sec.querySelectorAll('.mr-vision-text h3'), function (h) { return h.textContent.trim(); });
+  ok('LP6: die vier Themen', JSON.stringify(heads) === JSON.stringify(['Bessere Entscheidungen im alpinen Raum', 'Transparenz', 'Risikobewusstsein', 'Zugang zu Informationen']), heads.join(' | '));
+  var closing = sec.querySelector('.mr-vision-closing');
+  ok('LP6: Slogan „Know before you go.“ im Abschnitt eingebunden', closing && closing.querySelector('strong').textContent.trim() === 'Know before you go.');
+  var order = d.querySelector('#lp5-hinweis').compareDocumentPosition(sec.querySelector('h2')) & 4;
+  ok('LP6: Abschnitt steht nach Datenquellen und Hinweis', order);
+  var t = sec.textContent.toLowerCase();
+  ['revolution', 'smart', 'einzigartig', 'bahnbrechend', 'innovativ', 'führend', 'weltweit', 'disrupt', 'investor', 'skalier', 'lösung', 'ki ', 'künstliche', 'sicher ', 'garantier', 'gpx', 'risk engine', 'terrain', 'ersetzt'].forEach(function (w) {
+    ok('LP6: keine Floskel oder Übertreibung: ' + w.trim(), t.indexOf(w) === -1);
+  });
+  ok('LP6: keine Aktion im Abschnitt', sec.querySelectorAll('a, button').length === 0);
+  ok('LP6: weiterhin genau eine Aktion auf der Seite', d.querySelectorAll('a, button').length === 1);
+  ok('LP6: Seite ohne Skripte', d.querySelectorAll('script').length === 0);
 }async function whatIsSmall(w) {
   var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
-  ok('LP2–LP5 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
+  ok('LP2–LP6 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
 }
 (async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await whatIsSmall(390); await whatIsSmall(320); }
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
