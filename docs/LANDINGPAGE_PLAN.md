@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 und LP2 erledigt, LP3–LP8 geplant)
+> Status: In Arbeit (LP1 bis LP3 erledigt, LP4–LP8 geplant)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -164,7 +164,7 @@ Umsetzung (LP2):
 
 # LP3 – Aktuelle Informationsquellen
 
-Status: Geplant
+Status: Erledigt (04.11.2026)
 
 Ziel:
 
@@ -181,6 +181,12 @@ Mögliche Bereiche:
 Keine Zukunftsfunktionen.
 
 Nur reale Features.
+
+Umsetzung (LP3):
+
+- Abschnitt „Aktuelle Informationsquellen“ unter „Für wen?“: fünf Infokarten (Wetter, Lawinenlage, Schutzgebiete, Wildlife, Sperrungen & Hinweise), je Titel und ein Satz. Wo LP2 erklärt, was Mountain Radar ist, nennt LP3, welche Informationen konkret zu sehen sind (z. B. Nullgradgrenze, Höhengrenzen, Filter).
+- Bestehendes Designsystem (`.mr-section`, `.mr-feature-grid`, `.mr-card--raised`), keine neuen Komponenten, kein JavaScript, keine zweite Aktion.
+- Bewusst nicht dargestellt: Risk Engine, GPX-Analyse, automatische Risikobewertung, Geländeanalyse, Unfalllayer, Coming-Soon-Bereiche, Datenquellen-Details (LP5).
 
 ---
 
