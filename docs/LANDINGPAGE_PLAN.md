@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 erledigt, LP2–LP8 geplant)
+> Status: In Arbeit (LP1 und LP2 erledigt, LP3–LP8 geplant)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -136,7 +136,7 @@ Umsetzung (LP1):
 
 # LP2 – Was ist Mountain Radar?
 
-Status: Geplant
+Status: Erledigt (04.11.2026)
 
 Ziel:
 
@@ -153,6 +153,12 @@ Schwerpunkte:
 - Orientierung
 - Risikobewusstsein
 - Informationszugang
+
+Umsetzung (LP2):
+
+- Zwei Abschnitte unter dem Hero: „Was ist Mountain Radar?“ (ein Einleitungssatz, fünf Infokarten Wetter, Lawinenlage, Schutzgebiete, Wildlife, Sperrungen & Hinweise) und „Für wen?“ (fünf Zielgruppen, ein Satz „Warum Mountain Radar?“).
+- Beschrieben wird nur, was die Anwendung heute kann. Risk Engine, GPX, Geländeanalyse, Routenanalyse und automatische Risikobewertung kommen nicht vor (LP4); Behörden und Organisationen werden nicht als Zielgruppe genannt.
+- Details und Test: STYLEGUIDE.md, Abschnitt „Landing Page (seit LP1)“.
 
 ---
 
