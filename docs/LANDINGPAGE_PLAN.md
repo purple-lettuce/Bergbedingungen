@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 bis LP7 erledigt, LP8 geplant)
+> Status: In Arbeit (LP1 bis LP8 erledigt)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -307,15 +307,23 @@ Abschluss LP1–LP6
 
 # LP8 – SEO & Sharing
 
-Status: Geplant
+Status: Erledigt (04.11.2026)
 
 Themen:
 
 - Open Graph
 - Social Preview
 - Suchmaschinen-Metadaten
-- strukturierte Daten
+- strukturierte Daten (bewusst nicht umgesetzt, siehe unten)
 
+Umsetzung (LP8):
+
+- Im `<head>` von `index.html` und `app.html`: `<title>`, `meta description`, Open Graph (`og:type`, `og:site_name`, `og:locale`, `og:title`, `og:description`, `og:image` samt Typ, Größe, Alternativtext) und Twitter/X (`twitter:card` = `summary_large_image`, Titel, Beschreibung, Bild, Alternativtext). Der Text steht pro Seite einmal; Open Graph und Twitter wiederholen ihn.
+- Titel: Startseite „Mountain Radar – Alpine Risk Intelligence“, Karte „Karte – Mountain Radar“. Beschreibung (gleich für beide, ≈ 115 Zeichen): „Sperrungen, Hinweise, Schutzgebiete, Wetter und Lawinenlage für den Alpenraum auf einer Karte. Know before you go.“ Es steht nur darin, was die Karte tatsächlich zeigt; keine Keyword-Listen, keine Versprechen.
+- Social Preview: `docs/design/mountain-radar-social-preview.png` (1200 × 630, Verhältnis 1,91 : 1). Links das Emblem, rechts Name, Claim und Slogan auf dem Verlauf Deep Alpine Blue → Alpine Green, mit Inter. Quelle: `docs/design/social-preview.html` (Screenshot der Seite in Edge/Chrome headless bei 1200 × 630).
+- Sharing-Darstellung: große Karte mit Bild oben, darunter Titel und Beschreibung (Open Graph und Twitter/X gleich).
+- Bewusst nicht umgesetzt: strukturierte Daten (JSON-LD) und `canonical`/`og:url`. Es gibt noch keine feste öffentliche Adresse, und eine erfundene Adresse wäre falsch. Die Bild-Adressen sind deshalb relativ; viele Dienste verlangen für `og:image` eine absolute Adresse. **Sobald die Seite öffentlich erreichbar ist**, müssen `og:image` und `twitter:image` absolut gesetzt und `canonical`/`og:url` ergänzt werden. Strukturierte Daten bringen bei einer einzelnen Startseite ohne Suchfunktion nichts.
+- Keine Funktionsänderung: Es wurden nur Metadaten im `<head>` und ein Bild ergänzt. Test: `scripts/test_landing.html` (Titel, Beschreibung, Open Graph, Twitter/X, Bildgröße).
 ---
 
 # Priorisierung

@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1 bis LP7)</title>
+<title>Tests Landing Page (LP1 bis LP8)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -187,8 +187,20 @@ async function whatIsSmall(w) {
   var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
   ok('LP2–LP6 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
 }
-(async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); await navigation(1440, 900); await navigation(390, 844); await navigation(320, 640); await navigationDark(); }
+async function seo(page, title) {
+  // LP8: Metadaten der Seite (Titel, Beschreibung, Open Graph, Twitter/X) und das Vorschaubild.
+  var f = await openFrame('../' + page, 1024, 768), d = f.contentDocument, tag = 'LP8 ' + page + ': ';
+  function meta(sel) { var e = d.querySelector(sel); return e ? (e.getAttribute('content') || '').trim() : ''; }
+  var desc = meta('meta[name="description"]');
+  ok(tag + 'Titel', d.title === title, d.title);
+  ok(tag + 'Meta Description vorhanden (50 bis 160 Zeichen)', desc.length >= 50 && desc.length <= 160, desc.length + ' Zeichen');
+  ok(tag + 'Open Graph: type, site_name, title, description, image', meta('meta[property="og:type"]') === 'website' && meta('meta[property="og:site_name"]') === 'Mountain Radar' && meta('meta[property="og:title"]') === title && meta('meta[property="og:description"]') === desc && meta('meta[property="og:image"]') !== '');
+  ok(tag + 'Open Graph: Bild mit Größe und Alternativtext', meta('meta[property="og:image:width"]') === '1200' && meta('meta[property="og:image:height"]') === '630' && meta('meta[property="og:image:alt"]').length > 10);
+  ok(tag + 'Twitter/X: große Karte mit Titel, Beschreibung, Bild', meta('meta[name="twitter:card"]') === 'summary_large_image' && meta('meta[name="twitter:title"]') === title && meta('meta[name="twitter:description"]') === desc && meta('meta[name="twitter:image"]') === meta('meta[property="og:image"]') && meta('meta[name="twitter:image:alt"]') !== '');
+  var img = await new Promise(function (resolve) { var i = new Image(); i.onload = function () { resolve(i); }; i.onerror = function () { resolve(null); }; i.src = new URL(meta('meta[property="og:image"]'), f.contentWindow.location.href).href; });
+  ok(tag + 'Vorschaubild ist erreichbar und 1200 × 630', img && img.naturalWidth === 1200 && img.naturalHeight === 630, img ? img.naturalWidth + ' × ' + img.naturalHeight : 'nicht ladbar');
+}(async function () {
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); await navigation(1440, 900); await navigation(390, 844); await navigation(320, 640); await navigationDark(); await seo('index.html', 'Mountain Radar – Alpine Risk Intelligence'); await seo('app.html', 'Karte – Mountain Radar'); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
