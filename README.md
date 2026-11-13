@@ -95,6 +95,7 @@ Die Dokumentation des Projekts liegt im Ordner [docs/](docs/):
 - **[docs/ROADMAP.md](docs/ROADMAP.md)** — Alpine Risk Intelligence Roadmap mit 5 Phasen, 9 Kernmodulen, Mountain Radar Toolbox (Website + Mobile), Abhängigkeiten und Akzeptanzkriterien
 - **[docs/DATENQUELLEN.md](docs/DATENQUELLEN.md)** — Vollständiger Katalog aller Datenquellen (20+) mit URLs, Lizenzen, Prioritäten, Roadmap-Phasen, lokalen Dateien und Skripten
 - **[docs/WORKFLOW.md](docs/WORKFLOW.md)** — Arbeitsabläufe, Definition of Done, Dokumentations-Prozesse
+- **[docs/ROUTE_INTELLIGENCE_PLAN.md](docs/ROUTE_INTELLIGENCE_PLAN.md)** — Entwicklungsplan für GPX, Routenanalyse und die Alpine Risk Engine (geplant, noch nicht umgesetzt)
 
 ### Fachliche Analysen
 
