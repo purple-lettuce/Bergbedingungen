@@ -152,9 +152,9 @@ Warum diese Reihenfolge: Ebene 2 ist ohne Datenquelle machbar und liefert sofort
 
 ### RI0 – Grundsatzentscheidungen festhalten
 
-Ebene 1 · Stufe 1.1. Status: Geplant. Schicht: Dokumentation.
+Ebene 1 · Stufe 1.1. Status: Erledigt (13.11.2026). Schicht: Dokumentation. Ergebnis: Abschnitt 13.
 
-**Ziel:** Die Entscheidungen E1 bis E6 und E14 (Abschnitt 13) vor dem ersten Code bestätigen oder ändern.
+**Ziel:** Die Entscheidungen E1 bis E14 (Abschnitt 13) vor dem ersten Code bestätigen oder ändern. Ergebnis: E1 bis E6, E8, E10, E11, E13, E14 bestätigt (E4, E5, E6, E8 vorläufig bis zur Prüfung in RI1, RI4, RI7, RI10/RI11), E7 und E12 offen mit Frist, E9 Skala bestätigt.
 
 **Umfang:** Eintrag der Entscheidungen im Plan; kein Code.
 
@@ -164,7 +164,7 @@ Ebene 1 · Stufe 1.1. Status: Geplant. Schicht: Dokumentation.
 
 **Abhängigkeiten:** keine.
 
-**Definition of Done:** Entscheidungen stehen im Plan, PR gemerged.
+**Definition of Done:** Entscheidungen stehen im Plan, PR gemerged. (Erfüllt.)
 
 ---
 
@@ -714,27 +714,58 @@ Bis ein Paket gemerged ist, bleibt seine Funktion in Landing, README und ROADMAP
 
 ---
 
-# 13. Offene Entscheidungen
+# 13. Entscheidungen E1–E14
 
-| Nr. | Frage | Empfehlung | Nötig vor |
-|---|---|---|---|
-| E1 | GPX nur lokal im Browser oder serverseitig? | Nur lokal; die Datei wird nie hochgeladen. Kein Backend, keine Datenschutzfragen zu Standortdaten. | RI1 |
-| E2 | Wo werden Routen gespeichert? | Zunächst nirgends (eine Route pro Sitzung); danach IndexedDB mit Export. Kein Server. | RI6 |
-| E3 | Koordinaten, Einheiten, Höhenbezug | WGS84, Meter und Kilometer; Höhe über Meeresspiegel laut Datei bzw. DEM; Ellipsoid/Geoid beim Vergleich beachten. | RI1 |
-| E4 | Größenlimit der GPX-Datei | z. B. 10 MB bzw. 200 000 Punkte, bei Überschreitung ablehnen statt abschneiden, mit klarer Meldung. | RI1 |
-| E5 | Glättung der GPX-Höhen | Einfache dokumentierte Schwelle (Hysterese), im UI als Methode benannt. | RI4 |
-| E6 | Abtastabstand für Flächenschnitte | 25 m; Abschnitte nach Ereignis, nicht in festen Längen. | RI7 |
-| E7 | DEM-Quelle | offen; RI11 entscheidet (Lizenz, Abdeckung Alpenraum, Abruf ohne Backend). | RI11 |
-| E8 | Cache-Strategie (DEM, Wetter, Overpass) | Zwischenspeicher je Sitzung plus Browser-Cache; vorberechnete statische Kacheln nur, wenn die Datenmenge im Repository vertretbar ist. | RI10, RI11 |
-| E9 | Skala und Gewichtung von Befunden | Keine Zahlen, kein Gesamtwert; drei Stufen `info`, `hinweis`, `beachten`. Gewichtung bleibt offen (ALPINE_RISK_ENGINE.md). | RI16 |
-| E10 | Analyse lokal oder backendgestützt? | Lokal im Browser, solange Datenmengen und Abfragen tragbar sind. Ein Backend wäre nur für große DEM-Daten, Archive oder Konten gerechtfertigt und ist eine eigene Architekturentscheidung. | RI18 |
-| E11 | Offline-Unterstützung | Nicht in den Ebenen 2 bis 4; Logik bleibt serverunabhängig, damit PWA/Offline später möglich ist. | später |
-| E12 | Umgang mit widersprüchlichen Daten | offen (ALPINE_RISK_ENGINE.md); jedes Modul liefert eigene Befunde, keine Auflösung der Widersprüche. | RI21 |
-| E13 | Suche in eigenen Routen | Nicht in den Ebenen 2 bis 4; später als zusätzliche Gruppe der globalen Suche. | später |
-| E14 | Bibliotheken | Keine; Parser, Geometrie und Diagramm als eigener Code. Falls nötig: Self-Hosting unter `vendor/` und Lizenzprüfung. | RI1 |
+Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die genannten Pakete), **Bestätigt, vorläufig** (Grundsatz gilt, ein Zahlenwert wird im genannten Paket an echten Daten geprüft), **Offen** (bewusst vertagt, mit Frist). Eine Änderung einer bestätigten Entscheidung braucht einen eigenen Dokumentations-PR.
+
+## Bestätigte Grundsatzentscheidung E1
+
+**E1 – GPX-Verarbeitung: ausschließlich lokal im Browser. Bestätigt.**
+
+- GPX-Dateien werden nur im Browser des Nutzers gelesen und verarbeitet (Dateiauswahl über das Dateisystem-Dialogelement, Inhalt per `File`-API). Die Datei und ihr Inhalt werden nicht übertragen.
+- **Keine Server-Komponente** für GPX, Routen oder Analyse. Die Anwendung bleibt statisch (GitHub Pages).
+- **Keine Benutzerkonten**, keine Anmeldung.
+- **Keine Speicherung auf dem Server.** Eine spätere lokale Speicherung im Browser (RI6, E2) ist davon getrennt und bleibt auf dem Gerät.
+- Externe Abfragen für Routen sind nur zulässig, wenn sie einzelne, gerundete Stützpunkte senden, nie die Datei oder die Linie als Ganzes (Wetter, RI10; DEM-Kacheln, RI12, werden nach Kachelkoordinate abgerufen, nicht nach Routenverlauf, soweit die Quelle das erlaubt; Prüfung in RI11).
+- **Begründung:** Eine GPX-Datei enthält Aufenthaltsorte und Zeiten und ist damit personenbezogen und sensibel. Lokale Verarbeitung vermeidet Datenschutz-, Konto- und Betriebsfragen und passt zur statischen Architektur (kein Backend vorhanden). Alle geplanten Pakete bis einschließlich RI10 sind lokal machbar; die Wetter- und Höhenmodellabfragen sind die einzigen Außenkontakte und unterliegen der Stützpunktregel.
+- **Änderung** (z. B. ein Backend für große DEM-Daten oder Konten) wäre eine eigene Architekturentscheidung (siehe E10) mit Datenschutzbewertung und kein Nebeneffekt eines Funktionspakets.
+
+## Übersicht
+
+| Nr. | Frage | Entscheidung | Status | Begründung und Hinweise | Nötig vor |
+|---|---|---|---|---|---|
+| E1 | GPX lokal oder serverseitig? | Nur lokal im Browser; kein Server, keine Konten, keine Serverspeicherung (siehe oben) | **Bestätigt** | Datenschutz (Standortdaten), statische Architektur | RI1 |
+| E2 | Wo werden Routen gespeichert? | RI1–RI5: nirgends, genau eine Route im Arbeitsspeicher der Sitzung (Neuladen verwirft sie). RI6: IndexedDB im Browser mit GPX-Export, kein Server | **Bestätigt** | Kein Datenformat festlegen, bevor die Anzeigepakete bewährt sind; `localStorage` ist für große Tracks zu klein. Details (Schema, Migration) werden erst in RI6 entschieden | RI6 |
+| E3 | Koordinaten, Einheiten, Höhenbezug | WGS84; Koordinaten intern als `lat`, `lon` in Grad; Strecken in Metern (Anzeige in km); Höhen in Metern wie in der Datei. GPX-Höhen werden nicht umgerechnet oder korrigiert; fehlende Höhe ist `null`, nie 0. Ellipsoid/Geoid wird erst beim DEM-Vergleich (RI12) betrachtet | **Bestätigt** | Entspricht der GPX-Spezifikation (WGS84) und dem Leaflet-Standard; keine Umrechnung vermeidet Scheinpräzision | RI1 |
+| E4 | Größenlimit der GPX-Datei | 10 MB und 200 000 Trackpunkte; Überschreitung wird abgelehnt (nicht abgeschnitten) mit klarer Meldung. Beide Werte stehen als benannte Konstanten im Parser | **Bestätigt, vorläufig** | Reicht für lange Mehrtagestouren. Die Grenzen werden mit dem Parser (RI1) an einer großen Testdatei auf Laufzeit geprüft und nur bei Bedarf in einem Dokumentations-PR angepasst | RI1 |
+| E5 | Glättung der GPX-Höhen | Anstieg/Abstieg per Hysterese (Höhenänderung zählt erst ab einer Schwelle); Startwert 5 m als benannte Konstante. Die Methode wird im UI genannt, keine versteckte Filterung | **Bestätigt, vorläufig** | Rohsummen überzeichnen durch GPS-Rauschen. Der Zahlenwert wird in RI4 an Referenzstrecken kalibriert | RI4 |
+| E6 | Abtastabstand für Flächenschnitte | 25 m; Abschnitte entstehen aus Ereignissen (Ein-/Austritt), nicht aus festen Längen | **Bestätigt, vorläufig** | Wert wird in RI7 gegen die echten Geometrien (Schutzgebiete, Regionen) und Laufzeit geprüft | RI7 |
+| E7 | DEM-Quelle | Keine Entscheidung | **Offen** (bewusst vertagt) | Lizenz, Abdeckung Alpenraum und Abruf ohne Backend sind ungeklärt; Spike in RI11. Bis dahin wird kein DEM-Code geschrieben | RI11 |
+| E8 | Cache-Strategie (DEM, Wetter, Overpass) | Grundsatz: Zwischenspeicher je Sitzung plus normaler Browser-Cache; vorberechnete statische Kacheln im Repository nur bei vertretbarer Datenmenge. Details je Quelle in RI10 bzw. RI11 | **Bestätigt, vorläufig** | Für RI1–RI5 ohne Bedeutung (keine externen Daten) | RI10, RI11 |
+| E9 | Skala und Gewichtung von Befunden | Keine Zahlenskala, kein Gesamtwert; drei Stufen `info`, `hinweis`, `beachten`. Gewichtung bleibt offen | **Bestätigt** (Skala), Gewichtung **offen** | Folgt `ALPINE_RISK_ENGINE.md` („kein Gesamtrisiko“). Gewichtung gehört zu RI21 | RI16 |
+| E10 | Analyse lokal oder backendgestützt? | Lokal im Browser. Ein Backend nur nach eigener Architekturentscheidung (große DEM-Daten, Archive, Konten) | **Bestätigt** | Folgt aus E1; bis einschließlich Ebene 4 (RI19) ist kein Backend vorgesehen | RI18 |
+| E11 | Offline-Unterstützung | Nicht in den Ebenen 2 bis 4. Die Logik bleibt serverunabhängig und ohne DOM, damit PWA/Offline später möglich ist | **Bestätigt** | ROADMAP: PWA/Offline „Zukunft (nach Phase 4)“ | später |
+| E12 | Umgang mit widersprüchlichen Daten | Jedes Modul liefert eigene Befunde; keine Auflösung der Widersprüche | **Offen** | Offene Frage in `ALPINE_RISK_ENGINE.md`; gehört zu RI21 | RI21 |
+| E13 | Suche in eigenen Routen | Nicht in den Ebenen 2 bis 4; später als zusätzliche Gruppe der globalen Suche | **Bestätigt** | Eigene Routen sind lokal und privat; die Suche indexiert sie nicht | später |
+| E14 | Bibliotheken | Keine neuen Bibliotheken; Parser, Geometrie und Diagramm als eigener Code (Leaflet bleibt). Falls später doch nötig: Self-Hosting unter `vendor/`, Lizenzprüfung, eigener Beschluss | **Bestätigt** | Keine externen Ressourcen ohne Self-Hosting; kleiner Umfang, volle Kontrolle über Sicherheit (`esc()`, XML-Parser) | RI1 |
+
+## Festlegungen für RI1 bis RI5
+
+Aus den bestätigten Entscheidungen folgen diese Vorgaben. Sie ändern weder Umfang noch Reihenfolge der Pakete, sondern konkretisieren sie.
+
+| Thema | Festlegung | Grundlage |
+|---|---|---|
+| Datenfluss | Dateiauswahl → Text per `File`-API im Browser → Parser → Routenobjekt im Arbeitsspeicher. Kein `fetch`/Upload mit Routeninhalt, kein Cookie, keine Speicherung in RI1–RI5 | E1, E2 |
+| Parser (RI1) | Reine Funktion `Text → Ergebnisobjekt` ohne DOM-Zugriff auf die Seite; Parsing über `DOMParser` (XML). Fehler werden als Ergebnis zurückgegeben (Meldung), nicht geworfen; Limits aus E4 als benannte Konstanten | E1, E4, E14 |
+| Koordinaten und Einheiten | `lat`, `lon` in Grad (WGS84); `dist` in Metern; `ele` in Metern oder `null`; `time` als Zeitpunkt oder `null`. Anzeige in km und m | E3 |
+| Routenmodell (RI2) | Eine zusammenhängende Punktliste mit Streckenposition je Punkt, Lücken vermerkt (Entwurf Abschnitt 11). Keine Analyseergebnisse im Routenobjekt | E3 |
+| Anzahl Routen (RI3) | Genau eine Route zugleich; „Route entfernen“ verwirft sie vollständig. Texte aus der Datei nur über `esc()` | E2 |
+| Statistik (RI4) | Höhen nur aus der Datei; Hysterese-Schwelle als benannte Konstante (Startwert 5 m), Methode im UI genannt; ohne Höhen: „keine Höhendaten in der Datei“ | E3, E5 |
+| Höhenprofil (RI5) | Eigenes SVG ohne Diagrammbibliothek; Logik (Skalierung, Abtastung) getrennt und getestet | E14 |
+| Externe Dienste | RI1–RI5 sprechen mit keinem externen Dienst | E1 |
+| Tests | Logik als Testseite in `scripts/run_js_tests.py`, Testdaten synthetisch unter `scripts/`; keine echten Fremdtracks im Repository | Prinzip 3 |
 
 ---
-
 # 14. Risiken des Gesamtvorhabens
 
 | Risiko | Wirkung | Gegenmaßnahme |
