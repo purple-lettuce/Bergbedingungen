@@ -379,6 +379,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.11 | 2026-11-13 | Route Intelligence: RI0 (Grundsatzentscheidungen E1–E14) bestätigt, GPX nur lokal im Browser, nur Dokumentation |
 | 4.10 | 2026-11-13 | Route Intelligence Plan (docs/ROUTE_INTELLIGENCE_PLAN.md) ergänzt, nur Dokumentation |
 | 4.9 | 2026-11-13 | Landing Experience: LP1b (Hero Visual & Landing-Hintergrund) umgesetzt |
 | 4.8 | 2026-11-04 | Landing Experience: LP8 (SEO & Sharing) umgesetzt |
