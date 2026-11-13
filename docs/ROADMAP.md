@@ -379,6 +379,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.10 | 2026-11-13 | Route Intelligence Plan (docs/ROUTE_INTELLIGENCE_PLAN.md) ergänzt, nur Dokumentation |
 | 4.9 | 2026-11-13 | Landing Experience: LP1b (Hero Visual & Landing-Hintergrund) umgesetzt |
 | 4.8 | 2026-11-04 | Landing Experience: LP8 (SEO & Sharing) umgesetzt |
 | 4.7 | 2026-11-04 | Landing Experience: LP7 (Navigation & Unterseiten) umgesetzt |
@@ -421,6 +422,7 @@ Diese Roadmap ist Teil eines größeren Dokumentationssystems:
 - **docs/WORKFLOW.md** — Entwicklungs-Workflow und Definition of Done
 - **docs/STYLEGUIDE.md** — Design System von Mountain Radar
 - **docs/LANDINGPAGE_PLAN.md** — Plan der Landing Experience (LP1–LP8)
+- **docs/ROUTE_INTELLIGENCE_PLAN.md** — Entwicklungsplan Route Intelligence: GPX, Höhenprofil, Kontext entlang der Route, DEM, Befunde (nur Plan, nichts umgesetzt)
 - **docs/ALPINE_RISK_ENGINE.md** — Konzept der Alpine Risk Engine
 - **docs/IDEENSAMMLUNG.md** — Ideen, die noch nicht in der Roadmap stehen
 - **docs/LAWINENLAGE_ANALYSE.md** — Detaillierte Analyse der Lawinenlage-Integration
