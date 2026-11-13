@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 bis LP8 erledigt)
+> Status: In Arbeit (LP1 bis LP8 und LP1b erledigt)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -131,6 +131,26 @@ Umsetzung (LP1):
 - Derselbe Header wie in der Anwendung (Emblem, Name, Claim) ist die einzige Markenführung; der Hero zeigt den Slogan als Überschrift, einen Satz Einleitung und genau einen Link „Zur Karte“.
 - Details, Regeln und Test: STYLEGUIDE.md, Abschnitt „Landing Page (seit LP1)“.
 - Bewusst nicht Teil von LP1 (bleibt bei den jeweiligen Paketen): Produkterklärung (LP2), aktuelle Funktionen (LP3), Vision und GPX (LP4), Datenquellen (LP5), Produktvision (LP6), Navigation (LP7, erledigt), SEO und Sharing (LP8).
+
+---
+
+# LP1b – Hero Visual & Landing-Hintergrund
+
+Status: Erledigt (13.11.2026)
+
+Ziel:
+
+Die Landing Page wärmer und hochwertiger wirken lassen, ohne Inhalt, Navigation oder Architektur zu ändern. Reines Visual-Paket.
+
+Umsetzung (LP1b):
+
+- **Hero-Bild:** `docs/design/mountain-radar-hero.jpg` (1152 × 768, Skitourengeher vor einer Brücke im Hochgebirge, 264 KB) füllt den Hero als CSS-Hintergrund (`background-size: cover`, Ausschnitt `center 40%`, Mindesthöhe `clamp(420px, 62vh, 640px)`). Das Bild ist Dekoration (kein `img`, kein Alternativtext nötig); es kommt kein neuer Text hinzu.
+- **Overlay:** Verlauf in Nachtblau (`--mr-hero-overlay`, `10, 24, 40`) von links (Deckkraft 0,6) nach rechts (≈ 0,09), damit „Know before you go.“, die Einleitung und „Zur Karte“ links lesbar sind und das Bild rechts sichtbar bleibt. Mobil (≤ 820 px) gleichmäßiger Verlauf von oben nach unten, da der Text über die ganze Breite läuft. Dunkelmodus: Deckkraft 0,76.
+- **Text und Aktion auf dem Bild:** Slogan und Einleitung in `--mr-on-primary` (weiß) mit leichtem Textschatten. „Zur Karte“ ist im Hero ein weißer Button mit Deep-Alpine-Blue-Schrift (der marineblaue Standardbutton verschwände auf dem dunklen Overlay).
+- **Hintergrundfarbe:** Die Vorgabe `#EBDFC3` wurde geprüft und leicht aufgehellt zu **`#EFE5CF`** (gleicher Farbton, mehr Helligkeit). Kontraste (WCAG): Haupttext `#1B2733` 12,1 : 1 (bei `#EBDFC3` 11,5), gedämpfter Text `#566574` **4,78 : 1** (bei `#EBDFC3` nur 4,52, knapp über AA), Link `#16324F` 10,5 : 1, Mountain Green `#2F6B4F` 5,0 : 1. Weiße Karten heben sich mit 1,25 : 1 klar ab (bei `#EBDFC3` 1,32), dazu Rahmen und Schatten. Die Linienfarbe ist auf der Startseite warm (`#DCD0B5`).
+- **Landing und Anwendung getrennt:** Die Tokens `--mr-landing-bg` und `--mr-landing-line` gelten nur mit `<body class="mr-landing">`. Die Kartenanwendung (`app.html`) behält `#F5F7F6`. Im Dunkelmodus bleibt die Landing-Fläche `#0E1620` (kein warmer Ton im Dunkeln).
+- Header, Navigation, Fußzeile und weiße Flächen (`--alt`-Abschnitte) bleiben unverändert; die warmen Abschnitte wechseln sich mit weißen ab.
+- Test: `scripts/test_landing.html` (Hero-Bild und Overlay, helle Schrift, Aktion im Hero, Bild erreichbar, warme Fläche, weiße Karten, Kontrast ≥ 4,5, Anwendung unverändert). Screenshots: `docs/design/lp1b/`.
 
 ---
 
