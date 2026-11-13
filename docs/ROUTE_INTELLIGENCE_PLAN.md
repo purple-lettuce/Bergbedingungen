@@ -4,20 +4,77 @@
 >
 > Ziel: Mountain Radar entwickelt sich in kleinen, einzeln mergebaren Schritten von der Kartenplattform zur Verarbeitung eigener Touren (Route Intelligence) und darauf aufbauend zur Alpine Risk Intelligence.
 >
-> Dieses Dokument ist ein Arbeitsplan, keine Zusage. Es beschreibt nur Geplantes. Was heute existiert, steht in ROADMAP und README. Maßgeblich für Phasen und Priorität bleibt die ROADMAP (Phase 1: GPX, DEM, Höhenprofil; Phase 2: Wetter, Lawinenlage, Tourenwarnungen; Phase 3: Alpine Risk Engine Beta).
+> Dieses Dokument ist ein Arbeitsplan, keine Zusage. Es beschreibt nur Geplantes. Was heute existiert, steht in ROADMAP und README. Maßgeblich für Phasen und Priorität bleibt die ROADMAP (die technischen Phasen 1–5 der ROADMAP und die vier Produktebenen dieses Plans sind zwei verschiedene Gliederungen: Ebene 2 und 3 liegen überwiegend in Phase 1–2, Ebene 4 in Phase 3 und später) (Phase 1: GPX, DEM, Höhenprofil; Phase 2: Wetter, Lawinenlage, Tourenwarnungen; Phase 3: Alpine Risk Engine Beta).
 
 ```
-Kartenplattform  →  Route Intelligence  →  Alpine Risk Intelligence
-(heute)             (Phasen A–C)           (Phasen D–E)
-Layer, Popups,      eine Route als Objekt: Befunde, Erklärung,
-Wetter am Punkt     Anzeige, Profil,       Alpine Risk Engine
-                    Kontext, Gelände
+Ebene 1                Ebene 2                Ebene 3                Ebene 4
+Kartenplattform   →    Route Intelligence  →  Terrain Intelligence → Alpine Risk Intelligence
+(heute)                eine konkrete Tour     Gelände entlang        Quellen zusammenführen,
+                                              der Route              später bewerten
 ```
 
 ---
 
-# 1. Ausgangslage (Analyse)
+# Produktevolution: vier Ebenen
 
+Der Plan folgt einer Produktentwicklung in vier aufeinander aufbauenden Ebenen. Jede Ebene beantwortet eine andere Frage, nutzt die darunterliegende und ist für sich nützlich, auch wenn die nächste nie gebaut würde. Pakete (RI…) sind die Bausteine; **Stufen** (z. B. 2.1) gliedern die Ebenen in mergebare Zwischenschritte.
+
+| Ebene | Leitfrage | Gegenstand | Ergebnis für Nutzer | Status |
+|---|---|---|---|---|
+| **1 Kartenplattform** | „Was ist hier?“ | ein Ort bzw. Kartenausschnitt | Karte mit Wetter, Lawinenlage, Schutzgebieten, Wildlife, Sperrungen & Hinweisen | **heute verfügbar** |
+| **2 Route Intelligence** | „Was ist das für eine Tour?“ | eine konkrete Route (GPX) | eigene Tour auf der Karte, Länge, Höhenmeter, Höhenprofil; die vorhandenen Datenebenen entlang der Route | geplant (RI1–RI10) |
+| **3 Terrain Intelligence** | „Wie ist das Gelände entlang der Tour?“ | Gelände unter und neben der Route | Steigung, Exposition, Hangneigung, Geländecharakteristik aus einem Höhenmodell | geplant (RI11–RI15, RI20) |
+| **4 Alpine Risk Intelligence** | „Worauf muss ich achten?“ | alle Quellen zusammen | einheitliche, erklärbare Befunde; später eine Risikobewertung | geplant (RI16–RI19, RI21) |
+
+## Was jede Ebene ausmacht
+
+### Ebene 1 – Kartenplattform (heute)
+
+Ein Ort oder Ausschnitt wird betrachtet; jede Datenquelle steht für sich: Wetter am Punkt (Open-Meteo), Lawinenlage (Euregio, Schweiz), Schutzgebiete mit Regeln, Wildlife, Sperrungen & Hinweise; dazu Layer-System, Popup-System, Datenstatus, globale Suche, mobile Bedienung. **Liefert den späteren Ebenen:** Layer- und Popup-Gerüst, Standardmodell der Lawinenlage mit `levelAtAltitude`, Geometrien der Schutzgebiete und Sperrungen, Wetterabruf, Testmuster. Im Plan nur eine Aufgabe: Grundsatzentscheidungen (RI0).
+
+### Ebene 2 – Route Intelligence
+
+Der Gegenstand wechselt vom Ort zur **Tour**: Eine eigene Route wird geladen, dargestellt und gemessen. Danach wird sie mit den Quellen der Ebene 1 verknüpft („Route trifft Karte“). Die Ebene arbeitet mit dem, was in der GPX-Datei und in den vorhandenen Daten steht; sie berechnet kein Gelände und bewertet nichts.
+- **Stufe 2.1 – Route als Objekt:** GPX-Parser, Routenmodell, Anzeige, Statistik, Höhenprofil, lokale Verwaltung (RI1–RI6).
+- **Stufe 2.2 – Route trifft Kartenplattform (Übergangsphase):** Die bestehenden Quellen werden entlang der Route ausgewertet, **jede für sich und ohne Zusammenführung**: Schutzgebiete und Sperrungen, Lawinenlage, Wetter (RI7–RI10). Das ist das Verbindungsglied zwischen Ebene 1 und den höheren Ebenen: Es nutzt nur vorhandene Daten, bringt aber erstmals Routenpositionen (km) in alle Ergebnisse.
+
+### Ebene 3 – Terrain Intelligence
+
+Neue Information entsteht, die weder in der GPX-Datei noch in den vorhandenen Daten steht: aus einem **Höhenmodell** (DEM).
+- **Stufe 3.1 – Höhenmodell:** Quelle klären, Zugriff bauen (RI11, RI12).
+- **Stufe 3.2 – Geländeanalyse:** Steigung/Hangneigung und Exposition entlang der Route (RI13, RI14).
+- **Stufe 3.3 – Darstellung:** Gelände im Höhenprofil (RI15).
+- **Stufe 3.4 – Geländecharakteristik:** Geländeformen wie Grat, Steilstufe, Mulde (RI20, zurückgestellt).
+
+Terrain Intelligence **beschreibt** das Gelände (Zahlen, Klassen, Abschnitte). Sie sagt nichts über Gefahr; die Deutung gehört zu Ebene 4.
+
+### Ebene 4 – Alpine Risk Intelligence
+
+Hier werden die Ergebnisse der Ebenen 2 und 3 und der Plattformdaten **zusammengeführt**: Route, Wetter, Lawinenlage, Schutzgebiete, Terrain. Der Unterschied zu Stufe 2.2 ist die gemeinsame Sprache: ein Befundmodell, eine Liste, eine Engine, die Module nacheinander ausführt und Ausfälle sichtbar macht.
+- **Stufe 4.1 – Befunde:** Befundmodell und Befundliste „Worauf achten?“ (RI16, RI17).
+- **Stufe 4.2 – Zusammenführung:** Engine-Orchestrierung (RI18).
+- **Stufe 4.3 – Terrain in der Zusammenführung:** Terrain-Befunde (RI19).
+- **Stufe 4.4 – Risikobewertung (Konzept):** Ob und wie bewertet wird, ist offen; zunächst nur ein Konzept auf Basis der gesammelten Erfahrung (RI21, zurückgestellt).
+
+Bis einschließlich Stufe 4.3 gilt: informieren, nicht entscheiden; kein Gesamtrisiko. Die Risikobewertung ist ausdrücklich das **spätere Ziel**, nicht Teil der ersten Engine.
+
+## Übergänge zwischen den Ebenen (Gates)
+
+Eine Ebene gilt als erreicht, wenn ihre Kriterien erfüllt sind; erst dann beginnt die nächste inhaltlich (Vorarbeiten wie RI0, RI7, RI11 dürfen früher laufen, weil sie keine Nutzerfunktion ändern).
+
+| Übergang | Kriterien |
+|---|---|
+| **1 → 2** | RI0 entschieden; GPX-Verarbeitung läuft vollständig lokal; Route kann geladen und entfernt werden, ohne die vorhandene Anwendung zu verändern (RI1–RI3). |
+| **2.1 → 2.2** | Routenobjekt mit km-Position stabil (RI2); Statistik und Profil liefern verlässliche Werte (RI4, RI5). |
+| **2 → 3** | Mindestens Schutzgebiete/Sperrungen entlang der Route (RI8) sind nutzbar und das Muster „Route × Datenquelle“ hat sich bewährt; DEM-Quelle entschieden (RI11). |
+| **3 → 4** | Mindestens zwei unabhängige Analysen liefern Ergebnisse mit km-Position (aus RI8, RI9, RI10 und/oder RI13/RI14); das Befundmodell kann an echten Ergebnissen geprüft werden. |
+| **Innerhalb 4** | Risikobewertung (RI21) erst, wenn Befunde im Einsatz sind und Rückmeldungen vorliegen; Entscheidung E9 (Skala, Gewichtung) vorher getroffen. |
+
+Hinweis zur Reihenfolge: Die Befunde (Ebene 4) brauchen Terrain nicht zwingend. RI16 bis RI18 können schon mit den Ergebnissen aus Stufe 2.2 starten, Terrain-Befunde (RI19) kommen nach. Ebene 4 beginnt also vor dem Ende von Ebene 3, ohne dass sich die Reihenfolge der Ergebnisse ändert.
+
+---
+
+# 1. Ausgangslage (Analyse)
 ## Was heute vorhanden ist und wiederverwendet wird
 
 | Baustein | Stand | Bedeutung für Routen |
@@ -52,7 +109,7 @@ Die Landing Page benennt GPX-Analyse, Risikoanalyse, Terrain Intelligence und Al
 1. **Eine Schicht pro Paket.** Jedes Paket gehört genau einer Schicht an: *Parser*, *Modell/Geometrie*, *Anzeige*, *Datenzugriff (DEM, Wetter)*, *Analyse-Logik*, *Befunde*. Kein Paket mischt GPX, DEM, Risk Engine, Analyse und UI. Wo UI nötig ist, steht die Logik vorher getestet bereit; das UI-Paket enthält keine neue Rechenlogik.
 2. **Reine Logik zuerst.** Berechnungen liegen in Modulen ohne DOM und ohne Leaflet, mit Testseite (wie `avalanche_logic.js`, `search_logic.js`).
 3. **Nur reale Daten.** Keine Platzhalter, keine erfundenen Werte, keine Beispielrouten im Produkt. Testdaten liegen unter `scripts/`. Fehlende Werte erscheinen als „unbekannt“, nie als Schätzung.
-4. **Daten vor KI.** Die Engine liefert Befunde mit Quelle. KI-Erklärungen setzen belastbare Befunde voraus (Phase E).
+4. **Daten vor KI.** Die Engine liefert Befunde mit Quelle. KI-Erklärungen setzen belastbare Befunde voraus (Zurückgestellt, Abschnitt 9).
 5. **Informieren statt entscheiden.** Keine Freigabe, keine Verbote, **kein Gesamtrisiko und keine Ampel für die ganze Tour**, solange nicht ausdrücklich entschieden (ALPINE_RISK_ENGINE.md: „Zu hohe Vereinfachung“).
 6. **Erklärbar.** Jeder Befund nennt: was, wo (Abschnitt in km), woher (Quelle, Stand), was nicht bekannt ist.
 7. **Karte bleibt Arbeitsfläche.** Neues erscheint als Layer, Seitenleisten-Karte oder Popup im bestehenden Designsystem (Komponenten aus D3), mit Hell/Dunkel, Mobil (Bottom Sheet), Tastatur und Touch-Zielen ab 44 px.
@@ -69,26 +126,33 @@ Die Landing Page benennt GPX-Analyse, Risikoanalyse, Terrain Intelligence und Al
 
 ---
 
-# 3. Phasenüberblick
+# 3. Ebenen, Stufen und Pakete
 
-| Phase | Thema | Pakete | Nutzer sieht | Neue externe Daten |
-|---|---|---|---|---|
-| **0** | Entscheidungen | RI0 | nichts (Doku) | – |
-| **A** | Route als Objekt: laden, zeigen, messen | RI1–RI6 | eigene GPX-Route auf der Karte, Statistik, Höhenprofil | keine |
-| **B** | Kontext entlang der Route aus vorhandenen Daten | RI7–RI10 | Schutzgebiete, Sperrungen, Lawinenlage, Wetter entlang der Route | keine neue Quelle |
-| **C** | Gelände (DEM) | RI11–RI15 | Steigung, Exposition, Gelände im Profil | DEM |
-| **D** | Befunde und erste Risk Engine | RI16–RI19, RI-L | Befundliste „Worauf achten?“ | keine |
-| **E** | Zukunft | – | – | OSM, Unfälle u. a. |
+| Ebene | Stufe | Pakete | Schicht(en) | Nutzer sieht | Neue externe Daten |
+|---|---|---|---|---|---|
+| 1 Kartenplattform | 1.1 Entscheidungen | RI0 | Dokumentation | nichts | – |
+| 2 Route Intelligence | 2.1 Route als Objekt | RI1–RI6 | Parser, Modell, Anzeige, Speicherung | eigene GPX-Route, Statistik, Höhenprofil | keine |
+| 2 Route Intelligence | 2.2 Route trifft Kartenplattform | RI7–RI10 | Analyse-Logik, Anzeige, Datenzugriff | Schutzgebiete, Sperrungen, Lawinenlage, Wetter entlang der Route (je Quelle getrennt) | keine neue Quelle |
+| 3 Terrain Intelligence | 3.1 Höhenmodell | RI11–RI12 | Entscheidung, Datenzugriff | nichts (Grundlage) | DEM |
+| 3 Terrain Intelligence | 3.2 Geländeanalyse | RI13–RI14 | Analyse-Logik, Anzeige | Steigung, Exposition | – |
+| 3 Terrain Intelligence | 3.3 Darstellung | RI15 | Anzeige | Gelände im Profil | – |
+| 3 Terrain Intelligence | 3.4 Geländecharakteristik | RI20 (zurückgestellt) | Analyse-Logik | Geländeformen | ggf. DEM mit höherer Auflösung |
+| 4 Alpine Risk Intelligence | 4.1 Befunde | RI16–RI17 | Modell, Anzeige | Liste „Worauf achten?“ | – |
+| 4 Alpine Risk Intelligence | 4.2 Zusammenführung | RI18 | Orchestrierung | Einstieg „Route analysieren“ | – |
+| 4 Alpine Risk Intelligence | 4.3 Terrain-Befunde | RI19 | Analyse-Logik | Gelände in der Befundliste | – |
+| 4 Alpine Risk Intelligence | 4.4 Risikobewertung | RI21 (Konzept, zurückgestellt) | Konzept | – | – |
+| übergreifend | Kommunikation | RI-L | Dokumentation | Landing, README | – |
 
-Warum diese Reihenfolge: Phase A ist ohne Datenquelle machbar und liefert sofort Nutzen (Toolbox WEB-T6). Phase B nutzt nur Daten, die heute im Repository liegen, und liefert den ersten Mehrwert gegenüber einer normalen GPX-Anzeige. Phase C braucht eine Quellen-, Lizenz- und Cache-Entscheidung und kommt erst, wenn A und B tragen. Phase D bündelt, was vorher einzeln nachvollziehbar gebaut wurde.
+Warum diese Reihenfolge: Ebene 2 ist ohne Datenquelle machbar und liefert sofort Nutzen (Toolbox WEB-T6). Stufe 2.2 nutzt nur Daten, die heute im Repository liegen, und liefert den ersten Mehrwert gegenüber einer normalen GPX-Anzeige. Ebene 3 braucht eine Quellen-, Lizenz- und Cache-Entscheidung und kommt erst, wenn Ebene 2 trägt. Ebene 4 bündelt, was vorher einzeln nachvollziehbar gebaut wurde; ihre Befundmodell-Pakete können bereits auf den Ergebnissen der Stufe 2.2 aufsetzen (siehe Gates).
+
+**Abgrenzung 2.2 gegen Ebene 4:** In 2.2 zeigt jede Quelle ihr eigenes Ergebnis in ihrer eigenen Form (Schutzgebietsliste, Lawinenstufen je Abschnitt, Wetterwerte je Stützpunkt). Erst Ebene 4 übersetzt alle in ein gemeinsames Befundformat und führt sie zusammen.
 
 ---
-
-# 4. Phase 0 – Entscheidungen
+# 4. Ebene 1 – Kartenplattform: Entscheidungen (Stufe 1.1)
 
 ### RI0 – Grundsatzentscheidungen festhalten
 
-Status: Geplant. Schicht: Dokumentation.
+Ebene 1 · Stufe 1.1. Status: Geplant. Schicht: Dokumentation.
 
 **Ziel:** Die Entscheidungen E1 bis E6 und E14 (Abschnitt 13) vor dem ersten Code bestätigen oder ändern.
 
@@ -104,13 +168,13 @@ Status: Geplant. Schicht: Dokumentation.
 
 ---
 
-# 5. Phase A – Route als Objekt
+# 5. Ebene 2 – Route Intelligence, Stufe 2.1: Route als Objekt
 
 Ziel: Eine eigene Tour laden, auf der Karte sehen und messen. Keine externen Daten, keine Bewertung.
 
 ### RI1 – GPX-Parser (reine Logik)
 
-Status: Geplant. Schicht: Parser.
+Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Parser.
 
 **Ziel:** GPX-Text in ein Rohmodell umwandeln.
 
@@ -133,7 +197,7 @@ Status: Geplant. Schicht: Parser.
 
 ### RI2 – Routenmodell und Geometrie (reine Logik)
 
-Status: Geplant. Schicht: Modell/Geometrie.
+Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Modell/Geometrie.
 
 **Ziel:** Aus dem Rohmodell ein einheitliches Routenobjekt bilden, auf dem alle späteren Analysen aufsetzen (Entwurf in Abschnitt 11).
 
@@ -154,7 +218,7 @@ Status: Geplant. Schicht: Modell/Geometrie.
 
 ### RI3 – GPX laden und auf der Karte anzeigen
 
-Status: Geplant. Schicht: Anzeige.
+Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige.
 
 **Ziel:** Der Nutzer wählt eine GPX-Datei, die Route erscheint als Ebene auf der Karte.
 
@@ -176,7 +240,7 @@ Status: Geplant. Schicht: Anzeige.
 
 ### RI4 – Routenstatistik (aus den GPX-Höhen)
 
-Status: Geplant. Schicht: Analyse-Logik mit kleiner Anzeige.
+Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Analyse-Logik mit kleiner Anzeige.
 
 **Ziel:** Länge, Höhenmeter und Höhenbereich der Route zeigen.
 
@@ -197,7 +261,7 @@ Status: Geplant. Schicht: Analyse-Logik mit kleiner Anzeige.
 
 ### RI5 – Höhenprofil
 
-Status: Geplant. Schicht: Anzeige (Diagramm).
+Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige (Diagramm).
 
 **Ziel:** Profil Höhe über Strecke, verbunden mit der Karte (Toolbox WEB-T6).
 
@@ -218,7 +282,7 @@ Status: Geplant. Schicht: Anzeige (Diagramm).
 
 ### RI6 – Routenverwaltung (lokal)
 
-Status: Geplant, nach E2 und nach Rückmeldung zu RI3 bis RI5. Schicht: Speicherung.
+Ebene 2 · Stufe 2.1. Status: Geplant, nach E2 und nach Rückmeldung zu RI3 bis RI5. Schicht: Speicherung.
 
 **Ziel:** Mehrere Routen im Browser behalten, wechseln, benennen, löschen, exportieren.
 
@@ -235,13 +299,13 @@ Status: Geplant, nach E2 und nach Rückmeldung zu RI3 bis RI5. Schicht: Speicher
 **Definition of Done:** Routen überleben Neuladen, Löschen entfernt sie vollständig, Fehlerfälle sichtbar, Dokumentation, PR gemerged.
 
 ---
-# 6. Phase B – Kontext aus vorhandenen Daten
+# 6. Ebene 2 – Route Intelligence, Stufe 2.2: Route trifft Kartenplattform (Übergangsphase)
 
 Ziel: Die Route mit Daten verknüpfen, die Mountain Radar schon besitzt. Keine neue Datenquelle, kein DEM. Logik und Anzeige kommen in getrennten PRs.
 
 ### RI7 – Räumlicher Schnitt Route × Polygone (reine Logik)
 
-Status: Geplant. Schicht: Analyse-Logik.
+Ebene 2 · Stufe 2.2. Status: Geplant. Schicht: Analyse-Logik.
 
 **Ziel:** Berechnen, welche Streckenabschnitte (von km bis km) in welchen Polygonen liegen.
 
@@ -262,7 +326,7 @@ Status: Geplant. Schicht: Analyse-Logik.
 
 ### RI8 – Schutzgebiete und Sperrungen entlang der Route
 
-Status: Geplant. Schicht: Anzeige auf vorhandener Logik.
+Ebene 2 · Stufe 2.2. Status: Geplant. Schicht: Anzeige auf vorhandener Logik.
 
 **Ziel:** „Diese Route berührt folgende Schutzgebiete und Sperrungen“ mit Abschnitt und Regeln.
 
@@ -284,7 +348,7 @@ Status: Geplant. Schicht: Anzeige auf vorhandener Logik.
 
 ### RI9 – Lawinenlage entlang der Route
 
-Status: Geplant. Zwei PRs: RI9a Analyse-Logik, RI9b Anzeige.
+Ebene 2 · Stufe 2.2. Status: Geplant. Zwei PRs: RI9a Analyse-Logik, RI9b Anzeige.
 
 **Ziel:** Für Routenabschnitte Region und Gefahrenstufe in der jeweiligen Höhe nennen.
 
@@ -292,7 +356,7 @@ Status: Geplant. Zwei PRs: RI9a Analyse-Logik, RI9b Anzeige.
 - RI9a (`js/route_avalanche.js`): Region je Abschnitt über RI7 mit den Regionspolygonen; Stufe je Abschnitt mit `levelAtAltitude(bulletin, ele)`; Ergebnis enthält `uncertain` (Waldgrenze ohne Zahl), Berichtsstatus (`bulletinStatus`) und Quelle. Ohne Höhe in der Route: höchste Stufe der Region, so gekennzeichnet.
 - RI9b: Abschnitte mit km-Bereich, Stufe (bestehende Chips und Farben), Lawinenprobleme der Region, Link zur Quelle. Nebensaison: „Kein aktueller Lawinenbericht“, nicht „keine Gefahr“. Hinweis, dass die Lawinenlage ein Regionalbericht ist und keine einzelne Route beschreibt.
 
-**Nicht im Umfang:** Exposition und Hangneigung (Phase C), Empfehlung zum Gehen oder Lassen.
+**Nicht im Umfang:** Exposition und Hangneigung (Ebene 3), Empfehlung zum Gehen oder Lassen.
 
 **Voraussetzungen:** RI3, RI7. Der Browser-Test der Lawinenlage mit echten Berichten ist ab Saisonstart 2026/27 offen (ROADMAP); RI9b wird erst danach gemergt, RI9a kann vorher mit Testdaten entstehen.
 
@@ -304,7 +368,7 @@ Status: Geplant. Zwei PRs: RI9a Analyse-Logik, RI9b Anzeige.
 
 ### RI10 – Wetter entlang der Route
 
-Status: Geplant. Zwei PRs: RI10a Datenzugriff, RI10b Anzeige.
+Ebene 2 · Stufe 2.2. Status: Geplant. Zwei PRs: RI10a Datenzugriff, RI10b Anzeige.
 
 **Ziel:** Wetterlage an wenigen Stützpunkten, keine Prognose für die ganze Tour.
 
@@ -325,13 +389,13 @@ Status: Geplant. Zwei PRs: RI10a Datenzugriff, RI10b Anzeige.
 
 ---
 
-# 7. Phase C – Gelände (DEM)
+# 7. Ebene 3 – Terrain Intelligence (Stufen 3.1 bis 3.4)
 
-Ziel: Eigene Geländeinformation aus einem Höhenmodell. Hier liegt das größte technische und rechtliche Risiko; die Phase beginnt mit Entscheidung und Prototyp, nicht mit Produktcode.
+Ziel: Eigene Geländeinformation aus einem Höhenmodell. Hier liegt das größte technische und rechtliche Risiko; die Ebene beginnt mit Entscheidung und Prototyp, nicht mit Produktcode.
 
 ### RI11 – DEM-Quellenentscheidung und Spike
 
-Status: Geplant. Schicht: Recherche/Entscheidung.
+Ebene 3 · Stufe 3.1. Status: Geplant. Schicht: Recherche/Entscheidung.
 
 **Ziel:** Quelle, Format, Abruf, Lizenz und Cache festlegen (E7, E8).
 
@@ -352,7 +416,7 @@ Status: Geplant. Schicht: Recherche/Entscheidung.
 
 ### RI12 – DEM-Zugriff (Höhe an einem Punkt)
 
-Status: Geplant. Schicht: Datenzugriff.
+Ebene 3 · Stufe 3.1. Status: Geplant. Schicht: Datenzugriff.
 
 **Ziel:** Modul, das für Koordinaten die Geländehöhe liefert.
 
@@ -370,7 +434,7 @@ Status: Geplant. Schicht: Datenzugriff.
 
 ### RI13 – Steigung entlang der Route
 
-Status: Geplant. Zwei PRs: RI13a Logik, RI13b Anzeige.
+Ebene 3 · Stufe 3.2. Status: Geplant. Zwei PRs: RI13a Logik, RI13b Anzeige.
 
 **Ziel:** Hangneigung des Geländes je Routenabschnitt.
 
@@ -391,7 +455,7 @@ Status: Geplant. Zwei PRs: RI13a Logik, RI13b Anzeige.
 
 ### RI14 – Exposition entlang der Route
 
-Status: Geplant. Zwei PRs: RI14a Logik, RI14b Anzeige.
+Ebene 3 · Stufe 3.2. Status: Geplant. Zwei PRs: RI14a Logik, RI14b Anzeige.
 
 **Ziel:** Himmelsrichtung, in die das Gelände an der Route abfällt.
 
@@ -411,7 +475,7 @@ Status: Geplant. Zwei PRs: RI14a Logik, RI14b Anzeige.
 
 ### RI15 – Gelände im Höhenprofil
 
-Status: Geplant. Schicht: Anzeige.
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Anzeige.
 
 **Ziel:** Steigung und Exposition im bestehenden Profil.
 
@@ -425,15 +489,30 @@ Status: Geplant. Schicht: Anzeige.
 
 **Definition of Done:** Umschaltbar, Kontrast AA, Screenshots, PR gemerged.
 
+### RI20 – Geländecharakteristik (zurückgestellt)
+
+Ebene 3 · Stufe 3.4. Status: Zurückgestellt. Schicht: Analyse-Logik.
+
+**Ziel:** Geländeformen entlang der Route beschreiben (Grat, Steilstufe, Mulde, Rinne), soweit das Höhenmodell das verlässlich hergibt.
+
+**Umfang:** Nur Konzept und Machbarkeitsprüfung mit Stichproben; Entscheidung, ob die Auflösung der gewählten DEM-Quelle ausreicht. Kein Produktcode, bevor das nachgewiesen ist.
+
+**Voraussetzungen:** RI13, RI14 im Einsatz; DEM-Auflösung aus RI11 bekannt.
+
+**Risiken:** 10 bis 30 m Auflösung bildet Grate, Rinnen und Steilstufen oft nicht ab; Ergebnisse wirken genauer, als sie sind. Gegenmaßnahme: Wenn die Auflösung nicht reicht, bleibt das Paket zurückgestellt.
+
+**Abhängigkeiten:** RI13, RI14.
+
+**Definition of Done:** Entscheidung „machbar/nicht machbar“ mit Stichproben dokumentiert; bei „machbar“ folgen eigene Pakete.
 ---
 
-# 8. Phase D – Befunde und erste Risk Engine
+# 8. Ebene 4 – Alpine Risk Intelligence (Stufen 4.1 bis 4.4)
 
 Ziel: Die Ergebnisse der Einzelanalysen einheitlich als **Befunde** darstellen, ohne Gesamtnote. Erst hier wird aus Route Intelligence die Alpine Risk Engine (Beta, ROADMAP Phase 3).
 
 ### RI16 – Befundmodell (Schema, keine UI)
 
-Status: Geplant. Schicht: Modell.
+Ebene 4 · Stufe 4.1. Status: Geplant. Schicht: Modell.
 
 **Ziel:** Gemeinsame Form für alle Aussagen der Engine.
 
@@ -454,7 +533,7 @@ Status: Geplant. Schicht: Modell.
 
 ### RI17 – Befundliste „Worauf achten?“
 
-Status: Geplant. Schicht: Anzeige.
+Ebene 4 · Stufe 4.1. Status: Geplant. Schicht: Anzeige.
 
 **Ziel:** Die zentrale Frage der Roadmap beantworten: „Wenn ich diese Tour morgen gehe, worauf muss ich achten?“
 
@@ -474,7 +553,7 @@ Status: Geplant. Schicht: Anzeige.
 
 ### RI18 – Engine-Orchestrierung (Alpine Risk Engine Alpha)
 
-Status: Geplant. Schicht: Orchestrierung.
+Ebene 4 · Stufe 4.2. Status: Geplant. Schicht: Orchestrierung.
 
 **Ziel:** Ein Einstieg „Route analysieren“, der die vorhandenen Module ausführt.
 
@@ -492,7 +571,7 @@ Status: Geplant. Schicht: Orchestrierung.
 
 ### RI19 – Terrain-Befunde
 
-Status: Geplant, optional. Schicht: Analyse-Logik.
+Ebene 4 · Stufe 4.3. Status: Geplant, optional. Schicht: Analyse-Logik.
 
 **Ziel:** Aus Neigung und Exposition Befunde bilden (Beispiel aus der Engine-Dokumentation: „3 Abschnitte > 35° Hangneigung“).
 
@@ -506,9 +585,24 @@ Status: Geplant, optional. Schicht: Analyse-Logik.
 
 **Definition of Done:** Befunde getestet und in RI17 sichtbar, PR gemerged.
 
+### RI21 – Risikobewertung: Konzept (zurückgestellt)
+
+Ebene 4 · Stufe 4.4. Status: Zurückgestellt. Schicht: Konzept (kein Code).
+
+**Ziel:** Klären, ob und in welcher Form Befunde zu einer Bewertung verdichtet werden (Skala, Gewichtung, Umgang mit widersprüchlichen Daten; E9, E12).
+
+**Umfang:** Konzeptdokument auf Basis realer Befunde und Rückmeldungen, mit Begründung, wie eine Bewertung erklärbar bleibt und wie Fehlinterpretation („Freigabe“) verhindert wird; ausdrücklich auch die Möglichkeit „keine Gesamtbewertung“.
+
+**Voraussetzungen:** RI17 im Einsatz mit Rückmeldungen, RI18; Entscheidung E9.
+
+**Risiken:** Sicherheitsrelevante Vereinfachung, Haftungsfragen, falsche Präzision. Gegenmaßnahme: Fachliche Prüfung vor jeder Umsetzung; Umsetzung nur als eigenes Paket nach Freigabe des Konzepts.
+
+**Abhängigkeiten:** RI16 bis RI18.
+
+**Definition of Done:** Konzept liegt vor und ist entschieden; erst danach werden Umsetzungspakete geschnitten.
 ### RI-L – Landing und Dokumentation anpassen
 
-Status: Geplant, erst wenn Funktionen nutzbar sind.
+ebenenübergreifend. Status: Geplant, erst wenn Funktionen nutzbar sind.
 
 **Ziel:** Landing, README und ROADMAP spiegeln den echten Stand.
 
@@ -523,21 +617,21 @@ Status: Geplant, erst wenn Funktionen nutzbar sind.
 **Definition of Done:** Texte entsprechen exakt dem Stand, LANDINGPAGE_PLAN und ROADMAP aktualisiert, PR gemerged.
 
 ---
-# 9. Phase E – Bewusst in die Zukunft verschoben
+# 9. Zurückgestellt (Ausblick über alle Ebenen)
 
 | Thema | Warum später | Voraussetzung |
 |---|---|---|
-| OSM-Wege und Infrastruktur (`sac_scale`, Hütten, Wasser) | Overpass-Last, Datenqualität, widersprüchliche Wegedaten (ALPINE_RISK_ENGINE.md, offene Fragen); eigenes Abfrage- und Cache-Konzept nötig | stabile Phase B, E8 |
+| OSM-Wege und Infrastruktur (`sac_scale`, Hütten, Wasser) | Overpass-Last, Datenqualität, widersprüchliche Wegedaten (ALPINE_RISK_ENGINE.md, offene Fragen); eigenes Abfrage- und Cache-Konzept nötig | stabile Stufe 2.2, E8 |
 | Unfallanalyse, Digiway Absturzrisiko | Daten noch in Recherche (ROADMAP Phase 3) | georeferenzierte Daten |
 | Steinschlag-, Muren-Indikatoren | Datengrundlage fehlt | DEM, Daten |
 | GeoSphere (Wetter Österreich) | eigenes Wetterpaket AP-2.1 | Entscheidung zu Zugang |
 | Gewitter-/Wetterfensterlogik, Startzeit-Auswahl | Modelllogik statt Anzeige | ROADMAP Phase 2 |
-| Routenplanung (Linie zeichnen, Routing) | Routing-Quelle, Lizenz, Aufwand; GPX-Verarbeitung kommt zuerst | Phase A bis C |
+| Routenplanung (Linie zeichnen, Routing) | Routing-Quelle, Lizenz, Aufwand; GPX-Verarbeitung kommt zuerst | Ebene 2 und 3 |
 | Tourenvergleich, Alternativrouten, GPX-Qualitätsbewertung | setzt Befundmodell voraus | RI16 |
 | Personalisierte Tourenbewertung | setzt Profile und Konto voraus (IDEENSAMMLUNG) | Konto, Datenschutzkonzept |
 | PDF-Tourenbericht, Teilen | setzt stabile Befunde voraus | RI17 |
 | KI-Erklärungen (ARI) | „Daten vor KI“ | RI18 und Evaluation |
-| Offline/PWA, Mobile App | ROADMAP Phase 4, Cache- und Plattformkonzept | Phase A bis C stabil |
+| Offline/PWA, Mobile App | ROADMAP Phase 4, Cache- und Plattformkonzept | Ebene 2 und 3 stabil |
 | Backend, Konten, Synchronisation | Betrieb, Datenschutz, Kosten | E1, E2, E10 |
 | Weitere Länder (DEM, Lawinen) | Lizenzen je Land | Provider-Muster, E7 |
 
@@ -546,24 +640,23 @@ Status: Geplant, erst wenn Funktionen nutzbar sind.
 # 10. Empfohlene Reihenfolge
 
 ```
-RI0 → RI1 → RI2 → RI3 → RI4 → RI5
-                  │
-                  ├→ RI7 → RI8
-                  │    └→ RI9a → (Saisontest) → RI9b
-                  └→ RI3 → RI10a → RI10b
-RI4 + RI5 → RI11 → RI12 → RI13a → RI13b → RI14a → RI14b → RI15
-RI8 + RI9 + RI10 → RI16 → RI17 → RI18 → RI19
-RI6 (Verwaltung): nach Rückmeldung zu RI3–RI5
-RI-L: nach jedem ausgelieferten Funktionsblock
+Ebene 1   RI0
+Ebene 2.1 RI1 → RI2 → RI3 → RI4 → RI5            (RI6 nach Rückmeldung)
+Ebene 2.2 RI2 → RI7 → RI8
+                    └→ RI9a → (Saisontest) → RI9b
+          RI3 → RI10a → RI10b
+Ebene 3   RI4 + RI5 → RI11 → RI12 → RI13a → RI13b → RI14a → RI14b → RI15   (RI20 zurückgestellt)
+Ebene 4   RI8 + RI9 + RI10 → RI16 → RI17 → RI18 → RI19   (RI21 zurückgestellt)
+RI-L      nach jedem ausgelieferten Funktionsblock
 ```
 
-1. **RI0 bis RI3:** Nach RI3 ist die erste sichtbare Verbesserung da (eigene GPX auf der Karte), ohne externe Daten.
-2. **RI4 und RI5:** Statistik und Profil liefern den Toolbox-Nutzen (WEB-T6) und die Anzeigeposition, an der später alles hängt.
-3. **RI7 und RI8:** Erste Intelligenz aus vorhandenen Daten, ohne neue Quelle und ohne Saisonabhängigkeit.
+1. **Ebene 1 → 2 (RI0 bis RI3):** Nach RI3 ist die erste sichtbare Verbesserung da (eigene GPX auf der Karte), ohne externe Daten.
+2. **Ebene 2.1 (RI4, RI5):** Statistik und Profil liefern den Toolbox-Nutzen (WEB-T6) und die Anzeigeposition, an der später alles hängt.
+3. **Ebene 2.2 (RI7, RI8):** Erste Intelligenz aus vorhandenen Daten, ohne neue Quelle und ohne Saisonabhängigkeit.
 4. **RI9:** Lawinenlage; die Logik darf vorher entstehen, die Anzeige erst nach dem Browser-Test mit echten Berichten.
 5. **RI10:** Wetter, getrennt von der Geometrie, wegen externer Abfragen und Limits.
-6. **RI11 bis RI15:** DEM erst jetzt, weil Quelle, Lizenz und Datenmenge nicht vor Paketen stehen sollen, die ohne sie auskommen.
-7. **RI16 bis RI19:** Befunde, sobald mehrere Module real vorliegen.
+6. **Ebene 3 (RI11 bis RI15):** DEM erst jetzt, weil Quelle, Lizenz und Datenmenge nicht vor Paketen stehen sollen, die ohne sie auskommen.
+7. **Ebene 4 (RI16 bis RI19):** Befunde, sobald mehrere Module real vorliegen. RI16 bis RI18 können bereits mit den Ergebnissen der Stufe 2.2 starten; RI19 folgt, wenn Ebene 3 liefert.
 8. **RI6:** Speicherung bindet Datenformate und wird erst nach Rückmeldung zu den Anzeigepaketen festgelegt.
 
 ## Kurzfristig realistisch
@@ -576,7 +669,7 @@ RI8, RI9b (nach Saisontest), RI10b, RI11, RI12, RI6.
 
 ## Bewusst weiter in der Zukunft
 
-RI13 bis RI19 (hängen an der DEM-Entscheidung bzw. an der Reife von Phase B) und alles aus Phase E.
+RI13 bis RI21 (hängen an der DEM-Entscheidung bzw. an der Reife von Stufe 2.2) und alles aus Abschnitt 9.
 
 ---
 
@@ -607,7 +700,7 @@ Analyseergebnisse hängen nie an der Route selbst, sondern sind getrennte Ergebn
 
 **Dieser Plan führt nichts davon ein und ändert keinen Code.** Heute gibt es **nicht**: GPX-Import, Routen, Höhenprofil, DEM, Hangneigung, Exposition, Befunde, Risikoanalyse, Alpine Risk Engine, Konto, Speicherung eigener Daten, Offline-Nutzung.
 
-**Auch in Phase A bis D nicht vorgesehen:**
+**Auch in den Ebenen 2 bis 4 (bis einschließlich RI19) nicht vorgesehen:**
 - ein Gesamtrisiko, eine Note oder Ampel für eine Tour
 - Empfehlungen oder Freigaben („geeignet“, „nicht geeignet“)
 - Gehzeit-, Konditions- oder Zeitprognosen
@@ -635,9 +728,9 @@ Bis ein Paket gemerged ist, bleibt seine Funktion in Landing, README und ROADMAP
 | E8 | Cache-Strategie (DEM, Wetter, Overpass) | Zwischenspeicher je Sitzung plus Browser-Cache; vorberechnete statische Kacheln nur, wenn die Datenmenge im Repository vertretbar ist. | RI10, RI11 |
 | E9 | Skala und Gewichtung von Befunden | Keine Zahlen, kein Gesamtwert; drei Stufen `info`, `hinweis`, `beachten`. Gewichtung bleibt offen (ALPINE_RISK_ENGINE.md). | RI16 |
 | E10 | Analyse lokal oder backendgestützt? | Lokal im Browser, solange Datenmengen und Abfragen tragbar sind. Ein Backend wäre nur für große DEM-Daten, Archive oder Konten gerechtfertigt und ist eine eigene Architekturentscheidung. | RI18 |
-| E11 | Offline-Unterstützung | Nicht in Phase A bis D; Logik bleibt serverunabhängig, damit PWA/Offline später möglich ist. | später |
-| E12 | Umgang mit widersprüchlichen Daten | offen (ALPINE_RISK_ENGINE.md); jedes Modul liefert eigene Befunde, keine Auflösung der Widersprüche. | Phase E |
-| E13 | Suche in eigenen Routen | Nicht in Phase A bis D; später als zusätzliche Gruppe der globalen Suche. | später |
+| E11 | Offline-Unterstützung | Nicht in den Ebenen 2 bis 4; Logik bleibt serverunabhängig, damit PWA/Offline später möglich ist. | später |
+| E12 | Umgang mit widersprüchlichen Daten | offen (ALPINE_RISK_ENGINE.md); jedes Modul liefert eigene Befunde, keine Auflösung der Widersprüche. | RI21 |
+| E13 | Suche in eigenen Routen | Nicht in den Ebenen 2 bis 4; später als zusätzliche Gruppe der globalen Suche. | später |
 | E14 | Bibliotheken | Keine; Parser, Geometrie und Diagramm als eigener Code. Falls nötig: Self-Hosting unter `vendor/` und Lizenzprüfung. | RI1 |
 
 ---
@@ -648,7 +741,7 @@ Bis ein Paket gemerged ist, bleibt seine Funktion in Landing, README und ROADMAP
 |---|---|---|
 | Befunde werden als Freigabe verstanden | sicherheitsrelevant | neutrale Sprache, kein Gesamturteil, Dauerhinweis, Quelle und Stand je Befund |
 | „Keine Treffer“ wirkt wie „kein Risiko“ | falsche Sicherheit | immer „in den geladenen Daten“, Stand nennen, Nebensaison und Ladefehler als eigener Zustand |
-| DEM-Lizenz oder Datenmenge tragen nicht | Phase C blockiert | Spike RI11 vor Produktcode; Phase A und B bleiben ohne DEM nutzbar |
+| DEM-Lizenz oder Datenmenge tragen nicht | Ebene 3 blockiert | Spike RI11 vor Produktcode; Ebene 2 bleibt ohne DEM nutzbar |
 | GPX-Varianten, Fehlerdateien | Ausfälle, Sicherheit | Parser mit Limits und Tests, `esc()` für alle Texte |
 | Datenschutz der Routen | Standortdaten verraten Gewohnheiten | lokal, Datei wird nicht übertragen, nur einzelne gerundete Stützpunkte an den Wetterdienst, Hinweis im UI |
 | Pakete wachsen | große, riskante PRs | Paketregeln, eine Schicht je Paket, Teilung in a/b |
