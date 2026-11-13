@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Tests Landing Page (LP1 bis LP8)</title>
+<title>Tests Landing Page (LP1 bis LP8, LP1b)</title>
 <pre id="result">läuft …</pre>
 <div id="frames"></div>
 <script>
@@ -187,6 +187,37 @@ async function whatIsSmall(w) {
   var f = await openFrame('../index.html', w, 800), d = f.contentDocument;
   ok('LP2–LP6 ' + w + ' px: kein waagerechter Überlauf', d.documentElement.scrollWidth <= w, 'Breite ' + d.documentElement.scrollWidth);
 }
+async function heroVisual(w, h) {
+  var f = await openFrame('../index.html', w, h), d = f.contentDocument, win = f.contentWindow;
+  var hero = d.querySelector('.mr-hero'), cs = win.getComputedStyle(hero);
+  ok('LP1b ' + w + ' px: Hero-Hintergrund enthält das Hero-Bild und ein Overlay', /mountain-radar-hero\.jpg/.test(cs.backgroundImage) && /gradient/.test(cs.backgroundImage), cs.backgroundImage.slice(0, 80));
+  var title = win.getComputedStyle(d.querySelector('.mr-hero__title')).color, lead = win.getComputedStyle(d.querySelector('.mr-hero__lead')).color;
+  ok('LP1b ' + w + ' px: Slogan und Einleitung sind hell auf dem Bild', title === 'rgb(255, 255, 255)' && lead === 'rgb(255, 255, 255)', title + ' / ' + lead);
+  var b = d.querySelector('.mr-hero .mr-button').getBoundingClientRect(), r = hero.getBoundingClientRect();
+  ok('LP1b ' + w + ' px: Aktion liegt im Hero und im Bildschirm', b.top >= r.top && b.bottom <= r.bottom && b.bottom <= h, 'unten ' + Math.round(b.bottom));
+  ok('LP1b ' + w + ' px: Aktion ist hell auf dunklem Overlay', win.getComputedStyle(d.querySelector('.mr-hero .mr-button')).backgroundColor === 'rgb(255, 255, 255)');
+}
+
+async function landingBackground() {
+  var f = await openFrame('../index.html', 1440, 900), d = f.contentDocument, win = f.contentWindow;
+  var res = await fetch(new URL('docs/design/mountain-radar-hero.jpg', new URL('../index.html', location.href)));
+  ok('LP1b: Hero-Bild ist erreichbar', res.ok && (await res.blob()).size > 10000);
+  var sec = win.getComputedStyle(d.querySelector('.mr-section')).backgroundColor, card = win.getComputedStyle(d.querySelector('.mr-card--raised')).backgroundColor;
+  var dark = win.matchMedia('(prefers-color-scheme: dark)').matches;
+  ok('LP1b: Fläche ist ' + (dark ? 'im Dunkelmodus unverändert dunkel' : 'warmer Sandton (rot > grün > blau)'), dark ? sec === 'rgb(14, 22, 32)' : /rgb\((\d+), (\d+), (\d+)\)/.test(sec) && (function (m) { return +m[0] > +m[1] && +m[1] > +m[2] + 20; })(sec.match(/\d+/g)), sec);
+  ok('LP1b: Infokarten bleiben weiß (hell) bzw. Kartenfläche (dunkel)', dark ? card === 'rgb(22, 33, 44)' : card === 'rgb(255, 255, 255)', card);
+  // Kontrast der gedämpften Schrift auf der Landing-Fläche (WCAG AA: mind. 4,5)
+  function lum(c) { return c.match(/\d+/g).slice(0, 3).map(function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }).reduce(function (a, v, i) { return a + v * [.2126, .7152, .0722][i]; }, 0); }
+  var muted = win.getComputedStyle(d.querySelector('.mr-section__lead')).color, la = lum(muted), lb = lum(sec), ratio = (Math.max(la, lb) + .05) / (Math.min(la, lb) + .05);
+  ok('LP1b: gedämpfte Schrift auf der Landing-Fläche mind. 4,5 : 1', ratio >= 4.5, ratio.toFixed(2));
+}
+
+async function appUnchanged() {
+  var f = await openFrame('../app.html', 1440, 900), win = f.contentWindow, d = f.contentDocument;
+  var dark = win.matchMedia('(prefers-color-scheme: dark)').matches;
+  ok('LP1b: Anwendung behält ihre sachliche Fläche (kühles Grau bzw. Dunkelblau)', win.getComputedStyle(d.body).backgroundColor === (dark ? 'rgb(14, 22, 32)' : 'rgb(245, 247, 246)'), win.getComputedStyle(d.body).backgroundColor);
+}
+
 async function seo(page, title) {
   // LP8: Metadaten der Seite (Titel, Beschreibung, Open Graph, Twitter/X) und das Vorschaubild.
   var f = await openFrame('../' + page, 1024, 768), d = f.contentDocument, tag = 'LP8 ' + page + ': ';
@@ -200,7 +231,7 @@ async function seo(page, title) {
   var img = await new Promise(function (resolve) { var i = new Image(); i.onload = function () { resolve(i); }; i.onerror = function () { resolve(null); }; i.src = new URL(meta('meta[property="og:image"]'), f.contentWindow.location.href).href; });
   ok(tag + 'Vorschaubild ist erreichbar und 1200 × 630', img && img.naturalWidth === 1200 && img.naturalHeight === 630, img ? img.naturalWidth + ' × ' + img.naturalHeight : 'nicht ladbar');
 }(async function () {
-  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); await navigation(1440, 900); await navigation(390, 844); await navigation(320, 640); await navigationDark(); await seo('index.html', 'Mountain Radar – Alpine Risk Intelligence'); await seo('app.html', 'Karte – Mountain Radar'); }
+  try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); await navigation(1440, 900); await navigation(390, 844); await navigation(320, 640); await navigationDark(); await heroVisual(1440, 900); await heroVisual(390, 844); await heroVisual(320, 640); await landingBackground(); await appUnchanged(); await seo('index.html', 'Mountain Radar – Alpine Risk Intelligence'); await seo('app.html', 'Karte – Mountain Radar'); }
   catch (e) { ok('Test ohne Ausnahme', false, String(e && e.stack || e)); }
   var passed = results.filter(function (r) { return r.ok; }).length;
   document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
