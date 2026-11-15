@@ -246,6 +246,7 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] GPX laden und auf der Karte anzeigen (RI3, Karte „Route“ mit js/route.js und js/route_logic.js, lokal im Browser)
 - [x] Routenstatistik aus den GPX-Höhen (RI4, reine Logik js/route_stats.js mit Tests, Anzeige in der Routenkarte)
 - [x] Höhenprofil (RI5, SVG ohne Bibliothek in der Routenkarte: js/elevation_profile.js und reine Logik js/profile_logic.js mit Tests; Hover, Touch und Tastatur zeigen die Stelle auf der Karte)
+- [x] Routenverwaltung lokal (RI6, IndexedDB im Browser: speichern, öffnen, umbenennen, als GPX exportieren, löschen; js/route_store.js, js/route_store_logic.js, js/route_saved.js mit Tests)
 - [ ] Wegschwierigkeit-Matching (sac_scale)
 - [ ] Website Toolbox: Koordinaten & Höhe
 - [ ] Website Toolbox: Entfernungsmessungen
@@ -382,7 +383,9 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
-| 4.16 | 2026-11-15 | Route Intelligence: RI5 (Höhenprofil in der Routenkarte, verbunden mit der Karte) umgesetzt |`n| 4.15 | 2026-11-15 | Route Intelligence: RI4 (Routenstatistik aus den GPX-Höhen: Länge, Anstieg/Abstieg mit Hysterese, höchster/tiefster Punkt, Dauer) umgesetzt |
+| 4.17 | 2026-11-15 | Route Intelligence: RI6 (lokale Routenverwaltung: speichern, öffnen, umbenennen, als GPX exportieren, löschen; IndexedDB, nichts wird übertragen) umgesetzt |
+| 4.16 | 2026-11-15 | Route Intelligence: RI5 (Höhenprofil in der Routenkarte, verbunden mit der Karte) umgesetzt |
+| 4.15 | 2026-11-15 | Route Intelligence: RI4 (Routenstatistik aus den GPX-Höhen: Länge, Anstieg/Abstieg mit Hysterese, höchster/tiefster Punkt, Dauer) umgesetzt |
 | 4.14 | 2026-11-15 | Route Intelligence: RI3 (GPX laden und auf der Karte anzeigen, lokal im Browser) umgesetzt |
 | 4.13 | 2026-11-15 | Dokumentation: README, DATENQUELLEN und ALPINE_RISK_ENGINE mit der ROADMAP abgeglichen (Status DEM/OSM, Phasen, Modulanzahl) |
 | 4.13 | 2026-11-15 | Route Intelligence: RI2 (Routenmodell und Geometrie, reine Logik ohne Oberfläche) umgesetzt |

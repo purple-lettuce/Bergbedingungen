@@ -239,7 +239,7 @@ Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Anzeige.
 - Neue Ebenengruppe in `js/map.js`, Anmeldung in `js/layers.js` („Meine Route“), Legendenzeile, Linie, Start- und Zielmarker, Zoom auf die Route mit `fitPadded`.
 - Fehler über `warn`/`unwarn`, Zustand über die Datenstatus-Leiste („Route: geladen“, ohne erfundenen Zeitstempel).
 - Ladehinweis: Während die Datei gelesen wird, erscheint „Datei wird gelesen“ (Zustand „lädt“ in der Datenstatus-Leiste bzw. in der Routenkarte), danach Erfolg oder Fehlermeldung. Grund: Der Parser braucht bei Dateien am Limit (E4) rund 2 s und blockiert dabei den Hauptthread (Messung in RI1). Der Hinweis muss vor dem Parsen sichtbar gezeichnet sein (z. B. ein Frame Pause vor `parseGpx`).
-- Nur eine Route gleichzeitig (Verwaltung in RI6). Popup mit Namen über `esc()`.
+- Nur eine Route gleichzeitig geöffnet (Verwaltung in RI6). Popup mit Namen über `esc()`.
 
 **Nicht im Umfang:** Statistik, Profil, Speichern, Analyse.
 
@@ -316,7 +316,7 @@ Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Anzeige (Diagramm)
 
 ### RI6 – Routenverwaltung (lokal)
 
-Ebene 2 · Stufe 2.1. Status: Geplant, nach E2 und nach Rückmeldung zu RI3 bis RI5. Schicht: Speicherung.
+Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026), auf ausdrücklichen Wunsch vor der Rückmeldung zu RI3 bis RI5 umgesetzt. Schicht: Speicherung.
 
 **Ziel:** Mehrere Routen im Browser behalten, wechseln, benennen, löschen, exportieren.
 
@@ -331,6 +331,15 @@ Ebene 2 · Stufe 2.1. Status: Geplant, nach E2 und nach Rückmeldung zu RI3 bis 
 **Abhängigkeiten:** RI3, E2.
 
 **Definition of Done:** Routen überleben Neuladen, Löschen entfernt sie vollständig, Fehlerfälle sichtbar, Dokumentation, PR gemerged.
+
+**Umsetzungshinweise (15.11.2026):**
+- Speicher (E2): IndexedDB-Datenbank `bergbedingungen-routes` (Version 1) mit zwei Speichern: `routes` (Kopfdaten: `id`, `name`, `lengthM`, `points`, `bytes`, `savedAt`) und `files` (Originaltext der GPX-Datei unter derselben `id`). Beide werden in **einer** Transaktion geschrieben und gelöscht, sodass nichts halb gespeichert wird und nach dem Löschen nichts zurückbleibt (im Test auch im Rohspeicher geprüft). Gespeichert wird der Originaltext, nicht das Routenobjekt: Der Export ist verlustfrei, und Parser und Statistik können sich ändern, ohne dass ein Datenformat migriert werden muss. Beim Öffnen wird die Datei wie beim Laden neu gelesen (`parseGpx` → `createRoute`).
+- Module: `js/route_store.js` (IndexedDB, `createStore`: `list`, `add`, `getFile`, `rename`, `remove`), `js/route_store_logic.js` (rein: Namen, Grenzen, Sortierung, Dateiname, Fehlertexte, Hinweistext), `js/route_saved.js` (Liste „Meine Routen“), Anbindung in `js/route.js`. Getestet mit `scripts/test_route_store.html` (11 Tests, echtes IndexedDB mit eigener Test-Datenbank: Neuladen simuliert durch neue Verbindung, Umbenennen, doppelte Kennung, vollständiges Löschen, fehlendes IndexedDB). Weil IndexedDB in einem eigenen Thread läuft, wartet der Modus `--dump-dom` mit virtueller Zeit nicht darauf; `scripts/run_js_tests.py` führt diese Seite daher über den kleinen Chrome-DevTools-Client `scripts/cdp_client.py` (nur Standardbibliothek) in echter Zeit aus.
+- Bedienung: Speichern ist **ausdrücklich** („Auf diesem Gerät speichern“ erscheint, sobald eine nicht gespeicherte Route geöffnet ist); nichts wird automatisch abgelegt, weil Routen Wohnorte verraten können. Die Karte „Meine Routen“ erscheint erst mit mindestens einer gespeicherten Route (ohne Routen bleibt die Oberfläche unverändert) und zeigt je Route Name, Länge und Speicherdatum (das Datum des Speicherns, kein erfundener Zeitstempel). Aktionen: Öffnen, Umbenennen (Eingabefeld in der Zeile, Enter/Esc), Exportieren (Originaldatei, Dateiname aus dem Namen), Löschen (mit Rückfrage). Die geöffnete Route ist als „Geöffnet“ markiert. Hinweis in der Liste: Routen liegen nur in diesem Browser auf diesem Gerät, nichts wird übertragen, eine Browserbereinigung kann sie löschen, daher Export.
+- Grenzen: höchstens 20 gespeicherte Routen (`MAX_ROUTES`), Namen höchstens 80 Zeichen; je Datei gilt weiter die Grenze von 10 MB aus E4. Der Export gibt die Originaldatei zurück; ein nach dem Speichern geänderter Name steht nur im Dateinamen und in der Liste, nicht im `<name>` der GPX-Datei.
+- Fehlerfälle: Speicher voll (`QuotaExceededError`), IndexedDB nicht verfügbar (fehlt, gesperrt, privater Modus), Route nicht gefunden und Limit erreicht erscheinen als Meldung über `warn('route', …)`; die geöffnete Route bleibt dabei unverändert. Ist der Speicher beim Start nicht verfügbar, bleibt die Oberfläche still, der Hinweis erscheint erst beim Versuch zu speichern.
+- Geprüft in einem Headless-Browser (CDP): Laden → Speichern → Neuladen → Öffnen → Umbenennen → Exportieren → Löschen (danach 0 Köpfe und 0 Dateien im Speicher); Name mit HTML-Zeichen bleibt Text; Fehlertext bei nicht verfügbarem IndexedDB; Desktop 1440 hell und dunkel, Mobil 390 dunkel. Screenshots: `docs/screenshots/verwaltung-*.png`. **Nicht geprüft:** echter privater Modus und echter voller Speicher, Echtgerät (iOS/Android; Safari löscht Website-Daten nach längerer Nichtnutzung), Verhalten bei mehreren offenen Tabs.
+- Offen: Rückmeldung zu Bedienung und Grenzen (20 Routen). `navigator.storage.persist()` wurde bewusst nicht eingebaut, weil die Anfrage ein Bestätigungsfenster auslösen kann.
 
 ---
 # 6. Ebene 2 – Route Intelligence, Stufe 2.2: Route trifft Kartenplattform (Übergangsphase)
@@ -675,7 +684,7 @@ ebenenübergreifend. Status: Geplant, erst wenn Funktionen nutzbar sind.
 
 ```
 Ebene 1   RI0
-Ebene 2.1 RI1 → RI2 → RI3 → RI4 → RI5            (RI6 nach Rückmeldung)
+Ebene 2.1 RI1 → RI2 → RI3 → RI4 → RI5            (RI6 auf Wunsch vorgezogen)
 Ebene 2.2 RI2 → RI7 → RI8
                     └→ RI9a → (Saisontest) → RI9b
           RI3 → RI10a → RI10b
@@ -691,7 +700,7 @@ RI-L      nach jedem ausgelieferten Funktionsblock
 5. **RI10:** Wetter, getrennt von der Geometrie, wegen externer Abfragen und Limits.
 6. **Ebene 3 (RI11 bis RI15):** DEM erst jetzt, weil Quelle, Lizenz und Datenmenge nicht vor Paketen stehen sollen, die ohne sie auskommen.
 7. **Ebene 4 (RI16 bis RI19):** Befunde, sobald mehrere Module real vorliegen. RI16 bis RI18 können bereits mit den Ergebnissen der Stufe 2.2 starten; RI19 folgt, wenn Ebene 3 liefert.
-8. **RI6:** Speicherung bindet Datenformate und wird erst nach Rückmeldung zu den Anzeigepaketen festgelegt.
+8. **RI6:** Speicherung bindet Datenformate und war für nach der Rückmeldung zu den Anzeigepaketen vorgesehen; sie wurde auf Wunsch vorgezogen. Das Datenformat ist bewusst der Originaltext der GPX-Datei, damit sich später nichts migrieren lässt.
 
 ## Kurzfristig realistisch
 
@@ -759,7 +768,7 @@ Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die 
 - GPX-Dateien werden nur im Browser des Nutzers gelesen und verarbeitet (Dateiauswahl über das Dateisystem-Dialogelement, Inhalt per `File`-API). Die Datei und ihr Inhalt werden nicht übertragen.
 - **Keine Server-Komponente** für GPX, Routen oder Analyse. Die Anwendung bleibt statisch (GitHub Pages).
 - **Keine Benutzerkonten**, keine Anmeldung.
-- **Keine Speicherung auf dem Server.** Eine spätere lokale Speicherung im Browser (RI6, E2) ist davon getrennt und bleibt auf dem Gerät.
+- **Keine Speicherung auf dem Server.** Die lokale Speicherung im Browser (RI6, E2) ist davon getrennt, geschieht nur auf ausdrücklichen Wunsch und bleibt auf dem Gerät.
 - Externe Abfragen für Routen sind nur zulässig, wenn sie einzelne, gerundete Stützpunkte senden, nie die Datei oder die Linie als Ganzes (Wetter, RI10; DEM-Kacheln, RI12, werden nach Kachelkoordinate abgerufen, nicht nach Routenverlauf, soweit die Quelle das erlaubt; Prüfung in RI11).
 - **Begründung:** Eine GPX-Datei enthält Aufenthaltsorte und Zeiten und ist damit personenbezogen und sensibel. Lokale Verarbeitung vermeidet Datenschutz-, Konto- und Betriebsfragen und passt zur statischen Architektur (kein Backend vorhanden). Alle geplanten Pakete bis einschließlich RI10 sind lokal machbar; die Wetter- und Höhenmodellabfragen sind die einzigen Außenkontakte und unterliegen der Stützpunktregel.
 - **Änderung** (z. B. ein Backend für große DEM-Daten oder Konten) wäre eine eigene Architekturentscheidung (siehe E10) mit Datenschutzbewertung und kein Nebeneffekt eines Funktionspakets.
@@ -769,7 +778,7 @@ Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die 
 | Nr. | Frage | Entscheidung | Status | Begründung und Hinweise | Nötig vor |
 |---|---|---|---|---|---|
 | E1 | GPX lokal oder serverseitig? | Nur lokal im Browser; kein Server, keine Konten, keine Serverspeicherung (siehe oben) | **Bestätigt** | Datenschutz (Standortdaten), statische Architektur | RI1 |
-| E2 | Wo werden Routen gespeichert? | RI1–RI5: nirgends, genau eine Route im Arbeitsspeicher der Sitzung (Neuladen verwirft sie). RI6: IndexedDB im Browser mit GPX-Export, kein Server | **Bestätigt** | Kein Datenformat festlegen, bevor die Anzeigepakete bewährt sind; `localStorage` ist für große Tracks zu klein. Details (Schema, Migration) werden erst in RI6 entschieden | RI6 |
+| E2 | Wo werden Routen gespeichert? | RI1–RI5: nirgends, genau eine Route im Arbeitsspeicher der Sitzung (Neuladen verwirft sie). RI6: IndexedDB im Browser mit GPX-Export, kein Server | **Bestätigt, in RI6 umgesetzt** | Kein Datenformat festlegen, bevor die Anzeigepakete bewährt sind; `localStorage` ist für große Tracks zu klein. Entschieden in RI6: Originaltext der GPX-Datei plus Kopfdaten, Schema siehe RI6 | RI6 |
 | E3 | Koordinaten, Einheiten, Höhenbezug | WGS84; Koordinaten intern als `lat`, `lon` in Grad; Strecken in Metern (Anzeige in km); Höhen in Metern wie in der Datei. GPX-Höhen werden nicht umgerechnet oder korrigiert; fehlende Höhe ist `null`, nie 0. Ellipsoid/Geoid wird erst beim DEM-Vergleich (RI12) betrachtet | **Bestätigt** | Entspricht der GPX-Spezifikation (WGS84) und dem Leaflet-Standard; keine Umrechnung vermeidet Scheinpräzision | RI1 |
 | E4 | Größenlimit der GPX-Datei | 10 MB und 200 000 Trackpunkte; Überschreitung wird abgelehnt (nicht abgeschnitten) mit klarer Meldung. Beide Werte stehen als benannte Konstanten im Parser | **Bestätigt, vorläufig** | Reicht für lange Mehrtagestouren. Die Grenzen werden mit dem Parser (RI1) an einer großen Testdatei auf Laufzeit geprüft und nur bei Bedarf in einem Dokumentations-PR angepasst | RI1 |
 | E5 | Glättung der GPX-Höhen | Anstieg/Abstieg per Hysterese (Höhenänderung zählt erst ab einer Schwelle); Startwert 5 m als benannte Konstante. Die Methode wird im UI genannt, keine versteckte Filterung | **Bestätigt, vorläufig** | Rohsummen überzeichnen durch GPS-Rauschen. Der Zahlenwert wird in RI4 an Referenzstrecken kalibriert | RI4 |
@@ -789,7 +798,7 @@ Aus den bestätigten Entscheidungen folgen diese Vorgaben. Sie ändern weder Umf
 
 | Thema | Festlegung | Grundlage |
 |---|---|---|
-| Datenfluss | Dateiauswahl → Text per `File`-API im Browser → Parser → Routenobjekt im Arbeitsspeicher. Kein `fetch`/Upload mit Routeninhalt, kein Cookie, keine Speicherung in RI1–RI5 | E1, E2 |
+| Datenfluss | Dateiauswahl → Text per `File`-API im Browser → Parser → Routenobjekt im Arbeitsspeicher. Kein `fetch`/Upload mit Routeninhalt, kein Cookie, keine Speicherung in RI1–RI5; ab RI6 nur auf ausdrücklichen Wunsch im Browser (IndexedDB) | E1, E2 |
 | Parser (RI1) | Reine Funktion `Text → Ergebnisobjekt` ohne DOM-Zugriff auf die Seite; Parsing über `DOMParser` (XML). Fehler werden als Ergebnis zurückgegeben (Meldung), nicht geworfen; Limits aus E4 als benannte Konstanten | E1, E4, E14 |
 | Koordinaten und Einheiten | `lat`, `lon` in Grad (WGS84); `dist` in Metern; `ele` in Metern oder `null`; `time` als Zeitpunkt oder `null`. Anzeige in km und m | E3 |
 | Routenmodell (RI2) | Eine zusammenhängende Punktliste mit Streckenposition je Punkt, Lücken vermerkt (Entwurf Abschnitt 11). Keine Analyseergebnisse im Routenobjekt | E3 |

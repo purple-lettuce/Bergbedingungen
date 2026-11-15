@@ -667,3 +667,9 @@ path.mr-route-pos { fill: var(--mr-route); stroke: var(--mr-surface); stroke-wid
 .mr-profile__cursor { stroke: var(--mr-text); stroke-width: 1px; stroke-dasharray: 3 3; }
 .mr-profile__dot { fill: var(--mr-route); stroke: var(--mr-surface); stroke-width: 2px; }
 .mr-profile__readout { min-height: 1.4em; font-variant-numeric: tabular-nums; }
+/* Meine Routen (RI6): Liste gespeicherter Routen in der Routenkarte; Tokens statt fester Werte */
+.mr-saved { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--mr-space-sm); }
+.mr-saved__item { padding: var(--mr-space-sm); border: 1px solid var(--mr-line); border-radius: var(--mr-radius-sm); background: var(--mr-bg); min-width: 0; }
+.mr-saved__name { font-weight: 600; overflow-wrap: anywhere; }
+.mr-saved input[type=text] { min-height: calc(var(--mr-space-2xl) + var(--mr-space-sm)); padding: var(--mr-space-sm) var(--mr-space-md); border: 1px solid var(--mr-line); border-radius: var(--mr-radius-md); background: var(--mr-surface); color: var(--mr-text); font: inherit; }
+.mr-saved input[type=text]:focus-visible { outline: 2px solid var(--mr-route); outline-offset: 2px; }

@@ -67,11 +67,16 @@
       <div class="mr-cluster">
         <button id="route-load" type="button">GPX laden</button>
         <button id="route-clear" type="button" hidden>Route entfernen</button>
+        <button id="route-save" type="button" hidden>Auf diesem Gerät speichern</button>
       </div>
       <input id="route-file" type="file" accept=".gpx,.xml,application/gpx+xml,text/xml" hidden aria-label="GPX-Datei auswählen">
       <div id="route-info" class="mr-stack mr-gap-xs" role="status" hidden></div>
       <div id="route-profile" class="mr-stack mr-gap-xs" hidden></div>
-    </section>
+      <div id="route-saved" class="mr-stack mr-gap-xs mr-divider-top" hidden>
+        <h3 class="mr-label" id="route-saved-h">Meine Routen</h3>
+        <ul id="route-saved-list" class="mr-saved" aria-labelledby="route-saved-h"></ul>
+        <p id="route-saved-note" class="mr-text-muted mr-text-sm mr-m-0"></p>
+      </div>    </section>
 
     <section class="mr-card mr-stack">
       <h2 class="mr-label">Sperrungen und Hinweise</h2>
