@@ -1,0 +1,141 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests profile_logic.js (Höhenprofil, RI5)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Referenzstrecken sind synthetisch, entlang eines Meridians mit 10 m Punktabstand.
+import * as P from '../js/profile_logic.js';
+import { routeStats } from '../js/route_stats.js';
+import { createRoute } from '../js/route_model.js';
+import { parseGpx } from '../js/gpx.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) {
+  if (!(Math.abs(actual - expected) <= tol)) throw new Error('erwartet ' + expected + ' ± ' + tol + ', erhalten ' + actual);
+}
+
+function build(eles, splitAfter) {
+  var s = '<gpx><trk><trkseg>';
+  for (var i = 0; i < eles.length; i++) {
+    s += '<trkpt lat="' + (47 + i * 10 / 111194.93).toFixed(7) + '" lon="11">' + (eles[i] == null ? '' : '<ele>' + eles[i] + '</ele>') + '</trkpt>';
+    if (splitAfter === i) s += '</trkseg><trkseg>';
+  }
+  var made = createRoute(parseGpx(s + '</trkseg></trk></gpx>'));
+  if (!made.ok) throw new Error(made.error);
+  return made.route;
+}
+function ramp(from, to, n) { var a = []; for (var i = 0; i < n; i++) a.push(from + (to - from) * i / (n - 1)); return a; }
+
+test('profileSeries: Läufe, Bereich, Länge', function () {
+  var r = build(ramp(1000, 1100, 11));
+  var s = P.profileSeries(r);
+  eq(s.runs.length, 1); eq(s.runs[0].length, 11); eq(s.minEle, 1000); eq(s.maxEle, 1100);
+  near(s.lengthM, 100, 0.5); near(s.runs[0][10].d, 100, 0.5); eq(s.runs[0][10].e, 1100);
+});
+
+test('profileSeries: fehlende Höhen werden übersprungen, nie als 0 gezeichnet', function () {
+  var s = P.profileSeries(build([1000, null, 1020, 1030]));
+  eq(s.runs[0].map(function (p) { return p.e; }), [1000, 1020, 1030]);
+  eq(s.minEle, 1000);
+});
+
+test('profileSeries: Lücke trennt die Linie', function () {
+  var s = P.profileSeries(build([1000, 1010, 1020, 1030], 1));
+  eq(s.runs.length, 2); eq(s.runs[0].length, 2); eq(s.runs[1].length, 2);
+});
+
+test('profileSeries: ohne oder mit nur einer Höhe kein Profil', function () {
+  eq(P.profileSeries(build([null, null, null])), null);
+  eq(P.profileSeries(build([1000, null, null])), null);
+});
+
+test('decimate: kleine Läufe bleiben unverändert', function () {
+  var run = [{ d: 0, e: 1 }, { d: 50, e: 5 }, { d: 100, e: 2 }];
+  eq(P.decimate(run, 100, 400), run);
+});
+
+test('decimate: Spitze bleibt erhalten, Punktzahl höchstens 4 je Spalte, Reihenfolge stimmt', function () {
+  var run = [];
+  for (var i = 0; i <= 20000; i++) run.push({ d: i * 0.5, e: 1000 + (i === 7777 ? 500 : 0) + (i % 3) });
+  var out = P.decimate(run, 10000, 200);
+  if (out.length > 800) throw new Error('zu viele Punkte: ' + out.length);
+  eq(Math.max.apply(null, out.map(function (p) { return p.e; })), 1501);   // Spitze 1500 + (7777 % 3)
+  for (var k = 1; k < out.length; k++) if (out[k].d < out[k - 1].d) throw new Error('Reihenfolge verletzt bei ' + k);
+  eq(out[0], run[0]); eq(out[out.length - 1], run[run.length - 1]);
+});
+
+test('niceTicks: 1-2-5-Schritte umfassen den Bereich', function () {
+  var t = P.niceTicks(1003, 1497, 5);
+  eq(t.step, 100); eq(t.min, 1000); eq(t.max, 1500); eq(t.ticks, [1000, 1100, 1200, 1300, 1400, 1500]);
+  var u = P.niceTicks(0, 12.3, 5);
+  eq(u.step, 5); eq(u.ticks, [0, 5, 10, 15]);
+  var f = P.niceTicks(0.1, 0.45, 4);
+  eq(f.ticks, [0.1, 0.2, 0.3, 0.4, 0.5]);   // keine Gleitkomma-Reste wie 0.30000000000000004
+});
+
+function scaleFor(lengthM, lo, hi) {
+  return P.makeScale({ lengthM: lengthM, minEle: lo, maxEle: hi, width: 340, height: 150, left: 44, right: 8, top: 8, bottom: 20 });
+}
+
+test('makeScale: x und y sind lineare Abbildungen, meterAt ist die Umkehrung und begrenzt', function () {
+  var s = scaleFor(5000, 1000, 1500);
+  eq(s.plot, { x0: 44, x1: 332, y0: 8, y1: 130 });
+  near(s.x(0), 44, 1e-9); near(s.x(5000), 332, 1e-9); near(s.x(2500), 188, 1e-9);
+  near(s.y(s.yMin), 130, 1e-9); near(s.y(s.yMax), 8, 1e-9);
+  if (!(s.y(1400) < s.y(1100))) throw new Error('höher muss weiter oben liegen');
+  near(s.meterAt(188), 2500, 1e-6); eq(s.meterAt(-50), 0); eq(s.meterAt(999), 5000);
+  if (s.yMin > 1000 || s.yMax < 1500) throw new Error('Bereich nicht umfasst');
+});
+
+test('makeScale: flache Strecke bekommt mindestens 20 m Höhenbereich', function () {
+  var s = scaleFor(2000, 1500, 1500);
+  if (s.yMax - s.yMin < P.MIN_SPAN_M) throw new Error('Bereich zu klein: ' + (s.yMax - s.yMin));
+  var y = s.y(1500);
+  if (!(y > s.plot.y0 && y < s.plot.y1)) throw new Error('Linie außerhalb der Fläche');
+});
+
+test('makeScale: Kilometermarken liegen innerhalb der Strecke', function () {
+  var s = scaleFor(5400, 1000, 1100);
+  eq(s.xTicksKm[0], 0);
+  if (s.xTicksKm.some(function (t) { return t * 1000 > 5400; })) throw new Error('Marke hinter dem Ziel');
+});
+
+test('profilePaths: je Lauf ein Linienzug, Fläche geschlossen, Lücke gibt zwei "M"', function () {
+  var r = build(ramp(1000, 1030, 4).concat(ramp(1040, 1070, 4)), 3);
+  var s = P.profileSeries(r), sc = scaleFor(s.lengthM, s.minEle, s.maxEle);
+  var p = P.profilePaths(s, sc);
+  eq((p.line.match(/M/g) || []).length, 2); eq((p.area.match(/Z/g) || []).length, 2);
+  eq(/NaN|undefined/.test(p.line + p.area), false);
+  eq(P.profilePaths({ runs: [[{ d: 0, e: 1 }]], lengthM: 10 }, sc), { line: '', area: '' });   // ein einzelner Punkt ergibt keine Linie
+});
+
+test('stepPosition: Schritte, Grenzen, unbekannte Taste', function () {
+  eq(P.stepPosition(500, 10000, 'ArrowRight'), 600);
+  eq(P.stepPosition(500, 10000, 'ArrowLeft'), 400);
+  eq(P.stepPosition(500, 10000, 'PageUp'), 1500);
+  eq(P.stepPosition(500, 10000, 'PageDown'), 0);
+  eq(P.stepPosition(9950, 10000, 'ArrowRight'), 10000);
+  eq(P.stepPosition(500, 10000, 'Home'), 0); eq(P.stepPosition(500, 10000, 'End'), 10000);
+  eq(P.stepPosition(0, 50, 'ArrowRight'), 1);   // mindestens 1 m
+  eq(P.stepPosition(500, 10000, 'a'), null);
+});
+
+test('Texte: Position und Textalternative', function () {
+  eq(P.positionText({ dist: 3200, ele: 1844.6 }), 'km 3,2 · 1.845 m');
+  eq(P.positionText({ dist: 0, ele: null }), 'km 0,0 · keine Höhe');
+  var r = build(ramp(1000, 1100, 11)), st = routeStats(r);
+  var t = P.profileSummary(Object.assign({}, st, { minEle: 1000, maxEle: 1100 }));
+  eq(/Höhenprofil über 100 m/.test(t) && /1\.000 m bis 1\.100 m/.test(t) && /Anstieg 100 m/.test(t), true);
+});
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>

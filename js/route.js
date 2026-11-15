@@ -5,19 +5,20 @@
 
 import { map, routeLayer, esc, warn, unwarn } from './map.js';
 import { panel } from './layers.js';
-import { fitPadded } from './layout.js';
+import { fitPadded, coveredInsets } from './layout.js';
 import { revealMap } from './sheet.js';
 import { setSourceStatus } from './status_bar.js';
 import { parseGpx } from './gpx.js';
 import { createRoute, displayLines } from './route_model.js';
 import { checkFile, routeTitle, routeStatus, STATUS_LOADING } from './route_logic.js';
 import { routeStats, statsRows } from './route_stats.js';
+import { createProfile } from './elevation_profile.js';
 
 var DISPLAY_TOLERANCE_M = 3;   // Vereinfachung der Linie für die Darstellung; die Route selbst bleibt unverändert
 var MAX_ZOOM = 15;
 
 var route = null, stats = null, title = '', loading = false, registered = false;
-var btnLoad, btnClear, fileInput, info;
+var btnLoad, btnClear, fileInput, info, profile, posMarker = null;
 
 // Ebene und Legende werden erst beim ersten Laden im Bedienfeld angemeldet: ohne Route bleibt die Oberfläche unverändert.
 function register() {
@@ -36,8 +37,20 @@ function popupHtml() {
     '<p class="mr-text-muted mr-text-sm mr-m-0">Die Datei wurde nur in diesem Browser gelesen und nicht übertragen.</p></div>';
 }
 
+// Marker für die Position, die im Höhenprofil gezeigt wird (null = ausblenden). Er liegt in der Routenebene und verschwindet mit ihr.
+function showPosition(p) {
+  if (!p) { if (posMarker) routeLayer.removeLayer(posMarker); return; }
+  if (!posMarker) posMarker = L.circleMarker([p.lat, p.lon], { radius: 8, weight: 3, fillOpacity: 1, interactive: false, className: 'mr-route-pos' });
+  posMarker.setLatLng([p.lat, p.lon]);
+  if (!routeLayer.hasLayer(posMarker)) posMarker.addTo(routeLayer);
+  // Marker nicht unter Seitenleiste oder Sheet liegen lassen (mobil verdeckt das Sheet mit dem Profil einen Teil der Karte)
+  var ins = coveredInsets(map);
+  map.panInside([p.lat, p.lon], { paddingTopLeft: [24 + ins.left, 24 + ins.top], paddingBottomRight: [24 + ins.right, 24 + ins.bottom], animate: false });
+}
+
 function draw() {
   routeLayer.clearLayers();
+  posMarker = null;
   var lines = displayLines(route, DISPLAY_TOLERANCE_M);
   var opts = { interactive: true, lineCap: 'round', lineJoin: 'round' };
   lines.forEach(function (line) {
@@ -124,6 +137,7 @@ async function loadFile(file) {
     title = routeTitle(route, file.name);
     register();
     draw();
+    profile.show(route, stats);
     if (!map.hasLayer(routeLayer)) map.addLayer(routeLayer);
     map.closePopup();
     revealMap();
@@ -140,6 +154,7 @@ async function loadFile(file) {
 function clearRoute() {
   route = null;
   stats = null;
+  profile.hide();
   routeLayer.clearLayers();
   map.closePopup();
   unwarn('route');
@@ -152,6 +167,7 @@ export function initRoute() {
   btnClear = document.getElementById('route-clear');
   fileInput = document.getElementById('route-file');
   info = document.getElementById('route-info');
+  profile = createProfile(document.getElementById('route-profile'), showPosition);
   btnLoad.addEventListener('click', function () { fileInput.click(); });
   fileInput.addEventListener('change', function () {
     var file = fileInput.files && fileInput.files[0];
