@@ -203,7 +203,7 @@ Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Parser.
 
 ### RI2 – Routenmodell und Geometrie (reine Logik)
 
-Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Modell/Geometrie.
+Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Modell/Geometrie.
 
 **Ziel:** Aus dem Rohmodell ein einheitliches Routenobjekt bilden, auf dem alle späteren Analysen aufsetzen (Entwurf in Abschnitt 11).
 
@@ -222,6 +222,12 @@ Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Modell/Geometrie.
 
 **Definition of Done:** Funktionen getestet, Modellfelder dokumentiert, keine UI-Änderung, PR gemerged.
 
+**Umsetzungshinweise (15.11.2026):**
+- js/route_model.js exportiert createRoute(gpxModel) (Ergebnis { ok, error, route }, wirft nie) und displayLines(route, toleranceM) (Linien für die Karte, an Lücken getrennt, vereinfacht). Das Routenobjekt entspricht dem Entwurf in Abschnitt 11; ergänzt um lengthM und warnings. hasElevation/hasTime sind wahr, wenn mindestens ein Punkt Höhe bzw. Zeit hat; einzelne fehlende Höhen bleiben 
+ull (RI4 muss damit umgehen).
+- Auswahl: der erste Track mit allen Segmenten, ohne Track die erste Route; weitere Tracks/Routen werden nicht verwendet und als Warnung vermerkt. Lücken zwischen Segmenten werden in gaps vermerkt und **zählen nicht zur Strecke** (dist springt dort nicht); Abstands- und Darstellungsfunktionen behandeln den Sprung nicht als Linie.
+- js/geo.js: haversine, cumulativeDistances, pointAtKm, sampleAlong, distanceToLine (liefert Abstand und Streckenkilometer), simplify (Douglas-Peucker, iterativ, gibt Indizes zurück). Kugelmodell (R = 6 371 008,8 m), lokale ebene Projektion für Abstand und Vereinfachung. Toleranzen im Test: 0,5 m bei Kilometerstrecken, Zentimeter bei Abstand und Interpolation. Höhen werden bei pointAtKm nur interpoliert, wenn beide Nachbarn eine Höhe haben.
+- Getestet mit scripts/test_route_model.html (16 Tests, analytische Referenzwerte, 200 000 Punkte für simplify).
 ### RI3 – GPX laden und auf der Karte anzeigen
 
 Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige.
