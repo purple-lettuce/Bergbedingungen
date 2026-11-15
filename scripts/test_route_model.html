@@ -1,0 +1,190 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests geo.js und route_model.js (Routenmodell und Geometrie, RI2)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Referenzwerte sind analytisch (Kugel R = 6 371 008,8 m): 1° Breitengrad = 111 194,93 m, 1° Längengrad = 111 194,93 m * cos(Breite).
+// Toleranz bei Distanzen: 0,5 m bei Kilometerstrecken (Rundung der Referenz), 1 cm bei Abstand und Interpolation.
+import * as G from '../js/geo.js';
+import * as M from '../js/route_model.js';
+import { parseGpx } from '../js/gpx.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) {
+  if (!(Math.abs(actual - expected) <= tol)) throw new Error('erwartet ' + expected + ' ± ' + tol + ', erhalten ' + actual);
+}
+var DEG = 111194.93;
+
+function withDist(pts, gapAfter) {
+  var d = G.cumulativeDistances(pts, gapAfter);
+  return pts.map(function (p, i) { return { lat: p.lat, lon: p.lon, ele: p.ele == null ? null : p.ele, time: null, dist: d[i] }; });
+}
+
+test('haversine: ein Breitengrad, ein Längengrad am Äquator und bei 60°', function () {
+  near(G.haversine({ lat: 47, lon: 11 }, { lat: 48, lon: 11 }), DEG, 0.5);
+  near(G.haversine({ lat: 0, lon: 0 }, { lat: 0, lon: 1 }), DEG, 0.5);
+  near(G.haversine({ lat: 60, lon: 10 }, { lat: 60, lon: 11 }), DEG / 2, 60);   // Großkreis ist kürzer als der Breitenkreis (cos 60° = 0,5)
+});
+
+test('haversine: gleicher Punkt 0, symmetrisch, Datumsgrenze und Pol ohne NaN', function () {
+  eq(G.haversine({ lat: 47, lon: 11 }, { lat: 47, lon: 11 }), 0);
+  eq(G.haversine({ lat: 47, lon: 11 }, { lat: 47.5, lon: 12 }), G.haversine({ lat: 47.5, lon: 12 }, { lat: 47, lon: 11 }));
+  near(G.haversine({ lat: 0, lon: 179.5 }, { lat: 0, lon: -179.5 }), DEG, 0.5);
+  near(G.haversine({ lat: 90, lon: 0 }, { lat: -90, lon: 0 }), Math.PI * 6371008.8, 1);
+});
+
+test('cumulativeDistances: kumuliert, Lücke zählt nicht zur Strecke', function () {
+  var pts = [{ lat: 47, lon: 11 }, { lat: 47.01, lon: 11 }, { lat: 47.5, lon: 11 }, { lat: 47.51, lon: 11 }];
+  var d = G.cumulativeDistances(pts);
+  eq(d[0], 0); near(d[1], 0.01 * DEG, 0.5); near(d[3], 0.51 * DEG - 0.5 * DEG + 0.5 * DEG - 0.5 * DEG + 0.5 * DEG, 5);
+  var g = G.cumulativeDistances(pts, [1]);
+  eq(g[2], g[1]); near(g[3], 0.02 * DEG, 0.5);
+  eq(G.cumulativeDistances([]), []);
+});
+
+test('pointAtKm: Interpolation, Grenzen, Höhe nur mit beiden Nachbarn', function () {
+  var pts = withDist([{ lat: 47, lon: 11, ele: 1000 }, { lat: 47.01, lon: 11, ele: 1100 }, { lat: 47.02, lon: 11 }]);
+  var half = G.pointAtKm(pts, pts[1].dist / 2000);
+  near(half.lat, 47.005, 1e-9); near(half.ele, 1050, 1e-6); near(half.dist, pts[1].dist / 2, 1e-6);
+  eq(G.pointAtKm(pts, 1.5 * pts[1].dist / 1000).ele, null);
+  eq(G.pointAtKm(pts, -5).lat, 47);
+  near(G.pointAtKm(pts, 999).lat, 47.02, 1e-12);
+  near(G.pointAtKm(pts, 999).dist, pts[2].dist, 1e-9);
+  eq(G.pointAtKm([], 1), null);
+  var one = G.pointAtKm(withDist([{ lat: 47, lon: 11, ele: 5 }]), 3);
+  eq([one.lat, one.ele, one.dist], [47, 5, 0]);
+});
+
+test('pointAtKm: an einer Lücke springt die Position ohne Zwischenpunkte', function () {
+  var pts = withDist([{ lat: 47, lon: 11 }, { lat: 47.01, lon: 11 }, { lat: 47.5, lon: 11 }, { lat: 47.51, lon: 11 }], [1]);
+  var before = G.pointAtKm(pts, pts[1].dist / 1000 - 0.001), after = G.pointAtKm(pts, pts[1].dist / 1000 + 0.001);
+  near(before.lat, 47.01 - 0.001 / (DEG / 1000), 1e-6);
+  near(after.lat, 47.5 + 0.001 / (DEG / 1000), 1e-6);
+});
+
+test('sampleAlong: feste Abstände, Start und Ziel immer dabei', function () {
+  var pts = withDist([{ lat: 47, lon: 11 }, { lat: 47.1, lon: 11 }]);   // rund 11 119 m
+  var s = G.sampleAlong(pts, 1000);
+  eq(s.length, 13);
+  near(s[0].dist, 0, 0); near(s[1].dist, 1000, 1e-6); near(s[11].dist, 11000, 1e-6); near(s[12].dist, pts[1].dist, 1e-6);
+  eq(G.sampleAlong(pts, 1e9).length, 2);
+  eq(G.sampleAlong([], 25), []);
+  var exact = G.sampleAlong(withDist([{ lat: 0, lon: 0 }, { lat: 0, lon: 0.0089932 }]), 500);   // ≈ 1000 m: Ziel nicht doppelt
+  eq(exact.length, 3);
+  var threw = false; try { G.sampleAlong(pts, 0); } catch (e) { threw = true; }
+  eq(threw, true);
+});
+
+test('distanceToLine: senkrecht, Endpunkt, Lücke, Kilometer', function () {
+  var pts = withDist([{ lat: 47, lon: 11 }, { lat: 47, lon: 11.02 }]);
+  var cos = Math.cos(47 * Math.PI / 180);
+  var r = G.distanceToLine({ lat: 47.001, lon: 11.01 }, pts);
+  near(r.distance, 0.001 * DEG, 0.05); near(r.km, pts[1].dist / 2000, 0.001); eq(r.index, 0);
+  var beyond = G.distanceToLine({ lat: 47, lon: 11.03 }, pts);
+  near(beyond.distance, 0.01 * DEG * cos, 0.05); near(beyond.km, pts[1].dist / 1000, 1e-9);
+  eq(G.distanceToLine({ lat: 47, lon: 11 }, pts).distance, 0);
+  var gapped = withDist([{ lat: 47, lon: 11 }, { lat: 47, lon: 11.01 }, { lat: 47.1, lon: 11.01 }, { lat: 47.1, lon: 11.02 }], [1]);
+  var mid = G.distanceToLine({ lat: 47.05, lon: 11.01 }, gapped, [1]);   // der Sprung 47 → 47.1 ist keine Linie
+  near(mid.distance, 0.05 * DEG, 5);
+  eq(G.distanceToLine({ lat: 47, lon: 11 }, []), null);
+  eq(G.distanceToLine({ lat: 47, lon: 11.001 }, withDist([{ lat: 47, lon: 11 }])).km, 0);
+});
+
+test('simplify: gerade Linie, Spitze bleibt, Toleranz, kurze Eingaben', function () {
+  var line = []; for (var i = 0; i <= 10; i++) line.push({ lat: 47, lon: 11 + i * 0.001 });
+  eq(G.simplify(line, 1), [0, 10]);
+  var peak = line.slice(); peak[5] = { lat: 47.01, lon: 11.005 };   // rund 1,1 km neben der Linie
+  eq(G.simplify(peak, 10).indexOf(5) >= 0, true);   // die schräg anliegenden Nachbarpunkte 4 und 6 weichen von der neuen Linie ab und bleiben ebenfalls
+  var small = line.slice(); small[5] = { lat: 47.00003, lon: 11.005 };   // rund 3,3 m
+  eq(G.simplify(small, 10), [0, 10]); eq(G.simplify(small, 1).indexOf(5) >= 0, true);
+  eq(G.simplify([], 5), []); eq(G.simplify([line[0]], 5), [0]); eq(G.simplify([line[0], line[1]], 5), [0, 1]);
+  eq(G.simplify(line, 0.01), [0, 10]);   // Punkte auf der Linie weichen nur im Rundungsbereich ab
+});
+
+test('simplify: 200 000 Punkte ohne Stapelüberlauf', function () {
+  var pts = []; for (var i = 0; i < 200000; i++) pts.push({ lat: 47 + i * 1e-6, lon: 11 + Math.sin(i / 50) * 1e-3 });
+  var idx = G.simplify(pts, 5);
+  eq(idx[0], 0); eq(idx[idx.length - 1], 199999); eq(idx.length < 200000 && idx.length > 2, true);
+});
+
+function gpxText(body) {
+  return '<?xml version="1.0"?><gpx version="1.1" creator="test" xmlns="http://www.topografix.com/GPX/1/1">' + body + '</gpx>';
+}
+function trkpt(lat, lon, ele, time) {
+  return '<trkpt lat="' + lat + '" lon="' + lon + '">' + (ele == null ? '' : '<ele>' + ele + '</ele>') + (time ? '<time>' + time + '</time>' : '') + '</trkpt>';
+}
+
+test('createRoute: Felder, Länge, Grenzen, Höhe und Zeit', function () {
+  var raw = parseGpx(gpxText('<metadata><name>Tour</name></metadata><trk><trkseg>' + trkpt(47, 11, 1000, '2026-07-01T06:00:00Z') + trkpt(47.01, 11.02, 1100, '2026-07-01T06:10:00Z') + '</trkseg></trk>'));
+  var r = M.createRoute(raw);
+  eq(r.ok, true); eq(r.error, null);
+  var route = r.route;
+  eq(route.name, 'Tour'); eq(route.source, 'gpx'); eq(typeof route.id, 'string'); eq(route.points.length, 2);
+  eq(route.bounds, [[47, 11], [47.01, 11.02]]); eq(route.hasElevation, true); eq(route.hasTime, true); eq(route.gaps, []);
+  eq(route.points[0].dist, 0); eq(route.points[0].time, Date.parse('2026-07-01T06:00:00Z'));
+  near(route.lengthM, G.haversine(route.points[0], route.points[1]), 1e-9); eq(route.lengthM, route.points[1].dist);
+  eq(route.warnings, []);
+});
+
+test('createRoute: mehrere Segmente werden zusammengesetzt, Lücke vermerkt und nicht gemessen', function () {
+  var raw = parseGpx(gpxText('<trk><trkseg>' + trkpt(47, 11) + trkpt(47.01, 11) + '</trkseg><trkseg>' + trkpt(47.5, 11) + trkpt(47.51, 11) + '</trkseg></trk>'));
+  var route = M.createRoute(raw).route;
+  eq(route.points.length, 4); eq(route.gaps, [{ afterIndex: 1 }]);
+  near(route.lengthM, 0.02 * DEG, 0.5); eq(route.points[2].dist, route.points[1].dist);
+  eq(route.hasElevation, false); eq(route.hasTime, false);
+  eq(route.points.every(function (p) { return p.ele === null && p.time === null; }), true);
+  eq(route.warnings.some(function (w) { return /mehreren Segmenten/.test(w); }), true);
+});
+
+test('createRoute: erster Track maßgeblich mit Warnung; ohne Track die erste Route', function () {
+  var two = M.createRoute(parseGpx(gpxText('<trk><name>A</name><trkseg>' + trkpt(47, 11, 1) + '</trkseg></trk><trk><name>B</name><trkseg>' + trkpt(48, 12, 1) + '</trkseg></trk>'))).route;
+  eq(two.points[0].lat, 47); eq(two.warnings, ['Die Datei enthält 2 Tracks; verwendet wird der erste.']);
+  var rte = M.createRoute(parseGpx(gpxText('<rte><rtept lat="47" lon="11"><ele>1</ele></rtept><rtept lat="47.1" lon="11"><ele>2</ele></rtept></rte><rte><rtept lat="1" lon="1"><ele>3</ele></rtept></rte>'))).route;
+  eq(rte.points.length, 2); eq(rte.warnings, ['Die Datei enthält 2 Routen; verwendet wird die erste.']);
+  var both = M.createRoute(parseGpx(gpxText('<trk><trkseg>' + trkpt(47, 11) + '</trkseg></trk><rte><rtept lat="1" lon="1"/></rte>'))).route;
+  eq(both.points[0].lat, 47);
+});
+
+test('createRoute: Fehler als Ergebnis, nie geworfen', function () {
+  var bad = M.createRoute(parseGpx('kein xml'));
+  eq(bad.ok, false); eq(bad.route, null); eq(typeof bad.error, 'string');
+  eq(M.createRoute(null).ok, false); eq(M.createRoute(undefined).ok, false);
+  eq(M.createRoute({ ok: true, tracks: [], routes: [], warnings: [] }).ok, false);
+  eq(M.createRoute({ ok: true, tracks: [{ segments: [[]] }], routes: [], warnings: [] }).ok, false);
+});
+
+test('createRoute: Rohmodell wird nicht verändert, ids sind verschieden, Punkt ohne Höhe bleibt null', function () {
+  var raw = parseGpx(gpxText('<trk><trkseg>' + trkpt(47, 11, 0) + trkpt(47.01, 11) + '</trkseg></trk>'));
+  var before = JSON.stringify(raw);
+  var a = M.createRoute(raw).route, b = M.createRoute(raw).route;
+  eq(JSON.stringify(raw), before); eq(a.id !== b.id, true);
+  eq(a.points.map(function (p) { return p.ele; }), [0, null]);
+});
+
+test('createRoute: nur ein Punkt ist eine gültige Route der Länge 0', function () {
+  var route = M.createRoute(parseGpx(gpxText('<trk><trkseg>' + trkpt(47, 11, 1000) + '</trkseg></trk>'))).route;
+  eq(route.lengthM, 0); eq(route.bounds, [[47, 11], [47, 11]]);
+});
+
+test('displayLines: an Lücken getrennt, vereinfacht, Koordinatenpaare', function () {
+  var body = '<trk><trkseg>';
+  for (var i = 0; i <= 10; i++) body += trkpt(47, 11 + i * 0.001);
+  body += '</trkseg><trkseg>' + trkpt(48, 12) + trkpt(48.001, 12) + '</trkseg></trk>';
+  var route = M.createRoute(parseGpx(gpxText(body))).route;
+  var full = M.displayLines(route, 0), simple = M.displayLines(route, 5);
+  eq(full.length, 2); eq(full[0].length, 11); eq(full[1], [[48, 12], [48.001, 12]]);
+  eq(simple[0], [[47, 11], [47, 11.01]]); eq(simple[1].length, 2);
+  eq(M.displayLines(M.createRoute(parseGpx(gpxText('<trk><trkseg>' + trkpt(47, 11) + '</trkseg></trk>'))).route, 5), [[[47, 11]]]);
+});
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>
