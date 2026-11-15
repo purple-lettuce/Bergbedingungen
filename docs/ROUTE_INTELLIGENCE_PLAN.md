@@ -232,6 +232,7 @@ Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige.
 - Knopf „GPX laden“ (Dateiauswahl, am Desktop optional Drag & Drop) und „Route entfernen“ in einer Karte „Route“ der Seitenleiste bzw. des Sheets; ohne Route erscheint nur der Knopf, kein Platzhaltertext.
 - Neue Ebenengruppe in `js/map.js`, Anmeldung in `js/layers.js` („Meine Route“), Legendenzeile, Linie, Start- und Zielmarker, Zoom auf die Route mit `fitPadded`.
 - Fehler über `warn`/`unwarn`, Zustand über die Datenstatus-Leiste („Route: geladen“, ohne erfundenen Zeitstempel).
+- Ladehinweis: Während die Datei gelesen wird, erscheint „Datei wird gelesen“ (Zustand „lädt“ in der Datenstatus-Leiste bzw. in der Routenkarte), danach Erfolg oder Fehlermeldung. Grund: Der Parser braucht bei Dateien am Limit (E4) rund 2 s und blockiert dabei den Hauptthread (Messung in RI1). Der Hinweis muss vor dem Parsen sichtbar gezeichnet sein (z. B. ein Frame Pause vor `parseGpx`).
 - Nur eine Route gleichzeitig (Verwaltung in RI6). Popup mit Namen über `esc()`.
 
 **Nicht im Umfang:** Statistik, Profil, Speichern, Analyse.
