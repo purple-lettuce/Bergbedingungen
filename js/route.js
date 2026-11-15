@@ -17,6 +17,7 @@ import { createProfile } from './elevation_profile.js';
 import { store, newId } from './route_store.js';
 import { canSave, makeMeta, storeErrorText } from './route_store_logic.js';
 import { createSaved } from './route_saved.js';
+import { initRouteContext, setRouteContext } from './route_context.js';
 
 var DISPLAY_TOLERANCE_M = 3;   // Vereinfachung der Linie für die Darstellung; die Route selbst bleibt unverändert
 var MAX_ZOOM = 15;
@@ -144,6 +145,7 @@ async function load(readText, fileName, meta) {
     title = meta ? meta.name : routeTitle(route, fileName);
     register();
     draw();
+    setRouteContext(route);   // nach draw(): clearLayers entfernt die Hervorhebung der Abschnitte
     profile.show(route, stats);
     if (!map.hasLayer(routeLayer)) map.addLayer(routeLayer);
     map.closePopup();
@@ -197,6 +199,7 @@ function clearRoute() {
   savedId = null;
   profile.hide();
   routeLayer.clearLayers();
+  setRouteContext(null);
   map.closePopup();
   unwarn('route');
   showCurrent();
@@ -210,6 +213,7 @@ export function initRoute() {
   btnSave = document.getElementById('route-save');
   fileInput = document.getElementById('route-file');
   info = document.getElementById('route-info');
+  initRouteContext(document.getElementById('route-context'));
   profile = createProfile(document.getElementById('route-profile'), showPosition);
   btnLoad.addEventListener('click', function () { fileInput.click(); });
   fileInput.addEventListener('change', function () {

@@ -248,6 +248,7 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] Höhenprofil (RI5, SVG ohne Bibliothek in der Routenkarte: js/elevation_profile.js und reine Logik js/profile_logic.js mit Tests; Hover, Touch und Tastatur zeigen die Stelle auf der Karte)
 - [x] Routenverwaltung lokal (RI6, IndexedDB im Browser: speichern, öffnen, umbenennen, als GPX exportieren, löschen; js/route_store.js, js/route_store_logic.js, js/route_saved.js mit Tests)
 - [x] Räumlicher Schnitt Route × Polygone (RI7, reine Logik js/route_overlay.js mit Tests und Laufzeitmessung an den Schutzgebieten; noch keine Anzeige, die folgt mit RI8)
+- [x] Schutzgebiete und Sperrungen entlang der Route (RI8, Block „Entlang der Route“ in der Routenkarte: js/route_context.js, js/route_context_logic.js, js/route_sources.js mit Tests; Linien und Punkte der Sperrungen gelten bis 30 m Abstand als berührt; Klick öffnet das Popup, Abschnitte auf der Karte hervorgehoben)
 - [ ] Wegschwierigkeit-Matching (sac_scale)
 - [ ] Website Toolbox: Koordinaten & Höhe
 - [ ] Website Toolbox: Entfernungsmessungen
@@ -384,6 +385,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.19 | 2026-11-15 | Route Intelligence: RI8 (Schutzgebiete und Sperrungen entlang der Route: Liste mit km-Bereichen, Popup, Hervorhebung auf der Karte; Schnitt um Linien und Punkte erweitert) umgesetzt |
 | 4.18 | 2026-11-15 | Route Intelligence: RI7 (räumlicher Schnitt Route × Polygone als reine Logik, Abschnitte von km bis km, Messung an den Schutzgebieten) umgesetzt |
 | 4.17 | 2026-11-15 | Route Intelligence: RI6 (lokale Routenverwaltung: speichern, öffnen, umbenennen, als GPX exportieren, löschen; IndexedDB, nichts wird übertragen) umgesetzt |
 | 4.16 | 2026-11-15 | Route Intelligence: RI5 (Höhenprofil in der Routenkarte, verbunden mit der Karte) umgesetzt |

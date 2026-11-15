@@ -130,15 +130,55 @@ test('Features außerhalb, ungültige Geometrien, Kennungen', function () {
     { type: 'Feature', properties: { uuid: 'U1' }, geometry: poly([rect(47.03, 47.04, 10.99, 11.01)]) },
     { type: 'Feature', properties: {}, geometry: poly([rect(47.05, 47.06, 10.99, 11.01)]) },   // → Index 2
     feat('fern', poly([rect(50, 51, 10, 12)])),
-    feat('punkt', { type: 'Point', coordinates: [11, 47.01] }),
+    feat('punkt', { type: 'Point', coordinates: [11, 47.09] }),
     feat('kaputt', poly([[[11, 47], [11, 'x'], [12, 47]]])),
     feat('leer', { type: 'Polygon', coordinates: [] }),
+    feat('unbekannt', { type: 'Feature' }),
     null
   ]);
   eq(r.skipped, 4);
-  eq(r.sections.map(function (s) { return s.featureId; }), [0, 'U1', 2]);
+  eq(r.sections.map(function (s) { return s.featureId; }), [0, 'U1', 2, 'punkt']);
   var custom = secs(ROUTE, [{ type: 'Feature', properties: { name: 'X' }, geometry: poly([rect(47.01, 47.02, 10.99, 11.01)]) }], { idOf: function (f) { return f.properties.name; } });
   eq(custom[0].featureId, 'X');
+});
+
+// Linien und Punkte (RI8, Sperrungen): berührt, wenn die Route höchstens 30 m entfernt ist
+var M_LON = 111194.93 * Math.cos(47.05 * Math.PI / 180);   // Meter je Grad Länge bei 47,05°
+function line(coords) { return { type: 'LineString', coordinates: coords }; }
+
+test('Linie quer zur Route: Abschnitt etwa 60 m lang (zweimal NEAR_M), mittig auf der Kreuzung', function () {
+  var r = secs(ROUTE, [feat('q', line([[10.99, 47.05], [11.01, 47.05]]))]);
+  eq(r.length, 1);
+  near((r[0].fromKm + r[0].toKm) / 2, km(47.05), 0.002);
+  near(r[0].toKm - r[0].fromKm, 0.06, 0.002);
+});
+
+test('Linie parallel zur Route: 20 m Abstand berührt, 40 m nicht; eigene Entfernung über nearM', function () {
+  var at = function (m) { return line([[11 + m / M_LON, 47.02], [11 + m / M_LON, 47.06]]); };
+  var near20 = secs(ROUTE, [feat('p', at(20))]);
+  eq(near20.length, 1);
+  var ext = Math.sqrt(30 * 30 - 20 * 20) / 1000;   // am Linienende reicht das 30-m-Band um diese Länge über das Ende hinaus
+  near(near20[0].fromKm, km(47.02) - ext, 0.002);
+  near(near20[0].toKm, km(47.06) + ext, 0.002);
+  eq(secs(ROUTE, [feat('p', at(40))]), []);
+  eq(secs(ROUTE, [feat('p', at(40))], { nearM: 50 }).length, 1);
+});
+
+test('Punkt und MultiPoint: berührt nur in der Nähe; MultiLineString und GeometryCollection werden aufgelöst', function () {
+  eq(secs(ROUTE, [feat('p', { type: 'Point', coordinates: [11 + 10 / M_LON, 47.03] })]).length, 1);
+  eq(secs(ROUTE, [feat('p', { type: 'Point', coordinates: [11 + 100 / M_LON, 47.03] })]), []);
+  eq(secs(ROUTE, [feat('mp', { type: 'MultiPoint', coordinates: [[11.5, 47.03], [11, 47.04]] })]).length, 1);
+  var ml = secs(ROUTE, [feat('ml', { type: 'MultiLineString', coordinates: [[[10.99, 47.02], [11.01, 47.02]], [[10.99, 47.06], [11.01, 47.06]]] })]);
+  eq(ml.length, 2);
+  var gc = secs(ROUTE, [feat('gc', { type: 'GeometryCollection', geometries: [poly([rect(47.01, 47.02, 10.99, 11.01)]), { type: 'Point', coordinates: [11, 47.08] }] })]);
+  eq(gc.length, 2);
+});
+
+test('Linie, die die Route nur kreuzt, entgeht bei keiner Lage zwischen den Proben (Band 60 m, Abstand 25 m)', function () {
+  for (var m = 0; m < 25; m += 3) {
+    var lat = 47 + (4000 + m) / (DEG * 1000);
+    eq(secs(ROUTE, [feat('k', line([[10.99, lat], [11.01, lat]]))]).length, 1);
+  }
 });
 
 test('Leere Eingaben und Route ohne Treffer werfen nie', function () {
@@ -185,6 +225,31 @@ test('Echte Daten: Schnitt einer 100-km-Route mit allen Schutzgebieten', async f
   if (prep.skipped) throw new Error(prep.skipped + ' Features übersprungen');
   if (overlayMs > 3000) throw new Error('Schnitt dauert ' + overlayMs + ' ms');
   out.sections.forEach(function (s) { if (!(s.toKm >= s.fromKm) || s.toKm > len + 1e-9) throw new Error('Abschnitt außerhalb der Route'); });
+});
+
+// RI8: Sperrungen (Linien, Punkte, wenige Flächen) an der echten Datei: eine Route entlang einer echten Sperrlinie muss diese finden
+test('Echte Daten: Route entlang einer Sperrung findet sie über die ganze Länge (Laufzeit im Namen)', async function () {
+  var res = await fetch('../data/closures.json');
+  if (!res.ok) throw new Error('Datei nicht ladbar: ' + res.status);
+  var rows = (await res.json()).results.filter(function (r) { return r.geometry; });
+  var idx = rows.findIndex(function (r) { return r.geometry.type === 'MultiLineString' && r.geometry.coordinates[0].length >= 6; });
+  if (idx < 0) throw new Error('keine Sperrlinie in den Daten');
+  var coords = rows[idx].geometry.coordinates[0];
+  var xml = '<gpx><trk><trkseg>' + coords.map(function (c) { return '<trkpt lat="' + c[1] + '" lon="' + c[0] + '"/>'; }).join('') + '</trkseg></trk></gpx>';
+  var route = createRoute(parseGpx(xml)).route;
+  var features = rows.map(function (r) { return { type: 'Feature', properties: {}, geometry: r.geometry }; });
+  var t0 = performance.now();
+  var prep = O.prepareFeatures(features, function (f, i) { return i; });
+  var t1 = performance.now();
+  var out = O.routeOverlay(route, prep);
+  var t2 = performance.now();
+  var mine = out.sections.filter(function (s) { return s.featureId === idx; });
+  currentName = 'Echte Daten (Sperrungen): ' + rows.length + ' Einträge, ' + out.sections.length + ' Abschnitte, Vorbereitung ' + Math.round(t1 - t0) + ' ms, Schnitt ' + Math.round(t2 - t1) + ' ms';
+  if (prep.skipped) throw new Error(prep.skipped + ' Einträge übersprungen');
+  if (mine.length !== 1) throw new Error('eigene Sperrung: ' + mine.length + ' Abschnitte');
+  near(mine[0].fromKm, 0, 0.001);
+  near(mine[0].toKm, route.lengthM / 1000, 0.001);   // die Route ist die Sperrlinie selbst: ganze Länge
+  if (t2 - t1 > 3000) throw new Error('Schnitt dauert ' + Math.round(t2 - t1) + ' ms');
 });
 
 (async function () {
