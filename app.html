@@ -62,6 +62,16 @@
       </div>
     </section>
 
+    <section class="mr-card mr-stack" aria-labelledby="route-h">
+      <h2 class="mr-label" id="route-h">Route</h2>
+      <div class="mr-cluster">
+        <button id="route-load" type="button">GPX laden</button>
+        <button id="route-clear" type="button" hidden>Route entfernen</button>
+      </div>
+      <input id="route-file" type="file" accept=".gpx,.xml,application/gpx+xml,text/xml" hidden aria-label="GPX-Datei auswählen">
+      <div id="route-info" class="mr-stack mr-gap-xs" role="status" hidden></div>
+    </section>
+
     <section class="mr-card mr-stack">
       <h2 class="mr-label">Sperrungen und Hinweise</h2>
       <input id="q" type="search" placeholder="Suchen, z. B. Steig, Forst" aria-label="Suchen">

@@ -7,7 +7,9 @@ var SOURCES = [
   { id: 'protectedAreas', name: 'Schutzgebiete', state: 'loading', text: 'wird geladen …' },
   // Die Lawinenlage lädt erst beim ersten Einblenden der Ebene (js/avalanche.js), vorher gibt es keinen Status.
   { id: 'avalanche', name: 'Lawinenlage', state: 'unavailable', text: 'wird beim Einblenden geladen' },
-  { id: 'weather', name: 'Wetter', state: 'loading', text: 'wird geladen …' }
+  { id: 'weather', name: 'Wetter', state: 'loading', text: 'wird geladen …' },
+  // Die Route gibt es nur nach dem Laden einer GPX-Datei (js/route.js); ohne Route ist der Eintrag verborgen (Zustand 'none').
+  { id: 'route', name: 'Route', state: 'none', text: '' }
 ];
 var STATE_WORD = { ok: 'geladen', limited: 'eingeschränkt', unavailable: 'nicht verfügbar', error: 'Fehler', loading: 'lädt' };
 var rows = {};
@@ -29,11 +31,12 @@ function build() {
   });
 }
 
-// state: 'ok' | 'limited' | 'unavailable' | 'error' | 'loading'
+// state: 'ok' | 'limited' | 'unavailable' | 'error' | 'loading' | 'none' (Eintrag verborgen)
 export function setSourceStatus(id, state, text) {
   var r = rows[id];
   if (!r) return;
   r.li.dataset.state = state;
+  r.li.hidden = state === 'none';
   r.state.textContent = ' (' + (STATE_WORD[state] || state) + '): ';
   r.text.textContent = text;
 }

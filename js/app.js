@@ -11,6 +11,7 @@ import { initClosuresLegend } from './closures_legend.js';
 import { initLayout } from './layout.js';
 import { initSheet } from './sheet.js';
 import { initSearch } from './search.js';
+import { initRoute } from './route.js';
 
 // ---------- Ereignisse ----------
 map.on('moveend', scheduleRender);
@@ -32,6 +33,8 @@ var c0 = map.getCenter();
 loadWeather(c0.lat, c0.lng);
 
 initSearch([protectedAreasSearchSource, closuresSearchSource('closure', 'Sperrungen'), closuresSearchSource('notice', 'Hinweise')]);
+
+initRoute();
 
 initClosuresFilter();
 initClosuresLegend();

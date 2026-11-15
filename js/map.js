@@ -58,4 +58,5 @@ export var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
 // ---------- Ebenengruppen ----------
 export var layerGroup = L.layerGroup().addTo(map);
 export var protectedAreasLayer = L.layerGroup().addTo(map);
+export var routeLayer = L.layerGroup().addTo(map);   // eigene GPX-Route (js/route.js), erst nach dem Laden einer Datei im Bedienfeld angemeldet
 export var avalancheLayer = L.layerGroup();   // standardmäßig ausgeblendet, lädt beim ersten Einblenden

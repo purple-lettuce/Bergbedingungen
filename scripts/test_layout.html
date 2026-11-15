@@ -45,8 +45,10 @@ async function desktop() {
 
   var cards = Array.prototype.map.call(d.querySelectorAll('main > aside > .mr-card'), function (e) { var r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; });
   var panel = rect(d, '.kl-panel'), legend = rect(d, '.kl-card'), zoom = rect(d, '.leaflet-control-zoom'), dock = rect(d, '.kl-dock');
-  ok('Desktop: Wetter und Sperrungen sind schwebende Karten innerhalb der Karte', cards.length === 2 && cards.every(function (c) { return c.l >= m.l && c.r <= m.r && c.b <= m.b + 0.5; }));
-  ok('Desktop: die beiden Seitenleistenkarten überlappen sich nicht', cards.length === 2 && cards[0].b <= cards[1].t + 0.5);
+  // Wetter, Route (RI3) und Sperrungen: Die Seitenleiste scrollt für sich, wenn die drei Karten nicht in die Kartenhöhe passen.
+  var asideEl = d.querySelector('main > aside'), asideR = asideEl.getBoundingClientRect();
+  ok('Desktop: Wetter, Route und Sperrungen sind schwebende Karten innerhalb der Karte (Seitenleiste scrollt bei Bedarf)', cards.length === 3 && cards.every(function (c) { return c.l >= m.l && c.r <= m.r && c.t >= m.t - 0.5; }) && asideR.bottom <= m.b + 0.5);
+  ok('Desktop: die Seitenleistenkarten überlappen sich nicht', cards.length === 3 && cards[0].b <= cards[1].t + 0.5 && cards[1].b <= cards[2].t + 0.5);
   var legendEl = d.querySelector('.kl-card');
   ok('Desktop: Legendenkarte steht im Dock unter dem Bedienfeld', legendEl && legendEl.parentElement.classList.contains('kl-dock') && !legendEl.hidden && panel.b <= legend.t + 0.5, fmt(panel) + ' / ' + fmt(legend));
   ok('Desktop: Legendenkarte ist im Dock zunächst offen', !d.getElementById('kl-card-list').hidden);
@@ -126,9 +128,9 @@ async function mobile(w, h) {   // bis 820 px: Karte füllt den Raum, Seitenleis
 
   var s = rect(d, 'main > aside');
   ok(t + 'Seitenleiste ist ein Bottom Sheet am unteren Rand (Zustand peek, Griff sichtbar)', cs(aside).position === 'absolute' && Math.abs(s.b - main.b) < 1 && s.h <= 80 && d.querySelector('main').dataset.sheet === 'peek' && cs(handle).display !== 'none' && handle.getAttribute('aria-expanded') === 'false', fmt(s));
-  ok(t + 'Wetter und Sperrungen liegen im Sheet, verdeckter Inhalt ist inert', d.querySelectorAll('main > aside > .mr-card').length === 2 && d.querySelectorAll('main > aside > .mr-card[inert]').length === 2);
+  ok(t + 'Wetter, Route und Sperrungen liegen im Sheet, verdeckter Inhalt ist inert', d.querySelectorAll('main > aside > .mr-card').length === 3 && d.querySelectorAll('main > aside > .mr-card[inert]').length === 3);
   ok(t + 'Quellenangaben (Fußzeile) stehen am Ende des Sheets', d.querySelector('footer').parentElement === aside && aside.lastElementChild === d.querySelector('footer'));
-  var one = d.querySelector('.mr-statusbar'), items = one.querySelectorAll('.mr-statusbar__item'), tops = Array.prototype.map.call(items, function (e) { return Math.round(e.getBoundingClientRect().top); });
+  var one = d.querySelector('.mr-statusbar'), items = one.querySelectorAll('.mr-statusbar__item:not([hidden])'), tops = Array.prototype.map.call(items, function (e) { return Math.round(e.getBoundingClientRect().top); });
   ok(t + 'Statusleiste einzeilig, scrollt für sich', tops.every(function (y) { return y === tops[0]; }) && cs(one).overflowX === 'auto' && one.scrollWidth > one.clientWidth, tops.join(','));
 
   var legendEl = d.querySelector('.kl-card'), lg = rect(d, '.kl-card'), bottomCtl = rect(d, '.leaflet-bottom.leaflet-right');

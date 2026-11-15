@@ -230,7 +230,7 @@ ull (RI4 muss damit umgehen).
 - Getestet mit scripts/test_route_model.html (16 Tests, analytische Referenzwerte, 200 000 Punkte für simplify).
 ### RI3 – GPX laden und auf der Karte anzeigen
 
-Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige.
+Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Anzeige.
 
 **Ziel:** Der Nutzer wählt eine GPX-Datei, die Route erscheint als Ebene auf der Karte.
 
@@ -250,6 +250,14 @@ Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige.
 **Abhängigkeiten:** RI1, RI2.
 
 **Definition of Done:** Route lädt, wird angezeigt und lässt sich entfernen; ohne Route ist die Anwendung unverändert; Screenshots Desktop/Mobil, hell/dunkel; STYLEGUIDE ergänzt; ROADMAP aktualisiert; PR gemerged.
+
+**Umsetzungshinweise (15.11.2026):**
+- `js/route.js` (Oberfläche und Karte) und `js/route_logic.js` (rein: `checkFile`, `routeTitle`, `routeStatus`, `STATUS_LOADING`; getestet mit `scripts/test_route_load.html`). Die Karte „Route“ steht in `app.html` zwischen Wetter und Sperrungen; „Route entfernen“ erscheint erst mit einer Route, der Knopf heißt danach „Andere GPX laden“.
+- Ablauf: Dateiprüfung vor dem Lesen (leer oder über 10 MB wird gar nicht gelesen), Ladehinweis „Datei wird gelesen …“ (Routenkarte und Datenstatus-Leiste), ein Frame Pause, dann `file.text()` → `parseGpx` → `createRoute`. Schlägt das Laden fehl, bleibt eine bereits geladene Route bestehen; die Meldung kommt über `warn('route', …)`. Während des Lesens ist der Knopf gesperrt.
+- Anzeige: Linie aus `displayLines` (Vereinfachung 3 m, an Lücken getrennt) mit heller Kontur, Start und Ziel als Punkte mit Tooltip, Popup mit Namen über `esc()`; Zoom mit `fitPadded` (höchstens Zoomstufe 15), mobil gibt das Sheet vorher die Karte frei. Ebene „Meine Route“ und Legende werden erst beim ersten Laden im Bedienfeld angemeldet (ohne Route bleibt die Oberfläche unverändert) und bleiben nach „Route entfernen“ als leere Ebene bestehen, der Statuseintrag „Route“ verschwindet wieder (neuer Zustand `none` in `status_bar.js`). Drag & Drop der Datei auf die Karte ist umgesetzt.
+- Die Datenstatus-Leiste zeigt „Route: geladen“ mit Punktzahl; Lücken und Warnungen des Parsers machen den Zustand „eingeschränkt“. Es gibt keinen Zeitstempel. Länge und Höhenmeter folgen mit RI4, nicht hier.
+- Seitenleiste jetzt mit drei Karten: Auf 900 px hohen Desktops scrollt die Seitenleiste, die Liste der Sperrungen liegt unter der Routenkarte; `scripts/test_layout.html` prüft drei statt zwei Karten. Der Titel des Sheets lautet weiterhin „Wetter und Sperrungen“.
+- Geprüft in einem Headless-Browser (CDP) mit synthetischer GPX (zwei Segmente, Name mit HTML-Zeichen, defekte Datei): Laden, Fehlermeldung, Entfernen, Popup maskiert; Desktop 1440 und Mobil 390 und 320, hell und dunkel. Screenshots: `docs/screenshots/route-*.png`. Echtgerät-Test (iOS/Android Dateidialog) steht aus.
 
 ### RI4 – Routenstatistik (aus den GPX-Höhen)
 
