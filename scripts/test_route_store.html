@@ -1,0 +1,139 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_store.js und route_store_logic.js (Routenverwaltung, RI6)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Die Speichertests nutzen eine eigene Datenbank, die am Ende gelöscht wird.
+import * as L from '../js/route_store_logic.js';
+import { createStore } from '../js/route_store.js';
+import { parseGpx } from '../js/gpx.js';
+import { createRoute } from '../js/route_model.js';
+import { formatKm } from '../js/route_stats.js';
+
+var results = [];
+var queue = [];
+function test(name, fn) { queue.push({ name: name, fn: fn }); }
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+async function rejects(promise) {
+  try { await promise; } catch (e) { return e; }
+  throw new Error('erwartet: Fehler, erhalten: Erfolg');
+}
+
+var GPX = '<gpx xmlns="http://www.topografix.com/GPX/1/1"><trk><name>Gipfel</name><trkseg><trkpt lat="47" lon="11"><ele>1000</ele></trkpt><trkpt lat="47.01" lon="11"><ele>1010</ele></trkpt></trkseg></trk></gpx>';
+var route = createRoute(parseGpx(GPX)).route;
+
+test('cleanName: Leerraum, Kürzen, leer', function () {
+  eq(L.cleanName('  Zugspitze \n  Rundtour '), { ok: true, name: 'Zugspitze Rundtour', error: null });
+  eq(L.cleanName('').ok, false);
+  eq(L.cleanName('   ').ok, false);
+  eq(L.cleanName(null).ok, false);
+  eq(L.cleanName('x'.repeat(200)).name.length, L.MAX_NAME_LENGTH);
+  eq(L.cleanName('<b>&</b>').name, '<b>&</b>');   // keine Umwandlung: Ausgabe erfolgt nur über textContent
+});
+
+test('canSave: Grenze', function () {
+  eq(L.canSave(L.MAX_ROUTES - 1).ok, true);
+  eq(L.canSave(L.MAX_ROUTES).ok, false);
+  eq(/20/.test(L.canSave(L.MAX_ROUTES).error), true);
+});
+
+test('makeMeta und sortMetas: neueste zuerst, dann Name, Eingabe unverändert', function () {
+  var m = L.makeMeta('a', 'Gipfel', route, 123, 5);
+  eq(m, { id: 'a', name: 'Gipfel', lengthM: route.lengthM, points: 2, bytes: 123, savedAt: 5 });
+  var list = [{ name: 'b', savedAt: 1 }, { name: 'z', savedAt: 9 }, { name: 'a', savedAt: 9 }];
+  eq(L.sortMetas(list).map(function (x) { return x.name; }), ['a', 'z', 'b']);
+  eq(list[0].name, 'b');
+});
+
+test('exportFileName: unzulässige Zeichen, leer, Länge', function () {
+  eq(L.exportFileName('Tour: A/B?'), 'Tour_ A_B_.gpx');
+  eq(L.exportFileName('...'), 'Route.gpx');
+  eq(L.exportFileName(''), 'Route.gpx');
+  eq(L.exportFileName('a'.repeat(300)).length, 104);
+});
+
+test('storeErrorText: Speicher voll, nicht verfügbar, nicht gefunden, sonst', function () {
+  eq(/voll/.test(L.storeErrorText({ name: 'QuotaExceededError' })), true);
+  eq(/nicht verfügbar/.test(L.storeErrorText({ name: 'SecurityError' })), true);
+  eq(/nicht verfügbar/.test(L.storeErrorText({ code: 'unavailable' })), true);
+  eq(/nicht gefunden/.test(L.storeErrorText({ code: 'missing' })), true);
+  eq(L.storeErrorText(new Error('x')), 'Die Route konnte nicht gespeichert werden.');
+  eq(L.storeErrorText(null), 'Die Route konnte nicht gespeichert werden.');
+});
+
+test('metaText: Länge und Datum', function () {
+  eq(L.metaText({ lengthM: 12300, savedAt: new Date(2026, 10, 15).getTime() }, formatKm), formatKm(12300) + ' · gespeichert 15.11.2026');
+});
+
+// Speicher (echtes IndexedDB mit eigener Datenbank)
+var DB = 'test-routes-' + Date.now();
+var store = createStore(DB);
+
+test('Speicher: add, list, getFile überstehen eine neue Verbindung (Neuladen)', async function () {
+  eq(await store.list(), []);
+  await store.add(L.makeMeta('r1', 'Gipfel', route, GPX.length, 1), GPX);
+  await store.close();
+  var again = createStore(DB);   // wie nach dem Neuladen der Seite
+  var list = await again.list();
+  eq(list.length, 1);
+  eq(list[0].name, 'Gipfel');
+  eq(await again.getFile('r1'), GPX);
+  await again.close();
+});
+
+test('Speicher: rename ändert nur den Namen, Datei bleibt', async function () {
+  var m = await store.rename('r1', 'Neuer Name');
+  eq(m.name, 'Neuer Name');
+  eq((await store.list())[0].name, 'Neuer Name');
+  eq((await store.list())[0].points, 2);
+  eq(await store.getFile('r1'), GPX);
+  var e = await rejects(store.rename('gibtsnicht', 'x'));
+  eq(e.code, 'missing');
+});
+
+test('Speicher: doppelte Kennung wird abgelehnt, nichts halb gespeichert', async function () {
+  await rejects(store.add(L.makeMeta('r1', 'Doppelt', route, 1, 2), 'anderer Text'));
+  eq((await store.list()).length, 1);
+  eq(await store.getFile('r1'), GPX);
+});
+
+test('Speicher: remove entfernt Kopf und Datei vollständig', async function () {
+  await store.add(L.makeMeta('r2', 'Zweite', route, 1, 2), GPX);
+  await store.remove('r1');
+  eq((await store.list()).map(function (m) { return m.id; }), ['r2']);
+  var e = await rejects(store.getFile('r1'));
+  eq(e.code, 'missing');
+  // auch im Rohspeicher keine Reste
+  var db = await new Promise(function (res, rej) { var q = indexedDB.open(DB); q.onsuccess = function () { res(q.result); }; q.onerror = function () { rej(q.error); }; });
+  var keys = await new Promise(function (res) { var q = db.transaction('files').objectStore('files').getAllKeys(); q.onsuccess = function () { res(q.result); }; });
+  db.close();
+  eq(keys, ['r2']);
+  await store.remove('nicht-vorhanden');   // Löschen einer fehlenden Route ist kein Fehler
+});
+
+test('Speicher: ohne IndexedDB Fehler "unavailable"', async function () {
+  var real = Object.getOwnPropertyDescriptor(window, 'indexedDB') || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'indexedDB');
+  Object.defineProperty(window, 'indexedDB', { value: undefined, configurable: true });
+  try {
+    var e = await rejects(createStore('egal').list());
+    eq(e.code, 'unavailable');
+    eq(/nicht verfügbar/.test(L.storeErrorText(e)), true);
+  } finally {
+    if (real) Object.defineProperty(window, 'indexedDB', real); else delete window.indexedDB;
+  }
+});
+
+(async function () {
+  for (var t of queue) {
+    try { await t.fn(); results.push({ name: t.name, ok: true }); } catch (e) { results.push({ name: t.name, ok: false, error: String(e.message || e) }); }
+  }
+  await store.close();
+  await new Promise(function (res) { var q = indexedDB.deleteDatabase(DB); q.onsuccess = q.onerror = q.onblocked = function () { res(); }; });
+  var passed = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+})();
+</script>

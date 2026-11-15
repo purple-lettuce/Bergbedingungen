@@ -1,5 +1,6 @@
 // Eigene Route (RI3): GPX-Datei wählen, lesen, als Ebene "Meine Route" auf der Karte zeigen und wieder entfernen.
-// Die Datei wird nur im Browser gelesen (File-API) und nicht übertragen (E1). Es gibt genau eine Route zugleich (E2); Neuladen der Seite verwirft sie.
+// Die Datei wird nur im Browser gelesen (File-API) und nicht übertragen (E1). Es ist genau eine Route zugleich geöffnet (E2); ohne Speichern verwirft Neuladen der Seite sie.
+// Auf Wunsch wird die Route lokal im Browser gespeichert (RI6: route_store.js, Liste in route_saved.js, Regeln in route_store_logic.js).
 // Parser, Modell, Statistik und Texte liegen in gpx.js, route_model.js, route_stats.js und route_logic.js; hier stehen nur Oberfläche und Karte.
 // Texte aus der Datei (Name, Warnungen) gelangen nur über textContent oder esc() in die Seite.
 
@@ -13,12 +14,16 @@ import { createRoute, displayLines } from './route_model.js';
 import { checkFile, routeTitle, routeStatus, STATUS_LOADING } from './route_logic.js';
 import { routeStats, statsRows } from './route_stats.js';
 import { createProfile } from './elevation_profile.js';
+import { store, newId } from './route_store.js';
+import { canSave, makeMeta, storeErrorText } from './route_store_logic.js';
+import { createSaved } from './route_saved.js';
 
 var DISPLAY_TOLERANCE_M = 3;   // Vereinfachung der Linie für die Darstellung; die Route selbst bleibt unverändert
 var MAX_ZOOM = 15;
 
 var route = null, stats = null, title = '', loading = false, registered = false;
-var btnLoad, btnClear, fileInput, info, profile, posMarker = null;
+var gpxText = '', savedId = null;   // Originaltext der geöffneten Route; Kennung im Speicher (null = nicht gespeichert)
+var btnLoad, btnClear, btnSave, fileInput, info, profile, saved, posMarker = null;
 
 // Ebene und Legende werden erst beim ersten Laden im Bedienfeld angemeldet: ohne Route bleibt die Oberfläche unverändert.
 function register() {
@@ -106,6 +111,7 @@ function renderInfo(warnings) {
 // Zustand der Oberfläche passend zur aktuellen Route (oder ohne Route).
 function showCurrent() {
   btnClear.hidden = !route;
+  btnSave.hidden = !route || !!savedId;
   btnLoad.disabled = false;
   btnLoad.textContent = route ? 'Andere GPX laden' : 'GPX laden';
   if (route) { var st = routeStatus(route); setSourceStatus('route', st.state, st.text); renderInfo(route.warnings); }
@@ -114,10 +120,9 @@ function showCurrent() {
 
 function frame() { return new Promise(function (r) { requestAnimationFrame(function () { setTimeout(r, 0); }); }); }
 
-async function loadFile(file) {
+// Öffnet eine Route aus einer Datei oder aus dem Speicher: readText() liefert den GPX-Text, meta ist der gespeicherte Datensatz (oder null).
+async function load(readText, fileName, meta) {
   if (loading) return;
-  var check = checkFile(file);
-  if (!check.ok) { warn('route', check.error); return; }
   loading = true;
   unwarn('route');
   btnLoad.disabled = true;
@@ -129,12 +134,14 @@ async function loadFile(file) {
   info.append(busy);
   try {
     await frame();   // Hinweis erst zeichnen lassen: Parsen großer Dateien blockiert den Hauptthread (Messung RI1)
-    var text = await file.text();
+    var text = await readText();
     var made = createRoute(parseGpx(text));
     if (!made.ok) { warn('route', made.error); return; }   // eine bereits geladene Route bleibt bestehen
     route = made.route;
+    gpxText = text;
+    savedId = meta ? meta.id : null;
     stats = routeStats(route);
-    title = routeTitle(route, file.name);
+    title = meta ? meta.name : routeTitle(route, fileName);
     register();
     draw();
     profile.show(route, stats);
@@ -148,23 +155,59 @@ async function loadFile(file) {
   } finally {
     loading = false;
     showCurrent();
+    saved.setCurrent(savedId);
   }
+}
+
+function loadFile(file) {
+  if (loading) return;
+  var check = checkFile(file);
+  if (!check.ok) { warn('route', check.error); return; }
+  load(function () { return file.text(); }, file.name, null);
+}
+
+function openSaved(meta) {
+  load(function () { return store.getFile(meta.id); }, meta.name, meta);
+}
+
+// Speichert die geöffnete Route auf Wunsch im Browser (nichts wird übertragen).
+function saveCurrent() {
+  if (!route || savedId || btnSave.disabled) return;
+  var can = canSave(saved.count());
+  if (!can.ok) { warn('route', can.error); return; }
+  unwarn('route');
+  var meta = makeMeta(newId(), title, route, new Blob([gpxText]).size, Date.now());
+  btnSave.disabled = true;
+  store.add(meta, gpxText).then(function () {
+    savedId = meta.id;
+    return saved.refresh();
+  }).catch(function (err) {
+    warn('route', storeErrorText(err));
+  }).then(function () {
+    btnSave.disabled = false;
+    showCurrent();
+    saved.setCurrent(savedId);
+  });
 }
 
 function clearRoute() {
   route = null;
   stats = null;
+  gpxText = '';
+  savedId = null;
   profile.hide();
   routeLayer.clearLayers();
   map.closePopup();
   unwarn('route');
   showCurrent();
+  saved.setCurrent(null);
   btnLoad.focus();
 }
 
 export function initRoute() {
   btnLoad = document.getElementById('route-load');
   btnClear = document.getElementById('route-clear');
+  btnSave = document.getElementById('route-save');
   fileInput = document.getElementById('route-file');
   info = document.getElementById('route-info');
   profile = createProfile(document.getElementById('route-profile'), showPosition);
@@ -175,6 +218,14 @@ export function initRoute() {
     if (file) loadFile(file);
   });
   btnClear.addEventListener('click', clearRoute);
+  btnSave.addEventListener('click', saveCurrent);
+  saved = createSaved(document.getElementById('route-saved'), document.getElementById('route-saved-list'), document.getElementById('route-saved-note'), {
+    open: openSaved,
+    error: function (text) { warn('route', text); },
+    renamed: function (id, name) { if (id === savedId) { title = name; showCurrent(); } },
+    removed: function (id) { if (id === savedId) { savedId = null; showCurrent(); saved.setCurrent(null); } }
+  });
+  saved.refresh();
   // Drag & Drop auf die Karte (Desktop)
   var dropArea = map.getContainer();
   function hasFiles(ev) { return ev.dataTransfer && Array.prototype.indexOf.call(ev.dataTransfer.types || [], 'Files') >= 0; }
