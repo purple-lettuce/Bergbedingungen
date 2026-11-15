@@ -1,0 +1,135 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_context_logic.js und route_sources.js (Entlang der Route, RI8)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as C from '../js/route_context_logic.js';
+import { setRouteSource, getRouteSource, onRouteSource } from '../js/route_sources.js';
+import { parseGpx } from '../js/gpx.js';
+import { createRoute } from '../js/route_model.js';
+import { routeOverlay, prepareFeatures } from '../js/route_overlay.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) {
+  if (!(Math.abs(actual - expected) <= tol)) throw new Error('erwartet ' + expected + ' ± ' + tol + ', erhalten ' + actual);
+}
+var SRC = { protectedAreas: C.SOURCES[0], closures: C.SOURCES[1] };
+
+function route() {
+  var pts = [];
+  for (var i = 0; i <= 100; i++) pts.push('<trkpt lat="' + (47 + i * 0.001).toFixed(6) + '" lon="11"/>');
+  return createRoute(parseGpx('<gpx><trk><trkseg>' + pts.join('') + '</trkseg></trk></gpx>')).route;
+}
+var DESC = { 1: { key: 'a', title: 'Gebiet A', meta: 'Naturpark', popupHtml: '<p>A</p>' }, 2: { key: 'a', title: 'Gebiet A', meta: 'Naturpark', popupHtml: '<p>A</p>' },
+  3: { key: 'b', title: 'Gebiet B', meta: 'Ruhezone', popupHtml: '<p>B</p>', popupOptions: { className: 'x', maxHeight: 340 } } };
+function describe(id) { return DESC[id] || null; }
+
+test('formatRange: Bereich mit einer Nachkommastelle, kurze Abschnitte als Stelle', function () {
+  eq(C.formatRange(3.24, 5.61), 'km 3,2–5,6');
+  eq(C.formatRange(0, 12.04), 'km 0,0–12,0');
+  eq(C.formatRange(2.0, 2.03), 'bei km 2,0');
+  eq(C.formatRange(1234.56, 1240), 'km 1.234,6–1.240,0');
+});
+
+test('buildEntries: gleiche Schlüssel werden vereint, berührende Abschnitte verschmelzen, Sortierung nach Beginn', function () {
+  var e = C.buildEntries([
+    { featureId: 3, fromKm: 5, toKm: 6 },
+    { featureId: 2, fromKm: 2, toKm: 3 },
+    { featureId: 1, fromKm: 3, toKm: 4 },     // schließt direkt an: verschmilzt mit 2–3
+    { featureId: 1, fromKm: 8, toKm: 9 },
+    { featureId: 99, fromKm: 1, toKm: 2 }     // describe liefert null: entfällt
+  ], describe);
+  eq(e.map(function (x) { return x.key; }), ['a', 'b']);
+  eq(e[0].ranges, [[2, 4], [8, 9]]);
+  eq(e[0].totalKm, 3);
+  eq(e[0].firstKm, 2);
+  eq(e[1].popupOptions, { className: 'x', maxHeight: 340 });
+  eq(C.rangesText(e[0]), 'km 2,0–4,0; km 8,0–9,0');
+  eq(C.buildEntries([], describe), []);
+  eq(C.buildEntries(null, describe), []);
+});
+
+test('summarize: Treffer, keine Überschneidung nur bei vollständigen Daten', function () {
+  var ready = function (n) { return { state: 'ready', entries: new Array(n).fill({}), info: { count: 5, stand: '' } }; };
+  var s = C.summarize({ protectedAreas: ready(2), closures: ready(1) });
+  eq(s.headline, 'Die Route berührt 2 Schutzgebiete und 1 Sperrung oder Hinweis.');
+  eq(s.complete, true);
+  var one = C.summarize({ protectedAreas: ready(1), closures: ready(0) });
+  eq(one.headline, 'Die Route berührt 1 Schutzgebiet.');
+  var none = C.summarize({ protectedAreas: ready(0), closures: ready(0) });
+  eq(none.headline, 'In den geladenen Daten keine Überschneidung.');
+  eq(none.notes.some(function (n) { return /keine Aussage über Risiken/.test(n); }), true);
+  eq(none.notes.some(function (n) { return /^Schutzgebiete: 5 Gebiete, ohne Zeitangabe/.test(n); }), true);
+});
+
+test('summarize: nie "keine Überschneidung", solange eine Quelle fehlt (laden oder gescheitert)', function () {
+  var ready0 = { state: 'ready', entries: [], info: { count: 3, stand: '' } };
+  var pending = C.summarize({ protectedAreas: ready0 });                                        // closures noch nicht gemeldet
+  eq(pending.headline, 'Noch nicht vollständig geprüft.');
+  eq(pending.complete, false);
+  eq(pending.notes[0], 'Sperrungen und Hinweise: werden noch geladen, hier noch nicht geprüft.');
+  var failed = C.summarize({ protectedAreas: { state: 'failed', entries: [] }, closures: ready0 });
+  eq(failed.headline, 'Noch nicht vollständig geprüft.');
+  eq(failed.notes[0], 'Schutzgebiete: nicht verfügbar, hier nicht geprüft.');
+  eq(failed.notes.some(function (n) { return /keine Aussage über Risiken/.test(n); }), false);
+  var partial = C.summarize({ protectedAreas: { state: 'ready', entries: [{}], info: { count: 1, stand: '' } }, closures: { state: 'failed', entries: [] } });
+  eq(partial.headline, 'Die Route berührt 1 Schutzgebiet.');   // Treffer werden genannt, die fehlende Quelle steht als Hinweis dabei
+  eq(partial.complete, false);
+  eq(C.summarize({}).headline, 'Noch nicht vollständig geprüft.');
+});
+
+test('standText: Anzahl und Stand, ohne erfundene Zeit', function () {
+  eq(C.standText(SRC.closures, { count: 1239, stand: '15.11.2026, 07:41' }), 'Sperrungen und Hinweise: 1.239 Einträge, Stand 15.11.2026, 07:41');
+  eq(C.standText(SRC.protectedAreas, { count: 1, stand: '' }), 'Schutzgebiete: 1 Gebiet, ohne Zeitangabe in der Datei');
+  eq(C.standText(SRC.protectedAreas, null), 'Schutzgebiete: ohne Zeitangabe in der Datei');
+});
+
+test('sectionPath und sectionMiddle: Anfang, Zwischenpunkte, Ende', function () {
+  var r = route();
+  var path = C.sectionPath(r, 2, 4);
+  eq(path[0].length, 2);
+  near(path[0][0], 47 + 2 / 111.19493, 1e-6);
+  near(path[path.length - 1][0], 47 + 4 / 111.19493, 1e-6);
+  eq(path.length > 10, true);   // Routenpunkte alle rund 111 m dazwischen
+  var mid = C.sectionMiddle(r, 2, 4);
+  near(mid.lat, 47 + 3 / 111.19493, 1e-6);
+  eq(C.sectionPath(r, 0, 0).length, 2);
+});
+
+test('Zusammenspiel mit dem Schnitt: Fläche mit zwei Teilen und eine Sperrlinie ergeben je einen Eintrag', function () {
+  var r = route();
+  var rect = function (a, b) { return [[10.99, a], [11.01, a], [11.01, b], [10.99, b], [10.99, a]]; };
+  var features = [
+    { type: 'Feature', geometry: { type: 'Polygon', coordinates: [rect(47.01, 47.02)] } },
+    { type: 'Feature', geometry: { type: 'Polygon', coordinates: [rect(47.05, 47.06)] } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[10.99, 47.08], [11.01, 47.08]] } }
+  ];
+  var d = function (i) { return i < 2 ? { key: 'g', title: 'Gebiet', meta: 'Park' } : { key: 's', title: 'Sperre', meta: 'Sperrung' }; };
+  var out = routeOverlay(r, prepareFeatures(features, function (f, i) { return i; }));
+  var entries = C.buildEntries(out.sections, d);
+  eq(entries.map(function (e) { return e.key; }), ['g', 's']);
+  eq(entries[0].ranges.length, 2);
+  eq(entries[1].ranges.length, 1);
+});
+
+test('route_sources: melden, lesen, Hörer werden benachrichtigt', function () {
+  var seen = [];
+  onRouteSource(function (id) { seen.push(id); });
+  eq(getRouteSource('x'), null);
+  setRouteSource('x', { state: 'ready', features: [] });
+  eq(getRouteSource('x').state, 'ready');
+  setRouteSource('x', { state: 'failed' });
+  eq(seen, ['x', 'x']);
+});
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>

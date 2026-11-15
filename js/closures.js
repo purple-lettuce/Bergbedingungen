@@ -8,6 +8,7 @@ import { loadWeather } from './weather.js';
 import { fitPadded } from './layout.js';
 import { revealMap, getSheetState } from './sheet.js';
 import { createIndex, searchIndex } from './search_logic.js';
+import { setRouteSource } from './route_sources.js';
 
 var DATA_URL = 'data/closures.json';
 var LINE_LIMIT = 150;   // bis zu dieser Anzahl im Ausschnitt werden Linien gezeichnet, darüber nur Punkte
@@ -84,14 +85,30 @@ export async function loadData() {
     setSourceStatus('closures', st.state, st.text);
     if (!rows.length) {
       setStatus('Noch keine Daten vorhanden. Sie werden beim nächsten automatischen Abruf geladen.');
+      setRouteSource('closures', { state: 'failed' });   // ohne Daten keine Aussage für "Entlang der Route"
       return;
     }
+    publishRouteSource(rows);
     render();
   } catch (e) {
+    setRouteSource('closures', { state: 'failed' });
     setStatus('Sperrungen und Hinweise sind gerade nicht verfügbar.', true);
     setSourceStatus('closures', 'error', 'nicht verfügbar');
     warn('data', 'Die Datei mit den Sperrungen und Hinweisen konnte nicht geladen werden (' + e.message + ').' + FILE_HINT);
   }
+}
+// Quelle für "Entlang der Route" (RI8): alle nicht abgelaufenen Einträge mit Geometrie, unabhängig von Filter und Kartenausschnitt.
+// Das Popup ist dasselbe wie in der Karte. Die Datei wird beim Laden gelesen; der Status (aktuell oder geplant) gilt zu diesem Zeitpunkt.
+function publishRouteSource(rows) {
+  var usable = rows.filter(function (r) { return r.geometry && statusOf(r) !== 'expired'; });
+  setRouteSource('closures', {
+    state: 'ready', count: usable.length, stand: dataInfo,
+    features: usable.map(function (r) { return { type: 'Feature', properties: {}, geometry: r.geometry }; }),
+    describe: function (i) {
+      var r = usable[i];
+      return { key: r.uuid, title: titleOf(r), meta: [TYPE_LABEL[r.type] || 'Eintrag', statusOf(r) === 'upcoming' ? 'Geplant' : '', periodText(r)].filter(Boolean).join(' · '), popupHtml: popupHtml(r), popupOptions: { className: 'mr-popup' } };
+    }
+  });
 }
 export function scheduleRender() {
   if (Date.now() < holdUntil) return;

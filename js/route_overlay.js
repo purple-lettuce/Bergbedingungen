@@ -1,18 +1,23 @@
-// Räumlicher Schnitt Route × Polygone (RI7), reine Logik ohne Karte, Seite und Datenzugriff.
-// Eingabe: Routenobjekt aus route_model.js (points mit dist, gaps) und GeoJSON-Features (Polygon, MultiPolygon; Koordinaten [lon, lat]).
+// Räumlicher Schnitt Route × Geometrien (RI7, erweitert in RI8), reine Logik ohne Karte, Seite und Datenzugriff.
+// Eingabe: Routenobjekt aus route_model.js (points mit dist, gaps) und GeoJSON-Features (Koordinaten [lon, lat]).
+// Polygon und MultiPolygon gelten als berührt, wenn die Route darin liegt. Linien und Punkte (LineString, MultiLineString, Point,
+// MultiPoint; in RI8 für Sperrungen) gelten als berührt, wenn die Route höchstens NEAR_M Meter entfernt ist; GeometryCollection wird
+// aufgelöst. Ein Feature kann beides enthalten.
 // Ausgabe: Abschnitte { featureId, fromKm, toKm } in Streckenkilometern der Route. Die Logik kennt weder Schutzgebiete noch Lawinen.
 //
 // Verfahren (E6): Die Route wird je zusammenhängendem Stück (an Lücken getrennt) alle SAMPLE_STEP_M Meter abgetastet. Jede Probe wird
-// gegen die Features geprüft, deren Umgebungsrechteck die Probe enthält (Vorauswahl je Polygon). Zusammenhängende Proben innerhalb
-// eines Features bilden einen Abschnitt; Ein- und Austritt werden zwischen der letzten Probe außen und der ersten innen durch
+// gegen die Features geprüft, deren Umgebungsrechteck die Probe enthält (Vorauswahl je Teilgeometrie). Zusammenhängende Proben
+// innerhalb eines Features bilden einen Abschnitt; Ein- und Austritt werden zwischen der letzten Probe außen und der ersten innen durch
 // Halbieren auf rund 1 mm eingegrenzt. Abschnitte entstehen also aus Ereignissen, nicht aus festen Längen.
 // Grenzen: Ein Polygon, das die Route zwischen zwei Proben durchquert, ohne dass eine Probe darin liegt (kürzer als der Abtastabstand),
-// wird nicht gefunden. Ein Punkt genau auf dem Rand gilt je nach Kante als innen oder außen (Strahlverfahren); das wirkt sich nur im
+// wird nicht gefunden. Bei Linien und Punkten ist das Band 2 * NEAR_M breit und damit breiter als der Abtastabstand: eine Kreuzung
+// entgeht nicht. Ein Punkt genau auf dem Rand gilt je nach Kante als innen oder außen (Strahlverfahren); das wirkt sich nur im
 // Bereich von Millimetern aus. Abschnitte reichen nie über eine Lücke der Route hinweg. Ungültige Features werden übersprungen und gezählt.
 
 import { pointAtKm } from './geo.js';
 
 export const SAMPLE_STEP_M = 25;
+export const NEAR_M = 30;          // Linien und Punkte gelten als berührt, wenn die Route höchstens so weit entfernt ist (vorläufig, GPS-Genauigkeit)
 const BISECT_ITERATIONS = 14;   // 25 m / 2^14 ≈ 1,5 mm
 
 function validCoord(c) {
@@ -72,23 +77,79 @@ function defaultId(feature, index) {
   return index;
 }
 
-// Bereitet Features einmal vor (Umgebungsrechtecke, flache Ringe). Das Ergebnis lässt sich für mehrere Routen wiederverwenden.
-// Ergebnis { items: [{ id, polygons, bbox }], skipped } – skipped zählt Features ohne gültige Polygon-Geometrie.
-export function prepareFeatures(features, idOf) {
-  var items = [], skipped = 0;
+// Linie (Array von [lon, lat], mindestens ein Punkt) → flache Zahlenliste oder null, wenn ungültig.
+function flatLine(line) {
+  if (!Array.isArray(line) || !line.length) return null;
+  var out = new Array(line.length * 2);
+  for (var i = 0; i < line.length; i++) {
+    if (!validCoord(line[i])) return null;
+    out[2 * i] = line[i][0];
+    out[2 * i + 1] = line[i][1];
+  }
+  return out;
+}
+
+const M_PER_DEG = 111194.93;   // Meter je Grad Breite (Kugel wie geo.js)
+
+// Abstand eines Punkts zu einer flachen Linie (ein Punkt = Linie aus einem Koordinatenpaar) in Metern; lokale ebene Projektion
+// um den Punkt (bis einige hundert Meter ohne messbaren Fehler).
+function distanceToFlat(lon, lat, flat) {
+  var kx = Math.cos(lat * Math.PI / 180) * M_PER_DEG, ky = M_PER_DEG, best = Infinity, n = flat.length / 2;
+  for (var i = 0; i < n; i++) {
+    var ax = (flat[2 * i] - lon) * kx, ay = (flat[2 * i + 1] - lat) * ky, d;
+    if (i === n - 1 && n > 1) break;
+    if (n === 1) d = Math.sqrt(ax * ax + ay * ay);
+    else {
+      var bx = (flat[2 * i + 2] - lon) * kx, by = (flat[2 * i + 3] - lat) * ky, dx = bx - ax, dy = by - ay, len2 = dx * dx + dy * dy;
+      var t = len2 > 0 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len2)) : 0;
+      var cx = ax + t * dx, cy = ay + t * dy;
+      d = Math.sqrt(cx * cx + cy * cy);
+    }
+    if (d < best) best = d;
+  }
+  return best;
+}
+
+// Teilgeometrien eines Features einsammeln: Polygone (Ringlisten), Linien und Punkte (jeweils als Koordinatenlisten).
+function collect(g, polys, lines) {
+  if (!g || !Array.isArray(g.coordinates) && g.type !== 'GeometryCollection') return;
+  switch (g.type) {
+    case 'Polygon': polys.push(g.coordinates); break;
+    case 'MultiPolygon': g.coordinates.forEach(function (c) { polys.push(c); }); break;
+    case 'LineString': lines.push(g.coordinates); break;
+    case 'MultiLineString': g.coordinates.forEach(function (c) { lines.push(c); }); break;
+    case 'Point': lines.push([g.coordinates]); break;
+    case 'MultiPoint': g.coordinates.forEach(function (c) { lines.push([c]); }); break;
+    case 'GeometryCollection': (g.geometries || []).forEach(function (x) { collect(x, polys, lines); }); break;
+  }
+}
+
+function extend(bbox, b) {
+  bbox[0] = Math.min(bbox[0], b[0]); bbox[1] = Math.min(bbox[1], b[1]);
+  bbox[2] = Math.max(bbox[2], b[2]); bbox[3] = Math.max(bbox[3], b[3]);
+}
+
+// Bereitet Features einmal vor (Umgebungsrechtecke, flache Koordinaten). Das Ergebnis lässt sich für mehrere Routen wiederverwenden.
+// nearM: Entfernung, bis zu der Linien und Punkte als berührt gelten (Standard NEAR_M).
+// Ergebnis { items: [{ id, polygons, lines, bbox, nearM }], skipped } – skipped zählt Features ohne gültige Geometrie.
+export function prepareFeatures(features, idOf, nearM) {
+  var items = [], skipped = 0, near = nearM >= 0 ? nearM : NEAR_M;
   (features || []).forEach(function (f, index) {
-    var g = f && f.geometry, polys = [];
-    if (g && g.type === 'Polygon' && Array.isArray(g.coordinates)) polys = [g.coordinates];
-    else if (g && g.type === 'MultiPolygon' && Array.isArray(g.coordinates)) polys = g.coordinates;
-    var prepared = [];
-    polys.forEach(function (rings) { var p = preparePolygon(rings); if (p) prepared.push(p); });
-    if (!prepared.length) { skipped++; return; }
-    var bbox = [Infinity, Infinity, -Infinity, -Infinity];
-    prepared.forEach(function (p) {
-      bbox[0] = Math.min(bbox[0], p.bbox[0]); bbox[1] = Math.min(bbox[1], p.bbox[1]);
-      bbox[2] = Math.max(bbox[2], p.bbox[2]); bbox[3] = Math.max(bbox[3], p.bbox[3]);
+    var polys = [], rawLines = [];
+    try { collect(f && f.geometry, polys, rawLines); } catch (e) { /* ungültige Geometrie: wird unten übersprungen */ }
+    var prepared = [], lines = [], bbox = [Infinity, Infinity, -Infinity, -Infinity];
+    polys.forEach(function (rings) { var p = preparePolygon(rings); if (p) { prepared.push(p); extend(bbox, p.bbox); } });
+    rawLines.forEach(function (l) {
+      var flat = flatLine(l);
+      if (!flat) return;
+      var b = [Infinity, Infinity, -Infinity, -Infinity];
+      for (var i = 0; i < flat.length; i += 2) extend(b, [flat[i], flat[i + 1], flat[i], flat[i + 1]]);
+      var dLat = near / M_PER_DEG, dLon = near / (M_PER_DEG * Math.max(0.01, Math.cos(Math.max(Math.abs(b[1]), Math.abs(b[3])) * Math.PI / 180)));
+      lines.push({ flat: flat, bbox: [b[0] - dLon, b[1] - dLat, b[2] + dLon, b[3] + dLat] });
+      extend(bbox, lines[lines.length - 1].bbox);
     });
-    items.push({ id: idOf ? idOf(f, index) : defaultId(f, index), polygons: prepared, bbox: bbox });
+    if (!prepared.length && !lines.length) { skipped++; return; }
+    items.push({ id: idOf ? idOf(f, index) : defaultId(f || {}, index), polygons: prepared, lines: lines, bbox: bbox, nearM: near });
   });
   return { items: items, skipped: skipped };
 }
@@ -97,9 +158,12 @@ function itemContains(item, lon, lat) {
   var b = item.bbox;
   if (lon < b[0] || lon > b[2] || lat < b[1] || lat > b[3]) return false;
   for (var i = 0; i < item.polygons.length; i++) if (pointInPolygon(lon, lat, item.polygons[i])) return true;
+  for (var j = 0; j < item.lines.length; j++) {
+    var l = item.lines[j], lb = l.bbox;
+    if (lon >= lb[0] && lon <= lb[2] && lat >= lb[1] && lat <= lb[3] && distanceToFlat(lon, lat, l.flat) <= item.nearM) return true;
+  }
   return false;
 }
-
 // Zusammenhängende Stücke der Route (an Lücken getrennt) als { points, startM, endM }.
 function pieces(route) {
   var cuts = route.gaps.map(function (g) { return g.afterIndex + 1; }), out = [], from = 0;
@@ -112,12 +176,12 @@ function pieces(route) {
 }
 
 // Schnitt der Route mit den Features. features: GeoJSON-Features oder das Ergebnis von prepareFeatures.
-// opts: { stepM (Abtastabstand, Standard 25), idOf(feature, index) }.
+// opts: { stepM (Abtastabstand, Standard 25), nearM (Entfernung für Linien und Punkte, Standard 30), idOf(feature, index) }.
 // Ergebnis { sections: [{ featureId, fromKm, toKm }], skipped } – sortiert nach fromKm, dann Kennung; nur Features mit Treffer.
 export function routeOverlay(route, features, opts) {
   opts = opts || {};
   var stepM = opts.stepM > 0 ? opts.stepM : SAMPLE_STEP_M;
-  var prep = features && features.items ? features : prepareFeatures(features, opts.idOf);
+  var prep = features && features.items ? features : prepareFeatures(features, opts.idOf, opts.nearM);
   var sections = [];
   if (!route || !route.points || !route.points.length || !prep.items.length) return { sections: sections, skipped: prep.skipped };
   var rb = route.bounds;   // [[s, w], [n, e]]
@@ -128,8 +192,9 @@ export function routeOverlay(route, features, opts) {
     var samples = [];
     for (var d = piece.startM; d < piece.endM; d += stepM) samples.push(d);
     samples.push(piece.endM);
+    var pts = samples.map(function (m) { return pointAtKm(piece.points, m / 1000); });   // einmal je Stück, nicht je Feature
     candidates.forEach(function (item) {
-      var flags = samples.map(function (m) { var p = pointAtKm(piece.points, m / 1000); return itemContains(item, p.lon, p.lat); });
+      var flags = pts.map(function (p) { return itemContains(item, p.lon, p.lat); });
       function inside(m) { var p = pointAtKm(piece.points, m / 1000); return itemContains(item, p.lon, p.lat); }
       // Grenze zwischen m0 (Zustand s0) und m1 (anderer Zustand): Ort des Wechsels auf rund 1 mm.
       function edge(m0, m1, s0) {

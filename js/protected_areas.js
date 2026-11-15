@@ -9,6 +9,7 @@ import { addProtectedAreasLegend, protectedAreasLegendFailed } from './protected
 import { bindCategoryFilter } from './protected_areas_filter.js';
 import { areaPopup } from './protected_areas_popup.js';
 import { setSourceStatus } from './status_bar.js';
+import { setRouteSource } from './route_sources.js';
 import { protectedAreasStatus } from './status_bar_logic.js';
 
 var PROTECTED_AREAS_URL = 'data/protected_areas_alps.geojson';
@@ -141,7 +142,8 @@ export async function loadProtectedAreas() {
     const res = await fetch(PROTECTED_AREAS_URL);
     const geojson = await res.json();
 
-    const layersByCategory = {};   // Kategorie-ID -> Flächen-Ebenen (für den Kategorienfilter)
+    const layersByCategory = {};
+    const infoByFeature = new Map();   // Feature -> { categoryName, popup } für "Entlang der Route" (RI8)   // Kategorie-ID -> Flächen-Ebenen (für den Kategorienfilter)
 
     const geoLayer = L.geoJSON(geojson, {
 style: function (feature) {
@@ -159,6 +161,7 @@ const categoryName =
   ] || "Schutzgebiet";
 
   const popup = areaPopup(p, geojson, categoryName, categoryStyle(p.category_id));
+  infoByFeature.set(feature, { categoryName: categoryName, popup: popup });
 
   if (p.name) {
     const key = p.name + "|" + p.category_id;
@@ -182,12 +185,23 @@ const categoryName =
     addProtectedAreasLegend(entries);
     bindCategoryFilter(filters.protectedAreas, geoLayer, layersByCategory, entries);
 
+    // Quelle für "Entlang der Route" (RI8): dieselben Flächen und Popups wie auf der Karte
+    setRouteSource('protectedAreas', {
+      state: 'ready', features: geojson.features, count: geojson.features.length, stand: '',
+      describe: function (i) {
+        var f = geojson.features[i], info = infoByFeature.get(f), p = f.properties || {};
+        if (!info) return null;
+        return { key: p.name ? p.name + '|' + p.category_id : 'uuid:' + (p.uuid || i), title: p.name || 'Schutzgebiet ohne Namen', meta: info.categoryName, popupHtml: info.popup.html, popupOptions: info.popup.extra ? { className: 'mr-popup', maxHeight: 340 } : { className: 'mr-popup' } };
+      }
+    });
+
     var st = protectedAreasStatus(geojson.features.length);
     setSourceStatus('protectedAreas', st.state, st.text);
     console.log("Schutzgebiete geladen:", geojson.features.length);
   } catch (err) {
     console.error("Fehler beim Laden der Schutzgebiete", err);
     protectedAreasLegendFailed();
+    setRouteSource('protectedAreas', { state: 'failed' });
     setSourceStatus('protectedAreas', 'unavailable', 'nicht verfügbar');
     filters.protectedAreas.setMessage("Der Filter ist nicht verfügbar, weil die Schutzgebiete nicht geladen werden konnten.");
   }
