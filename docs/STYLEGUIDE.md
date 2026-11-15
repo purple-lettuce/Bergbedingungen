@@ -619,7 +619,7 @@ Regeln:
 
 - **Linie:** `--mr-route` (hell `#6B2E8F`, dunkel `#D2A8F5`), 4 px, darunter eine Kontur in `--mr-surface` (8 px, 90 % Deckkraft), damit die Linie auf OpenStreetMap und OpenTopoMap lesbar bleibt. Violett kommt weder in den Lawinenstufen noch bei Sperrungen, Hinweisen oder Schutzgebieten vor; die Warnfarben bleiben unverändert.
 - **Start und Ziel:** Punkte mit `--mr-surface`-Rand, Start in `--mr-success`, Ziel in `--mr-text`; zusätzlich per Tooltip „Start“ und „Ziel“ benannt (nicht nur Farbe). Dieselben Punkte stehen in der Legende „Meine Route“.
-- **Karte „Route“** in der Seitenleiste bzw. im Sheet: `.mr-card` mit Titel, Knöpfen „GPX laden“ und „Route entfernen“ (ab Touch 44 px, wie alle Kartenknöpfe) und einer Infozeile (Name, Punktzahl, Hinweise). Ohne Route nur der Knopf. Ebene, Legende und der Eintrag „Route“ der Datenstatus-Leiste erscheinen erst nach dem ersten Laden.
+- **Karte „Route“** in der Seitenleiste bzw. im Sheet: `.mr-card` mit Titel, Knöpfen „GPX laden“ und „Route entfernen“ (ab Touch 44 px, wie alle Kartenknöpfe) und einer Infozeile (Name, Punktzahl, Hinweise). Seit RI4 folgt darunter die Routenstatistik als `.mr-kv` (Länge, Anstieg, Abstieg, höchster und tiefster Punkt, Dauer nur mit Zeitstempeln) und ein gedämpfter Methodenhinweis (`.mr-text-muted.mr-text-sm`); ohne Höhen steht „Höhen: keine Höhendaten in der Datei“. Ohne Route nur der Knopf. Ebene, Legende und der Eintrag „Route“ der Datenstatus-Leiste erscheinen erst nach dem ersten Laden.
 - **Texte aus der Datei** (Name, Warnungen) werden nur über `textContent` oder `esc()` ausgegeben.
 # Visuelle Prioritäten
 
