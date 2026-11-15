@@ -1,0 +1,107 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_avalanche_logic.js (Lawinenlage entlang der Route, Texte, RI9b)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as T from '../js/route_avalanche_logic.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+var SOURCE = { id: 'euregio', name: 'Euregio-Lawinenreport', attribution: 'Euregio', attribution_url: 'https://lawinen.report/more/open-data', report_url: 'https://lawinen.report/{main_date}', report_url_fallback: 'https://lawinen.report/' };
+function seg(over) {
+  return Object.assign({ regionId: 'R1', regionName: 'Testregion', sourceId: 'euregio', source: SOURCE, status: 'valid', fromKm: 1, toKm: 3.5, validFrom: '2026-05-02T15:00:00Z', validUntil: '2026-05-03T15:00:00Z',
+    publishedAt: '2026-05-02T15:00:00Z', mainDate: '2026-05-03', problemTypes: ['wind_slab', 'new_snow'], eleMin: 2100, eleMax: 2589.6, level: 2, subdivision: null, uncertain: false, basis: 'route', reason: null, nearBoundary: false }, over || {});
+}
+function result(segments, uncovered) { return { segments: segments, uncovered: uncovered || [], routeKm: 5 }; }
+
+test('levelText: Stufe, kein Bericht, abgelaufen, keine Stufe', function () {
+  eq(T.levelText(seg()), 'Stufe 2 – Mäßig');
+  eq(T.levelText(seg({ level: 3, subdivision: 'plus' })), 'Stufe 3+ – Erheblich');
+  eq(T.levelText(seg({ level: null, reason: 'none' })), 'Kein aktueller Lagebericht');
+  eq(/^Kein aktueller Lagebericht \(letzter Bericht galt bis .*Uhr\)$/.test(T.levelText(seg({ level: null, reason: 'expired' }))), true);
+  eq(/kein Schnee oder keine Beurteilung/.test(T.levelText(seg({ level: null, reason: 'no_rating' }))), true);
+});
+
+test('basisLines: Route mit Höhe, nahe Höhengrenze, ohne Höhe, ohne Höhengrenzen, Waldgrenze, abgelaufen', function () {
+  eq(T.basisLines(seg()), ['Höhe der Route 2.100–2.590 m']);
+  eq(T.basisLines(seg({ eleMin: 2300, eleMax: 2300 })), ['Höhe der Route 2.300 m']);
+  eq(T.basisLines(seg({ nearBoundary: true })).length, 2);
+  eq(T.basisLines(seg({ basis: 'region_max', eleMin: null, eleMax: null })), ['Route ohne Höhenangaben: höchste Stufe der Region']);
+  eq(/keine Höhengrenzen/.test(T.basisLines(seg({ basis: 'region' }))[0]), true);
+  eq(T.basisLines(seg({ uncertain: true })).some(function (t) { return /Waldgrenze ohne Zahlenwert/.test(t); }), true);
+  eq(T.basisLines(seg({ status: 'stale' })).some(function (t) { return /Bericht abgelaufen/.test(t); }), true);
+  eq(T.basisLines(seg({ level: null, reason: 'none' })), []);
+});
+
+test('problemsText: Namen je Typ, ohne Bericht nichts', function () {
+  eq(T.problemsText(seg()), 'Lawinenprobleme der Region: Triebschnee, Neuschnee');
+  eq(T.problemsText(seg({ problemTypes: [] })), null);
+  eq(T.problemsText(seg({ level: null, reason: 'expired' })), null);
+});
+
+test('sourceText und reportLink: Quelle mit Stand, Link nur https, Hauptdatum im Link', function () {
+  eq(/^Quelle: Euregio-Lawinenreport, Stand .*02\.05\.2026.*Uhr$/.test(T.sourceText(seg())), true);
+  eq(T.sourceText(seg({ level: null, reason: 'none', publishedAt: null })), 'Quelle: Euregio-Lawinenreport');
+  eq(T.reportLink(seg()), 'https://lawinen.report/2026-05-03');
+  eq(T.reportLink(seg({ mainDate: null })), 'https://lawinen.report/');
+  eq(T.reportLink(seg({ source: Object.assign({}, SOURCE, { report_url: 'http://unsicher.example/' }) })), null);
+  eq(T.reportLink(seg({ source: null })), null);
+});
+
+test('summarizeAvalanche: Zustände laden, fehlgeschlagen', function () {
+  eq(T.summarizeAvalanche('loading', null).headline, 'Lawinenlage wird geladen …');
+  var failed = T.summarizeAvalanche('failed', null);
+  eq(failed.headline, 'Lawinenlage: nicht verfügbar, hier nicht geprüft.');
+  eq(failed.items, []);
+  eq(T.summarizeAvalanche('ready', null).headline, 'Lawinenlage: nicht verfügbar, hier nicht geprüft.');
+});
+
+test('summarizeAvalanche: Berichte vorhanden, immer der Hinweis zum Regionalbericht', function () {
+  var s = T.summarizeAvalanche('ready', result([seg(), seg({ fromKm: 3.5, toKm: 5, level: 3 })]));
+  eq(s.headline, 'Die Route verläuft durch 1 Region mit Lawinenbericht.');
+  eq(s.items.length, 2);
+  eq(s.items[0].range, 'km 1,0–3,5');
+  eq(s.items[1].level, 3);
+  eq(s.notes[s.notes.length - 1], T.REGIONAL_NOTE);
+  eq(/Regionalbericht/.test(T.REGIONAL_NOTE) && /keine einzelne Route/.test(T.REGIONAL_NOTE), true);
+  var two = T.summarizeAvalanche('ready', result([seg(), seg({ regionId: 'R2', fromKm: 3.5, toKm: 5 })]));
+  eq(two.headline, 'Die Route verläuft durch 2 Regionen mit Lawinenbericht.');
+});
+
+test('summarizeAvalanche: kein aktueller Bericht ist nie "keine Gefahr"', function () {
+  var none = T.summarizeAvalanche('ready', result([seg({ level: null, reason: 'expired' })]));
+  eq(none.headline, 'Kein aktueller Lawinenbericht für die Region entlang der Route.');
+  eq(none.notes.includes(T.NO_REPORT_NOTE), true);
+  eq(/nicht „keine Gefahr“/.test(T.NO_REPORT_NOTE), true);
+  eq(/keine Gefahr/.test(none.headline), false);
+  var mixed = T.summarizeAvalanche('ready', result([seg(), seg({ regionId: 'R2', fromKm: 3.5, toKm: 5, level: null, reason: 'none' })]));
+  eq(mixed.notes.some(function (n) { return /Für einen Teil der Strecke liegt kein aktueller Bericht vor/.test(n); }), true);
+  var two = T.summarizeAvalanche('ready', result([seg({ level: null, reason: 'none' }), seg({ regionId: 'R2', fromKm: 3.5, toKm: 5, level: null, reason: 'none' })]));
+  eq(two.headline, 'Kein aktueller Lawinenbericht für die 2 Regionen entlang der Route.');
+});
+
+test('summarizeAvalanche: Route außerhalb aller Regionen, Strecken ohne Region', function () {
+  var out = T.summarizeAvalanche('ready', result([], [[0, 5]]));
+  eq(out.headline, 'Die Route liegt in keiner Region der geladenen Lawinenberichte.');
+  eq(out.items, []);
+  var part = T.summarizeAvalanche('ready', result([seg()], [[3.5, 5]]));
+  eq(part.notes.some(function (n) { return n === 'Für km 3,5–5,0 liegt keine Region der geladenen Berichte vor.'; }), true);
+});
+
+test('itemOf: Eintrag trägt Stufe, Zeilen, Quelle, Link und Namensnennung', function () {
+  var i = T.itemOf(seg());
+  eq([i.title, i.range, i.level, i.levelText], ['Testregion', 'km 1,0–3,5', 2, 'Stufe 2 – Mäßig']);
+  eq(i.link, 'https://lawinen.report/2026-05-03');
+  eq(i.attribution, { name: 'Euregio', url: 'https://lawinen.report/more/open-data' });
+});
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>

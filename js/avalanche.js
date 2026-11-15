@@ -202,15 +202,25 @@ async function load() {
   }
 }
 
-// Lädt erst beim ersten Einblenden der Ebene (standardmäßig ausgeblendet), bei Fehlern beim nächsten Einblenden erneut.
+var startLoading = null;   // von initAvalanche gesetzt; startet das Laden (einmalig) und liefert ein Versprechen mit dem Ergebnis
+
+// Daten für "Lawinenlage entlang der Route" (RI9b): lädt die Lawinenlage bei Bedarf (auch bei ausgeblendeter Ebene, dieselben Dateien) und liefert
+// { features, view(regionId) } mit den Regionspolygonen und der Ansicht { record, source, status } je Region, bei Fehlern null.
+export function requestAvalancheData() {
+  if (!startLoading) return Promise.resolve(null);
+  return startLoading().then(function (ok) { return ok ? { features: features, view: regionView } : null; });
+}
+
+// Lädt erst beim ersten Einblenden der Ebene (standardmäßig ausgeblendet) oder wenn eine Route geöffnet wird, bei Fehlern beim nächsten Mal erneut.
 export function initAvalanche() {
-  var started = false;
+  var loading = null;
   function start() {
-    if (started) return;
-    started = true;
+    if (loading) return loading;
     setSourceStatus('avalanche', 'loading', 'wird geladen …');
-    load().then(function (ok) { if (!ok) { started = false; sources = {}; records = {}; features = []; } });
+    loading = load().then(function (ok) { if (!ok) { loading = null; sources = {}; records = {}; features = []; } return ok; });
+    return loading;
   }
+  startLoading = start;
   avalancheLayer.on('add', function () {
     attributions.forEach(function (a) { map.attributionControl.addAttribution(a); });
     start();
