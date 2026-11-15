@@ -348,7 +348,7 @@ Ziel: Die Route mit Daten verknüpfen, die Mountain Radar schon besitzt. Keine n
 
 ### RI7 – Räumlicher Schnitt Route × Polygone (reine Logik)
 
-Ebene 2 · Stufe 2.2. Status: Geplant. Schicht: Analyse-Logik.
+Ebene 2 · Stufe 2.2. Status: Erledigt (15.11.2026). Schicht: Analyse-Logik.
 
 **Ziel:** Berechnen, welche Streckenabschnitte (von km bis km) in welchen Polygonen liegen.
 
@@ -366,6 +366,13 @@ Ebene 2 · Stufe 2.2. Status: Geplant. Schicht: Analyse-Logik.
 **Abhängigkeiten:** RI2.
 
 **Definition of Done:** Logik inklusive Randfällen getestet, Laufzeitmessung dokumentiert, keine UI-Änderung, PR gemerged.
+
+**Umsetzungshinweise (15.11.2026):**
+- `js/route_overlay.js` (rein, keine UI-Änderung): `routeOverlay(route, features, opts)` liefert `{ sections: [{ featureId, fromKm, toKm }], skipped }`, sortiert nach `fromKm`; `prepareFeatures(features, idOf)` bereitet die Features einmal vor (flache Ringe, Umgebungsrechteck je Polygon und Feature) und lässt sich für mehrere Routen wiederverwenden; `pointInPolygon(lon, lat, polygon)` (Strahlverfahren, Löcher, MultiPolygon). Unterstützt `Polygon` und `MultiPolygon`; andere oder ungültige Geometrien werden übersprungen und in `skipped` gezählt, die Funktionen werfen nie. Kennung: `feature.id`, sonst `properties.uuid` (so heißt sie in `protected_areas_alps.geojson`), sonst `properties.id`, sonst der Index; mit `opts.idOf` überschreibbar.
+- Verfahren (E6): Abtastung je zusammenhängendem Routenstück (an Lücken getrennt) alle 25 m (`SAMPLE_STEP_M`, mit `opts.stepM` änderbar). Je Probe werden nur Features geprüft, deren Umgebungsrechteck sie enthält; Features außerhalb der Routen-Begrenzung entfallen vorab. Aufeinanderfolgende Proben innerhalb eines Features bilden einen Abschnitt; Ein- und Austritt werden zwischen der letzten Probe außen und der ersten innen durch Halbieren auf rund 1,5 mm eingegrenzt. Abschnitte entstehen also aus Ereignissen, die Genauigkeit der Grenzen hängt nicht vom Abtastabstand ab (Test mit 7, 25 und 100 m). Abschnitte reichen nie über eine Lücke der Route hinweg; die Kilometerangaben sind Streckenkilometer des Routenobjekts (Lücken zählen nicht zur Strecke).
+- **Bekannte Grenze:** Eine Durchquerung, die kürzer als der Abtastabstand ist und zwischen zwei Proben liegt, wird nicht gefunden (im Test: 5 m breites Polygon zwischen zwei Proben entgeht, 60 m breites wird gefunden). Ein Punkt genau auf dem Polygonrand gilt je nach Kante als innen oder außen; das wirkt sich nur im Millimeterbereich aus.
+- Messung an der echten Datei (Headless-Browser, `data/protected_areas_alps.geojson`, 2 551 Features, 15,8 MB; synthetische Route Garmisch bis Meran, 111 km, 1 001 Punkte): Vorbereitung aller Features rund 280 ms (einmalig), Schnitt rund 80 bis 90 ms, 3 Abschnitte. Mit 5 m statt 25 m Abtastung ergeben sich dieselben 3 Abschnitte mit derselben Gesamtlänge; E6 (25 m) bleibt damit für diese Strecke bestätigt. **Das ist eine einzelne Strecke**: ein Vergleich an mehreren echten Touren in dichten Schutzgebietsgebieten steht aus, E6 bleibt „bestätigt, vorläufig“.
+- Getestet mit `scripts/test_route_overlay.html` (14 Tests; laufen im Runner über den DevTools-Client in echter Zeit, weil die Laufzeit gemessen wird): Punkt in Polygon (Loch, konkave Form), Ein- und Austritt, Start oder Ziel im Polygon, MultiPolygon, Loch trennt Abschnitt, überlappende Features, Lücke, Unabhängigkeit vom Abtastabstand, Abtastgrenze, ungültige Eingaben, leere Eingaben, einzelner Punkt, echte Daten.
 
 ### RI8 – Schutzgebiete und Sperrungen entlang der Route
 

@@ -1,0 +1,198 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_overlay.js (Schnitt Route × Polygone, RI7)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Referenz: 1° Breitengrad = 111 194,93 m (Kugel R = 6 371 008,8 m). Die Teststrecke läuft entlang des Längengrads 11°, daher ist
+// Streckenkilometer = (Breite - Startbreite) * 111,19493. Toleranz an Grenzen: 2 m (Abtastung 25 m, Eingrenzung auf rund 1 mm).
+import * as O from '../js/route_overlay.js';
+import { parseGpx } from '../js/gpx.js';
+import { createRoute } from '../js/route_model.js';
+
+var results = [], queue = [], currentName = null;
+function test(name, fn) { queue.push({ name: name, fn: fn }); }
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) {
+  if (!(Math.abs(actual - expected) <= tol)) throw new Error('erwartet ' + expected + ' ± ' + tol + ', erhalten ' + actual);
+}
+var DEG = 111.19493;   // km je Grad Breite
+function km(lat) { return (lat - 47) * DEG; }
+
+// Route aus Breitenlisten entlang lon 11 (je Liste ein Segment, Punkte alle 0,001° ≈ 111 m)
+function makeRoute(segments) {
+  var xml = '<gpx><trk>' + segments.map(function (seg) {
+    var pts = [];
+    for (var lat = seg[0]; lat <= seg[1] + 1e-9; lat += 0.001) pts.push('<trkpt lat="' + lat.toFixed(6) + '" lon="11"/>');
+    return '<trkseg>' + pts.join('') + '</trkseg>';
+  }).join('') + '</trk></gpx>';
+  var made = createRoute(parseGpx(xml));
+  if (!made.ok) throw new Error(made.error);
+  return made.route;
+}
+function rect(lat0, lat1, lon0, lon1) { return [[lon0, lat0], [lon1, lat0], [lon1, lat1], [lon0, lat1], [lon0, lat0]]; }
+function feat(id, geometry) { return { type: 'Feature', id: id, properties: {}, geometry: geometry }; }
+function poly(rings) { return { type: 'Polygon', coordinates: rings }; }
+function secs(route, features, opts) { return O.routeOverlay(route, features, opts).sections; }
+function rounded(list) { return list.map(function (s) { return [s.featureId, +s.fromKm.toFixed(2), +s.toKm.toFixed(2)]; }); }
+
+var ROUTE = makeRoute([[47, 47.1]]);   // rund 11,12 km
+
+test('pointInPolygon: Quadrat, Loch, konkave Form, außerhalb des Umgebungsrechtecks', function () {
+  var prep = O.prepareFeatures([feat('a', poly([rect(0, 10, 0, 10), rect(4, 6, 4, 6)])), feat('u', poly([[[0, 0], [10, 0], [10, 10], [6, 10], [6, 3], [4, 3], [4, 10], [0, 10], [0, 0]]]))]);
+  var square = prep.items[0].polygons[0], u = prep.items[1].polygons[0];
+  eq(O.pointInPolygon(2, 2, square), true);
+  eq(O.pointInPolygon(5, 5, square), false);   // im Loch
+  eq(O.pointInPolygon(11, 5, square), false);
+  eq(O.pointInPolygon(5, 8, u), false);        // in der Einbuchtung des U
+  eq(O.pointInPolygon(2, 8, u), true);
+  eq(O.pointInPolygon(5, 1, u), true);
+});
+
+test('Ein Polygon: Abschnitt von Eintritt bis Austritt', function () {
+  var r = secs(ROUTE, [feat('a', poly([rect(47.02, 47.05, 10.99, 11.01)]))]);
+  eq(r.length, 1);
+  eq(r[0].featureId, 'a');
+  near(r[0].fromKm, km(47.02), 0.002);
+  near(r[0].toKm, km(47.05), 0.002);
+});
+
+test('Route beginnt oder endet im Polygon: Abschnitt reicht bis Start bzw. Ziel', function () {
+  var len = ROUTE.lengthM / 1000;
+  var r = secs(ROUTE, [feat('s', poly([rect(46.9, 47.03, 10.9, 11.1)])), feat('e', poly([rect(47.07, 47.2, 10.9, 11.1)])), feat('all', poly([rect(46, 48, 10, 12)]))]);
+  var byId = {}; r.forEach(function (s) { byId[s.featureId] = s; });
+  eq(byId.s.fromKm, 0);
+  near(byId.s.toKm, km(47.03), 0.002);
+  near(byId.e.fromKm, km(47.07), 0.002);
+  near(byId.e.toKm, len, 1e-9);
+  eq([byId.all.fromKm, byId.all.toKm], [0, len]);
+});
+
+test('MultiPolygon: zwei getrennte Teile ergeben zwei Abschnitte derselben Kennung', function () {
+  var r = secs(ROUTE, [feat('m', { type: 'MultiPolygon', coordinates: [[rect(47.01, 47.02, 10.99, 11.01)], [rect(47.06, 47.08, 10.99, 11.01)]] })]);
+  eq(r.length, 2);
+  eq(r.map(function (s) { return s.featureId; }), ['m', 'm']);
+  near(r[0].toKm, km(47.02), 0.002);
+  near(r[1].fromKm, km(47.06), 0.002);
+});
+
+test('Loch im Polygon trennt den Abschnitt', function () {
+  var r = secs(ROUTE, [feat('h', poly([rect(47.0, 47.1, 10.9, 11.1), rect(47.04, 47.06, 10.95, 11.05)]))]);
+  eq(r.length, 2);
+  near(r[0].toKm, km(47.04), 0.002);
+  near(r[1].fromKm, km(47.06), 0.002);
+});
+
+test('Zwei überlappende Features: je eigene Abschnitte, nach Beginn sortiert', function () {
+  var r = secs(ROUTE, [feat('b', poly([rect(47.03, 47.06, 10.9, 11.1)])), feat('a', poly([rect(47.01, 47.04, 10.9, 11.1)]))]);
+  eq(r.map(function (s) { return s.featureId; }), ['a', 'b']);
+  eq(r[0].toKm > r[1].fromKm, true);   // sie überlappen
+});
+
+test('Lücke in der Route: Abschnitt wird an der Lücke getrennt, die Lücke zählt nicht zur Strecke', function () {
+  var route = makeRoute([[47, 47.03], [47.06, 47.09]]);
+  eq(route.gaps.length, 1);
+  var r = secs(route, [feat('g', poly([rect(47.02, 47.07, 10.9, 11.1)]))]);
+  eq(r.length, 2);
+  var gapKm = route.points[route.gaps[0].afterIndex].dist / 1000;
+  near(r[0].toKm, gapKm, 1e-6);
+  near(r[1].fromKm, gapKm, 1e-6);   // das zweite Stück beginnt dort, wo das erste endet (die Lücke hat keine Länge)
+  near(r[0].fromKm, km(47.02), 0.002);
+});
+
+test('Genauigkeit der Grenzen hängt nicht vom Abtastabstand ab (7, 25, 100 m)', function () {
+  var f = [feat('a', poly([rect(47.0234, 47.0517, 10.99, 11.01)]))];
+  var ref = secs(ROUTE, f, { stepM: 7 })[0];
+  [25, 100].forEach(function (step) {
+    var s = secs(ROUTE, f, { stepM: step })[0];
+    near(s.fromKm, ref.fromKm, 0.001);
+    near(s.toKm, ref.toKm, 0.001);
+  });
+  near(ref.fromKm, km(47.0234), 0.001);
+});
+
+test('Grenze der Abtastung: 60 m breites Polygon wird gefunden, 5 m breites dazwischen kann entgehen', function () {
+  var w = 60 / (DEG * 1000);   // 60 m in Grad
+  var found = secs(ROUTE, [feat('p', poly([rect(47.0301, 47.0301 + w, 10.99, 11.01)]))]);
+  eq(found.length, 1);
+  near(found[0].toKm - found[0].fromKm, 0.06, 0.002);
+  // 5 m breit zwischen zwei Proben (Proben bei Vielfachen von 25 m; 3,010 bis 3,015 km liegt zwischen 3,000 und 3,025)
+  var tiny = secs(ROUTE, [feat('t', poly([rect(47 + 3.0100 / DEG, 47 + 3.0150 / DEG, 10.99, 11.01)]))]);
+  eq(tiny.length, 0);   // dokumentierte Grenze: Durchquerungen unter dem Abtastabstand können entgehen
+});
+
+test('Features außerhalb, ungültige Geometrien, Kennungen', function () {
+  var r = O.routeOverlay(ROUTE, [
+    feat(null, poly([rect(47.01, 47.02, 10.99, 11.01)])),                      // ohne id und ohne Kennung → Index 0
+    { type: 'Feature', properties: { uuid: 'U1' }, geometry: poly([rect(47.03, 47.04, 10.99, 11.01)]) },
+    { type: 'Feature', properties: {}, geometry: poly([rect(47.05, 47.06, 10.99, 11.01)]) },   // → Index 2
+    feat('fern', poly([rect(50, 51, 10, 12)])),
+    feat('punkt', { type: 'Point', coordinates: [11, 47.01] }),
+    feat('kaputt', poly([[[11, 47], [11, 'x'], [12, 47]]])),
+    feat('leer', { type: 'Polygon', coordinates: [] }),
+    null
+  ]);
+  eq(r.skipped, 4);
+  eq(r.sections.map(function (s) { return s.featureId; }), [0, 'U1', 2]);
+  var custom = secs(ROUTE, [{ type: 'Feature', properties: { name: 'X' }, geometry: poly([rect(47.01, 47.02, 10.99, 11.01)]) }], { idOf: function (f) { return f.properties.name; } });
+  eq(custom[0].featureId, 'X');
+});
+
+test('Leere Eingaben und Route ohne Treffer werfen nie', function () {
+  eq(O.routeOverlay(ROUTE, []).sections, []);
+  eq(O.routeOverlay(ROUTE, null).sections, []);
+  eq(O.routeOverlay(null, [feat('a', poly([rect(0, 1, 0, 1)]))]).sections, []);
+  eq(O.routeOverlay({ points: [], gaps: [] }, [feat('a', poly([rect(0, 1, 0, 1)]))]).sections, []);
+  eq(secs(ROUTE, [feat('a', poly([rect(10, 11, 10, 11)]))]), []);
+});
+
+test('Vorbereitete Features lassen sich für mehrere Routen wiederverwenden', function () {
+  var prep = O.prepareFeatures([feat('a', poly([rect(47.02, 47.05, 10.99, 11.01)]))]);
+  eq(rounded(secs(ROUTE, prep)), rounded(secs(ROUTE, [feat('a', poly([rect(47.02, 47.05, 10.99, 11.01)]))])));
+  eq(secs(makeRoute([[47.2, 47.3]]), prep), []);
+});
+
+test('Route mit nur einem Punkt', function () {
+  var one = createRoute(parseGpx('<gpx><trk><trkseg><trkpt lat="47.01" lon="11"/></trkseg></trk></gpx>')).route;
+  eq(secs(one, [feat('a', poly([rect(47, 47.02, 10.9, 11.1)]))]).length, 1);
+});
+
+// Messung an der echten Datei (E6): 2551 Schutzgebiete; Route rund 100 km quer durch die Alpen (Garmisch bis Meran)
+test('Echte Daten: Schnitt einer 100-km-Route mit allen Schutzgebieten', async function () {
+  var res = await fetch('../data/protected_areas_alps.geojson');
+  if (!res.ok) throw new Error('Datei nicht ladbar: ' + res.status);
+  var data = await res.json();
+  var t0 = performance.now();
+  var prep = O.prepareFeatures(data.features);
+  var t1 = performance.now();
+  var xml = '<gpx><trk><trkseg>';
+  for (var i = 0; i <= 1000; i++) { var t = i / 1000; xml += '<trkpt lat="' + (47.49 - 0.95 * t).toFixed(6) + '" lon="' + (11.1 + 0.45 * t).toFixed(6) + '"/>'; }
+  xml += '</trkseg></trk></gpx>';
+  var route = createRoute(parseGpx(xml)).route;
+  var t2 = performance.now();
+  var out = O.routeOverlay(route, prep);
+  var t3 = performance.now();
+  var fine = O.routeOverlay(route, prep, { stepM: 5 });   // E6: Vergleich mit feinerer Abtastung (entgehen bei 25 m Abschnitte?)
+  function covered(list) { return list.reduce(function (a, s) { return a + (s.toKm - s.fromKm); }, 0); }
+  var prepMs = Math.round(t1 - t0), overlayMs = Math.round(t3 - t2), len = route.lengthM / 1000;
+  currentName = 'Echte Daten: ' + Math.round(len) + ' km, ' + out.sections.length + ' Abschnitte (bei 5 m: ' + fine.sections.length + '), Vorbereitung ' + prepMs + ' ms, Schnitt ' + overlayMs + ' ms';
+  if (out.sections.length < 1) throw new Error('keine Abschnitte gefunden');
+  if (fine.sections.length !== out.sections.length) throw new Error('25 m: ' + out.sections.length + ' Abschnitte, 5 m: ' + fine.sections.length);
+  if (Math.abs(covered(fine.sections) - covered(out.sections)) > 0.01) throw new Error('Länge der Abschnitte weicht ab');
+  if (prep.skipped) throw new Error(prep.skipped + ' Features übersprungen');
+  if (overlayMs > 3000) throw new Error('Schnitt dauert ' + overlayMs + ' ms');
+  out.sections.forEach(function (s) { if (!(s.toKm >= s.fromKm) || s.toKm > len + 1e-9) throw new Error('Abschnitt außerhalb der Route'); });
+});
+
+(async function () {
+  for (var t of queue) {
+    currentName = null;
+    try { await t.fn(); results.push({ name: currentName || t.name, ok: true }); } catch (e) { results.push({ name: t.name, ok: false, error: String(e.message || e) }); }
+  }
+  var passed = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+})();
+</script>
