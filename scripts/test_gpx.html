@@ -1,0 +1,176 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests gpx.js (GPX-Parser, RI1)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Alle GPX-Texte sind synthetisch erzeugt, keine echten Fremdtracks.
+import * as G from '../js/gpx.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function gpx(body, attrs) {
+  return '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="test" xmlns="http://www.topografix.com/GPX/1/1"' + (attrs || '') + '>' + body + '</gpx>';
+}
+function pt(tag, lat, lon, ele, time) {
+  return '<' + tag + ' lat="' + lat + '" lon="' + lon + '">' + (ele == null ? '' : '<ele>' + ele + '</ele>') + (time ? '<time>' + time + '</time>' : '') + '</' + tag + '>';
+}
+
+test('gültiger Track: Name, Punkte, Höhe und Zeit', function () {
+  var r = G.parseGpx(gpx('<metadata><name>Testtour</name></metadata><trk><name>Spur</name><trkseg>' +
+    pt('trkpt', 47.1, 11.2, 1200.5, '2026-07-01T06:00:00Z') + pt('trkpt', 47.2, 11.3, 1300, '2026-07-01T06:10:00Z') + '</trkseg></trk>'));
+  eq(r.ok, true); eq(r.error, null); eq(r.name, 'Testtour'); eq(r.warnings, []);
+  eq(r.tracks.length, 1); eq(r.tracks[0].name, 'Spur'); eq(r.tracks[0].segments.length, 1);
+  eq(r.tracks[0].segments[0][0], { lat: 47.1, lon: 11.2, ele: 1200.5, time: Date.parse('2026-07-01T06:00:00Z') });
+  eq(r.tracks[0].segments[0][1].ele, 1300);
+});
+
+test('mehrere Segmente bleiben getrennt, Warnung zu Lücken', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11, 1) + pt('trkpt', 47.1, 11, 2) + '</trkseg><trkseg>' + pt('trkpt', 47.5, 11, 3) + '</trkseg></trk>'));
+  eq(r.tracks[0].segments.map(function (s) { return s.length; }), [2, 1]);
+  eq(r.warnings.some(function (w) { return /mehreren Segmenten/.test(w); }), true);
+});
+
+test('mehrere Tracks', function () {
+  var r = G.parseGpx(gpx('<trk><name>A</name><trkseg>' + pt('trkpt', 47, 11, 1) + '</trkseg></trk><trk><name>B</name><trkseg>' + pt('trkpt', 47.1, 11, 1) + '</trkseg></trk>'));
+  eq(r.tracks.map(function (t) { return t.name; }), ['A', 'B']);
+  eq(r.name, 'A');
+});
+
+test('ohne Höhe: ele ist null (nie 0), Warnung mit Anzahl', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11) + pt('trkpt', 47.1, 11, '') + pt('trkpt', 47.2, 11, 'abc') + pt('trkpt', 47.3, 11, 0) + '</trkseg></trk>'));
+  eq(r.tracks[0].segments[0].map(function (p) { return p.ele; }), [null, null, null, 0]);
+  eq(r.warnings, ['3 Punkte ohne Höhe in der Datei.']);
+});
+
+test('ohne Zeit: time ist null, keine Warnung; ungültige Zeit: null mit Warnung', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11, 1) + '</trkseg></trk>'));
+  eq(r.tracks[0].segments[0][0].time, null); eq(r.warnings, []);
+  r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11, 1, 'gestern') + '</trkseg></trk>'));
+  eq(r.tracks[0].segments[0][0].time, null);
+  eq(r.warnings, ['1 Punkt mit ungültigem Zeitstempel in der Datei.']);
+});
+
+test('Route (rte/rtept) und Wegpunkte (wpt)', function () {
+  var r = G.parseGpx(gpx(pt('wpt', 47.5, 11.5, 2000).replace('</wpt>', '<name>Gipfel</name></wpt>') + '<rte><name>Plan</name>' + pt('rtept', 47, 11) + pt('rtept', 47.1, 11) + '</rte>'));
+  eq(r.ok, true); eq(r.tracks, []); eq(r.routes[0].name, 'Plan'); eq(r.routes[0].points.length, 2);
+  eq(r.waypoints, [{ lat: 47.5, lon: 11.5, ele: 2000, name: 'Gipfel' }]);
+  eq(r.name, 'Plan');
+});
+
+test('Track und Route: beide werden geliefert, Warnung', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11, 1) + '</trkseg></trk><rte>' + pt('rtept', 47, 11) + '</rte>'));
+  eq(r.tracks.length, 1); eq(r.routes.length, 1);
+  eq(r.warnings.some(function (w) { return /Tracks und Routen/.test(w); }), true);
+});
+
+test('GPX ohne Namensraum und mit Präfix wird gelesen', function () {
+  var r = G.parseGpx('<gpx version="1.1"><trk><trkseg><trkpt lat="47" lon="11"><ele>5</ele></trkpt></trkseg></trk></gpx>');
+  eq(r.ok, true); eq(r.tracks[0].segments[0][0].ele, 5);
+  r = G.parseGpx('<g:gpx xmlns:g="http://www.topografix.com/GPX/1/1"><g:trk><g:trkseg><g:trkpt lat="47" lon="11"/></g:trkseg></g:trk></g:gpx>');
+  eq(r.ok, true); eq(r.tracks[0].segments[0].length, 1);
+});
+
+test('Erweiterungen (Garmin u. a.) werden ignoriert, auch gleichnamige Elemente darin', function () {
+  var r = G.parseGpx(gpx('<trk><extensions><name>Fremd</name></extensions><trkseg><trkpt lat="47" lon="11"><ele>7</ele><extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="x"><gpxtpx:hr>120</gpxtpx:hr><ele>999</ele></gpxtpx:TrackPointExtension></extensions></trkpt></trkseg></trk>'));
+  eq(r.ok, true); eq(r.tracks[0].name, null); eq(r.tracks[0].segments[0][0].ele, 7);
+});
+
+test('Koordinaten außerhalb des Bereichs oder unlesbar: Punkt übersprungen, Warnung', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 91, 11, 1) + pt('trkpt', 47, 181, 1) + pt('trkpt', 'x', 11, 1) + '<trkpt lat="47"/>' + pt('trkpt', 47, 11, 1) + pt('trkpt', '-90', '-180', 1) + '</trkseg></trk>'));
+  eq(r.tracks[0].segments[0].length, 2);
+  eq(r.warnings, ['4 Punkte mit ungültigen Koordinaten wurden übersprungen.']);
+});
+
+test('Zahlen wie "47abc" oder "NaN" gelten nicht als Koordinate', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', '47abc', 11) + pt('trkpt', 'NaN', 11) + pt('trkpt', 'Infinity', 11) + pt('trkpt', 47, 11) + '</trkseg></trk>'));
+  eq(r.tracks[0].segments[0].length, 1);
+});
+
+test('Track nur mit ungültigen Punkten: Fehler statt leerem Track', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 99, 11) + '</trkseg></trk>'));
+  eq(r.ok, false); eq(r.tracks, []);
+  eq(/keinen Track/.test(r.error), true);
+});
+
+test('nur Wegpunkte: Fehler mit eigener Meldung', function () {
+  var r = G.parseGpx(gpx(pt('wpt', 47, 11)));
+  eq(r.ok, false); eq(/nur Wegpunkte/.test(r.error), true);
+});
+
+test('leere Datei, nur Leerraum, kein Text', function () {
+  eq(G.parseGpx('').error, 'Die Datei ist leer.');
+  eq(G.parseGpx('  \n ').ok, false);
+  eq(G.parseGpx(null).ok, false);
+  eq(G.parseGpx(42).ok, false);
+});
+
+test('ungültiges XML', function () {
+  var r = G.parseGpx('<gpx><trk><trkseg><trkpt lat="47" lon="11"></trkseg></trk>');
+  eq(r.ok, false); eq(r.error, 'Die Datei ist keine gültige XML-Datei.');
+  eq(G.parseGpx('das ist keine Datei').ok, false);
+});
+
+test('anderes XML: Wurzelelement nicht gpx', function () {
+  var r = G.parseGpx('<kml><Placemark/></kml>');
+  eq(r.ok, false); eq(/keine GPX-Datei/.test(r.error), true);
+});
+
+test('Dokumenttyp-Deklaration und Entitäten werden abgelehnt', function () {
+  var r = G.parseGpx('<?xml version="1.0"?><!DOCTYPE gpx [<!ENTITY a "aaaa"><!ENTITY b "&a;&a;&a;">]><gpx><trk><name>&b;</name></trk></gpx>');
+  eq(r.ok, false); eq(/Dokumenttyp/.test(r.error), true);
+});
+
+test('Namen sind unbehandelter Text (HTML bleibt Text), Länge begrenzt', function () {
+  var r = G.parseGpx(gpx('<metadata><name>&lt;img src=x onerror=alert(1)&gt;</name></metadata><trk><trkseg>' + pt('trkpt', 47, 11) + '</trkseg></trk>'));
+  eq(r.name, '<img src=x onerror=alert(1)>');
+  r = G.parseGpx(gpx('<metadata><name>' + 'a'.repeat(1000) + '</name></metadata><trk><trkseg>' + pt('trkpt', 47, 11) + '</trkseg></trk>'));
+  eq(r.name.length, 200);
+});
+
+test('ohne Namen: name ist null (kein erfundener Name)', function () {
+  eq(G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11) + '</trkseg></trk>')).name, null);
+});
+
+test('Grenzwerte E4 sind benannte Konstanten', function () {
+  eq(G.MAX_BYTES, 10 * 1024 * 1024); eq(G.MAX_POINTS, 200000);
+});
+
+test('Datei über 10 MB wird abgelehnt, nicht abgeschnitten', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11) + '</trkseg></trk><!--' + 'x'.repeat(G.MAX_BYTES) + '-->'));
+  eq(r.ok, false); eq(/zu groß/.test(r.error), true); eq(r.tracks, []);
+});
+
+test('Größe zählt Bytes, nicht Zeichen (Umlaute)', function () {
+  var r = G.parseGpx(gpx('<trk><trkseg>' + pt('trkpt', 47, 11) + '</trkseg></trk><!--' + 'ä'.repeat(G.MAX_BYTES / 2) + '-->'));
+  eq(r.ok, false); eq(/zu groß/.test(r.error), true);
+});
+
+function bigTrack(n) {
+  var parts = ['<trk><trkseg>'];
+  for (var i = 0; i < n; i++) parts.push('<trkpt lat="' + (47 + i * 1e-5).toFixed(5) + '" lon="11.0"/>');   // kompakt, damit die Punktgrenze vor der Größengrenze greift
+  parts.push('</trkseg></trk>');
+  return gpx(parts.join(''));
+}
+
+// Der Name enthält die gemessene Laufzeit (zur Prüfung der Grenzen aus E4).
+var bigText = bigTrack(G.MAX_POINTS), t0 = performance.now(), big = G.parseGpx(bigText);
+var bigName = 'genau 200 000 Punkte werden gelesen (' + (bigText.length / 1024 / 1024).toFixed(1) + ' MB in ' + Math.round(performance.now() - t0) + ' ms)';
+test(bigName, function () {
+  eq(big.ok, true); eq(big.tracks[0].segments[0].length, G.MAX_POINTS);
+});
+
+test('200 001 Punkte werden abgelehnt', function () {
+  var r = G.parseGpx(bigTrack(G.MAX_POINTS + 1));
+  eq(r.ok, false); eq(/zu viele Punkte/.test(r.error), true);
+});
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>
