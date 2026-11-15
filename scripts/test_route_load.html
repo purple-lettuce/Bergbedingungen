@@ -1,0 +1,53 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_logic.js (GPX laden, RI3)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as R from '../js/route_logic.js';
+import { MAX_BYTES, parseGpx } from '../js/gpx.js';
+import { createRoute } from '../js/route_model.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+
+function routeFrom(gpx) { return createRoute(parseGpx(gpx)).route; }
+var TWO = '<gpx xmlns="http://www.topografix.com/GPX/1/1"><trk><trkseg><trkpt lat="47" lon="11"><ele>1000</ele></trkpt><trkpt lat="47.01" lon="11"><ele>1010</ele></trkpt></trkseg></trk></gpx>';
+var GAP = '<gpx><trk><trkseg><trkpt lat="47" lon="11"><ele>1000</ele></trkpt></trkseg><trkseg><trkpt lat="47.1" lon="11"><ele>1010</ele></trkpt></trkseg></trk></gpx>';
+
+test('checkFile: gültig, Grenze, leer, zu groß, ohne Datei', function () {
+  eq(R.checkFile({ name: 'a.gpx', size: 1000 }), { ok: true, error: null });
+  eq(R.checkFile({ name: 'a.gpx', size: MAX_BYTES }).ok, true);
+  eq(R.checkFile({ name: 'a.gpx', size: 0 }).ok, false);
+  eq(R.checkFile({ name: 'a.gpx', size: MAX_BYTES + 1 }).ok, false);
+  eq(/10 MB/.test(R.checkFile({ name: 'a.gpx', size: MAX_BYTES + 1 }).error), true);
+  eq(R.checkFile(null).ok, false);
+});
+
+test('routeTitle: Name aus der Datei, sonst Dateiname ohne Endung, sonst "Route"', function () {
+  eq(R.routeTitle({ name: 'Gipfeltour' }, 'x.gpx'), 'Gipfeltour');
+  eq(R.routeTitle({ name: null }, 'Zugspitze Rundtour.gpx'), 'Zugspitze Rundtour');
+  eq(R.routeTitle({ name: null }, ''), 'Route');
+  eq(R.routeTitle(null, undefined), 'Route');
+});
+
+test('routeStatus: ok mit Punktzahl; Lücken und Warnungen machen es eingeschränkt', function () {
+  eq(R.routeStatus(routeFrom(TWO)), { state: 'ok', text: '2 Punkte' });
+  var g = R.routeStatus(routeFrom(GAP));
+  eq(g.state, 'limited');
+  eq(g.text, '2 Punkte · 1 Lücke · 1 Hinweis');
+  var noEle = R.routeStatus(routeFrom('<gpx><trk><trkseg><trkpt lat="47" lon="11"/><trkpt lat="47.01" lon="11"/></trkseg></trk></gpx>'));
+  eq(noEle.state, 'limited');
+});
+
+test('Ladezustand', function () { eq(R.STATUS_LOADING, { state: 'loading', text: 'Datei wird gelesen …' }); });
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>

@@ -30,6 +30,7 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 - Am Desktop (ab 1200 px) füllt die Karte die ganze Fläche; Wetter und Sperrungen schweben links, Bedienfeld und Legendenkarte rechts in einem Dock (unter 1200 px bleibt das bisherige Layout)
 - Auf dem Smartphone (bis 820 px) füllt die Karte den Bildschirm; Wetter und Sperrungen sind ein Bottom Sheet (Griff antippen oder wischen: zu, halb, voll), „Karten & Layer“ öffnet als Sheet über der Karte, die Statusleiste läuft einzeilig
 - Lawinenlage für Euregio (Tirol, Südtirol, Trentino) und Schweiz als gemeinsamer Layer: Warnregionen nach Gefahrenstufe, ein Symbol je Region, vollständiger Lagebericht mit Höhenangaben im Popup (aktuelle Berichte ab Saisonstart der Lawinenwarndienste)
+- Eigene Route: GPX-Datei laden (nur lokal im Browser, nichts wird übertragen), als Linie mit Start und Ziel auf der Karte anzeigen und wieder entfernen; noch ohne Statistik, Höhenprofil und Analyse (RI3)
 - Globale Suche im Header: Schutzgebiete, Sperrungen und Hinweise aus den geladenen Daten, Treffer in Gruppen, per Tastatur bedienbar, Klick springt zur Karte (keine Ortssuche)
 - Datenstatus-Leiste unter dem Header: je Quelle (Sperrungen, Schutzgebiete, Lawinenlage, Wetter) Ladezustand und, wo die Daten einen Zeitstempel liefern, der Datenstand; nur echte Werte
 
@@ -142,7 +143,7 @@ Sofort aktualisieren: Reiter **Actions** → **Sperrungen aktualisieren** → **
 | `data/wildlife_entities.json` | aufgelöste Schutzgüter: Kennung → Name, Kennung → Art (`FAUNA`, `FLORA`, `HABITAT`) und Verknüpfung → Kennung, nur aus der Digitize API |
 | `data/wildlife_probe.json` | Diagnosebericht der Wildlife-Auflösung (was die API geliefert hat, was fehlt) |
 | `scripts/avalanche_providers.py`, `scripts/avalanche_sources.py`, `scripts/avalanche_model.py`, `scripts/avalanche_schema.py`, `scripts/fetch_avalanche.py` | Lawinen-Framework: Provider je Quelle, Registry, Normalisierung, Standardmodell und GeoJSON-Schema, zentrale Pipeline ([docs/AVALANCHE_ARCHITECTURE.md](docs/AVALANCHE_ARCHITECTURE.md)) |
-| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/test_protected_areas.html`, `scripts/test_layout.html`, `scripts/test_sheet_logic.html`, `scripts/test_gpx.html`, `scripts/test_route_model.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage, der Schutzgebiets-Oberfläche, des Layouts und des Bottom Sheets (Python und JavaScript im Headless-Browser) |
+| `scripts/test_avalanche_model.py`, `scripts/test_fetch_avalanche.py`, `scripts/test_avalanche_framework.py`, `scripts/test_avalanche_logic.html`, `scripts/test_avalanche_frontend.html`, `scripts/test_protected_areas.html`, `scripts/test_layout.html`, `scripts/test_sheet_logic.html`, `scripts/test_gpx.html`, `scripts/test_route_model.html`, `scripts/test_route_load.html`, `scripts/run_js_tests.py` | Tests der Lawinenlage, der Schutzgebiets-Oberfläche, des Layouts und des Bottom Sheets (Python und JavaScript im Headless-Browser) |
 | `data/avalanche/` | Lawinenlage: `index.json`, je Quelle `<id>.json` (Bulletins) und `<id>_regions.geojson` (Polygone) für `euregio` und `slf` |
 | `vendor/inter/` | Schrift Inter (variable, SIL OFL 1.1), selbst gehostet, Lizenz in `vendor/inter/OFL.txt` |
 | `docs/design/komponenten.html` | Referenzseite der gemeinsamen UI-Komponenten (`.mr-*`), nur zur Ansicht, nicht Teil der Anwendung |
@@ -180,8 +181,8 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/avalanche_popup.js` | dieselbe Popup-Komponente für jede Quelle: Lagebericht aus einem Regionsdatensatz, rein (ohne DOM und Leaflet) |
 | `js/avalanche_symbols.js` | gemeinsames Symbolmodell: Gefahrenstufen, Expositionen, Lawinenprobleme, Gefahrenmuster, Höhenangaben, Piktogramme, deutsche Bezeichnungen |
 | `js/avalanche_model.js` | Regionsdatensatz im Browser (Standardmodell aus Polygon-Properties und Bulletin) |
-| `js/gpx.js` | GPX-Parser (rein, noch ohne Oberfläche, RI1): Text einer GPX-Datei → Tracks, Routen, Wegpunkte und Warnungen, mit Größenlimit; Fehler als Ergebnis; getestet mit `scripts/test_gpx.html` |
-| `js/route_model.js`, `js/geo.js` | Routenmodell (rein, noch ohne Oberfläche, RI2): Rohmodell des GPX-Parsers → eine Route mit Streckenposition, Grenzen und vermerkten Lücken; Geometrie: Haversine-Distanz, Punkt bei Kilometer, Abtastung, Abstand Punkt–Linie, Vereinfachung (Douglas-Peucker); getestet mit `scripts/test_route_model.html` |
+| `js/route.js`, `js/route_logic.js` | Eigene Route (RI3): Karte : Text einer GPX-Datei → Tracks, Routen, Wegpunkte und Warnungen, mit Größenlimit; Fehler als Ergebnis; getestet mit `scripts/test_gpx.html` |
+| `js/route_model.js`, `js/geo.js` | Routenmodell (rein, RI2): Rohmodell des GPX-Parsers → eine Route mit Streckenposition, Grenzen und vermerkten Lücken; Geometrie: Haversine-Distanz, Punkt bei Kilometer, Abtastung, Abstand Punkt–Linie, Vereinfachung (Douglas-Peucker); getestet mit `scripts/test_route_model.html` |
 | `js/html.js` | HTML-Maskierung `esc` ohne Abhängigkeiten (`map.js` exportiert sie weiter) |
 | `js/avalanche_legend.js` | Legende der Lawinenlage mit Berichtsstatus je Quelle, Stufenfarben, Höhenwahl, Hinweisen und Namensnennung (Abschnitt im Bedienfeld „Karten & Layer“) |
 | `js/avalanche_logic.js` | reine Logik ohne DOM und Leaflet auf dem Regionsdatensatz: Gefahrenstufe je Höhe, Gültigkeit, Gruppierung, Link zum Lagebericht (getestet mit `scripts/run_js_tests.py`) |

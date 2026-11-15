@@ -45,6 +45,7 @@
   --mr-notice: #B7791F;
   --mr-upcoming: #3B6EA5;
   --mr-success: var(--mr-secondary);
+  --mr-route: #6B2E8F;              /* eigene GPX-Route (RI3): Violett, weder Lawinenstufe noch Sperrungs-/Hinweisfarbe */
 
   /* Radien */
   --mr-radius-xs: 4px;
@@ -117,6 +118,7 @@
     --mr-notice: #E3A93F;
     --mr-upcoming: #7FB0E3;
     --mr-success: #6FBF98;
+    --mr-route: #D2A8F5;
     --mr-shadow-sm: 0 1px 4px rgba(0,0,0,.6);
     --mr-shadow-up: 0 -4px 16px rgba(0,0,0,.6);
     --mr-scrim: rgba(0,0,0,.65);
@@ -642,3 +644,13 @@ html:has(body.mr-landing) { overflow: visible; }
   .mr-hero { padding-block: var(--mr-space-sm); min-height: 0; }
   .mr-hero__inner { --mr-gap: var(--mr-space-md); padding-block: var(--mr-space-sm); }
 }
+/* Eigene Route (RI3): Linie mit heller Kontur für Kontrast auf jeder Grundkarte, Start und Ziel als Punkte (Start gefüllt grün, Ziel gefüllt dunkel, zusätzlich per Tooltip benannt) */
+path.mr-route-casing { stroke: var(--mr-surface); stroke-width: 8px; stroke-opacity: .9; fill: none; }
+path.mr-route-line { stroke: var(--mr-route); stroke-width: 4px; fill: none; }
+path.mr-route-pin { stroke: var(--mr-surface); }
+path.mr-route-pin--start { fill: var(--mr-success); }
+path.mr-route-pin--end { fill: var(--mr-text); }
+.mr-route-sw { flex: none; width: 18px; height: 4px; border-radius: 2px; background: var(--mr-route); box-shadow: 0 0 0 2px var(--mr-surface); }
+span.mr-route-pin { flex: none; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--mr-surface); box-shadow: 0 0 0 1px var(--mr-line); }
+span.mr-route-pin--start { background: var(--mr-success); }
+span.mr-route-pin--end { background: var(--mr-text); }

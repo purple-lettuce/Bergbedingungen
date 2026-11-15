@@ -241,8 +241,9 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] Wetter am Punkt (Open-Meteo, WEB-T1)
 - [ ] DEM-Integration
 - [ ] OSM Overpass API Integration
-- [x] GPX-Parser (RI1, reine Logik `js/gpx.js` mit Tests; noch ohne Oberfläche, Datei laden und Anzeige folgen mit RI3)
-- [x] Routenmodell und Geometrie (RI2, reine Logik js/route_model.js und js/geo.js mit Tests; noch ohne Oberfläche)
+- [x] GPX-Parser (RI1, reine Logik `js/gpx.js` mit Tests)
+- [x] Routenmodell und Geometrie (RI2, reine Logik js/route_model.js und js/geo.js mit Tests)
+- [x] GPX laden und auf der Karte anzeigen (RI3, Karte 
 - [ ] Höhenprofil-Berechnung
 - [ ] Wegschwierigkeit-Matching (sac_scale)
 - [ ] Website Toolbox: Koordinaten & Höhe
@@ -380,6 +381,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.14 | 2026-11-15 | Route Intelligence: RI3 (GPX laden und auf der Karte anzeigen, lokal im Browser) umgesetzt |
 | 4.13 | 2026-11-15 | Dokumentation: README, DATENQUELLEN und ALPINE_RISK_ENGINE mit der ROADMAP abgeglichen (Status DEM/OSM, Phasen, Modulanzahl) |
 | 4.13 | 2026-11-15 | Route Intelligence: RI2 (Routenmodell und Geometrie, reine Logik ohne Oberfläche) umgesetzt |
 | 4.12 | 2026-11-15 | Route Intelligence: RI1 (GPX-Parser, reine Logik ohne Oberfläche) umgesetzt |
