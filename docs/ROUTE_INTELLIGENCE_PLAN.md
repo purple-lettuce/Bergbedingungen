@@ -289,7 +289,7 @@ Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Analyse-Logik mit 
 - Geprüft in einem Headless-Browser mit synthetischer GPX (60 Punkte, Höhen, Zeitstempel, Name mit HTML-Zeichen): Statistik erscheint, der Name bleibt als Text. Screenshots stehen aus.
 ### RI5 – Höhenprofil
 
-Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige (Diagramm).
+Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Anzeige (Diagramm).
 
 **Ziel:** Profil Höhe über Strecke, verbunden mit der Karte (Toolbox WEB-T6).
 
@@ -307,6 +307,12 @@ Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige (Diagramm).
 **Abhängigkeiten:** RI4.
 
 **Definition of Done:** Profil Desktop und Mobil lesbar, Karte und Diagramm verbunden, Kontrast AA, Screenshots, Dokumentation, PR gemerged.
+
+**Umsetzungshinweise (15.11.2026):**
+- `js/profile_logic.js` (rein, getestet mit `scripts/test_profile.html`, 13 Tests): `profileSeries` (Linienzüge aus den Punkten mit Höhe, getrennt an Lücken; einzelne fehlende Höhen werden übersprungen, nie als 0 gezeichnet; ohne mindestens zwei Höhenwerte kein Profil), `decimate` (Abtastung auf Pixelbreite: je Pixelspalte höchstens kleinster und größter Wert, Spitzen bleiben erhalten), `niceTicks` und `makeScale` (1-2-5-Achsenmarken, mindestens 20 m Höhenbereich, damit flache Strecken nicht aufgeblasen werden), `profilePaths`, `stepPosition` (Tastaturschritte), `positionText`, `profileSummary`. Beim Test fiel ein Gleitkommarest in den Achsenmarken (0,30000000000000004) auf; behoben.
+- `js/elevation_profile.js` (Oberfläche): SVG in der Routenkarte unter der Statistik, keine neue schwebende Karte. Maus (Hover), Touch (waagerechtes Wischen, `touch-action: pan-y`) und Tastatur (Pfeile 1 %, Bild 10 %, Pos1/Ende, Esc) melden die Position an `js/route.js`; dort erscheint ein Marker in der Routenebene. Der Marker wird bei Bedarf mit `panInside` und den überdeckten Rändern aus `coveredInsets` ins freie Kartenfeld geholt (mobil verdeckt das Sheet einen Teil der Karte). Die Breite folgt der Karte (ResizeObserver); ohne Höhendaten bleibt der Bereich verborgen (die Statistik nennt „keine Höhendaten in der Datei“).
+- Barrierefreiheit: Das Diagramm ist ein `role="slider"` mit `aria-valuetext` („km 7,1 · 1.457 m“), sichtbarem Textfeld mit derselben Angabe und einer Textalternative mit Kerndaten (Länge, tiefster/höchster Punkt, Anstieg, Abstieg). Linie und Beschriftung nutzen die vorhandenen Farben `--mr-route`/`--mr-text-muted`; ein gesonderter Kontrastnachweis (AA) mit Messwerten steht noch aus. STYLEGUIDE ergänzt.
+- Geprüft in einem Headless-Browser (CDP) mit synthetischer GPX (300 Punkte, eine Lücke): Desktop 1440, Mobil 390 und 320, hell und dunkel; Maus-Hover, Touch, Tastatur, Marker auf der Karte, Entfernen der Route (Profil und Marker verschwinden). Screenshots: `docs/screenshots/profil-*.png`. Dabei fiel ein Fehler auf (der Marker erschien nach dem Ausblenden nicht wieder) und wurde behoben. Echtgerät-Test (Touch-Genauigkeit, iOS/Android) steht aus.
 
 ### RI6 – Routenverwaltung (lokal)
 
