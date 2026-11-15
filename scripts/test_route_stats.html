@@ -1,0 +1,122 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_stats.js (Routenstatistik, RI4)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Referenzstrecken sind synthetisch mit bekanntem Anstieg/Abstieg; Rauschen ist deterministisch (kein Zufall), damit der Test stabil bleibt.
+import * as S from '../js/route_stats.js';
+import { createRoute } from '../js/route_model.js';
+import { parseGpx } from '../js/gpx.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) {
+  if (!(Math.abs(actual - expected) <= tol)) throw new Error('erwartet ' + expected + ' ± ' + tol + ', erhalten ' + actual);
+}
+
+// Route entlang eines Meridians, 10 m Abstand; eles: Liste von Höhen (null = fehlt), times optional.
+function build(eles, times, splitAfter) {
+  function pt(i) { return '<trkpt lat="' + (47 + i * 10 / 111194.93).toFixed(7) + '" lon="11">' + (eles[i] == null ? '' : '<ele>' + eles[i] + '</ele>') +
+    (times && times[i] != null ? '<time>' + new Date(times[i]).toISOString() + '</time>' : '') + '</trkpt>'; }
+  var s = '<gpx><trk><trkseg>';
+  for (var i = 0; i < eles.length; i++) { s += pt(i); if (splitAfter === i) s += '</trkseg><trkseg>'; }
+  var made = createRoute(parseGpx(s + '</trkseg></trk></gpx>'));
+  if (!made.ok) throw new Error(made.error);
+  return made.route;
+}
+function ramp(from, to, n) { var a = []; for (var i = 0; i < n; i++) a.push(from + (to - from) * i / (n - 1)); return a; }
+function noisy(arr, amp) { return arr.map(function (v, i) { return v + (i % 2 ? amp : -amp); }); }
+
+test('Konstante: Hysterese 5 m (E5)', function () { eq(S.HYSTERESIS_M, 5); });
+
+test('glatter Anstieg und Abstieg: Summen exakt', function () {
+  var r = build(ramp(1000, 1500, 51).concat(ramp(1500, 1200, 31).slice(1)));
+  var s = S.routeStats(r);
+  near(s.ascentM, 500, 0.001); near(s.descentM, 300, 0.001);
+  eq(s.maxEle, 1500); eq(s.minEle, 1000); eq(s.hasElevation, true); eq(s.missingElevation, 0);
+  near(s.lengthM, 800, 1);
+});
+
+test('Rauschen ±2 m auf flacher Strecke zählt nicht (Rohsumme würde 4 m je Punkt zählen)', function () {
+  var s = S.routeStats(build(noisy(ramp(1200, 1200, 101), 2)));
+  eq(s.ascentM, 0); eq(s.descentM, 0);
+});
+
+test('Rauschen ±2 m auf 500 m Anstieg: Anstieg bleibt nahe 500 m', function () {
+  var s = S.routeStats(build(noisy(ramp(1000, 1500, 101), 2)));
+  near(s.ascentM, 500, 6); eq(s.descentM <= 6, true);
+});
+
+test('Schwelle: Änderung von genau 5 m zählt, 4,9 m nicht', function () {
+  var s = S.routeStats(build([1000, 1005, 1000]));
+  eq(s.ascentM, 5); eq(s.descentM, 5);
+  var t = S.routeStats(build([1000, 1004.9, 1000]));
+  eq(t.ascentM, 0); eq(t.descentM, 0);
+});
+
+test('Schwelle ist überschreibbar (0 = Rohsumme)', function () {
+  var s = S.routeStats(build([1000, 1002, 1001, 1004]), null, null);
+  var raw = S.routeStats(build([1000, 1002, 1001, 1004]), undefined);
+  eq(s.ascentM, 0); eq(raw.ascentM, 0);
+  var r0 = S.routeStats(build([1000, 1002, 1001, 1004]), 0);
+  eq(r0.ascentM, 5); eq(r0.descentM, 1);
+});
+
+test('einzelne fehlende Höhen: Rest wird verwendet, Anzahl gemeldet, nie als 0 gezählt', function () {
+  var s = S.routeStats(build([1000, null, 1100, null, 1050]));
+  eq(s.hasElevation, true); eq(s.elevationPoints, 3); eq(s.missingElevation, 2);
+  eq(s.ascentM, 100); eq(s.descentM, 50); eq(s.minEle, 1000);
+  var rows = S.statsRows(s);
+  eq(/2 von 5 Punkten/.test(rows.caveat), true);
+});
+
+test('keine Höhen: Länge bleibt, Höhenwerte null, Text "keine Höhendaten in der Datei"', function () {
+  var s = S.routeStats(build([null, null, null]));
+  eq(s.hasElevation, false); eq(s.ascentM, null); eq(s.descentM, null); eq(s.maxEle, null); eq(s.minEle, null);
+  var v = S.statsRows(s);
+  eq(v.rows.map(function (r) { return r.label; }), ['Länge', 'Höhen']);
+  eq(v.rows[1].value, 'keine Höhendaten in der Datei');
+  eq(v.note, null);
+});
+
+test('Lücke: Höhensprung über die Lücke zählt nicht', function () {
+  var s = S.routeStats(build([1000, 1050, 2000, 2050], null, 1));
+  eq(s.ascentM, 100); eq(s.descentM, 0); eq(s.maxEle, 2050);
+  var ohne = S.routeStats(build([1000, 1050, 2000, 2050]));
+  eq(ohne.ascentM, 1050);
+});
+
+test('Dauer nur bei Zeitstempeln', function () {
+  var t0 = Date.UTC(2026, 0, 1, 8, 0, 0);
+  var s = S.routeStats(build([1000, 1010, 1020], [t0, t0 + 1800000, t0 + 2 * 3600000 + 300000]));
+  eq(s.durationMs, 2 * 3600000 + 300000);
+  eq(S.statsRows(s).rows.slice(-1)[0], { label: 'Dauer der Aufzeichnung', value: '2 h 05 min' });
+  var n = S.routeStats(build([1000, 1010, 1020]));
+  eq(n.durationMs, null);
+  eq(S.statsRows(n).rows.some(function (r) { return /Dauer/.test(r.label); }), false);
+  eq(S.routeStats(build([1000, 1010], [t0 + 1000, t0])).durationMs, null);   // umgekehrte Zeit
+});
+
+test('Formate', function () {
+  eq(S.formatKm(850), '850 m'); eq(S.formatKm(12345), '12,3 km'); eq(S.formatKm(1000), '1,0 km');
+  eq(S.formatMeters(1234.6), '1.235 m');
+  eq(S.formatDuration(45 * 60000), '45 min'); eq(S.formatDuration(3600000), '1 h 00 min'); eq(S.formatDuration(3 * 3600000 + 9 * 60000), '3 h 09 min');
+});
+
+test('statsRows mit Höhen: Zeilen und Methodenhinweis', function () {
+  var v = S.statsRows(S.routeStats(build(ramp(1000, 1100, 11))));
+  eq(v.rows.map(function (r) { return r.label; }), ['Länge', 'Anstieg', 'Abstieg', 'Höchster Punkt', 'Tiefster Punkt']);
+  eq(v.rows[1].value, '100 m'); eq(v.caveat, null);
+  eq(/5 m/.test(v.note) && /Andere Apps/.test(v.note), true);
+});
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>

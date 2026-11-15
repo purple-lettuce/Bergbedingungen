@@ -261,7 +261,7 @@ Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Anzeige.
 
 ### RI4 – Routenstatistik (aus den GPX-Höhen)
 
-Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Analyse-Logik mit kleiner Anzeige.
+Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Analyse-Logik mit kleiner Anzeige.
 
 **Ziel:** Länge, Höhenmeter und Höhenbereich der Route zeigen.
 
@@ -280,6 +280,13 @@ Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Analyse-Logik mit kleiner Anzeig
 
 **Definition of Done:** Werte gegen Referenzstrecken getestet, Methodenhinweis sichtbar, Dokumentation und ROADMAP aktualisiert, PR gemerged.
 
+**Umsetzungshinweise (15.11.2026):**
+- `js/route_stats.js` (rein): `routeStats(route, hysteresisM)` liefert Länge, Anstieg, Abstieg, höchsten und tiefsten Punkt, Zahl der Punkte mit und ohne Höhe und die Dauer; `statsRows(stats)` liefert die Anzeigezeilen, den Methodenhinweis und einen Datenhinweis. Getestet mit `scripts/test_route_stats.html` (12 Tests). Die Oberfläche (`js/route.js`) berechnet die Statistik einmal beim Laden und zeigt sie als `.mr-kv` in der Routenkarte; Analyseergebnisse hängen nicht an der Route.
+- Verfahren (E5): Hysterese mit Bezugspunkt, Schwelle `HYSTERESIS_M = 5`. Eine Änderung zählt, sobald sie seit dem letzten gezählten Bezugspunkt mindestens 5 m beträgt (genau 5 m zählt, 4,9 m nicht). Der Bezugspunkt wird an Lücken zurückgesetzt, ein Höhensprung über eine Lücke zählt nicht. Eine am Ende noch unter der Schwelle liegende Änderung zählt nicht. Höchster und tiefster Punkt sind ungeglättete Rohwerte der Datei.
+- Fehlende Höhen: Einzelne fehlende Höhen werden übersprungen, die Zahl steht als Hinweis in der Anzeige („x von n Punkten haben keine Höhe“). Ohne jede Höhe erscheint nur die Länge und „Höhen: keine Höhendaten in der Datei“, kein Methodenhinweis. Die Dauer („Dauer der Aufzeichnung“, erster bis letzter Zeitstempel, Pausen eingeschlossen) erscheint nur mit mindestens zwei verschiedenen Zeitstempeln in richtiger Reihenfolge.
+- Länge ist `route.lengthM` aus RI2 (Lücken zählen nicht). Anzeige in Metern unter 1 km, sonst Kilometer mit einer Nachkommastelle.
+- Kalibrierung zu E5: Geprüft an synthetischen Referenzstrecken mit bekanntem Anstieg (glatt exakt; mit ±2 m Rauschen bleibt der Anstieg bei 500 m innerhalb von 6 m, auf flacher Strecke werden 0 m gezählt, eine Rohsumme käme dort auf 4 m je Punkt). **E5 bleibt „bestätigt, vorläufig“**: Echte Aufzeichnungen (Smartphone, Barometer, Uhr) und der Vergleich mit anderen Apps stehen aus; der Wert 5 m ist eine benannte Konstante und lässt sich ändern.
+- Geprüft in einem Headless-Browser mit synthetischer GPX (60 Punkte, Höhen, Zeitstempel, Name mit HTML-Zeichen): Statistik erscheint, der Name bleibt als Text. Screenshots stehen aus.
 ### RI5 – Höhenprofil
 
 Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Anzeige (Diagramm).

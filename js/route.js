@@ -1,6 +1,6 @@
 // Eigene Route (RI3): GPX-Datei wählen, lesen, als Ebene "Meine Route" auf der Karte zeigen und wieder entfernen.
 // Die Datei wird nur im Browser gelesen (File-API) und nicht übertragen (E1). Es gibt genau eine Route zugleich (E2); Neuladen der Seite verwirft sie.
-// Parser, Modell und Texte liegen in gpx.js, route_model.js und route_logic.js; hier stehen nur Oberfläche und Karte.
+// Parser, Modell, Statistik und Texte liegen in gpx.js, route_model.js, route_stats.js und route_logic.js; hier stehen nur Oberfläche und Karte.
 // Texte aus der Datei (Name, Warnungen) gelangen nur über textContent oder esc() in die Seite.
 
 import { map, routeLayer, esc, warn, unwarn } from './map.js';
@@ -11,11 +11,12 @@ import { setSourceStatus } from './status_bar.js';
 import { parseGpx } from './gpx.js';
 import { createRoute, displayLines } from './route_model.js';
 import { checkFile, routeTitle, routeStatus, STATUS_LOADING } from './route_logic.js';
+import { routeStats, statsRows } from './route_stats.js';
 
 var DISPLAY_TOLERANCE_M = 3;   // Vereinfachung der Linie für die Darstellung; die Route selbst bleibt unverändert
 var MAX_ZOOM = 15;
 
-var route = null, title = '', loading = false, registered = false;
+var route = null, stats = null, title = '', loading = false, registered = false;
 var btnLoad, btnClear, fileInput, info;
 
 // Ebene und Legende werden erst beim ersten Laden im Bedienfeld angemeldet: ohne Route bleibt die Oberfläche unverändert.
@@ -63,6 +64,23 @@ function renderInfo(warnings) {
   meta.className = 'mr-text-muted mr-text-sm mr-m-0';
   meta.textContent = route.points.length.toLocaleString('de-DE') + ' Punkte · Datei nur lokal gelesen';
   info.append(name, meta);
+  var view = statsRows(stats);
+  var kv = document.createElement('dl');
+  kv.className = 'mr-kv';
+  view.rows.forEach(function (r) {
+    var dt = document.createElement('dt'), dd = document.createElement('dd');
+    dt.textContent = r.label;
+    dd.textContent = r.value;
+    kv.append(dt, dd);
+  });
+  info.append(kv);
+  [view.caveat, view.note].forEach(function (text) {
+    if (!text) return;
+    var p = document.createElement('p');
+    p.className = 'mr-text-muted mr-text-sm mr-m-0';
+    p.textContent = text;
+    info.append(p);
+  });
   warnings.forEach(function (w) {
     var p = document.createElement('p');
     p.className = 'mr-text-muted mr-text-sm mr-m-0';
@@ -102,6 +120,7 @@ async function loadFile(file) {
     var made = createRoute(parseGpx(text));
     if (!made.ok) { warn('route', made.error); return; }   // eine bereits geladene Route bleibt bestehen
     route = made.route;
+    stats = routeStats(route);
     title = routeTitle(route, file.name);
     register();
     draw();
@@ -120,6 +139,7 @@ async function loadFile(file) {
 
 function clearRoute() {
   route = null;
+  stats = null;
   routeLayer.clearLayers();
   map.closePopup();
   unwarn('route');
