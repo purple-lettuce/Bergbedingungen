@@ -174,7 +174,7 @@ Ziel: Eine eigene Tour laden, auf der Karte sehen und messen. Keine externen Dat
 
 ### RI1 – GPX-Parser (reine Logik)
 
-Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Parser.
+Ebene 2 · Stufe 2.1. Status: Erledigt (15.11.2026). Schicht: Parser.
 
 **Ziel:** GPX-Text in ein Rohmodell umwandeln.
 
@@ -194,6 +194,12 @@ Ebene 2 · Stufe 2.1. Status: Geplant. Schicht: Parser.
 **Abhängigkeiten:** keine.
 
 **Definition of Done:** Testseite grün, Fehlerfälle getestet, keine Änderung der Oberfläche, ROADMAP („GPX-Parser“) und Plan aktualisiert, PR gemerged.
+
+**Umsetzungshinweise (15.11.2026):**
+- `js/gpx.js` exportiert `parseGpx(text)`, `MAX_BYTES` (10 MB) und `MAX_POINTS` (200 000) nach E4. Ergebnis: `{ ok, error, name, tracks, routes, waypoints, warnings }`; bei Fehlern `ok: false` mit deutscher Meldung und leeren Listen, es wird nie geworfen. `routes` (rte/rtept) kam zum Rohmodell des Plans hinzu, `name` ist `null`, wenn die Datei keinen Namen enthält. `time` ist ein Zeitpunkt in Millisekunden seit 1970 oder `null`, `ele` Meter oder `null` (E3).
+- Gelesen wird nur über direkte Kindelemente (`trk/trkseg/trkpt`, `rte/rtept`, `wpt`, `metadata/name`), unabhängig von Namensraum und Präfix; Erweiterungen (`extensions`) bleiben unbeachtet, auch gleichnamige Elemente darin. Punkte mit unlesbaren oder außerhalb des Bereichs liegenden Koordinaten werden übersprungen und als Warnung gezählt; ein Track ohne gültigen Punkt gilt als Fehler. Dateien mit Dokumenttyp-Deklaration oder Entitäten werden abgelehnt.
+- Messung zu E4 (Headless-Browser, synthetische Datei): 200 000 Punkte (6,5 MB, kompakte Punkte) werden in rund 2 s gelesen; 200 001 Punkte und Dateien über 10 MB werden abgelehnt. Bei üblichen Punkten mit Höhe und Zeit (rund 100 Byte je Punkt) greift die Größengrenze schon bei etwa 100 000 Punkten. **Die Werte aus E4 bleiben unverändert**; die Lesezeit von rund 2 s am Limit blockiert den Hauptthread und ist bei RI3 (Laden) mit einem Hinweis „Datei wird gelesen“ zu beachten.
+- Ein Segment wird nicht zusammengesetzt (RI2); mehrere Segmente erzeugen die Warnung „Lücken in der Aufzeichnung“. Sind Track und Route vorhanden, werden beide geliefert, RI2 wählt den Track.
 
 ### RI2 – Routenmodell und Geometrie (reine Logik)
 
