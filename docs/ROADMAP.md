@@ -250,7 +250,7 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] Räumlicher Schnitt Route × Polygone (RI7, reine Logik js/route_overlay.js mit Tests und Laufzeitmessung an den Schutzgebieten; noch keine Anzeige, die folgt mit RI8)
 - [x] Schutzgebiete und Sperrungen entlang der Route (RI8, Block „Entlang der Route“ in der Routenkarte: js/route_context.js, js/route_context_logic.js, js/route_sources.js mit Tests; Linien und Punkte der Sperrungen gelten bis 30 m Abstand als berührt; Klick öffnet das Popup, Abschnitte auf der Karte hervorgehoben)
 - [x] Lawinenlage entlang der Route, Logik (RI9a, reine Logik js/route_avalanche.js mit Tests: Region je Abschnitt, Stufe nach Höhe der Route, vorsichtig bei Höhenunsicherheit; noch keine Anzeige, die folgt mit RI9b)
-- [x] Lawinenlage entlang der Route, Anzeige (RI9b, Block „Lawinenlage entlang der Route“: js/route_avalanche_view.js, js/route_avalanche_logic.js mit Tests; geprüft mit archiviertem Euregio-Bericht, **Merge erst nach dem Test mit aktuellen Berichten**)
+- [x] Lawinenlage entlang der Route, Anzeige (RI9b, Block „Lawinenlage entlang der Route“: js/route_avalanche_view.js, js/route_avalanche_logic.js mit Tests; geprüft nur mit archiviertem Euregio-Bericht, **Test mit aktuellen Berichten steht aus**; vor dem Test gemergt, weil die Seite noch nicht öffentlich ist)
 - [ ] Wegschwierigkeit-Matching (sac_scale)
 - [ ] Website Toolbox: Koordinaten & Höhe
 - [ ] Website Toolbox: Entfernungsmessungen
