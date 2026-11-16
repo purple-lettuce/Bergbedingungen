@@ -389,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.24 | 2026-11-16 | Route Intelligence Plan: Geländebedeckung (Land Cover, RI15a–RI15e) und Sonneneinstrahlung/Schatten (RI15f–RI15k) in Stufe 3.3 ergänzt, Entscheidungen E15–E17 offen; nur Dokumentation |
 | 4.23 | 2026-11-16 | Route Intelligence: RI10b (Wetter entlang der Route: Anzeige je Stützpunkt auf Knopfdruck, Datenschutzhinweis, Nullgradgrenze neben der Routenhöhe) umgesetzt; Stufe 2.2 damit abgeschlossen |
 | 4.22 | 2026-11-16 | Route Intelligence: RI10a (Wetter entlang der Route, Datenzugriff: Stützpunkte, Abruf in einer Abfrage, Zwischenspeicher; Wetterkarte unverändert) umgesetzt |
 | 4.21 | 2026-11-15 | Route Intelligence: RI9b (Lawinenlage entlang der Route: Abschnitte mit Stufe nach Höhe, Probleme, Quelle, Regionalhinweis; nur mit archiviertem Bericht geprüft, Saisontest offen) umgesetzt |
@@ -446,7 +447,7 @@ Diese Roadmap ist Teil eines größeren Dokumentationssystems:
 - **docs/WORKFLOW.md** — Entwicklungs-Workflow und Definition of Done
 - **docs/STYLEGUIDE.md** — Design System von Mountain Radar
 - **docs/LANDINGPAGE_PLAN.md** — Plan der Landing Experience (LP1–LP8)
-- **docs/ROUTE_INTELLIGENCE_PLAN.md** — Entwicklungsplan Route Intelligence: GPX, Höhenprofil, Kontext entlang der Route, DEM, Befunde (nur Plan, nichts umgesetzt)
+- **docs/ROUTE_INTELLIGENCE_PLAN.md** — Entwicklungsplan Route Intelligence: GPX, Höhenprofil, Kontext entlang der Route, DEM, Geländebedeckung (Land Cover, RI15a–RI15e), Sonne und Schatten (RI15f–RI15k), Befunde (nur Plan, nichts umgesetzt)
 - **docs/ALPINE_RISK_ENGINE.md** — Konzept der Alpine Risk Engine
 - **docs/IDEENSAMMLUNG.md** — Ideen, die noch nicht in der Roadmap stehen
 - **docs/LAWINENLAGE_ANALYSE.md** — Detaillierte Analyse der Lawinenlage-Integration

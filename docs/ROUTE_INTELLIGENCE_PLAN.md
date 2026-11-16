@@ -23,7 +23,7 @@ Der Plan folgt einer Produktentwicklung in vier aufeinander aufbauenden Ebenen. 
 |---|---|---|---|---|
 | **1 Kartenplattform** | „Was ist hier?“ | ein Ort bzw. Kartenausschnitt | Karte mit Wetter, Lawinenlage, Schutzgebieten, Wildlife, Sperrungen & Hinweisen | **heute verfügbar** |
 | **2 Route Intelligence** | „Was ist das für eine Tour?“ | eine konkrete Route (GPX) | eigene Tour auf der Karte, Länge, Höhenmeter, Höhenprofil; die vorhandenen Datenebenen entlang der Route | geplant (RI1–RI10) |
-| **3 Terrain Intelligence** | „Wie ist das Gelände entlang der Tour?“ | Gelände unter und neben der Route | Steigung, Exposition, Hangneigung, Geländecharakteristik aus einem Höhenmodell | geplant (RI11–RI15, RI20) |
+| **3 Terrain Intelligence** | „Wie ist das Gelände entlang der Tour?“ | Gelände unter und neben der Route | Steigung, Exposition, Hangneigung, Geländecharakteristik aus einem Höhenmodell; Geländebedeckung (Wald, offenes Gelände, Fels, Gewässer, Schnee/Eis) aus einem Land-Cover-Raster; Sonneneinstrahlung und Schatten aus Sonnenstand, Höhenmodell und Exposition | geplant (RI11–RI15k, RI20) |
 | **4 Alpine Risk Intelligence** | „Worauf muss ich achten?“ | alle Quellen zusammen | einheitliche, erklärbare Befunde; später eine Risikobewertung | geplant (RI16–RI19, RI21) |
 
 ## Was jede Ebene ausmacht
@@ -40,10 +40,10 @@ Der Gegenstand wechselt vom Ort zur **Tour**: Eine eigene Route wird geladen, da
 
 ### Ebene 3 – Terrain Intelligence
 
-Neue Information entsteht, die weder in der GPX-Datei noch in den vorhandenen Daten steht: aus einem **Höhenmodell** (DEM).
+Neue Information entsteht, die weder in der GPX-Datei noch in den vorhandenen Daten steht: aus einem **Höhenmodell** (DEM), aus der **Geländebedeckung** (Land Cover) und aus **Sonnenstand und Schatten**.
 - **Stufe 3.1 – Höhenmodell:** Quelle klären, Zugriff bauen (RI11, RI12).
 - **Stufe 3.2 – Geländeanalyse:** Steigung/Hangneigung und Exposition entlang der Route (RI13, RI14).
-- **Stufe 3.3 – Darstellung:** Gelände im Höhenprofil (RI15).
+- **Stufe 3.3 – Darstellung und ergänzende Geländeanalysen:** Gelände im Höhenprofil (RI15); Geländebedeckung (Land Cover) entlang der Route (RI15a–RI15e); Sonneneinstrahlung und Schatten entlang der Route (RI15f–RI15k).
 - **Stufe 3.4 – Geländecharakteristik:** Geländeformen wie Grat, Steilstufe, Mulde (RI20, zurückgestellt).
 
 Terrain Intelligence **beschreibt** das Gelände (Zahlen, Klassen, Abschnitte). Sie sagt nichts über Gefahr; die Deutung gehört zu Ebene 4.
@@ -135,7 +135,7 @@ Die Landing Page benennt GPX-Analyse, Risikoanalyse, Terrain Intelligence und Al
 | 2 Route Intelligence | 2.2 Route trifft Kartenplattform | RI7–RI10 | Analyse-Logik, Anzeige, Datenzugriff | Schutzgebiete, Sperrungen, Lawinenlage, Wetter entlang der Route (je Quelle getrennt) | keine neue Quelle |
 | 3 Terrain Intelligence | 3.1 Höhenmodell | RI11–RI12 | Entscheidung, Datenzugriff | nichts (Grundlage) | DEM |
 | 3 Terrain Intelligence | 3.2 Geländeanalyse | RI13–RI14 | Analyse-Logik, Anzeige | Steigung, Exposition | – |
-| 3 Terrain Intelligence | 3.3 Darstellung | RI15 | Anzeige | Gelände im Profil | – |
+| 3 Terrain Intelligence | 3.3 Darstellung und ergänzende Geländeanalysen | RI15, RI15a–RI15k | Anzeige; Entscheidung, Datenzugriff, Analyse-Logik | Gelände im Profil; Geländebedeckung, Sonne und Schatten entlang der Route | Land Cover (Quelle offen, E15); Sonne: keine eigene Quelle, Berechnung (E16 offen) |
 | 3 Terrain Intelligence | 3.4 Geländecharakteristik | RI20 (zurückgestellt) | Analyse-Logik | Geländeformen | ggf. DEM mit höherer Auflösung |
 | 4 Alpine Risk Intelligence | 4.1 Befunde | RI16–RI17 | Modell, Anzeige | Liste „Worauf achten?“ | – |
 | 4 Alpine Risk Intelligence | 4.2 Zusammenführung | RI18 | Orchestrierung | Einstieg „Route analysieren“ | – |
@@ -548,7 +548,7 @@ Ebene 3 · Stufe 3.2. Status: Geplant. Zwei PRs: RI14a Logik, RI14b Anzeige.
 **Ziel:** Himmelsrichtung, in die das Gelände an der Route abfällt.
 
 **Umfang:**
-- RI14a: Exposition aus dem DEM in acht Sektoren (wie die Lawinenrose); bei flachem Gelände „flach“ statt einer Richtung.
+- RI14a: Exposition aus dem DEM in acht Sektoren (wie die Lawinenrose); bei flachem Gelände „flach“ statt einer Richtung. Zusätzlich wird der Azimut der Hangrichtung in Grad ausgegeben (Eingang für RI15g, Sonne und Schatten).
 - RI14b: Anzeige je Abschnitt; Gegenüberstellung mit den im Bericht genannten Expositionen als Information („Lawinenproblem betrifft N, NO, O; Abschnitt exponiert NO“), ohne Schlussfolgerung.
 
 **Nicht im Umfang:** automatische Einstufung, Gesamtwertung.
@@ -576,6 +576,486 @@ Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Anzeige.
 **Abhängigkeiten:** RI5, RI13.
 
 **Definition of Done:** Umschaltbar, Kontrast AA, Screenshots, PR gemerged.
+
+### Geländebedeckung (Land Cover): Einordnung und Analyse für RI15a–RI15e
+
+Ebene 3 · Stufe 3.3. Status: Plan (16.11.2026), nichts umgesetzt, keine Datenquelle angebunden. Ergänzt Terrain Intelligence, ersetzt kein DEM-Paket.
+
+**Befund aus der Planung.** Der Plan deckt das Höhenmodell (RI11–RI15), die daraus abgeleiteten Größen (Steigung, Exposition, Profil) und die spätere Zusammenführung (RI16–RI19) ab. Die Frage „Was bedeckt das Gelände, durch das die Route führt?“ (Wald, offenes Gelände, Fels und Schutt, Gewässer, Schnee und Eis) hatte keinen eigenen Schritt. Ein Höhenmodell kann sie nicht beantworten: Es kennt die Form der Oberfläche, nicht ihre Bedeckung. Beides zusammen beschreibt das Gelände erst vollständig.
+
+**Begriffe.** *Land Cover* (Bodenbedeckung, hier „Geländebedeckung“) beschreibt, was die Oberfläche physisch bedeckt. *Land Use* (Nutzung) beschreibt, wofür sie genutzt wird. Dieser Plan behandelt nur die Bedeckung. „Alm“, „Skigebiet“ oder „Forstweg“ sind Nutzung und aus einem Bedeckungsraster nicht verlässlich ableitbar: Grünland oberhalb der Waldgrenze ist nicht automatisch Alm.
+
+#### Einordnung
+
+- **Keine neue Ebene, keine neue Hierarchie.** Die Pakete gehören zu Ebene 3, Stufe 3.3 (jetzt „Darstellung und ergänzende Geländeanalysen“). Es entsteht kein neues Epic.
+- **Pakete RI15a bis RI15e.** Die Buchstaben bezeichnen hier eigenständige Pakete, die nacheinander umgesetzt werden, nicht die Teil-PRs eines Pakets wie bei RI13a/RI13b. RI15 („Gelände im Höhenprofil“) bleibt unverändert.
+- **Gleiche Regeln wie überall:** eine Schicht je Paket, reine Logik zuerst, nur reale Daten, informieren statt entscheiden (Abschnitt 2), Paketregeln (ein PR, unter ca. 600 Zeilen).
+
+| Paket | Schicht | Inhalt | Nutzer sieht |
+|---|---|---|---|
+| RI15a | Recherche/Entscheidung | Quelle, Klassenschema, Abruf, Lizenz (E15) | nichts |
+| RI15b | Datenzugriff | Bedeckungsklasse an einem Punkt | nichts (Grundlage) |
+| RI15c | Analyse-Logik | Abschnitte und Anteile entlang der Route | nichts (getestete Logik) |
+| RI15d | Anzeige | Block „Geländebedeckung“ in der Routenkarte, Band im Profil | Anteile, Abschnitte, Profilband |
+| RI15e | Analyse-Logik (optional) | Bedeckung zusammen mit Steigung und Exposition | Kombinationen (über RI15d) |
+
+#### Warum diese Position
+
+1. **Nach RI12:** Land Cover ist wie das DEM ein Raster mit Kachelabruf, Zwischenspeicher, NoData-Fall, Statusmeldung und Lizenzhinweis (E1, E8). Diese Zugriffsart wird einmal mit RI12 gebaut und danach wiederverwendet, statt sie zweimal zu erfinden.
+2. **Unabhängig von RI13 und RI14:** RI15a bis RI15d brauchen weder Neigung noch Exposition. Nur RI15e kombiniert beides und kommt deshalb zuletzt.
+3. **Nach RI15 nummeriert:** Die Nummern RI16 bis RI21 und alle Verweise darauf bleiben stabil. RI15d nutzt das Profil (RI5) und kann die Bandkomponente und Farbregeln aus RI15 mitbenutzen.
+4. **Vor Ebene 4:** Befunde (RI16 ff.) sollen nur zusammenführen, was vorher einzeln nachvollziehbar vorliegt (Abschnitt 2, Prinzip 6). Die Befunde brauchen Land Cover nicht zwingend; RI16 bis RI18 werden dadurch nicht verzögert.
+5. **In Ebene 3, nicht in Ebene 4:** Land Cover beschreibt (Anteile, Abschnitte, Klassen) und bewertet nicht. Das ist die Aufgabe von Terrain Intelligence.
+
+```
+Kartenplattform → Route Intelligence → Terrain Intelligence → Alpine Risk Intelligence
+                                       ├─ Höhenmodell: Steigung, Exposition (RI11–RI15)
+                                       └─ Geländebedeckung: Wald, Offenland, Fels, Gewässer,
+                                          Schnee/Eis (RI15a–RI15e)
+```
+
+#### Welche Fähigkeiten entstehen
+
+Die Beispielsätze zeigen nur die Form der Aussage, es sind keine Daten.
+
+| Fähigkeit | Beispielform der Aussage | Braucht | Wann |
+|---|---|---|---|
+| Anteile je Bedeckungsgruppe | „Von 14,2 km: x km Wald, y km Offenland, z km vegetationsarm“ | Land Cover, Route | nach RI15c/d |
+| Abschnitte nach Bedeckung | „km 3,2 bis 5,1: Wald; danach offenes Gelände“ | Land Cover, Route | nach RI15c/d |
+| Übergang Wald zu offenem Gelände (Waldgrenze entlang der Route) | „Die Route verlässt den Wald bei km 5,1, rund 1 780 m laut GPX-Höhe“ | Land Cover, Route, GPX-Höhen (kein DEM) | nach RI15c/d |
+| Freigelände-Anteil | zusammenhängende Abschnitte ohne Baumbedeckung | Land Cover | nach RI15c/d |
+| Grünland (nur Bedeckung) | „Grünland“, nicht „Alm“ | Land Cover | nach RI15c/d |
+| Vegetationsarmes Gelände | „vegetationsarm (Fels, Schutt, Boden)“, die Klasse trennt Fels und Schutt nicht | Land Cover | nach RI15c/d |
+| Gewässer und Feuchtflächen in der Nähe | größere Flächen (Seen, Feuchtflächen) im Abstand; Bäche und Quellen werden bei 10 m nicht verlässlich erfasst | Land Cover | nach RI15c/d, eingeschränkt |
+| Schnee- und Eisflächen | Abschnitte mit „Schnee/Eis“ laut Aufnahmezeitraum | Land Cover | nach RI15c/d, mit Stand |
+| Geländecharakter (grobe Gesamtbeschreibung) | „überwiegend bewaldet“ oder „überwiegend offen“, aus den Anteilen | Land Cover | nach RI15c/d |
+| Bedeckung × Neigung und Exposition | „offenes Gelände steiler als 30°: x km“ | Land Cover, DEM (RI13a, RI14a) | RI15e |
+
+**Was Land Cover nicht liefert:** Nutzung (Alm, Skigebiet), Wegbeschaffenheit, Bäche und Quellen, aktuelle Schneelage, Gletscherspalten, Waldstruktur oder Schutzwirkung, Gefahr. Die Aussagen beschreiben die Bedeckung zum Zeitpunkt der Satellitenaufnahmen.
+
+#### Abhängigkeit zum DEM
+
+- **Keine harte Abhängigkeit für RI15a bis RI15d.** Das Bedeckungsraster ist ein eigener Datensatz. Die Pakete brauchen die Route (RI2) und optional die GPX-Höhen (RI4), aber kein Höhenmodell. Auch die Waldgrenze entlang der Route lässt sich mit der Höhe aus der GPX-Datei angeben.
+- **Weiche Abhängigkeit über das Zugriffsmuster.** RI11 und RI15a stellen dieselben Fragen (Abruf ohne Backend, CORS, Kachelzugriff, Datenmenge, Lizenz). Beide Spikes können gemeinsam laufen und ihre Ergebnisse in Abschnitt 13 festhalten. RI15b nutzt das Zugriffsmodul aus RI12.
+- **Harte Abhängigkeit nur für RI15e.** Die Kombination braucht Neigung und Exposition aus RI13a und RI14a.
+- **Unterschiedliche Gitter.** Bedeckungsraster und DEM haben eigene Gitter und Projektionen (CLC+ Backbone liegt zum Beispiel in EPSG:3035) und unterschiedliche Auflösung (10 m gegenüber 10 bis 30 m beim DEM). Die Umrechnung gehört in den Zugriff, nicht in die Analyse. Kombinationen laufen auf einer gemeinsamen Abtastung entlang der Route (E6, 25 m), die Unschärfe an Klassengrenzen wird dokumentiert.
+- **Klassendaten werden nicht interpoliert.** Anders als beim DEM (bilinear) gilt hier „nächster Pixel“, sonst entstehen Phantomklassen.
+
+#### Mögliche Datenquellen
+
+Angaben aus den Produktseiten der Anbieter, Stand der Recherche 16.11.2026. Sie sind eine Entscheidungsgrundlage, keine Zusage; die Prüfung (Abruf, Lizenz im Detail, Qualität in den Alpen) folgt in RI15a. Es wurde nichts abgerufen oder angebunden.
+
+| Quelle | Inhalt und Auflösung | Abdeckung | Lizenz und Zugang (laut Produktseite) | Einschätzung |
+|---|---|---|---|---|
+| **ESA WorldCover** 2020 (v100) und 2021 (v200), Sentinel-1/-2 | 10 m, 11 Klassen (u. a. Baumbedeckung, Strauchland, Grünland, vegetationsarm, Schnee und Eis, Gewässer, Feuchtgebiet, Moos und Flechten) | global | CC BY 4.0; öffentlich auf AWS (`esa-worldcover`, Region eu-central-1, ohne Anmeldung), STAC-Endpunkt, auch als Kachel-Downloads; jährliche Aktualisierung geplant. Änderungen 2020 → 2021 nicht als echte Veränderung lesen (andere Algorithmusversion) | **Primärkandidat:** einheitlich für alle Alpenländer, klare Lizenz, 10 m |
+| **CLC+ Backbone 2021** (Copernicus Land Monitoring Service) | 10 m, EPSG:3035, Referenz 2021 (Sentinel-2, Okt. 2020 bis März 2022), 11 Klassen: versiegelt, Nadelbäume, Laubbäume, immergrüne Laubbäume, niedrigwüchsige Gehölze, dauerhaft krautig, periodisch krautig, Flechten und Moose, vegetationsarm, Wasser, Schnee und Eis | EEA38 (Europa, ohne Großbritannien) | frei und offen nach Copernicus-Datenpolitik; Pflicht zur Quellenangabe, keine Zustimmung der EU suggerieren, Änderungen nennen, EU-Förderung nennen. GeoTIFF (rund 7 GB) oder Download-API, WMS vorhanden. Zielgenauigkeit 90 %; höhere Unsicherheit bei niedrigwüchsigen Gehölzen sowie Flechten und Moosen; Hinweis auf Überkorrektur an Nord- und Westhängen | **Primärkandidat:** trennt Nadel- und Laubwald und weist niedrigwüchsige Gehölze aus (nützlich an der Waldgrenze). Abruf ohne Backend ist die offene Frage (Dateigröße) |
+| **Copernicus HRL Tree Cover Density** (und davon abgeleitet Dominant Leaf Type, Forest Type) | 10 m, jährlich ab 2018, Baumbedeckung in Prozent | paneuropäisch | Lizenz auf der Produktseite nicht genannt; Teilprodukte auf Anfrage über den Service Desk | **Ergänzung:** Prozentwert eignet sich besser für „Wald wird lichter“ als ein Klassenraster. Lizenz und Zugang klären |
+| **CORINE Land Cover 2018** (CLMS) | 100 m, Mindestkartierfläche 25 ha, 44 Klassen, Referenz 2018 | Europa | frei und offen (Copernicus-Datenpolitik); GeoTIFF (rund 125 MB), Vektor, WMS | **Zu grob für Routen:** schmale Waldstreifen, Wege und kleine Flächen verschwinden. Nur Vergleich und Notlösung; Nutzungsnähere Klassen (Weiden, natürliches Grasland) als Hinweis |
+| **OpenStreetMap** (`natural=wood/scree/bare_rock/glacier/water/wetland/spring`, `landuse=meadow` u. a.) über Overpass | Vektor, je nach Region sehr unterschiedlich vollständig | global | ODbL; Overpass-Abfragen mit Lastgrenzen | **Ergänzung, keine Basis:** im Hochgebirge lückenhaft; sinnvoll für Quellen und Wasserstellen. Gehört zum zurückgestellten Overpass-Konzept (Abschnitt 9) |
+| **Österreich: BEV Land Cover** | 20 cm, 6 Klassen (hohe, mittlere, niedrige Vegetation, Gebäude, Bodenflächen, Wasser); Aktualisierung alle drei Jahre | Österreich | frei zum Download (COG, WMS) laut BEV; Lizenz auf der Seite nicht genannt | sehr genau, aber nur Österreich und ohne Trennung von Fels, Schutt und Boden. Später als Ländermodul denkbar |
+| **Schweiz: swissTLM3D** (Wald u. a. auf opendata.swiss), **Arealstatistik des BFS** | Vektor bzw. Hektar-Raster | Schweiz | offene Verwaltungsdaten; Lizenz im Einzelfall prüfen | Ländermodul nach dem Provider-Muster, erst nach der Basisquelle (Abschnitt 9, „Weitere Länder“) |
+| Italien, Frankreich, Slowenien (und weitere) | nicht geprüft | | | erst bei Bedarf |
+| Dynamic World, Esri 10 m Land Cover | nicht geprüft; nach bisherigem Kenntnisstand überwiegend über Google Earth Engine bzw. eigene Portale bereitgestellt | global | | wegen fehlendem Backend (E1, E10) voraussichtlich ungeeignet, im Spike nicht weiter verfolgen, falls sich das bestätigt |
+
+**Empfehlung für den Spike (keine Entscheidung):** WorldCover 2021 und CLC+ Backbone 2021 als Hauptkandidaten gegeneinander prüfen, Tree Cover Density als Ergänzung für die Waldgrenze, CORINE nur als Vergleich. Nationale Daten bleiben Ausblick.
+
+**Datenmenge (grobe Schätzung, in RI15a zu messen):** Der Alpenbogen umfasst rund 190 000 km². Bei 10 m sind das etwa 1,9 Milliarden Pixel. Vorberechnete Kacheln im Repository sind deshalb kaum vertretbar (E8); wahrscheinlicher ist der Abruf einzelner Kacheln oder Ausschnitte nach Bedarf, wenn die Quelle das ohne Backend erlaubt. Ob das gelingt, ist das zentrale Risiko von RI15a.
+
+**Klassengruppen (Entwurf für RI15a):** Die Quellen haben unterschiedliche Klassen. Die Anwendung arbeitet mit wenigen Gruppen, die Zuordnung steht als Datentabelle im Zugriffsmodul (RI15b).
+
+| Gruppe | WorldCover | CLC+ Backbone |
+|---|---|---|
+| Wald | Baumbedeckung | Nadelbäume, Laubbäume, immergrüne Laubbäume |
+| Niedrige Gehölze (Strauchland, Krummholz o. ä.) | Strauchland | niedrigwüchsige Gehölze |
+| Offenland (Grünland, Acker) | Grünland, Ackerland | dauerhaft krautig, periodisch krautig |
+| Vegetationsarm (Fels, Schutt, Boden) | vegetationsarm; Moos und Flechten (Zuordnung prüfen) | vegetationsarm; Flechten und Moose (Zuordnung prüfen) |
+| Schnee und Eis | Schnee und Eis | Schnee und Eis |
+| Gewässer und Feuchtflächen | Gewässer, krautiges Feuchtgebiet | Wasser |
+| Bebaut | bebaut | versiegelt |
+
+Die Klassennamen von WorldCover stammen aus der Produktdokumentation und sind in RI15a gegen sie zu bestätigen.
+
+#### Was sofort möglich ist und was später interessant wird
+
+**Sofort möglich** (nur Bedeckung und Route, kein DEM; Pakete RI15b bis RI15d): Anteile und Abschnitte je Gruppe, Übergang Wald zu offenem Gelände mit GPX-Höhe, vegetationsarme Abschnitte, Schnee- und Eisabschnitte mit Stand, größere Gewässer in der Nähe, grobe Beschreibung des Geländecharakters. Zusätzlich liefert die Waldgrenze entlang der Route Kontext zur Lawinenlage (siehe „Nutzen“).
+
+**Später für Alpine Intelligence** (nach RI15e, RI16 ff.; jeweils eigenes Paket und eigene Entscheidung):
+
+| Funktion | Nutzen | Zusätzlich nötig | Vorbehalt |
+|---|---|---|---|
+| Bedeckung als Befundtyp (Modul `terrain` in RI16) | einheitliche Liste „Worauf achten?“, z. B. „Route quert x km Schnee/Eis laut Landbedeckung“ | RI16, RI17, Erweiterung von RI19 | nur Beschreibung, Quelle und Stand je Befund |
+| Lawinenlage mit Wald und Offenland im Kontext | Abschnitte oberhalb und unterhalb der Waldgrenze neben der Lawinenstufe | RI9, RI14b, RI15c | Wald ist keine Schutzaussage; keine Lawinenbewertung |
+| Gletscher- und Spaltenbereiche | hohe Sicherheitsrelevanz | eigene Quelle (Gletscherinventare), nicht Land Cover | „Schnee und Eis“ im Bedeckungsraster ist kein Spaltenhinweis |
+| Steinschlag- und Murgang-Indikatoren (Abschnitt 9) | vegetationsarmes Gelände und Neigung als Eingangsgrößen | RI15e, Geologie- und Ereignisdaten | Land Cover allein sagt nichts über Ereignisse |
+| Orientierung und Sicht bei Schlechtwetter | Waldstrecken und offenes Gelände unterschiedlich beschreiben | Wetter (RI10), Konzept | qualitativ, nicht prognostisch |
+| Exponiertheit gegenüber Gewitter und Wind | offenes Gelände ohne Deckung entlang der Route | Wetter (RI10), Gratnähe (RI20) | Beschreibung, keine Prognose |
+| Wegbeschaffenheit und Schwierigkeit | Fels- und Schuttanteile als Hintergrund | OSM-Wege (`sac_scale`, Abschnitt 9) | Land Cover ist kein Wegdatensatz |
+| Lebensraumkontext zu Schutzgebieten | Wald oder Offenland innerhalb von Schutzgebieten neben den Regeln | RI8, Konzept | keine Aussage über das Vorkommen von Arten |
+| Wasserstellen | Quellen und Brunnen | OSM (Abschnitt 9) | aus Land Cover nicht ableitbar |
+
+#### Nutzen: was kurzfristig am meisten bringt
+
+1. **Anteile und Abschnitte nach Bedeckung (RI15c/RI15d).** Sofort verständlich und beantwortet die Leitfrage von Ebene 2 und 3 („Was ist das für eine Tour?“). Braucht kein DEM.
+2. **Waldgrenze entlang der Route.** Der Lawinenbericht nennt Höhengrenzen teils als „Waldgrenze“ ohne Zahlenwert. Die Lawinenlage entlang der Route (RI9) meldet für solche Abschnitte heute „Stufe unsicher“ (siehe `levelAtAltitude`). Die Landbedeckung kann daneben angeben, wo die Route den Wald verlässt. Das löst die Unsicherheit **nicht** auf (die Waldgrenze im Bericht ist ein regionaler, fachlicher Begriff, E12), liefert aber nachvollziehbaren Kontext als Gegenüberstellung mit Quelle. Das ist die engste Verbindung zu vorhandenen Funktionen.
+3. **Schnee- und Eisabschnitte als Hinweis** mit Stand der Aufnahme und deutlicher Einschränkung.
+4. **Kombination mit der Neigung (RI15e).** Fachlich der größte Gewinn („offenes Gelände steiler als 30°“), liegt aber hinter RI13/RI14 und damit hinter der DEM-Entscheidung.
+
+#### Nicht Bestandteil dieser Erweiterung
+
+Keine Implementierung, keine Anbindung einer Datenquelle, keine Architekturänderung, keine neue Ebene oder Hauptphase. Ausdrücklich nicht geplant: Nutzung (Alm, Skigebiet), Gesamtrisiko, Empfehlungen („gut begehbar“), aktuelle Schneebedeckung, Gletscherspalten, Waldstruktur und Schutzwald, Wasserstellen, Wegbeschaffenheit, Routing.
+
+### RI15a – Land-Cover-Quellenentscheidung und Spike
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Recherche/Entscheidung.
+
+**Ziel:** Quelle, Klassenschema, Abruf, Lizenz und Cache für die Geländebedeckung festlegen (E15).
+
+**Umfang:**
+- Vergleich der Kandidaten aus der Quellenübersicht: WorldCover 2021 und CLC+ Backbone 2021 (Hauptkandidaten), Tree Cover Density (Ergänzung), CORINE 2018 (Vergleich); nationale Daten (BEV, swissTLM3D) nur als Prüfung, ob sie die Basisquelle ergänzen können.
+- Gemessen werden: Abruf ohne Backend (CORS, HTTP-Range-Abfragen auf Cloud-optimierte Rasterdateien, Kachel- oder Kartendienst), Abruf nach Kachelkoordinate statt nach Routenverlauf (E1), Datenmenge je Tour und je Alpenregion, Gitter und Projektion, Klassenschema und Zuordnung zu den Gruppen, Lizenz und genauer Wortlaut der Namensnennung, Referenzjahr und Aktualität.
+- Qualitätsprobe in den Alpen: etwa 10 bis 15 bekannte Referenzstellen (geschlossener Wald, Waldgrenze, Fels und Schutt, Gletscher oder Firn, See, Almwiese) gegen Orthofoto und Topokarte; Ergebnis als Tabelle. Beachtet werden Schatten- und Nordhänge, Schnee im Aufnahmezeitraum, schmale Waldstreifen.
+- Ergebnis: Entscheidungsvorlage (E15) in Abschnitt 13, neuer Abschnitt „Land Cover“ in DATENQUELLEN, Entwurf der Klassengruppen. Der Prototyp bleibt außerhalb der Anwendung.
+
+**Nicht im Umfang:** Einbindung in die Anwendung, Vorberechnung, Pipeline, Pakete der Ebene 4.
+
+**Voraussetzungen:** RI0; sinnvoll gemeinsam mit RI11 (gleiche Fragen zu Abruf, Datenmenge und Lizenz, Ergebnisse gemeinsam festhalten). Nicht abhängig von RI12.
+
+**Risiken:** Keine Quelle lässt sich ohne Backend abrufen (CORS, Dateigröße). Die Klassifikation ist in den Alpen bei Schatten, Schnee und schmalen Strukturen unzuverlässig. Lizenz der Tree Cover Density unklar. Vorberechnete Kacheln für den Alpenbogen sind zu groß (E8). Gegenmaßnahme: Messung vor Entscheidung; ohne tragfähigen Abruf bleibt das Paket mit dokumentiertem Ergebnis stehen, die Ebenen 2 und 3 bleiben ohne Land Cover nutzbar.
+
+**Abhängigkeiten:** RI0 (inhaltlich verwandt mit RI11).
+
+**Definition of Done:** E15 entschieden und dokumentiert, Stichprobentabelle dokumentiert, DATENQUELLEN ergänzt, Folgepakete bei Bedarf angepasst, PR gemerged.
+
+### RI15b – Land-Cover-Zugriff (Klasse an einem Punkt)
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Datenzugriff.
+
+**Ziel:** Modul, das für Koordinaten die Bedeckungsklasse und die Gruppe liefert.
+
+**Umfang:** `js/landcover.js` mit `coverAt(lat, lon)` und `coversAlong(points)`; Ergebnis je Punkt `{ class, group, source, referenceYear }`. Klassentabelle (Code → Gruppe → deutscher Name) als Daten. Zugriff über das Kachelmodul aus RI12, Zwischenspeicher je Sitzung (E8). Nächster Pixel statt Interpolation. Klare Fehler („Kachel nicht verfügbar“, „außerhalb der Abdeckung“); NoData wird „unbekannt“, nie eine Standardklasse. Statusmeldung in der Datenstatus-Leiste, Namensnennung im Fußbereich. Gitter-zu-Pixel-Zuordnung und Klassenzuordnung als getestete Logik mit synthetischen Rastern, dazu eine Vergleichsseite für Entwickler (Referenzpunkte aus RI15a).
+
+**Nicht im Umfang:** Abschnitte, Anteile, Anzeige, Kombination mit dem DEM.
+
+**Voraussetzungen:** RI15a, RI12 (Zugriffsmuster und Kachelmodul).
+
+**Risiken:** CORS und Range-Abfragen, Datenmenge bei langen Routen (viele Kacheln), Dienstausfall, Pixelränder, anderes Gitter als das DEM. Gegenmaßnahme: Abtastung in 25 m Abstand (E6), Abruf nach Kachelkoordinate, Limit und eigener Fehlerzustand.
+
+**Abhängigkeiten:** RI15a, RI12.
+
+**Definition of Done:** Klassen an den Referenzpunkten wie erwartet, Fehlerfälle getestet, Lizenzhinweis im Fußbereich, DATENQUELLEN aktualisiert, PR gemerged.
+
+### RI15c – Geländebedeckung entlang der Route
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Analyse-Logik (ohne DOM).
+
+**Ziel:** Aus den Klassen entlang der Route Abschnitte und Anteile bilden.
+
+**Umfang:** Neues Modul (z. B. `js/route_cover_logic.js`): Abtastung (E6, 25 m); gleiche Gruppen zu Abschnitten von km bis km zusammenfassen; Einzelpixel unterdrücken (Mindestlänge eines Abschnitts als benannte Konstante, Startwert 50 m, an echten Daten zu prüfen; kürzere Stücke zählen in den Anteilen mit, bilden aber keinen eigenen Abschnitt); Anteile je Gruppe in km und Prozent der bewerteten Strecke, Anteil „unbekannt“ getrennt ausgewiesen; Übergang Wald zu offenem Gelände mit km und GPX-Höhe (fehlt die Höhe, bleibt sie `null`). Das Ergebnis ist ein eigenes Objekt neben der Route (Abschnitt 11). Testseite mit synthetischer Route und synthetischem Raster mit bekannten Anteilen; Randfälle: Route außerhalb der Abdeckung, Lücken (`gaps`), nur NoData, Route genau auf einer Klassengrenze.
+
+**Nicht im Umfang:** Anzeige, Befunde, Bewertung, Kombination mit dem DEM.
+
+**Voraussetzungen:** RI15b, RI2; RI4 für die Höhen.
+
+**Risiken:** GPS-Versatz und 10-m-Raster: Ein Weg am Waldrand kann dem Nachbarpixel zugeordnet werden; ein schmaler Weg im Wald erscheint als „Offenland“. Prozentwerte wirken genauer, als sie sind. Gegenmaßnahme: Mindestlänge, geprüfte Option einer Umfeldauswertung (Mehrheit im Umfeld des Punktes), Methodenbeschreibung, Anzeige „laut Landbedeckung“.
+
+**Abhängigkeiten:** RI15b, RI2.
+
+**Definition of Done:** Logik gegen synthetische Raster getestet (Anteile, Abschnitte, Randfälle), Methode dokumentiert (Abtastung, Mindestlänge, Umfeld), Stichprobe mit einer echten Route gegen eine Referenzkarte dokumentiert, keine Änderung der Oberfläche, Plan und ROADMAP aktualisiert, PR gemerged.
+
+### RI15d – Geländebedeckung in der Anzeige
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Anzeige. Bei Bedarf nach Paketregel in zwei PRs geteilt (Block in der Routenkarte, Band im Profil).
+
+**Ziel:** Anteile und Abschnitte der Geländebedeckung sichtbar machen.
+
+**Umfang:**
+- Block „Geländebedeckung“ in der Routenkarte, nach dem Muster der Blöcke zu Schutzgebieten, Lawinenlage und Wetter; weil Kacheln aus dem Netz geladen werden, auf Knopfdruck. Anteile je Gruppe (km und Prozent), Abschnittsliste mit km von bis, „unbekannt“ ausgewiesen.
+- Optionales, schaltbares Band im Höhenprofil (gemeinsame Bandkomponente mit RI15), Hover und Tastatur zeigen die Gruppe.
+- Legende, eigene Palette, die weder mit den Lawinenstufen noch mit den Neigungsklassen verwechselt wird (STYLEGUIDE), Quelle, Referenzjahr und Namensnennung.
+- Dauerhafter Hinweis: „Landbedeckung aus Satellitendaten (Referenzjahr …, 10-m-Raster). Beschreibt die Oberfläche, keine Gefahr und keine Begehbarkeit.“
+- Zustand und Fehler über die Datenstatus-Leiste; mobil im Sheet. Keine neue Rechenlogik.
+
+**Nicht im Umfang:** neue Analysen, Befunde, Kombination mit dem DEM, Exportfunktionen.
+
+**Voraussetzungen:** RI15c, RI5; abgestimmt mit RI15 (Bandkomponente, Palette).
+
+**Risiken:** Farbkonflikt mit Lawinen- und Neigungsfarben, überladene Routenkarte, Prozentwerte wirken präzise, Netzlast durch Kachelabruf. Gegenmaßnahme: eigene Palette im STYLEGUIDE, Abruf nur auf Knopfdruck, Hinweistext, gerundete Anzeige.
+
+**Abhängigkeiten:** RI15c, RI5, RI15.
+
+**Definition of Done:** Anzeige in Hell, Dunkel und Mobil (390 und 320), Kontrast AA, Tastatur und Textalternative geprüft, Screenshots unter `docs/screenshots/`, STYLEGUIDE, ROADMAP und README aktualisiert, Namensnennung im Fußbereich, PR gemerged.
+
+### RI15e – Geländebedeckung mit Gelände kombinieren (optional)
+
+Ebene 3 · Stufe 3.3. Status: Geplant, optional. Schicht: Analyse-Logik.
+
+**Ziel:** Bedeckung zusammen mit Steigung und Exposition beschreiben, zum Beispiel „offenes Gelände steiler als 30°: x km“ oder die Waldgrenze mit Höhe aus dem DEM.
+
+**Umfang:** Kreuzung der Abschnitte aus RI15c mit den Ergebnissen aus RI13a und RI14a auf gemeinsamer km-Basis; Waldgrenzhöhe aus dem DEM, wenn die GPX-Datei keine Höhen hat; Gegenüberstellung mit Höhengrenzen des Lawinenberichts (`treeline`) als Information, ohne die Unsicherheit aus RI9 aufzulösen (E12). Reine Logik und Testseite; die Anzeige der Kombinationen übernimmt der Block aus RI15d in einem kleinen Folge-PR.
+
+**Nicht im Umfang:** Einstufung, Gesamtwert, Befunde (Ebene 4), Empfehlungen.
+
+**Voraussetzungen:** RI15c, RI13a, RI14a; RI9 für die Gegenüberstellung.
+
+**Risiken:** Unterschiedliche Gitter und Auflösung führen zu scheinbar genauen Kreuzungen. Die „Waldgrenze“ im Bericht ist ein regionaler, fachlicher Begriff, die Landbedeckung zeigt nur die lokale Baumbedeckung. Die Kombination wird als Gefahrenurteil missverstanden. Gegenmaßnahme: Formulierung „laut Landbedeckung“, dokumentierte Toleranzen, beide Angaben nebeneinander mit Quelle.
+
+**Abhängigkeiten:** RI15c, RI13, RI14, RI9.
+
+**Definition of Done:** Logik inklusive Randfälle (NoData, flaches Gelände) getestet, Stichproben dokumentiert, Plan und ROADMAP aktualisiert, PR gemerged.
+
+### Sonneneinstrahlung und Schatten: Einordnung und Analyse für RI15f–RI15k
+
+Ebene 3 · Stufe 3.3. Status: Plan (16.11.2026), nichts umgesetzt. Es wird nichts berechnet, keine Bibliothek gewählt und keine Datenquelle angebunden. Erweitert Terrain Intelligence und kann später in Alpine Risk Intelligence einfließen.
+
+**Befund aus der Planung.** Der Plan beschreibt das Gelände bisher nach Form (Steigung, Exposition) und Bedeckung (RI15a–RI15e). Die Frage „Wann scheint hier die Sonne, und wo liegt die Route im Schatten?“ fehlt. Sie entsteht erst aus dem Zusammenspiel von Sonnenstand, Höhenmodell und Exposition, und sie hängt an Tages- und Jahreszeit. Anwendungen wie Shademap zeigen das als Schattenkarte für eine Fläche. Für Mountain Radar ist die passende Perspektive die **Route**: Welche Abschnitte liegen wann in Sonne oder Schatten?
+
+**Zwei Dinge, die nicht verwechselt werden dürfen:**
+- **Geometrische Besonnung** (hier geplant): Die Sonne steht so, dass sie die Fläche treffen *kann*. Bewölkung und Nebel sind nicht enthalten.
+- **Tatsächliche Sonne:** hängt zusätzlich vom Wetter ab (Bewölkung, Strahlung). Das kommt erst mit RI15k und der Wetterintegration aus RI10.
+
+#### Einordnung
+
+- **Keine neue Ebene, keine neue Hierarchie.** Die Pakete gehören zu Ebene 3, Stufe 3.3 (jetzt „Darstellung und ergänzende Geländeanalysen“), neben Geländebedeckung (RI15a–RI15e).
+- **Pakete RI15f bis RI15k.** Wie bei RI15a–RI15e sind die Buchstaben eigenständige Pakete, keine Teil-PRs. Gleiche Regeln: eine Schicht je Paket, reine Logik zuerst, nur reale Daten, informieren statt entscheiden.
+
+| Paket | Schicht | Inhalt | Nutzer sieht |
+|---|---|---|---|
+| RI15f | Analyse-Logik (ohne DOM) | Sonnenstand: Richtung und Höhe der Sonne, Auf- und Untergang | nichts (Grundlage) |
+| RI15g | Analyse-Logik | Hangbesonnung: Sonne gegen Neigung und Exposition (Eigenschatten) | nichts (Grundlage) |
+| RI15h | Machbarkeit, dann Logik | Geländeschatten durch umliegende Berge (Fernschatten), Horizontmodell | nichts; Entscheidung, zurückgestellt |
+| RI15i | Analyse-Logik | Sonne und Schatten entlang der Route (Route Sun Exposure, Route Shadow Analysis) | nichts (getestete Logik) |
+| RI15j | Anzeige | Block „Sonne und Schatten“, Zeitwahl, Band im Profil | sonnige und schattige Abschnitte |
+| RI15k | Konzept (zurückgestellt) | Wald-Beschattung und Hitzebelastung | nichts; Konzept |
+
+#### Warum diese Position
+
+1. **Nach RI14:** Die Hangbesonnung (RI15g) baut auf Neigung (RI13a) und Exposition (RI14a) auf. Dort steckt schon die halbe Antwort.
+2. **RI15f früh möglich:** Der Sonnenstand braucht nur Koordinaten und Zeit, kein DEM. Er ist reine Logik und kann als erstes Paket der Linie unabhängig vom DEM entstehen.
+3. **Nach RI15 und RI15a–RI15e nummeriert:** Nummern und Verweise bleiben stabil. Land Cover wird nur von RI15k benötigt.
+4. **Vor Ebene 4:** Ebene 4 führt zusammen, was vorher einzeln nachvollziehbar vorliegt. Sonne und Schatten sind eine Geländebeschreibung (Ebene 3), keine Bewertung.
+5. **Schwierigstes zuletzt:** Der Fernschatten (RI15h) braucht das DEM weit über die Route hinaus und ist der größte Rechen- und Genauigkeitsschritt. Er wird erst angegangen, wenn die einfachere Hangbesonnung im Einsatz ist.
+
+```
+Terrain Intelligence
+├─ Höhenmodell:       Höhe, Steigung, Exposition              (RI11–RI15)
+├─ Geländebedeckung:  Wald, Offenland, Fels, Schnee/Eis       (RI15a–RI15e)
+└─ Sonne und Schatten: Sonnenstand × Hang × Horizont          (RI15f–RI15k)
+                        └→ später: Befunde in Alpine Risk Intelligence
+```
+
+#### Welche Fähigkeiten entstehen
+
+| Frage | Form der Antwort | Braucht | Paket | Grenze |
+|---|---|---|---|---|
+| Wann gehen Sonne auf und unter, wie lang ist der Tag am Startpunkt? | Uhrzeiten, Tageslänge | Koordinaten, Datum | RI15f | ohne Gelände: Aufgang im Tal liegt später |
+| Wann erreicht die Sonne einen Hang? | Uhrzeit der ersten und letzten Besonnung des Abschnitts | Sonnenstand, Neigung, Exposition | RI15g (erste Näherung), RI15h (mit Fernschatten) | RI15g kennt nur den Eigenschatten und nennt den Zeitpunkt zu früh, wo Berge gegenüber das Tal beschatten |
+| Wann wird ein Osthang erstmals besonnt? | Uhrzeit je Abschnitt | wie oben | RI15g, RI15h | wie oben |
+| Welche Teile der Route liegen am Vormittag im Schatten? | Abschnitte (km von bis) für ein Zeitfenster | Route, RI15g (RI15h) | RI15i | Zeitbezug ist eine feste Uhrzeit oder ein Zeitfenster, keine Gehzeitprognose |
+| Welche Abschnitte sind ganztägig sonnig oder schattig? | Besonnungsdauer je Abschnitt, Anteil an der Tageslänge | wie oben | RI15i | „ganztägig“ braucht eine Schwelle (z. B. Anteil der Tageslänge), in RI15i festzulegen |
+| Wie verteilen sich Süd-, Nord-, Ost- und Westhänge auf der Route? | Anteile und Abschnitte je Himmelsrichtung, nach Sonnenverhalten beschrieben | Exposition (RI14a) | schon mit RI14, Erweiterung in RI15i | Exposition allein sagt noch nichts über die Uhrzeit |
+| Wie unterscheidet sich der Verlauf je Datum? | gleiche Route für Sommer, Frühjahr, Winter | Datum als Eingabe | RI15i, RI15j | im Winter dominiert der Fernschatten stärker (siehe unten) |
+| Welche Route verläuft überwiegend im Waldschatten? | Waldabschnitte, in denen Baumkronen wahrscheinlich beschatten | Land Cover (RI15c), Sonnenstand | RI15k | Baumhöhe und Kronenschluss sind nicht modelliert; „Wald“ ist ein Hinweis, kein Schattenmodell |
+| Welche Abschnitte besitzen hohe Hitzebelastung? | Sonnenstunden, Temperatur laut Prognose, Höhenlage nebeneinander | RI15i, Wetter (RI10) | RI15k | keine Bewertung der Gesundheit, kein Hitzeindex ohne eigenes Konzept |
+
+**Hangrichtungen (Richtwerte für 47° N, Mittag, ohne Fernschatten):** Ein nach Süden geneigter Hang wird mittags immer direkt getroffen. Ein nach Norden geneigter Hang erhält mittags nur dann direkte Sonne, wenn er flacher ist als die Sonnenhöhe: im Juni (Sonnenhöhe rund 66°) fast alle Nordhänge, zur Tag-und-Nacht-Gleiche (rund 43°) Nordhänge flacher als etwa 43°, im Dezember (rund 20°) nur Nordhänge flacher als etwa 20°. Ost- und Westhänge werden vormittags bzw. nachmittags getroffen. Das sind astronomische Richtwerte zur Orientierung, keine Ergebnisse der geplanten Analyse.
+
+**Tages- und Jahreszeit.** Die Sonnenbahn ändert sich stark mit dem Datum. Richtwerte für 47° N ohne Gelände: Tageslänge rund 8 bis 9 Stunden im Dezember und gut 15,5 Stunden im Juni; Sonnenhöhe mittags rund 20° im Dezember, rund 43° zur Tag-und-Nacht-Gleiche, rund 66° im Juni; Aufgang im Juni im Nordosten (Azimut rund 54°), im Dezember im Südosten (rund 126°). Folgen für die Analyse: Im Sommer steht die Sonne hoch, der Eigenschatten bestimmt den Tagesgang, und lange Besonnung ist die Regel. Im Winter steht sie tief; Täler und Nordhänge liegen oft stundenlang oder ganztägig im Fernschatten, und der Unterschied zwischen RI15g (nur Eigenschatten) und RI15h (mit Fernschatten) ist am größten. Zeitumstellung und Zeitzone sind Teil der Planung (siehe Daten).
+
+#### Welche Daten für eine spätere Sonnenanalyse erforderlich wären
+
+| Datum | Wofür | Quelle | Stand |
+|---|---|---|---|
+| Route mit Streckenposition | Abschnitte und km-Angaben | RI2 | vorhanden |
+| Datum, Uhrzeit oder Zeitfenster, Zeitzone | Sonnenstand; Sommerzeit und Reisezone müssen stimmen | Eingabe des Nutzers; Zeitzone aus Ort der Route | neu (E17) |
+| Zeiten aus der GPX-Datei | optional: aufgezeichnete Tour rückblickend zuordnen | RI1/RI4 (`time`, sofern vorhanden) | vorhanden, optional |
+| Sonnenstand (Azimut, Höhe, Auf- und Untergang) | Grundlage jeder Besonnung | Berechnung nach astronomischem Verfahren; Umsetzung offen (E16) | neu |
+| Geländehöhe | Neigung, Exposition, Horizont | DEM (RI11, RI12) | geplant |
+| Neigung und Exposition je Abschnitt | Hangbesonnung | RI13a, RI14a | geplant |
+| DEM im Umfeld der Route (Suchradius) | Fernschatten: Beispiel bei 5° Sonnenhöhe beschattet ein 1 000 m höherer Berg Gelände bis etwa 11 km dahinter | RI12 mit größerem Kachelbedarf | geplant, Datenmenge offen (RI15h) |
+| Bedeckung (Wald) | grober Hinweis auf Beschattung durch Bäume | RI15c | geplant |
+| Bewölkung, Strahlung, Sonnenscheindauer | tatsächliche Sonne statt geometrischer Besonnung | Wetterquelle aus RI10; ob sie die Werte liefert, ist in RI15k zu prüfen | nicht geprüft |
+| Gebäude, einzelne Bäume, Felswände unterhalb der DEM-Auflösung | genauere Schatten | nicht vorgesehen | Grenze |
+
+Die Anforderungen an Genauigkeit (Sonnenstand, Horizontwinkel, Auflösung) werden in RI15f und RI15h festgelegt und im Plan ergänzt.
+
+#### Abhängigkeiten zu DEM und Exposition
+
+| Paket | Höhe (RI12) | Neigung (RI13a) | Exposition (RI14a) | DEM im Umfeld | Sonnenstand (RI15f) | Wetter (RI10) | Land Cover (RI15c) |
+|---|---|---|---|---|---|---|---|
+| RI15f | – | – | – | – | selbst | – | – |
+| RI15g | ja | ja | ja | nein | ja | – | – |
+| RI15h | ja | ja | – | **ja** | ja | – | – |
+| RI15i | ja | ja | ja | optional (RI15h) | ja | – | – |
+| RI15j | – | – | – | – | über RI15i | – | – |
+| RI15k | – | – | – | – | über RI15i | ja | ja |
+
+- **RI15f hängt an nichts** außer den Koordinaten und kann unabhängig vom DEM entstehen.
+- **RI15g ist die kleinste DEM-Erweiterung:** Sie nutzt nur, was RI13a und RI14a liefern, und braucht keine weiteren Kacheln.
+- **RI15h ist die größte Abhängigkeit:** DEM weit über den Routenkorridor hinaus. Abruf bleibt kachelweise (E1), die Datenmenge ist die zentrale Frage (E8, RI11).
+- **Auflösung des DEM begrenzt die Aussage:** Bei 10 bis 30 m werden Grate, Rinnen und Felswände geglättet; Schatten schmaler Täler und steiler Wände sind unscharf (gleiche Grenze wie bei RI20).
+- **Exposition:** RI14a liefert acht Sektoren. Für die Besonnung ist der genaue Azimut in Grad nötig. RI14a soll ihn deshalb zusätzlich zum Sektor ausgeben (Ergänzung dort vermerkt); die Sektoren dienen nur der Anzeige.
+
+#### Was kurzfristig realistisch ist und was erst langfristig relevant wird
+
+**Kurzfristig realistisch** (nach RI14a, jeweils kleine PRs ohne neue Datenquelle über das DEM hinaus):
+- **RI15f Sonnenstand:** reine Logik, jederzeit machbar. Liefert Sonnenauf- und -untergang und Tageslänge am Startpunkt. Das überschneidet sich mit der geplanten Toolbox-Funktion „Sonnenstand & Dämmerung“ (ROADMAP, MOB-T6, derzeit Phase 5) und kann dort wiederverwendet werden. Die ROADMAP-Priorität ändert dieser Plan nicht.
+- **RI15g Hangbesonnung:** erste ehrliche Antwort auf „Wann erreicht die Sonne einen Hang?“, mit dem Vorbehalt Eigenschatten.
+- **RI15i Sonne und Schatten entlang der Route** auf Basis von RI15g.
+- **RI15j Anzeige** dazu.
+
+**Mittelfristig:** RI15h Fernschatten, erst wenn RI15g im Einsatz ist und Rückmeldungen vorliegen, ob der Eigenschatten genügt.
+
+**Langfristig und für Alpine Risk Intelligence relevant** (jeweils eigenes Paket und eigene Entscheidung; nur beschreibend):
+
+| Funktion | Nutzen | Zusätzlich nötig | Vorbehalt |
+|---|---|---|---|
+| Sonne und Schatten als Befundtyp (neues Modul oder Teil von `terrain` in RI16) | einheitliche Liste „Worauf achten?“, z. B. „Abschnitt km 4 bis 6 laut Berechnung bis 11:30 im Schatten“ | RI16, RI17, Schemaerweiterung | Quelle, Datum und „ohne Bewölkung“ in jedem Befund |
+| Sonne neben dem Lawinenbericht (Erwärmung, Nassschnee, Gleitschnee) | Zeiten der Besonnung je Abschnitt neben den im Bericht genannten Problemen und Expositionen | RI9, RI14b, RI15i, möglichst RI15h | Gegenüberstellung als Information, kein Schluss auf Gefahr (E12) |
+| Firn und Frost (Frühjahrstouren, Schattenhänge am Morgen) | Besonnungszeit als Kontext zur Wahl der Tageszeit | Wetter (RI10), Konzept | Schneebeschaffenheit wird nicht modelliert |
+| Hitzebelastung im Sommer | Sonnenstunden, Temperatur laut Prognose und Höhenlage nebeneinander; Hinweis auf Abschnitte ohne Schatten | RI15k, RI10, ggf. Wasserstellen (OSM, Abschnitt 9) | keine Gesundheitsbewertung, kein Hitzeindex ohne eigenes Konzept |
+| Tageslicht entlang der Tour | Sonnenuntergang und Dämmerung im Verhältnis zur Tour | RI15f, Zeitbezug (E17) | keine Gehzeitprognose (Abschnitt 12) |
+| Wald-Beschattung | Waldabschnitte als Hinweis auf Schatten im Sommer | RI15k, Baumhöhendaten (nicht geprüft) | Land Cover kennt keine Kronenhöhe |
+| Schattenkarte als Flächenlayer (wie Shademap) | Gelände unabhängig von einer Route betrachten | Rechenkonzept im Browser, Datenmenge | eigene Kartenebene, Ebene 1; erst nach der Routenanalyse zu bewerten (Abschnitt 9) |
+
+#### Nutzen für Sommeraktivitäten
+
+- **Wandern und Bergtouren:** Abschnitte in praller Sonne und im Schatten für die Wahl der Tageszeit sichtbar machen; Frühstart und Rückweg planen, wenn der Aufstieg mittags in der Sonne läge.
+- **Mehrtagestouren und Alpenüberquerungen:** Hitzeabschnitte und Sonnenuntergang je Etappe im Blick.
+- **Radfahren und Trailrunning:** lange besonnte Rampen und schattige Passagen für Trinkplanung und Tageszeit (Hinweis, keine Empfehlung).
+- **Gletscher und Firn:** nur indirekt; Gletscher- und Spaltenfragen gehören zu eigenen Quellen (siehe RI15a–RI15e).
+
+Die Aussagen beschreiben Sonne und Schatten, keine Eignung und keine Belastungsgrenze.
+
+#### Nicht Bestandteil dieser Erweiterung
+
+Keine Implementierung, keine Sonnenberechnung, keine Wahl einer Bibliothek, keine Datenquelle, keine Architekturänderung, keine neue Ebene oder Hauptphase. Ausdrücklich nicht geplant: Gehzeit- und Konditionsprognosen, Gesundheits- oder Hitzebewertung, Empfehlungen („geeignet bei Hitze“), Gesamtrisiko, Prognose von Schneeverhältnissen, Gebäude- und Einzelbaumschatten.
+
+### RI15f – Sonnenstand
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Analyse-Logik (ohne DOM).
+
+**Ziel:** Für einen Ort und einen Zeitpunkt Richtung und Höhe der Sonne sowie Auf- und Untergang liefern.
+
+**Umfang:**
+- Neues Modul ohne Karten- und DOM-Bezug (z. B. `js/sun.js`): Sonnenazimut und Sonnenhöhe für Breite, Länge und Zeitpunkt; Sonnenauf- und -untergang, Tageslänge, Dämmerung; Eingaben und Ausgaben in Grad und UTC, Umrechnung in Ortszeit getrennt (Zeitzone und Sommerzeit).
+- Entscheidung E16: Berechnung als eigener Code (E14) oder Prüfung einer Bibliothek (DATENQUELLEN führt SunCalc als geplante Ephemeris-Quelle); vor Beginn zu treffen, hier nicht vorweggenommen. Festzulegen: geforderte Genauigkeit und ob Refraktion berücksichtigt wird.
+- Testseite `scripts/test_sun.html` mit Referenzwerten aus unabhängigen Quellen (Sonnenauf- und -untergang an bekannten Orten und Daten, Sommer- und Wintersonnenwende, Tag-und-Nacht-Gleiche, Zeitumstellung, hohe und niedrige Breiten).
+
+**Nicht im Umfang:** Gelände, Schatten, Route, Anzeige, Wetter.
+
+**Voraussetzungen:** RI0 (E16 entschieden); keine DEM-Abhängigkeit.
+
+**Risiken:** Zeitzonen- und Sommerzeitfehler, Verwechslung von Orts- und Weltzeit, Genauigkeit am Horizont. Gegenmaßnahme: Berechnung in UTC, Referenzfälle für Zeitumstellung, dokumentierte Toleranz.
+
+**Abhängigkeiten:** keine; Wiederverwendung für die Toolbox-Funktion „Sonnenstand & Dämmerung“ möglich.
+
+**Definition of Done:** Referenzwerte innerhalb der dokumentierten Toleranz, Zeitzonenfälle getestet, E16 dokumentiert, DATENQUELLEN geprüft, keine Änderung der Oberfläche, PR gemerged.
+
+### RI15g – Hangbesonnung (Eigenschatten)
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Analyse-Logik (ohne DOM).
+
+**Ziel:** Für einen Hang (Neigung und Exposition) angeben, in welchen Zeiträumen ihn die Sonne treffen kann, soweit nur seine eigene Lage das bestimmt.
+
+**Umfang:**
+- Reine Logik: Winkel zwischen Sonnenrichtung (RI15f) und Hangfläche aus Neigung und Azimut der Hangrichtung (RI13a, RI14a); ergibt für einen Tag die Zeiträume mit Besonnung, Zeitpunkt der ersten und letzten Besonnung und die Dauer.
+- Ausdrücklich „ohne Fernschatten“: Beschattung durch umliegende Berge ist nicht enthalten. Ergebnisobjekt nennt das als Feld (`horizon: 'none'`), damit Anzeige und Befunde es nicht vergessen.
+- Flaches Gelände: keine Exposition, Besonnung nur durch die Sonnenhöhe (kein „Süden“ erfinden).
+- Testseite mit synthetischen Hängen und Sonnenständen: Süd-, Nord-, Ost- und Westhang, flach, sehr steil, Sommer, Winter.
+
+**Nicht im Umfang:** Fernschatten, Route, Anzeige, Wetter, Bewertung.
+
+**Voraussetzungen:** RI15f, RI13a, RI14a.
+
+**Risiken:** Der Eigenschatten überschätzt die Besonnung in tiefen Tälern, vor allem im Winter und an Nordhängen; Nutzer lesen „sonnig“ als Zusage. Neigung und Exposition aus einem 10- bis 30-m-Modell sind geglättet. Gegenmaßnahme: Pflichtfeld „ohne Fernschatten“, Hinweistext, Beschreibung der Methode.
+
+**Abhängigkeiten:** RI15f, RI13a, RI14a.
+
+**Definition of Done:** Logik gegen analytische Referenzfälle getestet, Randfälle (flach, Grenzwinkel) getestet, Methode und Grenzen dokumentiert, keine Änderung der Oberfläche, PR gemerged.
+
+### RI15h – Geländeschatten durch umliegende Berge (zurückgestellt)
+
+Ebene 3 · Stufe 3.3. Status: Zurückgestellt, bis RI15g im Einsatz ist. Schicht: Machbarkeit, bei „machbar“ Analyse-Logik.
+
+**Ziel:** Klären, ob und wie die Beschattung durch umliegende Berge (Fernschatten) im Browser belastbar berechnet werden kann, und bei positivem Ergebnis die Logik dafür bereitstellen.
+
+**Umfang:**
+- Machbarkeitsprüfung: Verfahren (Horizontwinkel je Punkt in mehreren Richtungen aus dem DEM, oder rasterweise Schattenberechnung), nötiger Suchradius (Größenordnung: bei 5° Sonnenhöhe beschattet ein 1 000 m höherer Berg Gelände bis etwa 11 km dahinter), Kachelbedarf und Datenmenge, Rechenzeit im Browser (ohne Backend, E10), Genauigkeit gegen Referenzstellen (bekannte Schattengrenzen, Beobachtungen, vergleichbare Anwendungen als Gegenprobe).
+- Ergebnis: Entscheidung „machbar“ oder „nicht machbar“ mit Stichproben, Anforderungen an das DEM (Auflösung aus RI11), Datenmengenabschätzung. Bei „machbar“ folgt ein eigenes Logikpaket (nicht Teil dieses Pakets).
+
+**Nicht im Umfang:** Produktcode vor dem Nachweis, Anzeige, Schattenkarte als Flächenlayer, Gebäude und Bäume.
+
+**Voraussetzungen:** RI12, RI15f, RI15g im Einsatz; DEM-Auflösung aus RI11 bekannt.
+
+**Risiken:** Datenmenge und Rechenzeit tragen im Browser nicht; Ergebnisse wirken genauer, als ein 10- bis 30-m-Modell hergibt (Grate und Wände); Winter und tiefe Sonnenstände sind am empfindlichsten. Gegenmaßnahme: Wenn der Nachweis nicht gelingt, bleibt das Paket zurückgestellt, RI15g bleibt mit seinem Vorbehalt bestehen.
+
+**Abhängigkeiten:** RI12, RI15f, RI15g.
+
+**Definition of Done:** Entscheidung mit Stichproben dokumentiert; bei „machbar“ Folgepakete geschnitten; DATENQUELLEN und Plan angepasst, PR gemerged.
+
+### RI15i – Sonne und Schatten entlang der Route
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Analyse-Logik (ohne DOM).
+
+**Ziel:** Für eine Route und ein Datum angeben, welche Abschnitte wann in Sonne oder Schatten liegen (Route Sun Exposure, Route Shadow Analysis).
+
+**Umfang:**
+- Reine Logik, die RI15g (und später RI15h) entlang der Route anwendet: Abschnitte mit gleichem Besonnungsverhalten (km von bis), Besonnungsdauer je Abschnitt, Zeitpunkt der ersten und letzten Besonnung, Anteil an der Tageslänge; „ganztägig sonnig“ und „überwiegend schattig“ über benannte Schwellen (Startwerte in diesem Paket festzulegen und zu begründen).
+- Eingaben: Route, Datum, Uhrzeit oder Zeitfenster. Zeitbezug laut E17: fester Zeitpunkt oder Fenster; kein Gehzeitmodell. Enthält die GPX-Datei Zeiten, kann eine aufgezeichnete Tour rückblickend zugeordnet werden (optional).
+- Abtastung und Zusammenfassen wie bei den anderen Routenanalysen (E6, Mindestlänge); Anteile „ohne Daten“ getrennt ausgewiesen.
+- Ergebnisobjekt neben der Route, mit Pflichtfeldern „ohne Bewölkung“ und, solange RI15h fehlt, „ohne Fernschatten“.
+- Testseite mit synthetischer Route und synthetischem Gelände mit bekannten Ergebnissen; Randfälle: Route ohne DEM-Abdeckung, Lücken, Zeitumstellungstag, kurzer Wintertag.
+
+**Nicht im Umfang:** Anzeige, Wetter, Hitzebewertung, Befunde, Empfehlungen.
+
+**Voraussetzungen:** RI15g, RI15f, RI2; RI15h optional.
+
+**Risiken:** „Sonnig“ wird als Wetteraussage gelesen. Ohne Fernschatten stimmen Zeiten im Tal nicht. Die Schwellen für „ganztägig“ sind willkürlich. Gegenmaßnahme: Feldbezeichnung „Besonnung ohne Bewölkung und ohne Fernschatten“, dokumentierte Schwellen, Methodenbeschreibung.
+
+**Abhängigkeiten:** RI15f, RI15g, RI2 (RI15h optional).
+
+**Definition of Done:** Logik gegen synthetische Fälle getestet, Zeitzonen- und Sommerzeitfälle getestet, Schwellen dokumentiert, Stichprobe mit einer echten Route gegen eine Beobachtung oder Referenz dokumentiert, keine Änderung der Oberfläche, Plan und ROADMAP aktualisiert, PR gemerged.
+
+### RI15j – Sonne und Schatten in der Anzeige
+
+Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Anzeige. Bei Bedarf nach Paketregel in zwei PRs geteilt (Block in der Routenkarte, Band im Profil).
+
+**Ziel:** Sonnige und schattige Abschnitte für ein wählbares Datum und eine wählbare Zeit sichtbar machen.
+
+**Umfang:**
+- Block „Sonne und Schatten“ in der Routenkarte: Datumswahl, Uhrzeit oder Zeitfenster, Abschnittsliste (km von bis, Besonnungsdauer, erste und letzte Besonnung); Zustand und Fehler über die Datenstatus-Leiste. Rechenarbeit im Browser, ohne Netz außer den DEM-Kacheln.
+- Optionales, schaltbares Band im Höhenprofil (gemeinsame Bandkomponente mit RI15 und RI15d), Hover und Tastatur zeigen den Abschnitt; Markierung auf der Karte.
+- Eigene Palette, die weder mit Lawinenstufen noch mit Neigungs- oder Bedeckungsfarben verwechselt wird (STYLEGUIDE).
+- Dauerhafter Hinweis: „Berechnete Besonnung aus Sonnenstand und Gelände, ohne Bewölkung und ohne Beschattung durch umliegende Berge. Beschreibt Sonne und Schatten, keine Wetterprognose und keine Eignung.“
+- Mobil im Sheet. Keine neue Rechenlogik.
+
+**Nicht im Umfang:** neue Analysen, Wetter, Hitzebewertung, Schattenkarte als Flächenlayer, Befunde.
+
+**Voraussetzungen:** RI15i, RI5; abgestimmt mit RI15 und RI15d (Bandkomponente, Palette).
+
+**Risiken:** Missverständnis „sonnig = Sonnenschein“; Farbkonflikte; überladene Routenkarte; Zeitwahl ohne Zeitzone. Gegenmaßnahme: eigene Palette, Hinweistext, Zeitzone neben der Zeitwahl sichtbar.
+
+**Abhängigkeiten:** RI15i, RI5, RI15.
+
+**Definition of Done:** Anzeige in Hell, Dunkel und Mobil (390 und 320), Kontrast AA, Tastatur und Textalternative geprüft, Screenshots unter `docs/screenshots/`, STYLEGUIDE, ROADMAP und README aktualisiert, PR gemerged.
+
+### RI15k – Wald-Beschattung und Hitzebelastung: Konzept (zurückgestellt)
+
+Ebene 3 · Stufe 3.3. Status: Zurückgestellt. Schicht: Konzept (kein Code).
+
+**Ziel:** Klären, ob und wie sich Waldschatten und Hitzebelastung entlang der Route belastbar und ohne Fehlinterpretation darstellen lassen.
+
+**Umfang:** Konzeptdokument auf Basis von RI15c (Wald), RI15i (Sonne), der Wetterintegration (RI10) und der Frage, welche Strahlungs- und Bewölkungswerte die Wetterquelle liefert (ungeprüft). Zu klären: Wie sich Baumhöhe und Kronenschluss abbilden lassen (Land Cover kennt sie nicht; Tree Cover Density gibt einen Prozentwert, Baumhöhendaten wurden nicht geprüft); ob „Hitzebelastung“ überhaupt als Begriff dargestellt wird oder nur Sonnenstunden, Temperatur und Höhe nebeneinander; Abgrenzung zu Gesundheitsaussagen; Umgang mit Wasserstellen (OSM, Abschnitt 9); ausdrücklich auch die Möglichkeit „nicht darstellen“.
+
+**Nicht im Umfang:** Umsetzung, Hitzeindex, Gesundheits- oder Trinkmengenempfehlungen.
+
+**Voraussetzungen:** RI15c, RI15i im Einsatz; RI10; Rückmeldungen zu RI15j.
+
+**Risiken:** Sicherheitsrelevante Vereinfachung („im Schatten“ bedeutet nicht „kühl“), falsche Präzision, Haftungsfragen. Gegenmaßnahme: Fachliche Prüfung vor jeder Umsetzung; Umsetzung nur als eigenes Paket nach Freigabe des Konzepts.
+
+**Abhängigkeiten:** RI15c, RI15i, RI10.
+
+**Definition of Done:** Konzept liegt vor und ist entschieden; erst danach werden Umsetzungspakete geschnitten.
 
 ### RI20 – Geländecharakteristik (zurückgestellt)
 
@@ -663,7 +1143,7 @@ Ebene 4 · Stufe 4.3. Status: Geplant, optional. Schicht: Analyse-Logik.
 
 **Ziel:** Aus Neigung und Exposition Befunde bilden (Beispiel aus der Engine-Dokumentation: „3 Abschnitte > 35° Hangneigung“).
 
-**Umfang:** Schwellen aus RI13, nur Beschreibung der Geländeform; Kopplung mit dem Lawinenbericht nur als Gegenüberstellung (RI14b).
+**Umfang:** Schwellen aus RI13, nur Beschreibung der Geländeform; Kopplung mit dem Lawinenbericht nur als Gegenüberstellung (RI14b). Die Geländebedeckung (RI15c) kann später als weitere Eingangsgröße folgen (siehe „Was später interessant wird“ bei RI15a–RI15e); das ist kein Bestandteil dieses Pakets.
 
 **Voraussetzungen:** RI13, RI14, RI16.
 
@@ -722,6 +1202,9 @@ ebenenübergreifend. Status: Geplant, erst wenn Funktionen nutzbar sind.
 | Offline/PWA, Mobile App | ROADMAP Phase 4, Cache- und Plattformkonzept | Ebene 2 und 3 stabil |
 | Backend, Konten, Synchronisation | Betrieb, Datenschutz, Kosten | E1, E2, E10 |
 | Weitere Länder (DEM, Lawinen) | Lizenzen je Land | Provider-Muster, E7 |
+| Schattenkarte als Flächenlayer (Sonne und Schatten für einen Kartenausschnitt, wie Shademap) | andere Perspektive als die Routenanalyse, Rechen- und Datenaufwand im Browser, eigene Kartenebene | RI15g bewährt, RI15h entschieden |
+| Hitzeindex, Gesundheits- und Trinkmengenhinweise | sicherheitsrelevant, fachliche Prüfung nötig | RI15k |
+| Nationale Land-Cover-Quellen (BEV, swissTLM3D u. a.), Gletscherinventare, Wasserstellen | je Land andere Klassen, Lizenzen und Abrufwege; Gletscherspalten und Wasserstellen sind aus Land Cover nicht ableitbar | Basisquelle aus RI15a, Provider-Muster, OSM-Konzept |
 
 ---
 
@@ -734,6 +1217,8 @@ Ebene 2.2 RI2 → RI7 → RI8
                     └→ RI9a → (Saisontest) → RI9b
           RI3 → RI10a → RI10b
 Ebene 3   RI4 + RI5 → RI11 → RI12 → RI13a → RI13b → RI14a → RI14b → RI15   (RI20 zurückgestellt)
+          Land Cover: RI11 ~ RI15a;  RI12 + RI15a → RI15b → RI15c → RI15d;  RI15c + RI13a + RI14a → RI15e
+          Sonne:      RI15f (unabhängig);  RI15f + RI13a + RI14a → RI15g → RI15i → RI15j;  RI12 + RI15g → RI15h (zurückgestellt);  RI15c + RI15i + RI10 → RI15k (Konzept)
 Ebene 4   RI8 + RI9 + RI10 → RI16 → RI17 → RI18 → RI19   (RI21 zurückgestellt)
 RI-L      nach jedem ausgelieferten Funktionsblock
 ```
@@ -743,7 +1228,7 @@ RI-L      nach jedem ausgelieferten Funktionsblock
 3. **Ebene 2.2 (RI7, RI8):** Erste Intelligenz aus vorhandenen Daten, ohne neue Quelle und ohne Saisonabhängigkeit.
 4. **RI9:** Lawinenlage; die Logik darf vorher entstehen, die Anzeige erst nach dem Browser-Test mit echten Berichten.
 5. **RI10:** Wetter, getrennt von der Geometrie, wegen externer Abfragen und Limits.
-6. **Ebene 3 (RI11 bis RI15):** DEM erst jetzt, weil Quelle, Lizenz und Datenmenge nicht vor Paketen stehen sollen, die ohne sie auskommen.
+6. **Ebene 3 (RI11 bis RI15k):** DEM erst jetzt, weil Quelle, Lizenz und Datenmenge nicht vor Paketen stehen sollen, die ohne sie auskommen. Die Geländebedeckung (RI15a bis RI15e) folgt derselben Linie, weil Abruf, Lizenz und Datenmenge dieselben Fragen stellen; RI15a bis RI15d sind von Neigung und Exposition unabhängig, nur RI15e kombiniert beides. Sonne und Schatten (RI15f bis RI15k) kommen nach RI14, weil die Hangbesonnung Neigung und Exposition braucht; nur der Sonnenstand (RI15f) ist davon unabhängig.
 7. **Ebene 4 (RI16 bis RI19):** Befunde, sobald mehrere Module real vorliegen. RI16 bis RI18 können bereits mit den Ergebnissen der Stufe 2.2 starten; RI19 folgt, wenn Ebene 3 liefert.
 8. **RI6:** Speicherung bindet Datenformate und war für nach der Rückmeldung zu den Anzeigepaketen vorgesehen; sie wurde auf Wunsch vorgezogen. Das Datenformat ist bewusst der Originaltext der GPX-Datei, damit sich später nichts migrieren lässt.
 
@@ -757,7 +1242,7 @@ RI8, RI9b (nach Saisontest), RI10b, RI11, RI12, RI6.
 
 ## Bewusst weiter in der Zukunft
 
-RI13 bis RI21 (hängen an der DEM-Entscheidung bzw. an der Reife von Stufe 2.2) und alles aus Abschnitt 9.
+RI13 bis RI21 einschließlich RI15a bis RI15k (hängen an der DEM-Entscheidung bzw. an der Reife von Stufe 2.2) und alles aus Abschnitt 9.
 
 ---
 
@@ -802,7 +1287,7 @@ Bis ein Paket gemerged ist, bleibt seine Funktion in Landing, README und ROADMAP
 
 ---
 
-# 13. Entscheidungen E1–E14
+# 13. Entscheidungen E1–E17
 
 Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die genannten Pakete), **Bestätigt, vorläufig** (Grundsatz gilt, ein Zahlenwert wird im genannten Paket an echten Daten geprüft), **Offen** (bewusst vertagt, mit Frist). Eine Änderung einer bestätigten Entscheidung braucht einen eigenen Dokumentations-PR.
 
@@ -836,6 +1321,9 @@ Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die 
 | E12 | Umgang mit widersprüchlichen Daten | Jedes Modul liefert eigene Befunde; keine Auflösung der Widersprüche | **Offen** | Offene Frage in `ALPINE_RISK_ENGINE.md`; gehört zu RI21 | RI21 |
 | E13 | Suche in eigenen Routen | Nicht in den Ebenen 2 bis 4; später als zusätzliche Gruppe der globalen Suche | **Bestätigt** | Eigene Routen sind lokal und privat; die Suche indexiert sie nicht | später |
 | E14 | Bibliotheken | Keine neuen Bibliotheken; Parser, Geometrie und Diagramm als eigener Code (Leaflet bleibt). Falls später doch nötig: Self-Hosting unter `vendor/`, Lizenzprüfung, eigener Beschluss | **Bestätigt** | Keine externen Ressourcen ohne Self-Hosting; kleiner Umfang, volle Kontrolle über Sicherheit (`esc()`, XML-Parser) | RI1 |
+| E15 | Land-Cover-Quelle und Klassenschema | Keine Entscheidung. Kandidaten: ESA WorldCover 2021 und CLC+ Backbone 2021 (je 10 m), Tree Cover Density als Ergänzung. Bedeckung wird nur beschreibend verwendet; Abruf nach Kachelkoordinate, nicht nach Routenverlauf; Klassen werden zu Gruppen zusammengefasst, nicht interpoliert | **Offen** (bewusst vertagt) | Lizenz, Abruf ohne Backend und Qualität in den Alpen sind ungeprüft; Spike in RI15a, möglichst gemeinsam mit RI11. Bis dahin wird kein Land-Cover-Code geschrieben | RI15a |
+| E16 | Sonnenstand: eigener Code oder Bibliothek, geforderte Genauigkeit | Keine Entscheidung. Grundsatz E14 (keine neuen Bibliotheken) gilt, bis anders beschlossen; DATENQUELLEN führt SunCalc als geplante Ephemeris-Quelle, das ist keine Festlegung | **Offen** (bewusst vertagt) | Genauigkeit, Zeitzonen, Lizenz und Umfang sind vor RI15f abzuwägen; die Wahl wird hier nicht vorweggenommen | RI15f |
+| E17 | Zeitbezug der Sonnenanalyse | Vorschlag: Nutzer wählt Datum und Uhrzeit oder Zeitfenster; keine Gehzeitprognose (Abschnitt 12); Zeiten aus der GPX-Datei nur, wenn vorhanden, für eine rückblickende Zuordnung | **Offen** (Vorschlag) | Hält die Analyse beschreibend und vermeidet ein Zeitmodell; Zeitzone und Sommerzeit sind Teil der Eingabe | RI15f, RI15i |
 
 ## Festlegungen für RI1 bis RI5
 
@@ -866,6 +1354,9 @@ Aus den bestätigten Entscheidungen folgen diese Vorgaben. Sie ändern weder Umf
 | Pakete wachsen | große, riskante PRs | Paketregeln, eine Schicht je Paket, Teilung in a/b |
 | Lawinen-Browser-Test steht aus | RI9b nicht verifizierbar | RI9b erst nach dem Saisontest |
 | Performance bei langen Tracks und großen Polygonen | träge Oberfläche | vereinfachte Darstellung, Bounding-Box-Filter, Messungen in den PRs |
+| Landbedeckung wird als Aussage über Begehbarkeit oder Sicherheit gelesen („Wald schützt“, „offen ist gefährlich“) | falsche Sicherheit oder falsche Warnung | neutrale Sprache („laut Landbedeckung“), Referenzjahr und Auflösung nennen, kein Schutz- oder Gefahrenurteil, Hinweis im UI |
+| Land Cover stammt aus Satellitenbildern früherer Jahre (Schnee, Gletscherrückgang, Schatten) | veraltete oder falsche Klasse | Referenzjahr anzeigen, „Schnee/Eis“ nur mit Stand, Qualitätsprobe in RI15a |
+| „Sonnig“ oder „Schatten“ wird als Wetter- oder Sicherheitsaussage gelesen; Besonnung ohne Fernschatten überschätzt die Sonne im Tal | falsche Tourenplanung (Zeit, Hitze, Erwärmung) | Pflichtfelder „ohne Bewölkung“ und „ohne Fernschatten“ im Ergebnis und in der Anzeige, Hinweistext, kein Hitze- oder Eignungsurteil |
 | Platz mobil | überladene Karte | alles in vorhandenen Karten und im Sheet, kein neues schwebendes Panel |
 
 ---
@@ -875,8 +1366,8 @@ Aus den bestätigten Entscheidungen folgen diese Vorgaben. Sie ändern weder Umf
 Nach docs/WORKFLOW.md bei jedem Paket prüfen und, falls betroffen, aktualisieren:
 
 - **ROADMAP.md:** Checkliste (GPX-Parser, Höhenprofil, DEM-Integration, Tourenwarnungen), Versionshistorie; bestehende Inhalte werden nur abgehakt oder ergänzt.
-- **DATENQUELLEN.md:** DEM (Status korrigieren), Open-Meteo-Nutzung für Routen, spätere OSM-Abfragen.
-- **STYLEGUIDE.md:** Routenlinie, Befundkomponenten, Neigungsfarben.
+- **DATENQUELLEN.md:** DEM (Status korrigieren), Open-Meteo-Nutzung für Routen, spätere OSM-Abfragen, Land Cover (neuer Abschnitt mit RI15a, Quellen und Lizenzen aus der Übersicht bei RI15a–RI15e), Sonnenstand-Berechnung (Eintrag „Ephemeris-Daten“ mit RI15f und E16 abgleichen).
+- **STYLEGUIDE.md:** Routenlinie, Befundkomponenten, Neigungsfarben, Bedeckungsfarben, Besonnungsfarben.
 - **ALPINE_RISK_ENGINE.md:** Befundmodell (RI16), Modulstatus.
 - **IDEENSAMMLUNG.md:** umgesetzte Ideen (GPX Upload, GPX Statistik) entfernen oder verschieben.
 - **README.md:** sichtbare Funktionen, Dateiübersicht.
