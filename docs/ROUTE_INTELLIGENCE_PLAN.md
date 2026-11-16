@@ -406,7 +406,7 @@ Ebene 2 · Stufe 2.2. Status: Erledigt (15.11.2026). Schicht: Anzeige auf vorhan
 
 ### RI9 – Lawinenlage entlang der Route
 
-Ebene 2 · Stufe 2.2. Status: Geplant. Zwei PRs: RI9a Analyse-Logik, RI9b Anzeige.
+Ebene 2 · Stufe 2.2. Status: RI9a Erledigt (15.11.2026), RI9b Geplant. Zwei PRs: RI9a Analyse-Logik, RI9b Anzeige.
 
 **Ziel:** Für Routenabschnitte Region und Gefahrenstufe in der jeweiligen Höhe nennen.
 
@@ -423,6 +423,13 @@ Ebene 2 · Stufe 2.2. Status: Geplant. Zwei PRs: RI9a Analyse-Logik, RI9b Anzeig
 **Abhängigkeiten:** RI3, RI7; für RI9b der Saisontest.
 
 **Definition of Done:** Logik gegen Testdaten mit Höhengrenzen getestet, Anzeige mit echtem Bericht geprüft, Hinweistexte abgestimmt, Dokumentation, PR gemerged.
+
+**Umsetzungshinweise RI9a (15.11.2026):**
+- `js/route_avalanche.js` (rein, keine UI-Änderung): `routeAvalanche(route, regions)` mit `regions = { features, view(regionId) }`; `view` liefert wie in `avalanche.js` `{ record, source, status }`. Ergebnis `{ segments, uncovered, routeKm }`. Region je Abschnitt über `routeOverlay` (RI7) mit den Regionspolygonen, Stufe je Probe (alle 25 m) mit `levelAtAltitude` aus `avalanche_logic.js`, also dieselbe Logik wie die Karte (im Test an einem echten Bericht gegengeprüft).
+- Ein Abschnitt nennt Region, Quelle (Metadaten), Status des Berichts, Gültigkeit und Veröffentlichung, km-Bereich, Stufe mit Teilstufe, `uncertain` (Waldgrenze ohne Zahl), `eleMin`/`eleMax` (ungeglättete Höhen der Datei) und die Lawinenprobleme der Region (nur die Typen, je Typ einmal). `basis` sagt, worauf die Stufe beruht: `route` (Höhe der Route verwendet), `region_max` (Route ohne Höhe: höchste Stufe der Region, so gekennzeichnet), `region` (Quelle ohne Höhengrenzen wie der SLF: Stufe gilt für die ganze Region). Ohne gültigen Bericht (`none`, `expired`) ist `level` null und `reason` der Status, bei gültigem Bericht ohne Stufe (kein Schnee, keine Beurteilung) `reason: 'no_rating'`. Ein kürzlich abgelaufener Bericht (`stale`) behält seine Stufe, der Status steht dabei. `uncovered` nennt Strecken ohne Region.
+- **Neu festgelegt (vorläufig):** Höhenunsicherheit. GPX-Höhen schwanken, und eine Route, die um eine Höhengrenze pendelt, würde sonst in viele kurze Abschnitte zerfallen. Die Höhe wird über ±3 Proben gemittelt (`SMOOTH_SAMPLES`), die Stufe vorsichtig bestimmt (die höchste Stufe, die innerhalb von ±10 m `ELE_MARGIN_M` gilt; der Abschnitt trägt dann `nearBoundary`), und Abschnitte unter 50 m (`MIN_SEGMENT_M`) gehen in den Nachbarn mit der höheren Stufe auf. Folge: Die Grenze zwischen zwei Stufen liegt bis zu 10 Höhenmeter früher (zur höheren Stufe hin) als die Zahl der Quelle allein. Die drei Werte sind benannte Konstanten, nicht an echten Aufzeichnungen geprüft.
+- Getestet mit `scripts/test_route_avalanche.html` (11 Tests, Referenzwerte analytisch): Höhengrenze auf einer steigenden Strecke, Route ganz unter/über der Grenze, Route ohne Höhe, Waldgrenze ohne Zahl, Quelle ohne Höhengrenzen mit Teilstufe, ungültiger Bericht und abgelaufener Bericht, kein Schnee, zwei Regionen mit Lücke dazwischen, Rauschen an der Grenze, leere Eingaben und ein echter Euregio-Bericht (`data/avalanche/euregio.json`, 02./03.05.2026, Bewertungszeitpunkt innerhalb der Gültigkeit): Stufe je Abschnitt stimmt mit der Karte überein.
+- Offen: RI9b (Anzeige).
 
 ### RI10 – Wetter entlang der Route
 

@@ -1,0 +1,199 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_avalanche.js (Lawinenlage entlang der Route, RI9a)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Teststrecke entlang des Längengrads 11°: Streckenkilometer = (Breite - 47) * 111,19493; die Höhe steigt linear (Referenzwerte analytisch).
+import * as A from '../js/route_avalanche.js';
+import { parseGpx } from '../js/gpx.js';
+import { createRoute } from '../js/route_model.js';
+import { toRecord } from '../js/avalanche_model.js';
+import { bulletinStatus } from '../js/avalanche_logic.js';
+
+var results = [], queue = [], currentName = null;
+function test(name, fn) { queue.push({ name: name, fn: fn }); }
+function eq(actual, expected, info) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a + (info ? ' ' + info : ''));
+}
+function near(actual, expected, tol) {
+  if (!(Math.abs(actual - expected) <= tol)) throw new Error('erwartet ' + expected + ' ± ' + tol + ', erhalten ' + actual);
+}
+var DEG = 111.19493;
+var SOURCE = { id: 'test', name: 'Testdienst', attribution: 'Testdienst', attribution_url: 'https://example.org', license: 'CC BY 4.0', license_url: 'https://example.org/l', report_url: 'https://example.org/', report_url_fallback: 'https://example.org/' };
+
+// Route entlang lon 11 von lat0 bis lat1 in Schritten von step Grad; eleFn(i, n) liefert die Höhe oder null
+function makeRoute(lat0, lat1, step, eleFn) {
+  var n = Math.round((lat1 - lat0) / step), pts = [];
+  for (var i = 0; i <= n; i++) {
+    var e = eleFn ? eleFn(i, n) : null;
+    pts.push('<trkpt lat="' + (lat0 + i * step).toFixed(6) + '" lon="11">' + (e == null ? '' : '<ele>' + e + '</ele>') + '</trkpt>');
+  }
+  var made = createRoute(parseGpx('<gpx><trk><trkseg>' + pts.join('') + '</trkseg></trk></gpx>'));
+  if (!made.ok) throw new Error(made.error);
+  return made.route;
+}
+function rect(id, lat0, lat1) {
+  return { type: 'Feature', properties: { region_id: id }, geometry: { type: 'Polygon', coordinates: [[[10, lat0], [12, lat0], [12, lat1], [10, lat1], [10, lat0]]] } };
+}
+function record(id, name, bulletin) {
+  return toRecord({ source: 'test', country: 'AT', region_id: id, region_name: name, label_point: [11, 47] }, bulletin);
+}
+function bulletin(ratings, problems, extra) {
+  var maxLevel = Math.max.apply(null, ratings.map(function (r) { return r.level || 0; }));
+  return Object.assign({ id: 'b1', publication_time: '2026-01-10T15:00:00Z', validity_period: { start: '2026-01-10T15:00:00Z', end: '2026-01-11T15:00:00Z' }, main_date: '2026-01-11',
+    max_level: maxLevel || null, danger_ratings: ratings, danger_by_elevation: [], elevation_thresholds: [], avalanche_problems: problems || [] }, extra || {});
+}
+function regions(list) {   // list: [{ id, lat0, lat1, record, status }]
+  var byId = {};
+  list.forEach(function (r) { byId[r.id] = { record: r.record, source: SOURCE, status: r.status || 'valid' }; });
+  return { features: list.map(function (r) { return rect(r.id, r.lat0, r.lat1); }), view: function (id) { return byId[id] || null; } };
+}
+var TWO_BANDS = bulletin([
+  { value: 'low', level: 1, period: 'all_day', elevation: { upper_bound: 2600 } },
+  { value: 'moderate', level: 2, period: 'all_day', elevation: { lower_bound: 2600 } }
+], [{ type: 'wind_slab', period: 'all_day' }, { type: 'wind_slab', period: 'all_day' }, { type: 'new_snow', period: 'all_day' }]);
+
+test('Höhengrenze: Route steigt von 2000 auf 3000 m, Stufe 1 bis 2600 m, danach Stufe 2', function () {
+  var route = makeRoute(47, 47.09, 0.0004, function (i, n) { return 2000 + 1000 * i / n; });   // rund 10 km
+  var len = route.lengthM / 1000;
+  var out = A.routeAvalanche(route, regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'Testregion', TWO_BANDS) }]));
+  eq(out.segments.length, 2);
+  eq([out.segments[0].level, out.segments[1].level], [1, 2]);
+  eq(out.segments[0].basis, 'route');
+  near(out.segments[0].toKm, len * 0.59, 0.03);   // Stufe 2 gilt ab 2600 m (60 % der Strecke); mit 10 m Sicherheitsabstand beginnt sie bei 2590 m (59 %)
+  eq([out.segments[0].nearBoundary, out.segments[1].nearBoundary], [false, true]);   // der Sicherheitsabstand gehört zur höheren Stufe, nur dieser Abschnitt trägt den Hinweis
+  eq(A.ELE_MARGIN_M, 10);
+  eq(out.segments[0].toKm, out.segments[1].fromKm);
+  near(out.segments[0].eleMin, 2000, 0.01);
+  near(out.segments[1].eleMax, 3000, 0.01);
+  eq(out.uncovered, []);
+  eq(out.segments[0].regionName, 'Testregion');
+  eq(out.segments[0].status, 'valid');
+  eq(out.segments[0].problemTypes, ['wind_slab', 'new_snow']);   // je Typ einmal, in der Reihenfolge des Berichts
+});
+
+test('Route komplett unterhalb oder oberhalb der Grenze: ein Abschnitt', function () {
+  var low = A.routeAvalanche(makeRoute(47, 47.03, 0.0004, function () { return 1500; }), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'T', TWO_BANDS) }]));
+  eq(low.segments.map(function (s) { return s.level; }), [1]);
+  var high = A.routeAvalanche(makeRoute(47, 47.03, 0.0004, function () { return 2900; }), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'T', TWO_BANDS) }]));
+  eq(high.segments.map(function (s) { return s.level; }), [2]);
+});
+
+test('Route ohne Höhe: höchste Stufe der Region, als region_max gekennzeichnet', function () {
+  var out = A.routeAvalanche(makeRoute(47, 47.03, 0.0004, null), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'T', TWO_BANDS) }]));
+  eq(out.segments.length, 1);
+  eq([out.segments[0].level, out.segments[0].basis, out.segments[0].eleMin], [2, 'region_max', null]);
+});
+
+test('Waldgrenze ohne Zahl: Stufe als unsicher gekennzeichnet', function () {
+  var b = bulletin([{ value: 'moderate', level: 2, period: 'all_day', elevation: { upper_bound: 'treeline' } }, { value: 'considerable', level: 3, period: 'all_day', elevation: { lower_bound: 'treeline' } }]);
+  var out = A.routeAvalanche(makeRoute(47, 47.03, 0.0004, function () { return 1800; }), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'T', b) }]));
+  eq(out.segments.map(function (s) { return [s.level, s.uncertain]; }), [[3, true]]);
+});
+
+test('Quelle ohne Höhengrenzen (z. B. SLF): Stufe und Teilstufe für die ganze Region, Höhe ohne Einfluss', function () {
+  var b = bulletin([{ value: 'considerable', level: 3, subdivision: 'plus', period: 'all_day' }], [], { max_subdivision: 'plus' });
+  var out = A.routeAvalanche(makeRoute(47, 47.05, 0.0004, function (i, n) { return 1000 + 2000 * i / n; }), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'T', b) }]));
+  eq(out.segments.length, 1);
+  eq([out.segments[0].level, out.segments[0].subdivision, out.segments[0].basis], [3, 'plus', 'region']);
+});
+
+test('Kein gültiger Bericht (none, expired): keine Stufe, Grund steht im Abschnitt', function () {
+  var rec = record('R1', 'T', TWO_BANDS);
+  ['none', 'expired'].forEach(function (st) {
+    var out = A.routeAvalanche(makeRoute(47, 47.03, 0.0004, function () { return 2000; }), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: rec, status: st }]));
+    eq(out.segments.length, 1);
+    eq([out.segments[0].level, out.segments[0].reason, out.segments[0].status, out.segments[0].basis], [null, st, st, null]);
+  });
+  var stale = A.routeAvalanche(makeRoute(47, 47.03, 0.0004, function () { return 2000; }), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: rec, status: 'stale' }]));
+  eq([stale.segments[0].level, stale.segments[0].status], [1, 'stale']);   // kürzlich abgelaufen: Stufe bleibt, Status steht dabei
+});
+
+test('Gültiger Bericht ohne Stufe (kein Schnee): level null, Grund no_rating', function () {
+  var b = bulletin([{ value: 'no_snow', period: 'all_day' }]);
+  var out = A.routeAvalanche(makeRoute(47, 47.03, 0.0004, function () { return 900; }), regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'T', b) }]));
+  eq([out.segments[0].level, out.segments[0].reason], [null, 'no_rating']);
+});
+
+test('Zwei Regionen nacheinander und eine Strecke ohne Region', function () {
+  var route = makeRoute(47, 47.09, 0.0004, function () { return 2000; });
+  var len = route.lengthM / 1000;
+  var out = A.routeAvalanche(route, regions([
+    { id: 'A', lat0: 46.9, lat1: 47.03, record: record('A', 'Region A', TWO_BANDS) },
+    { id: 'B', lat0: 47.05, lat1: 47.2, record: record('B', 'Region B', TWO_BANDS) }
+  ]));
+  eq(out.segments.map(function (s) { return s.regionId; }), ['A', 'B']);
+  eq(out.uncovered.length, 1);
+  near(out.uncovered[0][0], 0.03 * DEG, 0.002);
+  near(out.uncovered[0][1], 0.05 * DEG, 0.002);
+  near(out.routeKm, len, 1e-9);
+  eq(A.routeAvalanche(route, regions([{ id: 'X', lat0: 10, lat1: 11, record: record('X', 'weit weg', TWO_BANDS) }])).uncovered, [[0, len]]);
+});
+
+test('Rauschen an der Höhengrenze: keine kurzen Abschnitte, im Zweifel die höhere Stufe', function () {
+  // Höhe pendelt um 2600 m (+-15 m) alle 44 m, Route 4 km lang
+  var route = makeRoute(47, 47.036, 0.0001, function (i) { return 2600 + (i % 2 ? 15 : -15); });
+  var out = A.routeAvalanche(route, regions([{ id: 'R1', lat0: 46.9, lat1: 47.2, record: record('R1', 'T', TWO_BANDS) }]));
+  out.segments.forEach(function (s) { if ((s.toKm - s.fromKm) * 1000 < A.MIN_SEGMENT_M && out.segments.length > 1) throw new Error('kurzer Abschnitt ' + s.fromKm + '–' + s.toKm); });
+  eq(out.segments.length <= 2, true, JSON.stringify(out.segments.map(function (s) { return [s.level, +s.fromKm.toFixed(3), +s.toKm.toFixed(3)]; })));
+  eq(Math.max.apply(null, out.segments.map(function (s) { return s.level; })), 2);
+});
+
+test('Leere und ungültige Eingaben werfen nie', function () {
+  var route = makeRoute(47, 47.03, 0.0004, null);
+  eq(A.routeAvalanche(route, { features: [], view: function () { return null; } }).segments, []);
+  eq(A.routeAvalanche(null, regions([])).segments, []);
+  eq(A.routeAvalanche(route, null).segments, []);
+  // Region ohne Ansicht wird übersprungen
+  eq(A.routeAvalanche(route, { features: [rect('Z', 46, 48)], view: function () { return null; } }).segments, []);
+});
+
+// Echter Bericht: data/avalanche/euregio.json (Bericht vom 02./03.05.2026), Bewertungszeitpunkt innerhalb seiner Gültigkeit
+test('Echter Euregio-Bericht: Route durch das Karwendel mit steigender Höhe', async function () {
+  var base = '../data/avalanche/';
+  var docs = await Promise.all(['euregio.json', 'euregio_regions.geojson'].map(function (f) { return fetch(base + f).then(function (r) { if (!r.ok) throw new Error(f + ': ' + r.status); return r.json(); }); }));
+  var doc = docs[0], geo = docs[1];
+  var now = Date.parse(doc.validity_period.end) - 3600 * 1000;
+  var recs = {};
+  geo.features.forEach(function (f) {
+    var info = doc.regions[f.properties.region_id] || {};
+    recs[f.properties.region_id] = toRecord(f.properties, typeof info.bulletin === 'number' ? doc.bulletins[info.bulletin] : null);
+  });
+  var view = function (id) {
+    var rec = recs[id];
+    if (!rec) return null;
+    return { record: rec, source: doc.source, status: rec.bulletin_id !== null ? bulletinStatus({ start: rec.valid_from, end: rec.valid_until }, now) : 'none' };
+  };
+  var route = makeRoute(47.35, 47.50, 0.0005, function (i, n) { return 900 + 1700 * i / n; });   // von Seefeld Richtung Norden, 900 bis 2600 m, rund 17 km
+  var t0 = performance.now();
+  var out = A.routeAvalanche(route, { features: geo.features, view: view });
+  var ms = Math.round(performance.now() - t0);
+  currentName = 'Echter Euregio-Bericht: ' + out.segments.length + ' Abschnitte in ' + new Set(out.segments.map(function (s) { return s.regionId; })).size + ' Regionen, ' + ms + ' ms';
+  if (!out.segments.length) throw new Error('keine Region gefunden');
+  out.segments.forEach(function (s) {
+    if (s.status !== 'valid') throw new Error(s.regionId + ': Status ' + s.status);
+    if (!s.level) throw new Error(s.regionId + ': keine Stufe');
+    if (!(s.toKm > s.fromKm)) throw new Error('leerer Abschnitt');
+  });
+  // dieselbe Stufe wie die Karte: Gegenprobe direkt über levelAtAltitude je Abschnittsmitte
+  var { levelAtAltitude } = await import('../js/avalanche_logic.js');
+  var { pointAtKm } = await import('../js/geo.js');
+  out.segments.forEach(function (s) {
+    var mid = pointAtKm(route.points, (s.fromKm + s.toKm) / 2);
+    var res = levelAtAltitude(recs[s.regionId], mid.ele);
+    if (res.level !== s.level) throw new Error(s.regionId + ' bei km ' + ((s.fromKm + s.toKm) / 2).toFixed(1) + ': Karte ' + res.level + ', Route ' + s.level);
+  });
+  if (ms > 2000) throw new Error('dauert ' + ms + ' ms');
+});
+
+(async function () {
+  for (var t of queue) {
+    currentName = null;
+    try { await t.fn(); results.push({ name: currentName || t.name, ok: true }); } catch (e) { results.push({ name: t.name, ok: false, error: String(e.message || e) }); }
+  }
+  var passed = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+})();
+</script>

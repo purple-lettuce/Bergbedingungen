@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Führt die JavaScript-Tests (scripts/test_*.html: Lawinenlage, Schutzgebiete, Datenstatus-Leiste, Layout, Bottom Sheet, globale Suche, Landing Page, GPX-Parser, Routenmodell, Route laden, Routenstatistik, Höhenprofil, Routenverwaltung, Routenschnitt, Route entlang) in einem Headless-Browser aus.
+"""Führt die JavaScript-Tests (scripts/test_*.html: Lawinenlage, Schutzgebiete, Datenstatus-Leiste, Layout, Bottom Sheet, globale Suche, Landing Page, GPX-Parser, Routenmodell, Route laden, Routenstatistik, Höhenprofil, Routenverwaltung, Routenschnitt, Route entlang, Lawinenlage entlang) in einem Headless-Browser aus.
 
 Gebraucht wird Chrome, Chromium oder Edge. Ohne Browser endet das Skript mit Hinweis (Exit 0), mit
 --require-browser mit Fehler. Aufruf: python3 scripts/run_js_tests.py [--require-browser]
@@ -17,8 +17,8 @@ import threading
 import time
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html", "test_protected_areas.html", "test_status_bar_logic.html", "test_layout.html", "test_sheet_logic.html", "test_search_logic.html", "test_landing.html", "test_gpx.html", "test_route_model.html", "test_route_load.html", "test_route_stats.html", "test_profile.html", "test_route_store.html", "test_route_overlay.html", "test_route_context.html"]
-REALTIME_PAGES = {"test_route_store.html", "test_route_overlay.html"}   # brauchen echte Zeit (IndexedDB läuft in einem eigenen Thread); laufen über scripts/cdp_client.py
+PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html", "test_protected_areas.html", "test_status_bar_logic.html", "test_layout.html", "test_sheet_logic.html", "test_search_logic.html", "test_landing.html", "test_gpx.html", "test_route_model.html", "test_route_load.html", "test_route_stats.html", "test_profile.html", "test_route_store.html", "test_route_overlay.html", "test_route_context.html", "test_route_avalanche.html"]
+REALTIME_PAGES = {"test_route_store.html", "test_route_overlay.html", "test_route_avalanche.html"}   # brauchen echte Zeit (IndexedDB läuft in einem eigenen Thread); laufen über scripts/cdp_client.py
 CANDIDATES = [
     os.environ.get("BROWSER", ""),
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
