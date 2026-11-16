@@ -252,6 +252,7 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 - [x] Lawinenlage entlang der Route, Logik (RI9a, reine Logik js/route_avalanche.js mit Tests: Region je Abschnitt, Stufe nach Höhe der Route, vorsichtig bei Höhenunsicherheit; noch keine Anzeige, die folgt mit RI9b)
 - [x] Lawinenlage entlang der Route, Anzeige (RI9b, Block „Lawinenlage entlang der Route“: js/route_avalanche_view.js, js/route_avalanche_logic.js mit Tests; geprüft nur mit archiviertem Euregio-Bericht, **Test mit aktuellen Berichten steht aus**; vor dem Test gemergt, weil die Seite noch nicht öffentlich ist)
 - [x] Wetter entlang der Route, Datenzugriff (RI10a, js/weather_api.js und js/route_weather.js mit Tests: höchstens 6 gerundete Stützpunkte, eine Abfrage je Route, Zwischenspeicher je Punkt und Stunde; Wetterkarte nachweislich unverändert; noch keine Anzeige, die folgt mit RI10b)
+- [x] Wetter entlang der Route, Anzeige (RI10b, Block „Wetter entlang der Route“: js/route_weather_view.js, js/route_weather_logic.js mit Tests; Abruf erst auf Knopfdruck mit Datenschutzhinweis; Nullgradgrenze neben der Höhe der Route ohne Wertung; mit echten Open-Meteo-Daten geprüft)
 - [ ] Wegschwierigkeit-Matching (sac_scale)
 - [ ] Website Toolbox: Koordinaten & Höhe
 - [ ] Website Toolbox: Entfernungsmessungen
@@ -388,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.23 | 2026-11-16 | Route Intelligence: RI10b (Wetter entlang der Route: Anzeige je Stützpunkt auf Knopfdruck, Datenschutzhinweis, Nullgradgrenze neben der Routenhöhe) umgesetzt; Stufe 2.2 damit abgeschlossen |
 | 4.22 | 2026-11-16 | Route Intelligence: RI10a (Wetter entlang der Route, Datenzugriff: Stützpunkte, Abruf in einer Abfrage, Zwischenspeicher; Wetterkarte unverändert) umgesetzt |
 | 4.21 | 2026-11-15 | Route Intelligence: RI9b (Lawinenlage entlang der Route: Abschnitte mit Stufe nach Höhe, Probleme, Quelle, Regionalhinweis; nur mit archiviertem Bericht geprüft, Saisontest offen) umgesetzt |
 | 4.20 | 2026-11-15 | Route Intelligence: RI9a (Lawinenlage entlang der Route als reine Logik: Region je Abschnitt, Stufe nach Höhe der Route) umgesetzt |
