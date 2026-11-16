@@ -1,0 +1,222 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests weather_api.js und route_weather.js (Wetter entlang der Route, Datenzugriff, RI10a)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+// Das Netzwerk wird durch eine Attrappe ersetzt; nur der letzte Test fragt Open-Meteo wirklich ab und meldet "übersprungen", wenn es kein Netz gibt.
+import * as W from '../js/weather_api.js';
+import * as R from '../js/route_weather.js';
+import { parseGpx } from '../js/gpx.js';
+import { createRoute } from '../js/route_model.js';
+
+var results = [], queue = [], currentName = null;
+function test(name, fn) { queue.push({ name: name, fn: fn }); }
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) {
+  if (!(Math.abs(actual - expected) <= tol)) throw new Error('erwartet ' + expected + ' ± ' + tol + ', erhalten ' + actual);
+}
+var DEG = 111.19493;
+
+function makeRoute(lat0, lat1, step, eleFn, lon) {
+  var n = Math.round((lat1 - lat0) / step), pts = [];
+  for (var i = 0; i <= n; i++) {
+    var e = eleFn ? eleFn(i, n) : null;
+    pts.push('<trkpt lat="' + (lat0 + i * step).toFixed(6) + '" lon="' + (lon || 11.1234) + '">' + (e == null ? '' : '<ele>' + e + '</ele>') + '</trkpt>');
+  }
+  var made = createRoute(parseGpx('<gpx><trk><trkseg>' + pts.join('') + '</trkseg></trk></gpx>'));
+  if (!made.ok) throw new Error(made.error);
+  return made.route;
+}
+
+// Antwort wie von Open-Meteo für einen Ort
+function apiBody(lat, lon, over) {
+  return Object.assign({ latitude: lat, longitude: lon, elevation: 1875, current: { time: '2026-11-16T21:15', temperature_2m: 0.4, apparent_temperature: -3.9, precipitation: 0, wind_speed_10m: 10.8, wind_gusts_10m: 34.2, weather_code: 3 },
+    hourly: { time: ['2026-11-16T20:00', '2026-11-16T21:00', '2026-11-16T22:00'], freezing_level_height: [2040, 2020, 2100] },
+    daily: { time: ['2026-11-16'], weather_code: [3], temperature_2m_max: [4.2], temperature_2m_min: [-1.1], precipitation_sum: [0.6], wind_gusts_10m_max: [52.3] } }, over || {});
+}
+function fakeFetch(handler) {
+  var calls = [];
+  var fn = function (url) {
+    calls.push(url);
+    return Promise.resolve(handler(url, calls.length));
+  };
+  fn.calls = calls;
+  return fn;
+}
+function okJson(body) { return { ok: true, status: 200, json: function () { return Promise.resolve(body); } }; }
+function coordsOf(url) {
+  var lat = /latitude=([^&]+)/.exec(url)[1].split(','), lon = /longitude=([^&]+)/.exec(url)[1].split(',');
+  return lat.map(function (v, i) { return { lat: +v, lon: +lon[i] }; });
+}
+function echoFetch() {   // antwortet je Ort mit einer Antwort; bei einem Ort ein Objekt, sonst eine Liste (wie die echte Schnittstelle)
+  return fakeFetch(function (url) {
+    var pts = coordsOf(url).map(function (p) { return apiBody(p.lat, p.lon); });
+    return okJson(pts.length === 1 ? pts[0] : pts);
+  });
+}
+
+test('forecastUrl: gleiche Parameter wie das Wetterwidget, mehrere Orte kommagetrennt', function () {
+  var one = W.forecastUrl([{ lat: 47.123456, lon: 11.654321 }], 4);
+  eq(one, 'https://api.open-meteo.com/v1/forecast?latitude=47.1235&longitude=11.6543&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_gusts_10m,weather_code&hourly=freezing_level_height&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_gusts_10m_max&wind_speed_unit=kmh&timezone=auto&forecast_days=4');
+  var two = W.forecastUrl([{ lat: 47.1, lon: 11.2 }, { lat: 46.9, lon: 11.4 }], 1);
+  eq(/latitude=47\.1000,46\.9000&longitude=11\.2000,11\.4000/.test(two) && /forecast_days=1$/.test(two), true);
+});
+
+test('parseForecast: Werte, Nullgradgrenze zur aktuellen Stunde, Tageswerte', function () {
+  var p = W.parseForecast(apiBody(47, 11));
+  eq([p.time, p.temperature, p.apparent, p.precipitation, p.wind, p.gust, p.code, p.freezingLevel, p.elevation], ['2026-11-16T21:15', 0.4, -3.9, 0, 10.8, 34.2, 3, 2020, 1875]);
+  eq(p.days, [{ date: '2026-11-16', tmax: 4.2, tmin: -1.1, precipitation: 0.6, gustMax: 52.3, code: 3 }]);
+});
+
+test('parseForecast: fehlende Werte sind null, nie 0; unbrauchbare Antworten null', function () {
+  var p = W.parseForecast(apiBody(47, 11, { elevation: undefined, hourly: { time: [], freezing_level_height: [] }, daily: undefined, current: { time: '2026-11-16T21:15', temperature_2m: null } }));
+  eq([p.temperature, p.wind, p.freezingLevel, p.elevation, p.days], [null, null, null, null, []]);
+  eq(W.parseForecast(null), null);
+  eq(W.parseForecast({}), null);
+  eq(W.parseForecast({ current: {} }), null);
+  eq(W.parseForecast('x'), null);
+});
+
+test('fetchForecasts: ein Ort (Objekt) und mehrere Orte (Liste), gleiche Reihenfolge, unbrauchbarer Eintrag null', async function () {
+  var f = echoFetch();
+  var one = await W.fetchForecasts([{ lat: 47, lon: 11 }], { fetchFn: f });
+  eq(one.length, 1);
+  eq(one[0].temperature, 0.4);
+  var many = await W.fetchForecasts([{ lat: 47, lon: 11 }, { lat: 46, lon: 12 }], { fetchFn: f, forecastDays: 1 });
+  eq(many.length, 2);
+  eq(f.calls.length, 2);   // je Aufruf genau eine Abfrage
+  var partial = await W.fetchForecasts([{ lat: 47, lon: 11 }, { lat: 46, lon: 12 }], { fetchFn: fakeFetch(function () { return okJson([apiBody(47, 11), { error: true, reason: 'x' }]); }) });
+  eq([partial[0] !== null, partial[1]], [true, null]);
+});
+
+test('fetchForecasts: HTTP-Fehler, falsche Anzahl und Netzwerkfehler werfen', async function () {
+  async function fails(fn) { try { await fn(); } catch (e) { return String(e.message); } throw new Error('kein Fehler'); }
+  eq(await fails(function () { return W.fetchForecasts([{ lat: 47, lon: 11 }], { fetchFn: fakeFetch(function () { return { ok: false, status: 429 }; }) }); }), 'HTTP 429');
+  eq(/Antwort mit 1 statt 2/.test(await fails(function () { return W.fetchForecasts([{ lat: 47, lon: 11 }, { lat: 46, lon: 12 }], { fetchFn: fakeFetch(function () { return okJson(apiBody(47, 11)); }) }); })), true);
+  eq(await fails(function () { return W.fetchForecasts([{ lat: 47, lon: 11 }], { fetchFn: function () { return Promise.reject(new Error('offline')); } }); }), 'offline');
+});
+
+test('pickPoints: 20-km-Route mit Höhengipfel in der Mitte: Start, Ziel, höchster Punkt, Zwischenpunkte, höchstens 6, nach km geordnet', function () {
+  var route = makeRoute(47, 47.18, 0.0005, function (i, n) { return 1000 + 1500 * (1 - Math.abs(i - n / 2) / (n / 2)); });   // rund 20 km, Gipfel bei km 10
+  var pts = R.pickPoints(route);
+  eq(pts.length <= R.MAX_POINTS && pts.length >= 4, true);
+  eq(pts.map(function (p) { return p.role; }).filter(function (r) { return r !== 'via'; }), ['start', 'highest', 'end']);
+  eq(pts[0].km, 0);
+  near(pts[pts.length - 1].km, route.lengthM / 1000, 1e-9);
+  var hi = pts.find(function (p) { return p.role === 'highest'; });
+  near(hi.km, 10, 0.1);
+  near(hi.ele, 2500, 1);
+  for (var i = 1; i < pts.length; i++) eq(pts[i].km > pts[i - 1].km, true);
+});
+
+test('pickPoints: Koordinaten sind auf zwei Nachkommastellen gerundet, Höhe stammt aus der Route', function () {
+  var pts = R.pickPoints(makeRoute(47, 47.1, 0.0005, function () { return 1500; }));
+  pts.forEach(function (p) {
+    eq(Math.abs(p.lat * 100 - Math.round(p.lat * 100)) < 1e-9, true);
+    eq(Math.abs(p.lon * 100 - Math.round(p.lon * 100)) < 1e-9, true);
+    eq(p.ele, 1500);
+  });
+  eq(pts[0].lon, 11.12);
+});
+
+test('pickPoints: kurze Route ergibt einen Punkt, Route ohne Höhe hat keinen höchsten Punkt, leere Route keine Punkte', function () {
+  var tiny = R.pickPoints(makeRoute(47, 47.002, 0.0005, null));
+  eq(tiny.length, 1);
+  eq(tiny[0].role, 'start');
+  eq(tiny[0].ele, null);
+  var noEle = R.pickPoints(makeRoute(47, 47.12, 0.0005, null));
+  eq(noEle.some(function (p) { return p.role === 'highest'; }), false);
+  eq(R.pickPoints(null), []);
+  eq(R.pickPoints({ points: [], lengthM: 0 }), []);
+});
+
+test('pickPoints: Höhepunkt am Start oder Ziel wird nicht doppelt gezählt; maxPoints begrenzt, Start und Ziel bleiben', function () {
+  var down = R.pickPoints(makeRoute(47, 47.12, 0.0005, function (i, n) { return 2000 - 1000 * i / n; }));
+  eq(down.some(function (p) { return p.role === 'highest'; }), false);
+  var capped = R.pickPoints(makeRoute(47, 47.3, 0.0005, function (i, n) { return 1000 + 1500 * (1 - Math.abs(i - n / 2) / (n / 2)); }), { maxPoints: 3 });
+  eq(capped.length, 3);
+  eq(capped.map(function (p) { return p.role; }).sort(), ['end', 'highest', 'start']);
+  eq(R.pickPoints(makeRoute(47, 47.5, 0.0005, null), { maxPoints: 99 }).length <= 8, true);
+});
+
+test('Zwischenspeicher: eine Abfrage für alle Orte, danach alles aus dem Speicher, neue Stunde holt neu', async function () {
+  R.clearWeatherCache();
+  var pts = R.pickPoints(makeRoute(47, 47.18, 0.0005, null));
+  var f = echoFetch();
+  var t = Date.UTC(2026, 10, 16, 20, 20);
+  var first = await R.loadRouteWeather(pts, { fetchFn: f, now: t });
+  eq(f.calls.length, 1);
+  eq(coordsOf(f.calls[0]).length, pts.length);
+  eq(first.every(function (r) { return r.state === 'ok' && !r.cached && r.forecast.temperature === 0.4; }), true);
+  var second = await R.loadRouteWeather(pts, { fetchFn: f, now: t + 30 * 60 * 1000 });   // gleiche Stunde (20 Uhr UTC)
+  eq(f.calls.length, 1);
+  eq(second.every(function (r) { return r.cached; }), true);
+  await R.loadRouteWeather(pts, { fetchFn: f, now: t + 50 * 60 * 1000 });               // 21:10 UTC: neue Stunde
+  eq(f.calls.length, 2);
+});
+
+test('Zwischenspeicher: nur fehlende Orte werden abgefragt', async function () {
+  R.clearWeatherCache();
+  var all = R.pickPoints(makeRoute(47, 47.18, 0.0005, null)), f = echoFetch(), t = Date.UTC(2026, 10, 16, 12);
+  await R.loadRouteWeather(all.slice(0, 2), { fetchFn: f, now: t });
+  var res = await R.loadRouteWeather(all, { fetchFn: f, now: t });
+  eq(f.calls.length, 2);
+  eq(coordsOf(f.calls[1]).length, all.length - 2);
+  eq(res.map(function (r) { return r.cached; }), all.map(function (_, i) { return i < 2; }));
+  eq(res.every(function (r) { return r.state === 'ok'; }), true);
+});
+
+test('Fehlerfälle: HTTP-Fehler, Netzwerkfehler, einzelner unbrauchbarer Ort; nichts Falsches im Speicher; Wiederholung klappt', async function () {
+  R.clearWeatherCache();
+  var pts = R.pickPoints(makeRoute(47, 47.18, 0.0005, null)), t = Date.UTC(2026, 10, 16, 12);
+  var http = await R.loadRouteWeather(pts, { fetchFn: fakeFetch(function () { return { ok: false, status: 429 }; }), now: t });
+  eq(http.every(function (r) { return r.state === 'failed' && r.forecast === null && r.error === 'HTTP 429'; }), true);
+  var net = await R.loadRouteWeather(pts, { fetchFn: function () { return Promise.reject(new Error('offline')); }, now: t });
+  eq(net.every(function (r) { return r.state === 'failed' && r.error === 'offline'; }), true);
+  eq(R.weatherCacheSize(), 0);
+  var oneBad = await R.loadRouteWeather(pts, { fetchFn: fakeFetch(function (url) { var c = coordsOf(url); return okJson(c.map(function (p, i) { return i === 1 ? { error: true } : apiBody(p.lat, p.lon); })); }), now: t });
+  eq(oneBad.map(function (r) { return r.state; }), pts.map(function (_, i) { return i === 1 ? 'failed' : 'ok'; }));
+  eq(R.weatherCacheSize(), pts.length - 1);
+  var retry = await R.loadRouteWeather(pts, { fetchFn: echoFetch(), now: t });
+  eq(retry.every(function (r) { return r.state === 'ok'; }), true);
+  eq(retry.filter(function (r) { return r.cached; }).length, pts.length - 1);
+});
+
+test('Zwischenspeicher: begrenzt auf CACHE_MAX Einträge; leere Punktliste ruft nichts ab', async function () {
+  R.clearWeatherCache();
+  var f = echoFetch(), t = Date.UTC(2026, 10, 16, 12);
+  eq((await R.loadRouteWeather([], { fetchFn: f, now: t })).length, 0);
+  eq(f.calls.length, 0);
+  for (var i = 0; i < R.CACHE_MAX + 5; i++) await R.loadRouteWeather([{ role: 'start', km: 0, lat: 40 + i / 100, lon: 10, ele: null }], { fetchFn: f, now: t });
+  eq(R.weatherCacheSize(), R.CACHE_MAX);
+});
+
+// Echter Abruf (Open-Meteo), nur wenn das Netz erreichbar ist
+test('Echter Abruf: zwei Orte in einer Abfrage', async function () {
+  R.clearWeatherCache();
+  var res;
+  try { res = await R.loadRouteWeather([{ role: 'start', km: 0, lat: 47.4, lon: 11.1, ele: null }, { role: 'end', km: 5, lat: 46.9, lon: 11.4, ele: null }], { now: Date.now() }); }
+  catch (e) { currentName = 'Echter Abruf: übersprungen (' + e.message + ')'; return; }
+  if (res.every(function (r) { return r.state === 'failed'; })) { currentName = 'Echter Abruf: übersprungen (kein Netz: ' + res[0].error + ')'; return; }
+  res.forEach(function (r) {
+    if (r.state !== 'ok') throw new Error('Ort fehlgeschlagen: ' + r.error);
+    var f = r.forecast;
+    if (typeof f.temperature !== 'number' || typeof f.wind !== 'number' || typeof f.gust !== 'number' || f.days.length < 1) throw new Error('unvollständig');
+    if (f.freezingLevel == null) throw new Error('keine Nullgradgrenze');
+  });
+  currentName = 'Echter Abruf: 2 Orte, Stand ' + res[0].forecast.time + ', ' + Math.round(res[0].forecast.temperature) + ' °C';
+});
+
+(async function () {
+  for (var t of queue) {
+    currentName = null;
+    try { await t.fn(); results.push({ name: currentName || t.name, ok: true }); } catch (e) { results.push({ name: t.name, ok: false, error: String(e.message || e) }); }
+  }
+  var passed = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+})();
+</script>

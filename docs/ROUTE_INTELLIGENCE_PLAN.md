@@ -441,7 +441,7 @@ Ebene 2 · Stufe 2.2. Status: RI9a Erledigt (15.11.2026), RI9b umgesetzt (15.11.
 
 ### RI10 – Wetter entlang der Route
 
-Ebene 2 · Stufe 2.2. Status: Geplant. Zwei PRs: RI10a Datenzugriff, RI10b Anzeige.
+Ebene 2 · Stufe 2.2. Status: RI10a Erledigt (16.11.2026), RI10b Geplant. Zwei PRs: RI10a Datenzugriff, RI10b Anzeige.
 
 **Ziel:** Wetterlage an wenigen Stützpunkten, keine Prognose für die ganze Tour.
 
@@ -459,6 +459,15 @@ Ebene 2 · Stufe 2.2. Status: Geplant. Zwei PRs: RI10a Datenzugriff, RI10b Anzei
 **Abhängigkeiten:** RI3.
 
 **Definition of Done:** Abfragen gedrosselt und zwischengespeichert, Fehlerzustände sichtbar, Datenschutzhinweis, DATENQUELLEN aktualisiert, bestehende Wetterkarte unverändert, PR gemerged.
+
+**Umsetzungshinweise RI10a (16.11.2026):**
+- `js/weather_api.js` (rein, neu): `forecastUrl`, `parseForecast`, `fetchForecasts` und die Wettercodes, aus `js/weather.js` herausgelöst. Eine Abfrage kann mehrere Orte enthalten (kommagetrennte Koordinaten; Antwort bei einem Ort ein Objekt, bei mehreren eine Liste, an der echten Schnittstelle geprüft). Fehlende Werte sind `null`, nie 0.
+- **Wetterkarte unverändert:** `js/weather.js` nutzt jetzt das neue Modul. Nachweis: Mit einer festen Open-Meteo-Antwort liefern der alte (`main`) und der neue Stand im Browser dieselbe Abfrage-URL und dasselbe HTML des Widgets (889 Zeichen, Zeichen für Zeichen gleich). Die Wetterkarte nutzt keinen Zwischenspeicher.
+- `js/route_weather.js` (rein, Netzwerk wird übergeben): `pickPoints(route)` wählt Start, Ziel, höchsten Punkt (nur mit Höhen und mindestens 1,5 km von Start und Ziel entfernt) und gleichmäßig verteilte Zwischenpunkte: etwa alle 6 km ein Punkt, höchstens 6 (einstellbar bis 8), Zwischenpunkte nahe einem vorhandenen Stützpunkt entfallen, nach dem Runden zusammenfallende Punkte zählen einmal; bei Kürzung bleiben Start, Ziel und höchster Punkt. `loadRouteWeather(points, deps)` holt alle fehlenden Punkte mit **einer** Abfrage, wirft nie und liefert je Punkt `{ point, state, forecast, cached, error }`.
+- **Datenschutz:** Die Koordinaten der Stützpunkte werden auf zwei Nachkommastellen (rund 1 km) gerundet, bevor sie an Open-Meteo gehen; nie der Streckenverlauf, Start und Ziel werden aber als Stützpunkte genannt (auf rund 1 km genau). Das gehört in den Hinweis der Anzeige (RI10b). DATENQUELLEN ist ergänzt.
+- **Drosselung und Zwischenspeicher:** höchstens eine Abfrage je Route; Zwischenspeicher je gerundetem Punkt und Stunde (UTC) in der Sitzung (nichts im Browserspeicher), höchstens 60 Einträge; fehlgeschlagene Abfragen werden nicht gespeichert, ein einzelner unbrauchbarer Ort scheitert allein, die übrigen bleiben gültig.
+- Getestet mit `scripts/test_route_weather.html` (14 Tests, Attrappe für das Netzwerk; der letzte Test ruft Open-Meteo wirklich ab und meldet sich als übersprungen, wenn es kein Netz gibt): URL, Auswertung, Fehlerfälle, Auswahl der Punkte (Gipfel in der Mitte, Rundung, kurze Route, ohne Höhe, Kürzung), Zwischenspeicher (eine Abfrage, Stunde, nur fehlende Orte, Fehler, Grenze).
+- Offen: RI10b (Anzeige).
 
 ---
 
