@@ -1,0 +1,111 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests route_weather_logic.js (Wetter entlang der Route, Texte, RI10b)</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as T from '../js/route_weather_logic.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function forecast(over) {
+  return Object.assign({ time: '2026-11-16T21:15', temperature: 0.4, apparent: -3.9, precipitation: 0, wind: 10.8, gust: 34.2, code: 71, freezingLevel: 2024, elevation: 1875,
+    days: [{ date: '2026-11-16', tmax: 4.2, tmin: -1.1, precipitation: 0.6, gustMax: 52.3, code: 3 }] }, over || {});
+}
+function res(role, km, ele, over, failed) {
+  return { point: { role: role, km: km, lat: 47, lon: 11, ele: ele }, state: failed ? 'failed' : 'ok', forecast: failed ? null : forecast(over), cached: false, error: failed ? 'HTTP 429' : null };
+}
+function row(item, label) { var r = item.rows.find(function (x) { return x.label === label; }); return r ? r.value : undefined; }
+
+test('pointTitle: Rolle und Streckenkilometer', function () {
+  eq(T.pointTitle({ role: 'start', km: 0 }), 'Start (km 0,0)');
+  eq(T.pointTitle({ role: 'highest', km: 10.34 }), 'Höchster Punkt (km 10,3)');
+  eq(T.pointTitle({ role: 'via', km: 1234.5 }), 'Zwischenpunkt (km 1.234,5)');
+  eq(T.pointTitle({ role: 'end', km: 20 }), 'Ziel (km 20,0)');
+});
+
+test('itemOf: Werte gerundet und mit Einheit, Nullgradgrenze neben der Höhe der Route, Modellhöhe', function () {
+  var it = T.itemOf(res('highest', 10, 2350));
+  eq(row(it, 'Wetter'), 'Leichter Schneefall');
+  eq(row(it, 'Temperatur'), '0 °C (gefühlt -4 °C)');
+  eq(row(it, 'Wind / Böen'), '11 / 34 km/h');
+  eq(row(it, 'Niederschlag jetzt'), '0,0 mm');
+  eq(row(it, 'Heute'), '4° / -1° · 0,6 mm · Böen bis 52');
+  eq(row(it, 'Nullgradgrenze'), '2.020 m');
+  eq(row(it, 'Höhe der Route hier'), '2.350 m');
+  eq(row(it, 'Modellhöhe'), '1.875 m');
+  eq(it.stand, 'Stand 21:15 (Ortszeit)');
+  eq(it.ok, true);
+});
+
+test('itemOf: keine Wertung, keine abgeleiteten Aussagen aus Nullgradgrenze und Höhe', function () {
+  var it = T.itemOf(res('highest', 10, 2350));
+  var all = it.rows.map(function (r) { return r.label + ' ' + r.value; }).join(' ');
+  eq(/über der Nullgradgrenze|unter der Nullgradgrenze|Schneefallgrenze|gefährlich|Gefahr/i.test(all), false);
+});
+
+test('itemOf: fehlende Werte als Strich, Route ohne Höhe, nie 0', function () {
+  var it = T.itemOf(res('start', 0, null, { temperature: null, apparent: null, wind: null, gust: null, precipitation: null, freezingLevel: null, elevation: null, code: null, days: [] }));
+  eq(row(it, 'Wetter'), '–');
+  eq(row(it, 'Temperatur'), '–');
+  eq(row(it, 'Wind / Böen'), '–');
+  eq(row(it, 'Niederschlag jetzt'), '–');
+  eq(row(it, 'Nullgradgrenze'), '–');
+  eq(row(it, 'Höhe der Route hier'), 'keine Höhe in der Datei');
+  eq(row(it, 'Modellhöhe'), '–');
+  eq(row(it, 'Heute'), undefined);
+  var partial = T.itemOf(res('start', 0, 1500, { wind: null }));
+  eq(row(partial, 'Wind / Böen'), '– / 34 km/h');
+});
+
+test('itemOf: fehlgeschlagener Punkt', function () {
+  var it = T.itemOf(res('end', 20, null, null, true));
+  eq([it.ok, it.rows, it.stand, it.title], [false, [], null, 'Ziel (km 20,0)']);
+  eq(it.text, 'Wetter für diesen Punkt nicht abrufbar.');
+});
+
+test('summarizeWeather: noch nicht geladen mit Datenschutzhinweis und Knopf, Laden ohne Knopf', function () {
+  var idle = T.summarizeWeather('idle', null);
+  eq(idle.canLoad, true);
+  eq(idle.notes, [T.PRIVACY_NOTE]);
+  eq(/Open-Meteo/.test(T.PRIVACY_NOTE) && /gerundet/.test(T.PRIVACY_NOTE) && /Streckenverlauf/.test(T.PRIVACY_NOTE), true);
+  eq(idle.headline, 'Wetter an den Stützpunkten der Route laden.');
+  var loading = T.summarizeWeather('loading', null);
+  eq([loading.headline, loading.canLoad, loading.items], ['Wetter wird geladen …', false, []]);
+});
+
+test('summarizeWeather: alle, teilweise und kein Punkt abrufbar; Knopf zum erneuten Laden nur bei Fehlern', function () {
+  var okAll = T.summarizeWeather('done', [res('start', 0, null), res('end', 10, null)]);
+  eq(okAll.headline, 'Wetter an 2 Stützpunkten der Route.');
+  eq(okAll.canLoad, false);
+  eq(okAll.notes[0], 'Stand 21:15 (Ortszeit).');
+  eq(okAll.notes[okAll.notes.length - 1], T.SOURCE_NOTE);
+  var part = T.summarizeWeather('done', [res('start', 0, null), res('end', 10, null, null, true)]);
+  eq(part.headline, 'Wetter für 1 von 2 Stützpunkten; für die übrigen nicht abrufbar.');
+  eq(part.canLoad, true);
+  var none = T.summarizeWeather('done', [res('start', 0, null, null, true), res('end', 10, null, null, true)]);
+  eq(none.headline, 'Wetter nicht abrufbar, hier nicht geprüft.');
+  eq(none.canLoad, true);
+  eq(none.items.every(function (i) { return !i.ok; }), true);
+  eq(T.summarizeWeather('done', []).headline, 'Keine Stützpunkte für die Route.');
+});
+
+test('summarizeWeather: ein einzelner Stützpunkt wird erklärt; Quelle nennt Open-Meteo und dass es keine Prognose für die Tour ist', function () {
+  var one = T.summarizeWeather('done', [res('start', 0, null)]);
+  eq(one.headline, 'Wetter an 1 Stützpunkt der Route.');
+  eq(one.notes.includes('Die Route ist so kurz, dass ein Stützpunkt reicht.'), true);
+  eq(/Open-Meteo/.test(T.SOURCE_NOTE) && /keine Prognose für die Tour/.test(T.SOURCE_NOTE), true);
+  var mixed = T.summarizeWeather('done', [res('start', 0, null), res('end', 10, null, { time: '2026-11-16T21:30' })]);
+  eq(mixed.notes.some(function (n) { return /^Stand/.test(n); }), false);   // unterschiedliche Stände: jede Karte trägt ihren eigenen
+  eq(mixed.items[1].stand, 'Stand 21:30 (Ortszeit)');
+});
+
+var passed = results.filter(function (r) { return r.ok; }).length;
+document.getElementById('result').textContent = JSON.stringify({ passed: passed, failed: results.length - passed, results: results });
+</script>

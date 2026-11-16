@@ -441,7 +441,7 @@ Ebene 2 · Stufe 2.2. Status: RI9a Erledigt (15.11.2026), RI9b umgesetzt (15.11.
 
 ### RI10 – Wetter entlang der Route
 
-Ebene 2 · Stufe 2.2. Status: RI10a Erledigt (16.11.2026), RI10b Geplant. Zwei PRs: RI10a Datenzugriff, RI10b Anzeige.
+Ebene 2 · Stufe 2.2. Status: Erledigt (16.11.2026). Zwei PRs: RI10a Datenzugriff, RI10b Anzeige.
 
 **Ziel:** Wetterlage an wenigen Stützpunkten, keine Prognose für die ganze Tour.
 
@@ -467,7 +467,13 @@ Ebene 2 · Stufe 2.2. Status: RI10a Erledigt (16.11.2026), RI10b Geplant. Zwei P
 - **Datenschutz:** Die Koordinaten der Stützpunkte werden auf zwei Nachkommastellen (rund 1 km) gerundet, bevor sie an Open-Meteo gehen; nie der Streckenverlauf, Start und Ziel werden aber als Stützpunkte genannt (auf rund 1 km genau). Das gehört in den Hinweis der Anzeige (RI10b). DATENQUELLEN ist ergänzt.
 - **Drosselung und Zwischenspeicher:** höchstens eine Abfrage je Route; Zwischenspeicher je gerundetem Punkt und Stunde (UTC) in der Sitzung (nichts im Browserspeicher), höchstens 60 Einträge; fehlgeschlagene Abfragen werden nicht gespeichert, ein einzelner unbrauchbarer Ort scheitert allein, die übrigen bleiben gültig.
 - Getestet mit `scripts/test_route_weather.html` (14 Tests, Attrappe für das Netzwerk; der letzte Test ruft Open-Meteo wirklich ab und meldet sich als übersprungen, wenn es kein Netz gibt): URL, Auswertung, Fehlerfälle, Auswahl der Punkte (Gipfel in der Mitte, Rundung, kurze Route, ohne Höhe, Kürzung), Zwischenspeicher (eine Abfrage, Stunde, nur fehlende Orte, Fehler, Grenze).
-- Offen: RI10b (Anzeige).
+**Umsetzungshinweise RI10b (16.11.2026):**
+- Aufbau: `js/route_weather_logic.js` (rein: Texte, Zeilen je Stützpunkt, Zusammenfassung) und `js/route_weather_view.js` (Oberfläche). Der Block „Wetter entlang der Route“ steht unter der Lawinenlage, nur mit geöffneter Route.
+- **Abruf erst auf Knopfdruck („Wetter laden“)**, nicht automatisch beim Öffnen einer Route. Grund: Es ist die einzige Funktion, bei der Daten zur Route an einen externen Dienst gehen; bis dahin gilt „GPX bleibt lokal“ (E1) ohne Ausnahme. Vor dem Laden steht der Datenschutzhinweis: bis zu 6 Punkte der Route, auf etwa 1 km gerundet (Start und Ziel eingeschlossen), gehen an Open-Meteo; Streckenverlauf und Datei werden nicht übertragen. Im Browser nachgewiesen: vor dem Klick 0 Anfragen an Open-Meteo, nach dem Klick genau eine Abfrage mit den gerundeten Punkten; dieselbe Route erneut laden kommt aus dem Zwischenspeicher (0 Anfragen).
+- Anzeige je Stützpunkt (Start, Ziel, höchster Punkt, Zwischenpunkte mit Streckenkilometer): Wetter in Worten, Temperatur (gefühlt), Wind und Böen, Niederschlag jetzt, der heutige Tag (Höchst-/Tiefstwert, Niederschlagssumme, Böen), **Nullgradgrenze, Höhe der Route an dieser Stelle und Modellhöhe untereinander als reine Gegenüberstellung** – es wird bewusst nichts daraus abgeleitet („über der Nullgradgrenze“, „Schnee“ o. Ä.; als Test festgehalten). Fehlende Werte stehen als „–“, eine Route ohne Höhe als „keine Höhe in der Datei“. Darunter Stand (Ortszeit) und der Quellenhinweis: Open-Meteo, Modellwerte für ein Raster, aktuelle Werte und heutiger Tag, **keine Prognose für die Tour**, Modellhöhe kann von der Höhe des Punktes abweichen.
+- Zustände: „Wetter wird geladen …“, je Punkt „nicht abrufbar“, bei Totalausfall „Wetter nicht abrufbar, hier nicht geprüft.“ mit „Erneut versuchen“ (auch bei teilweisem Ausfall); ein einzelner Stützpunkt bei sehr kurzer Route wird erklärt.
+- Getestet mit `scripts/test_route_weather_logic.html` (8 Tests) und in einem Headless-Browser (CDP) mit **echten Open-Meteo-Daten**: Route im Karwendel (16 km, Gipfel in der Mitte): 5 Stützpunkte, eine Abfrage; Abruf blockiert → Fehlerzustand und erfolgreiche Wiederholung; Desktop 1440 und Mobil 390, hell und dunkel. Screenshots: `docs/screenshots/wetter-route-*.png`.
+- **Nicht geprüft / offen:** Abfragelimits bei vielen Nutzern (derzeit höchstens eine Abfrage je Route und Klick, Zwischenspeicher je Punkt und Stunde); Echtgerät; Kontrastnachweis; keine Startzeit-Auswahl (späteres Paket); Aussagekraft von Modellpunkten im Hochgebirge bleibt begrenzt (Hinweis steht in der Anzeige).
 
 ---
 

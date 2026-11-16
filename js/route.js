@@ -19,6 +19,7 @@ import { canSave, makeMeta, storeErrorText } from './route_store_logic.js';
 import { createSaved } from './route_saved.js';
 import { initRouteContext, setRouteContext } from './route_context.js';
 import { initRouteAvalanche, setRouteAvalanche } from './route_avalanche_view.js';
+import { initRouteWeather, setRouteWeather } from './route_weather_view.js';
 
 var DISPLAY_TOLERANCE_M = 3;   // Vereinfachung der Linie für die Darstellung; die Route selbst bleibt unverändert
 var MAX_ZOOM = 15;
@@ -148,6 +149,7 @@ async function load(readText, fileName, meta) {
     draw();
     setRouteContext(route);   // nach draw(): clearLayers entfernt die Hervorhebung der Abschnitte
     setRouteAvalanche(route);
+    setRouteWeather(route);
     profile.show(route, stats);
     if (!map.hasLayer(routeLayer)) map.addLayer(routeLayer);
     map.closePopup();
@@ -203,6 +205,7 @@ function clearRoute() {
   routeLayer.clearLayers();
   setRouteContext(null);
   setRouteAvalanche(null);
+  setRouteWeather(null);
   map.closePopup();
   unwarn('route');
   showCurrent();
@@ -218,6 +221,7 @@ export function initRoute() {
   info = document.getElementById('route-info');
   initRouteContext(document.getElementById('route-context'));
   initRouteAvalanche(document.getElementById('route-avalanche'));
+  initRouteWeather(document.getElementById('route-weather'));
   profile = createProfile(document.getElementById('route-profile'), showPosition);
   btnLoad.addEventListener('click', function () { fileInput.click(); });
   fileInput.addEventListener('change', function () {
