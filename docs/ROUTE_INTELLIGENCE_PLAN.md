@@ -135,7 +135,7 @@ Die Landing Page benennt GPX-Analyse, Risikoanalyse, Terrain Intelligence und Al
 | 2 Route Intelligence | 2.2 Route trifft Kartenplattform | RI7–RI10 | Analyse-Logik, Anzeige, Datenzugriff | Schutzgebiete, Sperrungen, Lawinenlage, Wetter entlang der Route (je Quelle getrennt) | keine neue Quelle |
 | 3 Terrain Intelligence | 3.1 Höhenmodell | RI11–RI12 | Entscheidung, Datenzugriff | nichts (Grundlage) | DEM |
 | 3 Terrain Intelligence | 3.2 Geländeanalyse | RI13–RI14 | Analyse-Logik, Anzeige | Steigung, Exposition | – |
-| 3 Terrain Intelligence | 3.3 Darstellung und ergänzende Geländeanalysen | RI15, RI15a–RI15k | Anzeige; Entscheidung, Datenzugriff, Analyse-Logik | Gelände im Profil; Geländebedeckung, Sonne und Schatten entlang der Route | Land Cover (Quelle offen, E15); Sonne: keine eigene Quelle, Berechnung (E16 offen) |
+| 3 Terrain Intelligence | 3.3 Darstellung und ergänzende Geländeanalysen | RI15, RI15a–RI15k | Anzeige; Entscheidung, Datenzugriff, Analyse-Logik | Gelände im Profil; Geländebedeckung, Sonne und Schatten entlang der Route | Land Cover (Quelle offen, E15); Sonne: keine eigene Quelle, Berechnung im eigenen Code (E16) |
 | 3 Terrain Intelligence | 3.4 Geländecharakteristik | RI20 (zurückgestellt) | Analyse-Logik | Geländeformen | ggf. DEM mit höherer Auflösung |
 | 4 Alpine Risk Intelligence | 4.1 Befunde | RI16–RI17 | Modell, Anzeige | Liste „Worauf achten?“ | – |
 | 4 Alpine Risk Intelligence | 4.2 Zusammenführung | RI18 | Orchestrierung | Einstieg „Route analysieren“ | – |
@@ -868,7 +868,7 @@ Terrain Intelligence
 | Route mit Streckenposition | Abschnitte und km-Angaben | RI2 | vorhanden |
 | Datum, Uhrzeit oder Zeitfenster, Zeitzone | Sonnenstand; Sommerzeit und Reisezone müssen stimmen | Eingabe des Nutzers; Zeitzone aus Ort der Route | neu (E17) |
 | Zeiten aus der GPX-Datei | optional: aufgezeichnete Tour rückblickend zuordnen | RI1/RI4 (`time`, sofern vorhanden) | vorhanden, optional |
-| Sonnenstand (Azimut, Höhe, Auf- und Untergang) | Grundlage jeder Besonnung | Berechnung nach astronomischem Verfahren; Umsetzung offen (E16) | neu |
+| Sonnenstand (Azimut, Höhe, Auf- und Untergang) | Grundlage jeder Besonnung | Berechnung nach astronomischem Verfahren im eigenen Code (E16) | neu |
 | Geländehöhe | Neigung, Exposition, Horizont | DEM (RI11, RI12) | geplant |
 | Neigung und Exposition je Abschnitt | Hangbesonnung | RI13a, RI14a | geplant |
 | DEM im Umfeld der Route (Suchradius) | Fernschatten: Beispiel bei 5° Sonnenhöhe beschattet ein 1 000 m höherer Berg Gelände bis etwa 11 km dahinter | RI12 mit größerem Kachelbedarf | geplant, Datenmenge offen (RI15h) |
@@ -938,18 +938,18 @@ Ebene 3 · Stufe 3.3. Status: Geplant. Schicht: Analyse-Logik (ohne DOM).
 
 **Umfang:**
 - Neues Modul ohne Karten- und DOM-Bezug (z. B. `js/sun.js`): Sonnenazimut und Sonnenhöhe für Breite, Länge und Zeitpunkt; Sonnenauf- und -untergang, Tageslänge, Dämmerung; Eingaben und Ausgaben in Grad und UTC, Umrechnung in Ortszeit getrennt (Zeitzone und Sommerzeit).
-- Entscheidung E16: Berechnung als eigener Code (E14) oder Prüfung einer Bibliothek (DATENQUELLEN führt SunCalc als geplante Ephemeris-Quelle); vor Beginn zu treffen, hier nicht vorweggenommen. Festzulegen: geforderte Genauigkeit und ob Refraktion berücksichtigt wird.
+- Entscheidung E16: Die Berechnung erfolgt als eigener Code (E14), ohne Bibliothek; SunCalc wird nicht eingebunden. Festzulegen sind in diesem Paket: geforderte Genauigkeit, das gewählte Verfahren und ob Refraktion berücksichtigt wird.
 - Testseite `scripts/test_sun.html` mit Referenzwerten aus unabhängigen Quellen (Sonnenauf- und -untergang an bekannten Orten und Daten, Sommer- und Wintersonnenwende, Tag-und-Nacht-Gleiche, Zeitumstellung, hohe und niedrige Breiten).
 
 **Nicht im Umfang:** Gelände, Schatten, Route, Anzeige, Wetter.
 
-**Voraussetzungen:** RI0 (E16 entschieden); keine DEM-Abhängigkeit.
+**Voraussetzungen:** RI0; keine DEM-Abhängigkeit.
 
 **Risiken:** Zeitzonen- und Sommerzeitfehler, Verwechslung von Orts- und Weltzeit, Genauigkeit am Horizont. Gegenmaßnahme: Berechnung in UTC, Referenzfälle für Zeitumstellung, dokumentierte Toleranz.
 
 **Abhängigkeiten:** keine; Wiederverwendung für die Toolbox-Funktion „Sonnenstand & Dämmerung“ möglich.
 
-**Definition of Done:** Referenzwerte innerhalb der dokumentierten Toleranz, Zeitzonenfälle getestet, E16 dokumentiert, DATENQUELLEN geprüft, keine Änderung der Oberfläche, PR gemerged.
+**Definition of Done:** Referenzwerte innerhalb der dokumentierten Toleranz, Zeitzonenfälle getestet, Verfahren und Genauigkeit (E16) dokumentiert, DATENQUELLEN-Eintrag abgeglichen, keine Änderung der Oberfläche, PR gemerged.
 
 ### RI15g – Hangbesonnung (Eigenschatten)
 
@@ -1322,7 +1322,7 @@ Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die 
 | E13 | Suche in eigenen Routen | Nicht in den Ebenen 2 bis 4; später als zusätzliche Gruppe der globalen Suche | **Bestätigt** | Eigene Routen sind lokal und privat; die Suche indexiert sie nicht | später |
 | E14 | Bibliotheken | Keine neuen Bibliotheken; Parser, Geometrie und Diagramm als eigener Code (Leaflet bleibt). Falls später doch nötig: Self-Hosting unter `vendor/`, Lizenzprüfung, eigener Beschluss | **Bestätigt** | Keine externen Ressourcen ohne Self-Hosting; kleiner Umfang, volle Kontrolle über Sicherheit (`esc()`, XML-Parser) | RI1 |
 | E15 | Land-Cover-Quelle und Klassenschema | Keine Entscheidung. Kandidaten: ESA WorldCover 2021 und CLC+ Backbone 2021 (je 10 m), Tree Cover Density als Ergänzung. Bedeckung wird nur beschreibend verwendet; Abruf nach Kachelkoordinate, nicht nach Routenverlauf; Klassen werden zu Gruppen zusammengefasst, nicht interpoliert | **Offen** (bewusst vertagt) | Lizenz, Abruf ohne Backend und Qualität in den Alpen sind ungeprüft; Spike in RI15a, möglichst gemeinsam mit RI11. Bis dahin wird kein Land-Cover-Code geschrieben | RI15a |
-| E16 | Sonnenstand: eigener Code oder Bibliothek, geforderte Genauigkeit | Keine Entscheidung. Grundsatz E14 (keine neuen Bibliotheken) gilt, bis anders beschlossen; DATENQUELLEN führt SunCalc als geplante Ephemeris-Quelle, das ist keine Festlegung | **Offen** (bewusst vertagt) | Genauigkeit, Zeitzonen, Lizenz und Umfang sind vor RI15f abzuwägen; die Wahl wird hier nicht vorweggenommen | RI15f |
+| E16 | Sonnenstand: eigener Code oder Bibliothek, geforderte Genauigkeit | Eigener Code, keine Bibliothek (E14); SunCalc wird nicht eingebunden. Verfahren, Genauigkeit und Refraktion werden in RI15f festgelegt | **Bestätigt, vorläufig** (17.11.2026) | Volle Kontrolle, keine Abhängigkeit, kein Lizenz- oder Updateaufwand; Aufwand und Fehlerverantwortung liegen bei uns, daher Referenzwert-Tests in RI15f. Vorläufig, weil Genauigkeit und Verfahren erst dort festgelegt werden | RI15f |
 | E17 | Zeitbezug der Sonnenanalyse | Nutzer wählt Datum und Uhrzeit (bzw. Zeitfenster); keine Gehzeitprognose (Abschnitt 12). Zeiten aus der GPX-Datei für eine rückblickende Zuordnung bleiben optional und werden in RI15i geprüft | **Bestätigt** (17.11.2026) | Hält die Analyse beschreibend und vermeidet ein Zeitmodell; Zeitzone und Sommerzeit sind Teil der Eingabe | RI15f, RI15i |
 
 ## Festlegungen für RI1 bis RI5
@@ -1366,7 +1366,7 @@ Aus den bestätigten Entscheidungen folgen diese Vorgaben. Sie ändern weder Umf
 Nach docs/WORKFLOW.md bei jedem Paket prüfen und, falls betroffen, aktualisieren:
 
 - **ROADMAP.md:** Checkliste (GPX-Parser, Höhenprofil, DEM-Integration, Tourenwarnungen), Versionshistorie; bestehende Inhalte werden nur abgehakt oder ergänzt.
-- **DATENQUELLEN.md:** DEM (Status korrigieren), Open-Meteo-Nutzung für Routen, spätere OSM-Abfragen, Land Cover (neuer Abschnitt mit RI15a, Quellen und Lizenzen aus der Übersicht bei RI15a–RI15e), Sonnenstand-Berechnung (Eintrag „Ephemeris-Daten“ mit RI15f und E16 abgleichen).
+- **DATENQUELLEN.md:** DEM (Status korrigieren), Open-Meteo-Nutzung für Routen, spätere OSM-Abfragen, Land Cover (neuer Abschnitt mit RI15a, Quellen und Lizenzen aus der Übersicht bei RI15a–RI15e), Sonnenstand-Berechnung (Eintrag „Ephemeris-Daten“ mit RI15f abgleichen, E16: eigener Code).
 - **STYLEGUIDE.md:** Routenlinie, Befundkomponenten, Neigungsfarben, Bedeckungsfarben, Besonnungsfarben.
 - **ALPINE_RISK_ENGINE.md:** Befundmodell (RI16), Modulstatus.
 - **IDEENSAMMLUNG.md:** umgesetzte Ideen (GPX Upload, GPX Statistik) entfernen oder verschieben.

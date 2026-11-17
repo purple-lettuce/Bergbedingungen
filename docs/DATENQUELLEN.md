@@ -447,7 +447,7 @@ Datenquellen speziell für die Mountain Radar Toolbox (Website + Mobile App).
 | **Roadmap-Phase** | Phase 5 (Mobile App Erweiterte Werkzeuge) |
 | **Status** | 🟡 Geplant |
 | **Abhängigkeiten** | Keine (nur Koordinaten + Zeit) |
-| **Notizen** | SunCalc.js ist leicht und offline-fähig |
+| **Notizen** | SunCalc.js ist leicht und offline-fähig. Für die Route-Intelligence-Linie (RI15f) wurde entschieden, den Sonnenstand im eigenen Code zu berechnen (E16 im Route Intelligence Plan); SunCalc wird dort nicht eingebunden. Für MOB-T6 (Phase 5) wird die Wiederverwendung von RI15f geprüft |
 
 ### OSM Emergency Tags & Rettungspunkte
 
