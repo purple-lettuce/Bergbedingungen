@@ -19,7 +19,7 @@ Es werden nur öffentliche Test-URLs abgerufen (je höchstens 1 KB, außer der Z
 Das Ergebnis (JSON unten) in den Chat kopieren. Wichtig: Die Seite sollte von einer echten Herkunft laufen (localhost oder GitHub Pages), nicht als <code>file://</code>.</p>
 <p>Eigene URL (z. B. BEV-Höhenraster, Kachel als COG): <input type="text" id="custom" placeholder="https://… (optional, wird als Zeile „eigene URL“ geprüft)"></p>
 <button id="run">Messung starten</button> <button id="full">Zusätzlich je Quelle die ganze Datei laden (Größe messen, kann mehrere MB bis GB sein, bei Kacheln &gt; 50 MB wird abgebrochen)</button>
-<table id="t"><thead><tr><th>Quelle</th><th>URL</th><th>Plain GET</th><th>Range 0–1023</th><th>Content-Range (Gesamtgröße)</th><th>Typ</th><th>CORS-Header</th><th>Bemerkung</th></tr></thead><tbody></tbody></table>
+<table id="t"><thead><tr><th>Quelle</th><th>URL</th><th>Plain GET</th><th>Range 0–1023</th><th>Content-Range (Gesamtgröße)</th><th>Typ</th><th>CORS-Header</th><th>Bemerkung</th><th>Direkt öffnen</th></tr></thead><tbody></tbody></table>
 <h2>Ergebnis (JSON zum Einfügen in den Chat)</h2>
 <textarea id="out" readonly></textarea>
 <script>
@@ -29,6 +29,8 @@ var SOURCES = [
     url: 'https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N47_00_E012_00_DEM/Copernicus_DSM_COG_10_N47_00_E012_00_DEM.tif' },
   { id: 'copernicus-glo90', name: 'Copernicus GLO-90 (AWS, COG, 1°-Kachel)',
     url: 'https://copernicus-dem-90m.s3.amazonaws.com/Copernicus_DSM_COG_30_N47_00_E012_00_DEM/Copernicus_DSM_COG_30_N47_00_E012_00_DEM.tif' },
+  { id: 'copernicus-opentopography', name: 'Copernicus GLO-30 (OpenTopography, URL ungeprüft)',
+    url: 'https://opentopography.s3.sdsc.edu/raster/COP30/COP30_hh/Copernicus_DSM_COG_10_N47_00_E012_00_DEM.tif' },
   { id: 'terrain-terrarium', name: 'AWS Terrain Tiles (terrarium PNG, z10)',
     url: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/10/545/359.png' },
   { id: 'terrain-geotiff', name: 'AWS Terrain Tiles (GeoTIFF, z10)',
@@ -72,6 +74,13 @@ function show(r, name) {
 async function run(full) {
   tbody.innerHTML = ''; rows = [];
   var list = SOURCES.slice(), c = document.getElementById('custom').value.trim();
+  // swissALTI3D: erste Kachel aus der STAC-Abfrage suchen und selbst prüfen (Daten liegen nicht in der Collection-Antwort)
+  try {
+    var it = await (await fetch('https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.swissalti3d/items?limit=1', { cache: 'no-store' })).json();
+    var assets = it.features && it.features[0] && it.features[0].assets || {};
+    var key = Object.keys(assets).filter(function (k) { return /\.tif$/i.test(assets[k].href || k); })[0];
+    if (key) list.push({ id: 'swissalti3d-kachel', name: 'swissALTI3D Kachel (' + key + ')', url: assets[key].href });
+  } catch (e) { rows.push({ id: 'swissalti3d-kachel', url: 'STAC items', plain: 'Fehler', range: '-', note: e.message }); }
   if (c) list.push({ id: 'custom', name: 'eigene URL', url: c });
   for (var i = 0; i < list.length; i++) {
     var r = await probe(list[i], full); rows.push(r); show(r, list[i].name);
