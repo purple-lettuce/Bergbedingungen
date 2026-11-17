@@ -389,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.26 | 2026-11-17 | Route Intelligence Plan: Entscheidung E16 (Sonnenstand im eigenen Code, keine Bibliothek) bestätigt, DATENQUELLEN-Notiz zu SunCalc angepasst; nur Dokumentation |
 | 4.25 | 2026-11-17 | Route Intelligence Plan: Entscheidung E17 (Zeitbezug der Sonnenanalyse: Nutzer wählt Datum und Uhrzeit) bestätigt; nur Dokumentation |
 | 4.24 | 2026-11-16 | Route Intelligence Plan: Geländebedeckung (Land Cover, RI15a–RI15e) und Sonneneinstrahlung/Schatten (RI15f–RI15k) in Stufe 3.3 ergänzt, Entscheidungen E15–E17 offen; nur Dokumentation |
 | 4.23 | 2026-11-16 | Route Intelligence: RI10b (Wetter entlang der Route: Anzeige je Stützpunkt auf Knopfdruck, Datenschutzhinweis, Nullgradgrenze neben der Routenhöhe) umgesetzt; Stufe 2.2 damit abgeschlossen |
