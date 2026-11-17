@@ -121,7 +121,7 @@ Nicht dargestellt, weil keine belastbare Grundlage existiert:
 
 | Quelle | Art, Auflösung | Abdeckung | Lizenz, Namensnennung | Stand |
 |---|---|---|---|---|
-| Copernicus DEM GLO-30 / GLO-90 (COG auf AWS) | DSM, 30 m / 90 m | global | frei nutzbar, Namensnennung nach Anbietertext | E7-Vorschlag: alpenweiter Rückfall und Horizont für Schatten; Direktabruf aus dem Browser scheiterte in der Messung (17.11.2026), URL-Prüfung offen |
+| Copernicus DEM GLO-30 / GLO-90 (COG auf AWS) | DSM, 30 m / 90 m | global | frei nutzbar, Namensnennung nach Anbietertext | E7-Vorschlag: alpenweiter Rückfall und Horizont für Schatten; Direktabruf von AWS aus dem Browser nicht möglich (CORS fehlt, 17.11.2026 gemessen und URL bestätigt); 42 MB je 1°-Kachel |
 | swisstopo swissALTI3D | DTM, 0,5 m / 2 m | Schweiz | STAC-Lizenzfeld „proprietary“, Bedingungen auf geo.admin.ch zu bestätigen | Kandidat Regionsquelle Schweiz (E7-Vorschlag) |
 | AWS Terrain Tiles (terrarium, GeoTIFF) | gemischt, bis ca. 10 m | global | mehrere Namensnennungen, u. a. DGM Österreich CC BY 3.0 AT; Anbieterhinweis „für EC2 gedacht“ | Ausweichlösung; Abruf aus dem Browser gemessen: funktioniert (Zoom 10: PNG 153 KB, GeoTIFF 257 KB je Kachel) |
 | Open-Meteo Elevation API | Punkthöhen, 90 m | global | wie Open-Meteo | nur Einzelhöhen, nicht für das Geländemodell |
