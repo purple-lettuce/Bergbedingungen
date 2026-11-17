@@ -389,7 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
-| 4.27 | 2026-11-17 | RI11: DEM-Quellenvergleich und Vorschlag für E7 im Route Intelligence Plan, DEM-Eintrag in DATENQUELLEN korrigiert (10 m / CC BY 4.0 nicht belegt), Messseite `scripts/spike_dem_cors.html` außerhalb der Anwendung; Messwerte (CORS, Range, Datenmenge) stehen aus |
+| 4.27 | 2026-11-17 | RI11: DEM-Quellenvergleich und Vorschlag für E7 (beste Auflösung je Region, Copernicus als Rückfall, Bewuchs aus Land Cover; E18 Bibliotheksfrage offen) im Route Intelligence Plan, DEM-Eintrag in DATENQUELLEN korrigiert (10 m / CC BY 4.0 nicht belegt), Messseite `scripts/spike_dem_cors.html` außerhalb der Anwendung; Messwerte (CORS, Range, Datenmenge) stehen aus |
 | 4.26 | 2026-11-17 | Route Intelligence Plan: Entscheidung E16 (Sonnenstand im eigenen Code, keine Bibliothek) bestätigt, DATENQUELLEN-Notiz zu SunCalc angepasst; nur Dokumentation |
 | 4.25 | 2026-11-17 | Route Intelligence Plan: Entscheidung E17 (Zeitbezug der Sonnenanalyse: Nutzer wählt Datum und Uhrzeit) bestätigt; nur Dokumentation |
 | 4.24 | 2026-11-16 | Route Intelligence Plan: Geländebedeckung (Land Cover, RI15a–RI15e) und Sonneneinstrahlung/Schatten (RI15f–RI15k) in Stufe 3.3 ergänzt, Entscheidungen E15–E17 offen; nur Dokumentation |
