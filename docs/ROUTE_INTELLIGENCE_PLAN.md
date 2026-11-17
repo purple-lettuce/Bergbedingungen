@@ -483,7 +483,7 @@ Ziel: Eigene Geländeinformation aus einem Höhenmodell. Hier liegt das größte
 
 ### RI11 – DEM-Quellenentscheidung und Spike
 
-Ebene 3 · Stufe 3.1. Status: Geplant. Schicht: Recherche/Entscheidung.
+Ebene 3 · Stufe 3.1. Status: Recherche erledigt, Entscheidung als Vorschlag, Messung im Browser ausstehend. Schicht: Recherche/Entscheidung.
 
 **Ziel:** Quelle, Format, Abruf, Lizenz und Cache festlegen (E7, E8).
 
@@ -501,6 +501,30 @@ Ebene 3 · Stufe 3.1. Status: Geplant. Schicht: Recherche/Entscheidung.
 **Abhängigkeiten:** RI0.
 
 **Definition of Done:** Entscheidung dokumentiert, DATENQUELLEN korrigiert, Folgepakete bei Bedarf angepasst, PR gemerged.
+
+**Umsetzungshinweise RI11 (17.11.2026):**
+
+Stand: Recherche aus den Produkt- und Lizenzseiten der Anbieter. **Nicht gemessen** sind CORS, Range-Anfragen, Dateigrößen und die Genauigkeit im Alpenraum, weil die Arbeitsumgebung keinen Zugriff auf die Hosts hat (Zugriff gesperrt, keine Umgehung versucht). Dafür gibt es die Messseite `scripts/spike_dem_cors.html` (eigenständig, nicht Teil der Anwendung, kein `js/dem.js`). Sie läuft im Browser des Nutzers und liefert die Messwerte als JSON.
+
+| Kandidat | Art | Auflösung | Abdeckung | Format und Abruf | Lizenz und Namensnennung | Befund |
+|---|---|---|---|---|---|---|
+| Copernicus GLO-30 | DSM (Oberfläche, mit Bäumen und Gebäuden) | 30 m | global, damit Ost-, West- und Südalpen | Cloud Optimized GeoTIFF, 1°×1°-Kacheln, öffentlicher Bucket AWS `eu-central-1` | frei nutzbar, Namensnennung nach Anbietertext (Produktseite) | Einzige Quelle mit durchgehender Alpenabdeckung. Vertikale Genauigkeit laut Anbieter < 4 m (90 %), im steilen Gelände schlechter. CORS und Range **offen** |
+| Copernicus GLO-90 | DSM | 90 m | global | wie GLO-30 | wie GLO-30 | Für Hangneigung zu grob. Von Open-Meteo als Punkthöhe genutzt |
+| BEV ALS DTM (Österreich) | DTM (Gelände ohne Bewuchs) | 1 m | Österreich | COG und GeoTIFF, 55 Kacheln zu je 50 km, EPSG:3035 | CC BY 4.0, Namensnennung BEV | Beste Qualität, aber sehr große Kacheln und anderes Koordinatensystem. Passt nur mit Range-Abruf und Neuprojektion im Browser. Nur Österreich |
+| Österreichisches DGM 10 m (data.gv.at) | DTM | 10 m | Österreich | in dieser Recherche kein aktueller Direktabruf gefunden | frühere Fassung CC BY 3.0 AT, **nicht CC BY 4.0**; aktuelle Fassung unbestätigt | Der Eintrag „10 m, CC BY 4.0“ in DATENQUELLEN war nicht belegt und wird korrigiert |
+| swisstopo swissALTI3D | DTM | 0,5 m und 2 m | Schweiz | STAC-Schnittstelle, Kacheln als GeoTIFF/COG | Lizenzfeld im STAC „proprietary“, Bedingungen auf geo.admin.ch; Wortlaut **zu bestätigen** | Nur Schweiz. Nutzungsbedingungen vor einer Entscheidung lesen |
+| AWS Terrain Tiles | gemischt (u. a. Copernicus/EU-DEM, nationale Modelle) | je nach Zoom bis ca. 10 m | global | fertige Kacheln, `terrarium`-PNG und GeoTIFF, Zoom 0 bis 15 | mehrere Namensnennungen je Quelle (u. a. DGM Österreich unter CC BY 3.0 AT) | Bequem, weil Web-Kacheln. Hinweis des Anbieters, der Bucket sei für EC2 gedacht, daher Dauerbetrieb von GitHub Pages aus unsicher. Gemischte Quellen erschweren die Genauigkeitsaussage |
+| Open-Meteo Elevation API | Punkthöhen | 90 m (GLO-90) | global | JSON, bis 100 Koordinaten je Anfrage | wie Open-Meteo | Nur für Einzelhöhen. Für Steigung und Exposition nicht geeignet, außerdem Anfrage mit Routenpunkten (E1, E6) |
+
+**Vorschlag für E7 (noch nicht bestätigt):**
+1. Basis alpenweit: Copernicus GLO-30 (DSM, 30 m) als COG im Browser per Range-Anfrage, sofern die Messung CORS und Range bestätigt. Ein DSM zeigt Baumhöhen als Gelände; für Steigung und Exposition ist das in Wald ein Fehler, den die Anzeige benennen muss (E12, informieren statt entscheiden).
+2. Qualitätsstufe später: BEV 1 m für Österreich und swissALTI3D für die Schweiz als optionale, schärfere Quelle je Land (Provider-Muster, siehe Weitere Länder in Abschnitt 12).
+3. Ausweichlösungen, falls CORS oder Range fehlen: AWS Terrain Tiles; als letzte Möglichkeit vorberechnete statische Kacheln im Repository (nur wenn die Datenmenge tragbar ist, E8) oder ein Dienst, was E10 (kein Backend) ändern würde und dann eine eigene Entscheidung braucht.
+4. Nicht verwendet: Open-Meteo Elevation API für das Geländemodell.
+
+**Offen, vor Bestätigung zu messen (mit `scripts/spike_dem_cors.html`):** CORS vom Herkunftsdomain GitHub Pages, Range-Anfragen (206), tatsächliche Kachelgröße und Datenmenge je Tour (Korridor und RI15h), Antwortzeit, Abgleich mit den GPX-Höhen einer bekannten Tour (RI5), BEV-Kachel-URL und swisstopo-Bedingungen.
+
+**Folgepakete:** RI12 bleibt blockiert, bis E7 bestätigt ist. RI13 bis RI15 und RI15f bis RI15h erben Auflösung (30 m) und DSM-Eigenschaft; RI15h braucht Kacheln weit über die Route hinaus und hängt an der gemessenen Datenmenge. RI15a (Land Cover) nutzt dieselbe Messseite für seine Quellen.
 
 ### RI12 – DEM-Zugriff (Höhe an einem Punkt)
 
@@ -1313,7 +1337,7 @@ Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die 
 | E4 | Größenlimit der GPX-Datei | 10 MB und 200 000 Trackpunkte; Überschreitung wird abgelehnt (nicht abgeschnitten) mit klarer Meldung. Beide Werte stehen als benannte Konstanten im Parser | **Bestätigt, vorläufig** | Reicht für lange Mehrtagestouren. Die Grenzen werden mit dem Parser (RI1) an einer großen Testdatei auf Laufzeit geprüft und nur bei Bedarf in einem Dokumentations-PR angepasst | RI1 |
 | E5 | Glättung der GPX-Höhen | Anstieg/Abstieg per Hysterese (Höhenänderung zählt erst ab einer Schwelle); Startwert 5 m als benannte Konstante. Die Methode wird im UI genannt, keine versteckte Filterung | **Bestätigt, vorläufig** | Rohsummen überzeichnen durch GPS-Rauschen. Der Zahlenwert wird in RI4 an Referenzstrecken kalibriert | RI4 |
 | E6 | Abtastabstand für Flächenschnitte | 25 m; Abschnitte entstehen aus Ereignissen (Ein-/Austritt), nicht aus festen Längen | **Bestätigt, vorläufig** | Wert wird in RI7 gegen die echten Geometrien (Schutzgebiete, Regionen) und Laufzeit geprüft | RI7 |
-| E7 | DEM-Quelle | Keine Entscheidung | **Offen** (bewusst vertagt) | Lizenz, Abdeckung Alpenraum und Abruf ohne Backend sind ungeklärt; Spike in RI11. Bis dahin wird kein DEM-Code geschrieben | RI11 |
+| E7 | DEM-Quelle | Keine Entscheidung | **Vorschlag, Messung ausstehend** (RI11, 17.11.2026) | Vorschlag: Copernicus GLO-30 (COG, alpenweit, 30 m, DSM) per Range-Abruf als Basis; BEV 1 m und swissALTI3D später als Qualitätsstufe je Land. Bestätigung erst nach Messung von CORS, Range und Datenmenge mit `scripts/spike_dem_cors.html`. Bis dahin wird kein DEM-Code geschrieben | RI11 |
 | E8 | Cache-Strategie (DEM, Wetter, Overpass) | Grundsatz: Zwischenspeicher je Sitzung plus normaler Browser-Cache; vorberechnete statische Kacheln im Repository nur bei vertretbarer Datenmenge. Details je Quelle in RI10 bzw. RI11 | **Bestätigt, vorläufig** | Für RI1–RI5 ohne Bedeutung (keine externen Daten) | RI10, RI11 |
 | E9 | Skala und Gewichtung von Befunden | Keine Zahlenskala, kein Gesamtwert; drei Stufen `info`, `hinweis`, `beachten`. Gewichtung bleibt offen | **Bestätigt** (Skala), Gewichtung **offen** | Folgt `ALPINE_RISK_ENGINE.md` („kein Gesamtrisiko“). Gewichtung gehört zu RI21 | RI16 |
 | E10 | Analyse lokal oder backendgestützt? | Lokal im Browser. Ein Backend nur nach eigener Architekturentscheidung (große DEM-Daten, Archive, Konten) | **Bestätigt** | Folgt aus E1; bis einschließlich Ebene 4 (RI19) ist kein Backend vorgesehen | RI18 |

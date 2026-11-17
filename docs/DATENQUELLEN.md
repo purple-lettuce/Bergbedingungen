@@ -106,16 +106,25 @@ Nicht dargestellt, weil keine belastbare Grundlage existiert:
 | Eigenschaft | Wert |
 |---|---|
 | **URL** | https://www.data.gv.at/ |
-| **Beschreibung** | Österreichisches Digitales Höhenmodell (10m-Auflösung) |
+| **Beschreibung** | Österreichisches Digitales Geländemodell. Die frühere Angabe „10 m, CC BY 4.0“ war nicht belegt: das 10-m-DGM stammt aus älterem Projekt unter CC BY 3.0 AT (aktuelle Verfügbarkeit unbestätigt); belegt ist das BEV-Höhenraster ALS DTM/DSM, 1 m, CC BY 4.0, 55 Kacheln zu 50 km, EPSG:3035 (RI11, 17.11.2026) |
 | **Fachlicher Nutzen** | Hangneigung, Exposition, Steilheit, Geländeanalyse, Absturzrisiko-Berechnung |
 | **Geplanter Einsatz** | Risk Engine, GPX Analyse, Gefahrenmodelle |
-| **Lizenzsituation** | Open Data (CC BY 4.0) ✅ |
+| **Lizenzsituation** | BEV ALS: CC BY 4.0 ✅; DGM 10 m: CC BY 3.0 AT (früher Stand) |
 | **Priorität** | 🔴 Sehr hoch |
 | **Roadmap-Phase** | Phase 1 (Grundlagen) |
 | **Zugeordnete Module** | Geländeanalyse, GPX Analyse, Alpine Risk Engine |
 | **Status** | Geplant (noch kein Code im Repository) |
 | **Abhängigkeiten** | Keine (unabhängig) |
-| **Notizen** | Fundamentales Datenset für alle geometrischen Analysen |
+| **Notizen** | Fundamentales Datenset für alle geometrischen Analysen. Quellenentscheidung (E7) steht als Vorschlag in `ROUTE_INTELLIGENCE_PLAN.md` (RI11); Messung von CORS, Range und Datenmenge steht aus |
+
+### Weitere DEM-Kandidaten (RI11, nur Recherche, kein Code)
+
+| Quelle | Art, Auflösung | Abdeckung | Lizenz, Namensnennung | Stand |
+|---|---|---|---|---|
+| Copernicus DEM GLO-30 / GLO-90 (COG auf AWS) | DSM, 30 m / 90 m | global | frei nutzbar, Namensnennung nach Anbietertext | Vorschlagskandidat für E7, CORS und Range ungemessen |
+| swisstopo swissALTI3D | DTM, 0,5 m / 2 m | Schweiz | STAC-Lizenzfeld „proprietary“, Bedingungen auf geo.admin.ch zu bestätigen | Kandidat Qualitätsstufe |
+| AWS Terrain Tiles (terrarium, GeoTIFF) | gemischt, bis ca. 10 m | global | mehrere Namensnennungen, u. a. DGM Österreich CC BY 3.0 AT; Anbieterhinweis „für EC2 gedacht“ | Ausweichlösung |
+| Open-Meteo Elevation API | Punkthöhen, 90 m | global | wie Open-Meteo | nur Einzelhöhen, nicht für das Geländemodell |
 
 ---
 
@@ -516,7 +525,8 @@ Alpine Risk Engine (Zielmodul)
 
 | Quelle | Lizenz | Status |
 |---|---|---|
-| DEM AT | CC BY 4.0 ✅ | Klar |
+| DEM AT (BEV ALS 1 m) | CC BY 4.0 ✅ | Klar; DGM 10 m: CC BY 3.0 AT, Stand unbestätigt |
+| DEM Copernicus / swissALTI3D / Terrain Tiles | je Quelle, siehe oben | Vor Entscheidung E7 zu bestätigen |
 | OSM | ODbL 1.0 ✅ | Klar |
 | GeoSphere | CC BY 4.0 ✅ | Klar |
 | Basemap.at | CC BY 4.0 ✅ | Klar |
@@ -563,7 +573,7 @@ Alpine Risk Engine (Zielmodul)
 
 ## Mittlere Priorität
 - [ ] Tirol Data Hub Details
-- [ ] Zusätzliche DEM für andere Länder
+- [ ] Zusätzliche DEM für andere Länder (Kandidaten und Lizenzfragen: siehe RI11)
 - [ ] Kuratorium für Alpine Sicherheit
 
 ---
@@ -572,6 +582,7 @@ Alpine Risk Engine (Zielmodul)
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.3 | 2026-11-17 | RI11: DEM-Eintrag korrigiert (10 m / CC BY 4.0 nicht belegt), weitere DEM-Kandidaten und Lizenzzeilen ergänzt |
 | 2.2 | 2026-11-15 | Status DEM und OSM Overpass mit ROADMAP abgeglichen (geplant, kein Code im Repository) |
 | 2.1 | 2026-10-31 | Abschnitt „Zeitstempel und Datenstatus“ (D5) |
 | 2.0 | 2026-10-29 | Konsolidation: Neue strukturierte Datenquellen mit allen Details + alte Workflow-Informationen |

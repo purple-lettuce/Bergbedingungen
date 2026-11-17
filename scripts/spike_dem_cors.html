@@ -1,0 +1,83 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>RI11 Spike: DEM-Quellen aus dem Browser prüfen (CORS, Range, Größe)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font: 15px/1.45 system-ui, sans-serif; max-width: 62rem; margin: 1.5rem auto; padding: 0 1rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #bbb; padding: .35rem .5rem; text-align: left; vertical-align: top; font-size: 13px; }
+  th { background: #eee; }
+  .ok { color: #0a6b2d; font-weight: 600; } .bad { color: #b00020; font-weight: 600; }
+  textarea { width: 100%; height: 12rem; font: 12px monospace; }
+  input[type=text] { width: 100%; }
+</style>
+<h1>RI11 Spike: DEM-Quellen aus dem Browser prüfen</h1>
+<p><strong>Eigenständige Messseite, nicht Teil der Anwendung.</strong> Sie prüft für jede Kandidatenquelle, ob ein Abruf aus dem Browser ohne Backend
+funktioniert (CORS), ob HTTP-Range-Anfragen erlaubt sind (Voraussetzung, um nur einen Ausschnitt einer großen Datei zu laden) und wie groß die Dateien sind.
+Es werden nur öffentliche Test-URLs abgerufen (je höchstens 1 KB, außer der Zeile „ganze Kachel“, siehe unten); es werden keine Nutzerdaten gesendet.</p>
+<p>Aufruf: im Repository-Stamm <code>python3 -m http.server 8000</code>, dann <code>http://localhost:8000/scripts/spike_dem_cors.html</code> öffnen.
+Das Ergebnis (JSON unten) in den Chat kopieren. Wichtig: Die Seite sollte von einer echten Herkunft laufen (localhost oder GitHub Pages), nicht als <code>file://</code>.</p>
+<p>Eigene URL (z. B. BEV-Höhenraster, Kachel als COG): <input type="text" id="custom" placeholder="https://… (optional, wird als Zeile „eigene URL“ geprüft)"></p>
+<button id="run">Messung starten</button> <button id="full">Zusätzlich je Quelle die ganze Datei laden (Größe messen, kann mehrere MB bis GB sein, bei Kacheln &gt; 50 MB wird abgebrochen)</button>
+<table id="t"><thead><tr><th>Quelle</th><th>URL</th><th>Plain GET</th><th>Range 0–1023</th><th>Content-Range (Gesamtgröße)</th><th>Typ</th><th>CORS-Header</th><th>Bemerkung</th></tr></thead><tbody></tbody></table>
+<h2>Ergebnis (JSON zum Einfügen in den Chat)</h2>
+<textarea id="out" readonly></textarea>
+<script>
+// Test-URLs: Kachel um den Großglockner (47°N, 12°E). Dateinamen folgen den dokumentierten Schemata der Anbieter; stimmt eine URL nicht, steht 404 in der Tabelle.
+var SOURCES = [
+  { id: 'copernicus-glo30', name: 'Copernicus GLO-30 (AWS, COG, 1°-Kachel)',
+    url: 'https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N47_00_E012_00_DEM/Copernicus_DSM_COG_10_N47_00_E012_00_DEM.tif' },
+  { id: 'copernicus-glo90', name: 'Copernicus GLO-90 (AWS, COG, 1°-Kachel)',
+    url: 'https://copernicus-dem-90m.s3.amazonaws.com/Copernicus_DSM_COG_30_N47_00_E012_00_DEM/Copernicus_DSM_COG_30_N47_00_E012_00_DEM.tif' },
+  { id: 'terrain-terrarium', name: 'AWS Terrain Tiles (terrarium PNG, z10)',
+    url: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/10/545/359.png' },
+  { id: 'terrain-geotiff', name: 'AWS Terrain Tiles (GeoTIFF, z10)',
+    url: 'https://s3.amazonaws.com/elevation-tiles-prod/geotiff/10/545/359.tif' },
+  { id: 'swissalti3d-stac', name: 'swisstopo swissALTI3D (STAC-Collection)',
+    url: 'https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.swissalti3d' },
+  { id: 'openmeteo-elevation', name: 'Open-Meteo Elevation API (Punkthöhe, GLO-90)',
+    url: 'https://api.open-meteo.com/v1/elevation?latitude=47.0745&longitude=12.6939' }
+];
+var MAX_FULL = 50 * 1024 * 1024;
+var rows = [], tbody = document.querySelector('#t tbody');
+
+function cls(ok) { return ok ? 'ok' : 'bad'; }
+async function probe(src, full) {
+  var r = { id: src.id, url: src.url, plain: null, range: null, contentRange: null, type: null, acao: null, acceptRanges: null, bytes: null, ms: null, note: '' };
+  try {
+    var t0 = performance.now();
+    var res = await fetch(src.url, { mode: 'cors', cache: 'no-store' });
+    r.plain = res.status; r.type = res.headers.get('content-type'); r.acao = res.headers.get('access-control-allow-origin');
+    r.acceptRanges = res.headers.get('accept-ranges');
+    var len = Number(res.headers.get('content-length') || 0);
+    if (full && len && len <= MAX_FULL) { r.bytes = (await res.arrayBuffer()).byteLength; r.ms = Math.round(performance.now() - t0); }
+    else { r.bytes = len || null; try { res.body && res.body.cancel(); } catch (e) {} if (full && len > MAX_FULL) r.note += 'zu groß für den Volltest; '; }
+  } catch (e) { r.plain = 'Fehler'; r.note += 'Plain GET: ' + e.message + ' (CORS blockiert oder nicht erreichbar); '; }
+  try {
+    var res2 = await fetch(src.url, { mode: 'cors', cache: 'no-store', headers: { Range: 'bytes=0-1023' } });
+    r.range = res2.status; r.contentRange = res2.headers.get('content-range');
+    var b = await res2.arrayBuffer(); r.rangeBytes = b.byteLength;
+  } catch (e) { r.range = 'Fehler'; r.note += 'Range: ' + e.message + ' (Preflight blockiert?); '; }
+  return r;
+}
+function show(r, name) {
+  var tr = document.createElement('tr');
+  var okPlain = r.plain === 200, okRange = r.range === 206;
+  tr.innerHTML = '<td>' + name + '</td><td style="word-break:break-all">' + r.url + '</td>' +
+    '<td class="' + cls(okPlain) + '">' + r.plain + '</td><td class="' + cls(okRange) + '">' + r.range + (okRange ? ' (' + r.rangeBytes + ' B)' : '') + '</td>' +
+    '<td>' + (r.contentRange || '–') + (r.bytes ? '<br>Content-Length: ' + r.bytes + (r.ms ? ' (' + r.ms + ' ms geladen)' : '') : '') + '</td>' +
+    '<td>' + (r.type || '–') + '</td><td>' + (r.acao || '–') + '</td><td>' + r.note + '</td>';
+  tbody.appendChild(tr);
+}
+async function run(full) {
+  tbody.innerHTML = ''; rows = [];
+  var list = SOURCES.slice(), c = document.getElementById('custom').value.trim();
+  if (c) list.push({ id: 'custom', name: 'eigene URL', url: c });
+  for (var i = 0; i < list.length; i++) {
+    var r = await probe(list[i], full); rows.push(r); show(r, list[i].name);
+  }
+  document.getElementById('out').value = JSON.stringify({ origin: location.origin, userAgent: navigator.userAgent, date: new Date().toISOString(), results: rows }, null, 1);
+}
+document.getElementById('run').onclick = function () { run(false); };
+document.getElementById('full').onclick = function () { run(true); };
+</script>
