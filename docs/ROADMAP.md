@@ -389,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.29 | 2026-11-17 | RI11: zweite Messung dokumentiert (swissALTI3D-Kachel aus dem Browser abrufbar, OpenTopography-Kopie mit CORS, Pfad offen); E7 weiter offen, BEV ungemessen |
 | 4.28 | 2026-11-17 | RI11: erstes Messergebnis im Browser dokumentiert (Copernicus-Direktabruf von AWS scheitert wegen fehlendem CORS (bestätigt), AWS Terrain Tiles funktionieren), Messseite um swissALTI3D-Kachel und Direktlinks erweitert; E7 weiter offen |
 | 4.27 | 2026-11-17 | RI11: DEM-Quellenvergleich und Vorschlag für E7 (beste Auflösung je Region, Copernicus als Rückfall, Bewuchs aus Land Cover; E18 Bibliotheksfrage offen) im Route Intelligence Plan, DEM-Eintrag in DATENQUELLEN korrigiert (10 m / CC BY 4.0 nicht belegt), Messseite `scripts/spike_dem_cors.html` außerhalb der Anwendung; Messwerte (CORS, Range, Datenmenge) stehen aus |
 | 4.26 | 2026-11-17 | Route Intelligence Plan: Entscheidung E16 (Sonnenstand im eigenen Code, keine Bibliothek) bestätigt, DATENQUELLEN-Notiz zu SunCalc angepasst; nur Dokumentation |
