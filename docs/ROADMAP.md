@@ -389,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.25 | 2026-11-17 | Route Intelligence Plan: Entscheidung E17 (Zeitbezug der Sonnenanalyse: Nutzer wählt Datum und Uhrzeit) bestätigt; nur Dokumentation |
 | 4.24 | 2026-11-16 | Route Intelligence Plan: Geländebedeckung (Land Cover, RI15a–RI15e) und Sonneneinstrahlung/Schatten (RI15f–RI15k) in Stufe 3.3 ergänzt, Entscheidungen E15–E17 offen; nur Dokumentation |
 | 4.23 | 2026-11-16 | Route Intelligence: RI10b (Wetter entlang der Route: Anzeige je Stützpunkt auf Knopfdruck, Datenschutzhinweis, Nullgradgrenze neben der Routenhöhe) umgesetzt; Stufe 2.2 damit abgeschlossen |
 | 4.22 | 2026-11-16 | Route Intelligence: RI10a (Wetter entlang der Route, Datenzugriff: Stützpunkte, Abruf in einer Abfrage, Zwischenspeicher; Wetterkarte unverändert) umgesetzt |
