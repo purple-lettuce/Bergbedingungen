@@ -5,13 +5,14 @@
 <h1>Höhenmodell gegen bekannte Gipfel und GPX</h1>
 <p>Entwicklerseite, nicht Teil der App. Sie liest über <code>js/dem.js</code> echte Daten (Copernicus über OpenTopography, sonst Terrain Tiles) und vergleicht sie mit den Gipfelhöhen der Karten.
 Das Modell ist ein Oberflächenmodell mit etwa 30 m Zellgröße: Auf Gipfeln liegt es meist einige Meter unter der Kartenhöhe (Spitze kleiner als eine Zelle), im Wald darüber.
-Toleranz für „ok“: <input id="tol" type="number" value="40" size="3"> m. Öffnen über <code>python3 -m http.server 8000</code> im Repository-Stamm und <code>http://localhost:8000/scripts/dem_compare.html</code>.</p>
+Zusätzlich der Höchstwert im Quadrat von ±100 m (Gitter 25 m), weil Koordinaten nur auf wenige Meter genau sind und ein 30-m-Modell Spitzen abschneidet. Die Farbe richtet sich nach dem Höchstwert; Toleranz für „ok“: <input id="tol" type="number" value="60" size="3"> m (Erwartung: Höchstwert liegt wenige Meter bis einige Zehner unter der Karte, selten darüber). Öffnen über <code>python3 -m http.server 8000</code> im Repository-Stamm und <code>http://localhost:8000/scripts/dem_compare.html</code>.</p>
 <button id="run">Messung starten</button>
-<table><thead><tr><th>Gipfel</th><th>Breite/Länge</th><th>Karte (m)</th><th>DEM (m)</th><th>Differenz</th><th>Quelle</th></tr></thead><tbody id="peaks"></tbody></table>
+<table><thead><tr><th>Gipfel</th><th>Breite/Länge</th><th>Karte (m)</th><th>DEM am Punkt (m)</th><th>Differenz</th><th>Höchstwert 100 m (m)</th><th>Differenz</th><th>Quelle</th></tr></thead><tbody id="peaks"></tbody></table>
 <h2>GPX-Datei: Höhen der Datei gegen DEM</h2>
 <input type="file" id="gpx" accept=".gpx"> <pre id="gpxout"></pre>
 <script type="module">
 import { elevationAt, elevationsAlong } from '../js/dem.js';
+import { gridAround } from '../js/dem_logic.js';
 import { parseGpx } from '../js/gpx.js';
 import { createRoute } from '../js/route_model.js';
 
@@ -24,11 +25,17 @@ var tol = document.getElementById('tol');
 document.getElementById('run').onclick = async function () {
   var body = document.getElementById('peaks'); body.textContent = '';
   for (var p of PEAKS) {
-    var tr = body.insertRow(), cells = [p[0], p[1] + ' / ' + p[2], p[3]], res, diff = null;
-    try { res = await elevationAt(p[1], p[2]); diff = res.ele == null ? null : res.ele - p[3]; cells.push(res.ele == null ? 'unbekannt' : res.ele.toFixed(1), diff == null ? '–' : (diff > 0 ? '+' : '') + diff.toFixed(1), res.source); }
-    catch (e) { cells.push('Fehler', e.message, ''); }
-    cells.forEach(function (c) { tr.insertCell().textContent = c; });
-    tr.className = diff != null && Math.abs(diff) <= +tol.value ? 'ok' : 'bad';
+    var tr = body.insertRow(), fmt = function (d) { return d == null ? '–' : (d > 0 ? '+' : '') + d.toFixed(1); };
+    var point = null, source = '', dmax = null;
+    try { var res = await elevationAt(p[1], p[2]); point = res.ele; source = res.source; } catch (e) { source = 'Fehler: ' + e.message; }
+    try {
+      var vals = (await elevationsAlong(gridAround(p[1], p[2], 100, 25))).map(function (x) { return x.ele; }).filter(function (v) { return v != null; });
+      if (vals.length) dmax = Math.max.apply(null, vals);
+    } catch (e) { /* Umgebung nicht lesbar: Spalten bleiben leer */ }
+    var d1 = point == null ? null : point - p[3], dd = dmax == null ? null : dmax - p[3];
+    [p[0], p[1] + ' / ' + p[2], p[3], point == null ? 'unbekannt' : point.toFixed(1), fmt(d1), dmax == null ? '–' : dmax.toFixed(1), fmt(dd), source]
+      .forEach(function (c) { tr.insertCell().textContent = c; });
+    tr.className = dd != null && Math.abs(dd) <= +tol.value ? 'ok' : 'bad';
   }
 };
 document.getElementById('gpx').onchange = async function (ev) {

@@ -389,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.33 | 2026-11-26 | RI12: Vergleichsseite um Höchstwert in der Umgebung (±100 m) erweitert, erste Messung gegen die echte Copernicus-Datei eingetragen (Gipfel 14 bis 232 m unter der Karte, erwartbar bei 30 m) |
 | 4.32 | 2026-11-26 | RI12 erledigt: DEM-Zugriff (`js/dem.js`, `js/dem_tiff.js`, `js/dem_logic.js`), E18 entschieden (eigener Code), Statuseintrag und Lizenzhinweis; RI13 als Nächstes |
 | 4.31 | 2026-11-26 | RI11 erledigt: Messlauf im Browser ausgewertet (OpenTopography-Kopie von Copernicus GLO-30 abrufbar, 57,4 MB je Kachel; swissALTI3D 2 m 177 KB je km²; BEV 8,09 GB je Kachel), E7 bestätigt; RI12 freigegeben |
 | 4.30 | 2026-11-26 | RI11: Recherche abgeschlossen (swissALTI3D-Lizenz OGD, BEV-Kachelschema und CC BY 4.0, OpenTopography-Bucket), Messseite sucht den OpenTopography-Dateipfad selbst, E7 als Entscheidungsvorlage mit Rückfallregel; Messlauf im Browser und Bestätigung offen |
