@@ -12,6 +12,7 @@ import { initLayout } from './layout.js';
 import { initSheet } from './sheet.js';
 import { initSearch } from './search.js';
 import { initRoute } from './route.js';
+import { initDemView } from './dem_view.js';
 
 // ---------- Ereignisse ----------
 map.on('moveend', scheduleRender);
@@ -35,6 +36,7 @@ loadWeather(c0.lat, c0.lng);
 initSearch([protectedAreasSearchSource, closuresSearchSource('closure', 'Sperrungen'), closuresSearchSource('notice', 'Hinweise')]);
 
 initRoute();
+initDemView();
 
 initClosuresFilter();
 initClosuresLegend();

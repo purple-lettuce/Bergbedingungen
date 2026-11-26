@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests dem_tiff.js</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py. Die Testdateien in scripts/fixtures/dem/ stammen aus GDAL und tifffile (scripts/make_dem_fixtures.py),
+// sind also unabhängig vom Leser in js/dem_tiff.js. Pixelwert an (c, r): 1000 + 2c + 3r + ((7c + 13r) mod 5).
+import { openTiff, blockIndex, pixelValue } from '../js/dem_tiff.js';
+
+var results = [], pending = [];
+function test(name, fn) {
+  pending.push(Promise.resolve().then(fn).then(
+    function () { results.push({ name: name, ok: true }); },
+    function (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }));
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function value(c, r) { return 1000 + 2 * c + 3 * r + ((7 * c + 13 * r) % 5); }
+
+var files = {};
+async function source(name) {
+  if (!files[name]) files[name] = new Uint8Array(await (await fetch('./fixtures/dem/' + name)).arrayBuffer());
+  var bytes = files[name], stats = { calls: 0, bytes: 0 };
+  return {
+    stats: stats, size: bytes.length,
+    read: async function (start, end) {
+      stats.calls++;
+      var part = bytes.slice(start, Math.min(end + 1, bytes.length));
+      stats.bytes += part.length;
+      return part.buffer;
+    }
+  };
+}
+async function allPixels(name) {
+  var s = await source(name), info = await openTiff(s.read);
+  var blocks = await info.readBlocks(Array.from({ length: info.across * info.down }, function (_, i) { return i; }));
+  return { info: info, blocks: blocks, s: s };
+}
+async function checkAll(name, skip) {
+  var t = await allPixels(name);
+  eq([t.info.width, t.info.height], [64, 64]);
+  for (var r = 0; r < 64; r++) for (var c = 0; c < 64; c++) {
+    if (skip && c === 5 && r === 5) { eq(pixelValue(t.info, t.blocks, c, r), null); continue; }
+    var v = pixelValue(t.info, t.blocks, c, r);
+    if (v !== value(c, r)) throw new Error(name + ' Pixel ' + c + '/' + r + ': erwartet ' + value(c, r) + ', erhalten ' + v);
+  }
+  return t;
+}
+
+test('gekachelt, Deflate, Gleitkomma-Predictor: alle 4096 Pixel stimmen, Georeferenz', async function () {
+  var t = await checkAll('cog_float32_deflate_p3.tif');
+  eq([t.info.tiled, t.info.blockW, t.info.compression, t.info.predictor, t.info.kind], [true, 16, 8, 3, 'f32']);
+  eq(t.info.geo.pointIsArea, true);
+  eq([t.info.geo.originLon, t.info.geo.originLat, t.info.geo.dx], [12, 48, 1 / 64]);
+});
+
+test('gestreift, unkomprimiert', async function () {
+  var t = await checkAll('strips_float32_none.tif');
+  eq([t.info.tiled, t.info.blockH, t.info.compression], [false, 4, 1]);
+});
+
+test('int16, Deflate, horizontaler Predictor, NoData wird unbekannt, Bezug Punkt', async function () {
+  var t = await checkAll('tiled_int16_deflate_p2_point.tif', true);
+  eq([t.info.kind, t.info.predictor, t.info.nodata], ['i16', 2, -32768]);
+  eq(t.info.geo.pointIsArea, false);
+});
+
+test('Big-Endian', async function () {
+  var t = await checkAll('be_float32_none.tif');
+  eq(t.info.littleEndian, false);
+});
+
+test('LZW und BigTIFF: Fehler "unsupported", kein stilles Falschlesen', async function () {
+  for (var name of ['lzw_float32.tif', 'bigtiff_float32.tif']) {
+    var s = await source(name), code = null;
+    try { await openTiff(s.read); } catch (e) { code = e.code; }
+    eq(code, 'unsupported');
+  }
+});
+
+test('Kein TIFF: Fehler', async function () {
+  var code = null;
+  try { await openTiff(async function () { return new TextEncoder().encode('<html>nicht tiff</html>').buffer; }); } catch (e) { code = e.code; }
+  eq(code, 'unsupported');
+});
+
+test('nur der gebrauchte Block wird geladen (Bereichsabruf)', async function () {
+  var s = await source('cog_float32_deflate_p3.tif'), info = await openTiff(s.read);
+  var before = s.stats.bytes, idx = blockIndex(info, 40, 20);
+  eq(idx, 1 * 4 + 2);
+  var blocks = await info.readBlocks([idx]);
+  eq(blocks.size, 1);
+  if (s.stats.bytes - before > 1500) throw new Error('zu viele Bytes für einen Block: ' + (s.stats.bytes - before));
+  eq(pixelValue(info, blocks, 40, 20), value(40, 20));
+  eq(pixelValue(info, blocks, 0, 0), null);   // anderer Block nicht geladen
+});
+
+Promise.all(pending).then(function () {
+  var failed = results.filter(function (r) { return !r.ok; });
+  document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+});
+</script>

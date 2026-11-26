@@ -56,6 +56,13 @@ export function weatherStatus(currentTime) {
   return m ? { state: 'ok', text: 'Stand ' + m[1] } : { state: 'ok', text: 'Geladen' };
 }
 
+// Höhenmodell (RI12): Quelle der zuletzt gelesenen Höhe; Werte sind Modellhöhen, keine Gipfelhöhen.
+export function demStatus(state, source) {
+  if (state !== 'ok') return { state: 'unavailable', text: 'Höhendaten nicht abrufbar' };
+  if (source === 'terrain') return { state: 'limited', text: 'Ersatzquelle Terrain Tiles (gröber)' };
+  return { state: 'ok', text: 'Copernicus GLO-30 (Modellhöhe)' };
+}
+
 // Lawinenlage: list = je geladener Quelle { status: 'valid' | 'stale' | 'expired' | 'none', published: ISO-Zeit des neuesten Berichts | null }.
 export function avalancheStatus(list, failedCount, now) {
   var failed = failedCount ? ' · ' + (failedCount === 1 ? '1 Quelle' : failedCount + ' Quellen') + ' nicht geladen' : '';

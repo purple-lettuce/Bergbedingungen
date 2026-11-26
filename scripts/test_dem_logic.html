@@ -1,0 +1,81 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests dem_logic.js</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py (oder diese Seite über einen Webserver im Repo-Stamm öffnen).
+import * as D from '../js/dem_logic.js';
+
+var results = [];
+function test(name, fn) {
+  try { fn(); results.push({ name: name, ok: true }); } catch (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); }
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) { if (Math.abs(actual - expected) > (tol || 1e-9)) throw new Error('erwartet ' + expected + ', erhalten ' + actual); }
+
+test('validCoord', function () {
+  eq(D.validCoord(47, 12), true); eq(D.validCoord(91, 0), false); eq(D.validCoord(0, 181), false);
+  eq(D.validCoord(NaN, 0), false); eq(D.validCoord('47', 12), false); eq(D.validCoord(undefined, 1), false);
+});
+
+test('cleanValue: NoData, NaN und unmögliche Werte sind unbekannt, 0 bleibt 0', function () {
+  eq(D.cleanValue(-32768, -32768), null); eq(D.cleanValue(NaN, null), null); eq(D.cleanValue(null, null), null);
+  eq(D.cleanValue(-9999, null), null); eq(D.cleanValue(99999, null), null);
+  eq(D.cleanValue(0, -32768), 0); eq(D.cleanValue(2962.5, null), 2962.5);
+});
+
+test('bilinear: Mitte, Ecken, unbekannte Ecke', function () {
+  eq(D.bilinear(0, 10, 20, 30, 0.5, 0.5), 15); eq(D.bilinear(0, 10, 20, 30, 0, 0), 0); eq(D.bilinear(0, 10, 20, 30, 1, 1), 30);
+  eq(D.bilinear(0, null, 20, 30, 0.5, 0.5), null); eq(D.bilinear(0, 10, 20, 30, 0.25, 0), 2.5);
+});
+
+test('interpolateAt: innen, Rand klemmt, unbekannter Nachbar', function () {
+  var get = function (c, r) { return c * 10 + r; };
+  near(D.interpolateAt(get, 1.5, 2.5, 4, 4), 15 + 2.5);
+  eq(D.interpolateAt(get, -0.4, 0, 4, 4), 0);          // vor der ersten Pixelmitte: Randwert
+  eq(D.interpolateAt(get, 3.4, 3.4, 4, 4), 33);        // hinter der letzten: Randwert
+  eq(D.interpolateAt(function (c) { return c === 2 ? null : 5; }, 1.5, 0, 4, 4), null);
+});
+
+test('copTileId und copTileUrl: Nord/Süd, Ost/West, negative Längen', function () {
+  eq(D.copTileId(47.0745, 12.6939), { id: 'N47_00_E012_00', south: 47, west: 12 });
+  eq(D.copTileId(-0.5, -0.5).id, 'S01_00_W001_00');
+  eq(D.copTileId(5.2, -70.1).id, 'N05_00_W071_00');
+  eq(D.copTileUrl(47.5, 12.5), 'https://opentopography.s3.sdsc.edu/raster/COP30/COP30_hh/Copernicus_DSM_10_N47_00_E012_00_DEM.tif');
+});
+
+test('geoPixel: Fläche vs. Punkt, Rand, außerhalb', function () {
+  var area = { originLon: 12, originLat: 48, dx: 1 / 64, dy: 1 / 64, pointIsArea: true, width: 64, height: 64 };
+  var p = D.geoPixel(area, 48 - 0.5 / 64, 12 + 0.5 / 64);   // Mitte des ersten Pixels
+  near(p.col, 0); near(p.row, 0);
+  var pt = Object.assign({}, area, { pointIsArea: false });
+  var q = D.geoPixel(pt, 48, 12);
+  near(q.col, 0); near(q.row, 0);
+  eq(D.geoPixel(area, 49, 12.5), null); eq(D.geoPixel(area, 47.5, 11.9), null); eq(D.geoPixel(null, 47, 12), null);
+  near(D.geoPixel(area, 47, 13).col, 63.5);   // Südostecke: halbes Pixel hinter der letzten Mitte, noch im Raster
+});
+
+test('terrainPixel und terrainTileUrl: Kachelnummer am Großglockner (z10)', function () {
+  var t = D.terrainPixel(47.0745, 12.6939, 10);
+  eq(Math.floor((t.x + 0.5) / 256), 548); eq(Math.floor((t.y + 0.5) / 256), 359);   // Gegenprobe: Python, Standardformel für Web-Mercator-Kacheln
+  eq(t.size, 262144);
+  eq(D.terrainTileUrl(10, 545, 359), 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/10/545/359.png');
+});
+
+test('decodeTerrarium', function () {
+  eq(D.decodeTerrarium(128, 0, 0), 0); eq(D.decodeTerrarium(139, 200, 128), 3016.5);
+});
+
+test('mergeRanges: Lücke, Höchstlänge, Reihenfolge', function () {
+  var r = [{ start: 200, end: 299 }, { start: 0, end: 99 }, { start: 100, end: 199 }, { start: 5000, end: 5099 }];
+  var m = D.mergeRanges(r, 10, 1000);
+  eq(m.map(function (x) { return [x.start, x.end, x.parts.length]; }), [[0, 299, 3], [5000, 5099, 1]]);
+  eq(D.mergeRanges(r, 10, 150).length, 4);   // Höchstlänge verhindert das Zusammenfassen
+});
+
+var failed = results.filter(function (r) { return !r.ok; });
+document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+</script>
