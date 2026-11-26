@@ -483,7 +483,7 @@ Ziel: Eigene Geländeinformation aus einem Höhenmodell. Hier liegt das größte
 
 ### RI11 – DEM-Quellenentscheidung und Spike
 
-Ebene 3 · Stufe 3.1. Status: Recherche erledigt, Entscheidung als Vorschlag, Messung im Browser ausstehend. Schicht: Recherche/Entscheidung.
+Ebene 3 · Stufe 3.1. Status: Recherche abgeschlossen (26.11.2026), E7 als Entscheidungsvorlage mit Rückfallregel formuliert; offen ist nur noch ein Messlauf im Browser (siehe „Abschluss von RI11“). Schicht: Recherche/Entscheidung.
 
 **Ziel:** Quelle, Format, Abruf, Lizenz und Cache festlegen (E7, E8).
 
@@ -552,6 +552,22 @@ Einordnung (Schätzung, nicht gemessen): Eine Web-Kachel bei Zoom 13 deckt am Br
 Folgerung für E7: Der Copernicus-Direktabruf von AWS entfällt (CORS fehlt, bestätigt). **swissALTI3D ist aus dem Browser nutzbar** (gemessen). Für Copernicus ist die OpenTopography-Kopie aussichtsreich (CORS vorhanden, Pfad offen). BEV ist weiter ungemessen. Bis Copernicus über eine Kopie geklärt ist, ist **AWS Terrain Tiles die erste lauffähige Basis außerhalb der Schweiz** (Kacheln, ohne Backend, alpenweit), mit dem Vorbehalt, dass Quellen gemischt sind, Namensnennungen je Quelle nötig sind und der Betreiber den Bucket als „für EC2 gedacht“ beschreibt (Dauerbetrieb von GitHub Pages aus unsicher). BEV und swissALTI3D als bessere Region bleiben das Ziel, wenn ihre Kacheln aus dem Browser erreichbar sind.
 
 **Folgepakete:** RI12 bleibt blockiert, bis E7 bestätigt ist; RI12 legt Provider-Schnittstelle, Zellgröße und E18 (Bibliothek oder eigener Code) fest und startet mit Copernicus. RI13 bis RI15 arbeiten mit der Quelle je Abschnitt und zeigen Quelle und Auflösung an. RI15f und RI15g nutzen die Routenquelle, RI15h den Copernicus-Horizont und hängt an der gemessenen Datenmenge; Baumschatten kommen aus RI15a. RI15a (Land Cover) nutzt dieselbe Messseite für seine Quellen.
+
+**Recherche-Ergebnis (26.11.2026, ohne Messung):** Die Arbeitsumgebung erreicht die Hosts weiterhin nicht (DNS gesperrt, keine Umgehung); die Punkte stammen aus Anbieterseiten und Metadaten, nicht aus Messungen.
+
+| Punkt | Befund | Folge |
+|---|---|---|
+| OpenTopography | Der Bucket heißt `raster` auf dem S3-kompatiblen Host `opentopography.s3.sdsc.edu`, Daten unter `COP30/`, öffentlich ohne Signatur listbar (laut Anbieterseite). Version DGED 2023_1, seit 23.07.2024 direkt von ESA statt aus dem Sinergise-Bucket. Der in der Messseite geratene Unterordner `COP30_hh/` ist nicht belegt | Die Messseite listet den Bucket jetzt selbst, leitet den Dateinamen der Kachel ab und prüft ihn (CORS, Range, Größe). Gelistete Namen stehen im JSON-Ergebnis |
+| BEV | Kachelschema `https://data.bev.gv.at/download/ALS/DTM/<Stichtag>/ALS_DTM_CRS3035RES50000mN<N>E<E>.tif`, Standardlizenz CC BY 4.0 (Metadaten, Stichtag 15.09.2025) | Messseite prüft eine Kachel; CORS, Range und Größe offen |
+| swisstopo | Open Government Data seit 01.03.2021: freie Nutzung auch kommerziell, Quellenangabe Pflicht, Zugang bei übermäßiger Nutzung einschränkbar | Lizenzfrage für die Schweiz erledigt; Wortlaut der Quellenangabe in RI12 übernehmen. Messseite bevorzugt jetzt die 2-m-Kachel, um die Datenmenge zu messen |
+
+**Abschluss von RI11: E7 als Entscheidungsvorlage mit Rückfallregel.** Richtung unverändert (Quelle je Region, gemeinsame Schnittstelle). Für RI12 gilt in dieser Reihenfolge, was sich im Messlauf als abrufbar erweist:
+1. Alpenweiter Rückfall: **Copernicus GLO-30 über OpenTopography**, wenn der abgeleitete Pfad im Messlauf CORS, 206 und eine tragbare Datenmenge liefert und die Nutzungsbedingungen es erlauben. Sonst **AWS Terrain Tiles** als ausdrücklich vorläufige Basis (Risiken: gemischte Quellen, Namensnennung je Quelle, Bucket-Hinweis „für EC2 gedacht“).
+2. Schweiz: **swissALTI3D** (abrufbar und lizenziert); 2 m oder 0,5 m nach Messung der Datenmenge je Tour.
+3. Österreich: **BEV** nur, wenn der Messlauf CORS und Range zeigt; sonst bleibt Österreich beim Rückfall aus Punkt 1.
+Damit blockiert keine offene Einzelfrage RI12: Es startet mit dem Rückfall aus Punkt 1, die Regionsquellen kommen als Qualitätsstufe hinzu.
+
+**Noch zu tun, nur im Browser möglich:** `scripts/spike_dem_cors.html` von localhost oder GitHub Pages öffnen, „Messung starten“, JSON in den Chat kopieren. Danach E7 auf „bestätigt“ setzen und RI11 abschließen (Statuszeilen in Plan und ROADMAP anpassen).
 
 ### RI12 – DEM-Zugriff (Höhe an einem Punkt)
 
@@ -1364,7 +1380,7 @@ Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die 
 | E4 | Größenlimit der GPX-Datei | 10 MB und 200 000 Trackpunkte; Überschreitung wird abgelehnt (nicht abgeschnitten) mit klarer Meldung. Beide Werte stehen als benannte Konstanten im Parser | **Bestätigt, vorläufig** | Reicht für lange Mehrtagestouren. Die Grenzen werden mit dem Parser (RI1) an einer großen Testdatei auf Laufzeit geprüft und nur bei Bedarf in einem Dokumentations-PR angepasst | RI1 |
 | E5 | Glättung der GPX-Höhen | Anstieg/Abstieg per Hysterese (Höhenänderung zählt erst ab einer Schwelle); Startwert 5 m als benannte Konstante. Die Methode wird im UI genannt, keine versteckte Filterung | **Bestätigt, vorläufig** | Rohsummen überzeichnen durch GPS-Rauschen. Der Zahlenwert wird in RI4 an Referenzstrecken kalibriert | RI4 |
 | E6 | Abtastabstand für Flächenschnitte | 25 m; Abschnitte entstehen aus Ereignissen (Ein-/Austritt), nicht aus festen Längen | **Bestätigt, vorläufig** | Wert wird in RI7 gegen die echten Geometrien (Schutzgebiete, Regionen) und Laufzeit geprüft | RI7 |
-| E7 | DEM-Quelle | Keine Entscheidung | **Vorschlag, Messung teilweise erfolgt** (RI11, 17.11.2026; swissALTI3D und Terrain Tiles funktionieren aus dem Browser, Copernicus von AWS nicht (CORS fehlt), OpenTopography-Kopie hat CORS (Pfad offen), BEV ungemessen) | Vorschlag (vom Nutzer angepasst): je Region die beste Auflösung, BEV (Österreich) und swissALTI3D (Schweiz), sonst Copernicus GLO-30 als alpenweiter Rückfall; Horizont für Schatten aus Copernicus, Bewuchs aus Land Cover. Bestätigung erst nach Messung von CORS, Range und Datenmenge mit `scripts/spike_dem_cors.html`. Bis dahin wird kein DEM-Code geschrieben | RI11 |
+| E7 | DEM-Quelle | Keine Entscheidung | **Vorschlag, Messung teilweise erfolgt** (RI11, 17.11.2026; swissALTI3D und Terrain Tiles funktionieren aus dem Browser, Copernicus von AWS nicht (CORS fehlt), OpenTopography-Kopie hat CORS (Pfad offen), BEV ungemessen) | Vorschlag (vom Nutzer angepasst): je Region die beste Auflösung, BEV (Österreich) und swissALTI3D (Schweiz), sonst Copernicus GLO-30 als alpenweiter Rückfall; Horizont für Schatten aus Copernicus, Bewuchs aus Land Cover. Rückfallregel für RI12 siehe „Abschluss von RI11“ (Copernicus über OpenTopography, sonst Terrain Tiles; swissALTI3D; BEV nur bei gemessenem CORS und Range). Bestätigung nach einem Messlauf mit `scripts/spike_dem_cors.html`. Bis dahin wird kein DEM-Code geschrieben | RI11 |
 | E8 | Cache-Strategie (DEM, Wetter, Overpass) | Grundsatz: Zwischenspeicher je Sitzung plus normaler Browser-Cache; vorberechnete statische Kacheln im Repository nur bei vertretbarer Datenmenge. Details je Quelle in RI10 bzw. RI11 | **Bestätigt, vorläufig** | Für RI1–RI5 ohne Bedeutung (keine externen Daten) | RI10, RI11 |
 | E9 | Skala und Gewichtung von Befunden | Keine Zahlenskala, kein Gesamtwert; drei Stufen `info`, `hinweis`, `beachten`. Gewichtung bleibt offen | **Bestätigt** (Skala), Gewichtung **offen** | Folgt `ALPINE_RISK_ENGINE.md` („kein Gesamtrisiko“). Gewichtung gehört zu RI21 | RI16 |
 | E10 | Analyse lokal oder backendgestützt? | Lokal im Browser. Ein Backend nur nach eigener Architekturentscheidung (große DEM-Daten, Archive, Konten) | **Bestätigt** | Folgt aus E1; bis einschließlich Ebene 4 (RI19) ist kein Backend vorgesehen | RI18 |

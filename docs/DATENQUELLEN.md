@@ -122,7 +122,9 @@ Nicht dargestellt, weil keine belastbare Grundlage existiert:
 | Quelle | Art, Auflösung | Abdeckung | Lizenz, Namensnennung | Stand |
 |---|---|---|---|---|
 | Copernicus DEM GLO-30 / GLO-90 (COG auf AWS) | DSM, 30 m / 90 m | global | frei nutzbar, Namensnennung nach Anbietertext | E7-Vorschlag: alpenweiter Rückfall und Horizont für Schatten; Direktabruf von AWS aus dem Browser nicht möglich (CORS fehlt, 17.11.2026 gemessen und URL bestätigt); 42 MB je 1°-Kachel |
-| swisstopo swissALTI3D | DTM, 0,5 m / 2 m | Schweiz | STAC-Lizenzfeld „proprietary“, Bedingungen auf geo.admin.ch zu bestätigen | Kandidat Regionsquelle Schweiz (E7-Vorschlag); Kachelabruf mit Range aus dem Browser gemessen (0,5 m: 2,7 MB je km², GeoTIFF cloud-optimized, LV95) |
+| Copernicus GLO-30 bei OpenTopography (S3-kompatibler Bucket `opentopography.s3.sdsc.edu`, Pfad `/raster/COP30/`) | DSM, 30 m | global | wie Copernicus; Version DGED 2023_1, seit 23.07.2024 direkt von ESA (laut Anbieterseite, 26.11.2026 recherchiert); Nutzungsbedingungen von OpenTopography noch zu lesen | Kandidat für den Copernicus-Abruf aus dem Browser: CORS und `Accept-Ranges` gemessen (17.11.2026), Dateipfad noch nicht gemessen (geratener Pfad 404; Bucket laut Anbieter öffentlich listbar, die Messseite sucht den Namen selbst) |
+| BEV ALS DTM (Kachelschema `https://data.bev.gv.at/download/ALS/DTM/<Stichtag>/ALS_DTM_CRS3035RES50000mN<N>E<E>.tif`) | DTM, 1 m | Österreich | CC BY 4.0 (Standardlizenz laut Metadatensatz), Namensnennung BEV | URL-Schema und Lizenz belegt (Metadaten, Stichtag 15.09.2025); CORS, Range und Kachelgröße noch nicht gemessen |
+| swisstopo swissALTI3D | DTM, 0,5 m / 2 m | Schweiz | Open Government Data seit 01.03.2021: freie Nutzung auch kommerziell, Quellenangabe Pflicht, bei übermäßiger Nutzung kann der Zugang eingeschränkt werden (swisstopo-Nutzungsbedingungen, 26.11.2026 recherchiert; konkreter Wortlaut der Quellenangabe vor Einbau übernehmen) | Kandidat Regionsquelle Schweiz (E7-Vorschlag); Kachelabruf mit Range aus dem Browser gemessen (0,5 m: 2,7 MB je km², GeoTIFF cloud-optimized, LV95) |
 | AWS Terrain Tiles (terrarium, GeoTIFF) | gemischt, bis ca. 10 m | global | mehrere Namensnennungen, u. a. DGM Österreich CC BY 3.0 AT; Anbieterhinweis „für EC2 gedacht“ | Ausweichlösung; Abruf aus dem Browser gemessen: funktioniert (Zoom 10: PNG 153 KB, GeoTIFF 257 KB je Kachel) |
 | Open-Meteo Elevation API | Punkthöhen, 90 m | global | wie Open-Meteo | nur Einzelhöhen, nicht für das Geländemodell |
 
@@ -526,7 +528,8 @@ Alpine Risk Engine (Zielmodul)
 | Quelle | Lizenz | Status |
 |---|---|---|
 | DEM AT (BEV ALS 1 m) | CC BY 4.0 ✅ | Klar; DGM 10 m: CC BY 3.0 AT, Stand unbestätigt |
-| DEM Copernicus / swissALTI3D / Terrain Tiles | je Quelle, siehe oben | Vor Entscheidung E7 zu bestätigen |
+| DEM swissALTI3D | OGD, Quellenangabe Pflicht ✅ | Frei, auch kommerziell; Zugang bei übermäßiger Nutzung einschränkbar |
+| DEM Copernicus (OpenTopography) / Terrain Tiles | je Quelle, siehe oben | Nutzungsbedingungen von OpenTopography und Namensnennung vor Einbau zu bestätigen |
 | OSM | ODbL 1.0 ✅ | Klar |
 | GeoSphere | CC BY 4.0 ✅ | Klar |
 | Basemap.at | CC BY 4.0 ✅ | Klar |
@@ -582,6 +585,7 @@ Alpine Risk Engine (Zielmodul)
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.6 | 2026-11-26 | RI11: swissALTI3D-Lizenz (OGD, Quellenangabe) belegt, BEV-Kachelschema und Lizenz belegt, OpenTopography-Bucket und Herkunft der Daten ergänzt |
 | 2.5 | 2026-11-17 | RI11: swissALTI3D-Kachel und OpenTopography-CORS gemessen |
 | 2.4 | 2026-11-17 | RI11: Messergebnis (Browser-Abruf) bei Copernicus und Terrain Tiles vermerkt |
 | 2.3 | 2026-11-17 | RI11: DEM-Eintrag korrigiert (10 m / CC BY 4.0 nicht belegt), weitere DEM-Kandidaten und Lizenzzeilen ergänzt |
