@@ -116,3 +116,13 @@ export function mergeRanges(ranges, maxGap, maxLen) {
   });
   return out;
 }
+
+// ---------- Vergleich mit Gipfelhöhen ----------
+
+// Gitterpunkte [{lat, lon}] in einem Quadrat um den Punkt (Halbseite radiusM, Abstand stepM), für den Höchstwert in der Umgebung. Gipfelkoordinaten sind nur auf
+// wenige Meter genau, und ein 30-m-Modell schneidet Spitzen ab; der Höchstwert in der Umgebung ist der fairere Vergleich mit der Kartenhöhe.
+export function gridAround(lat, lon, radiusM, stepM) {
+  var n = Math.floor(radiusM / stepM), dLat = stepM / 111320, dLon = stepM / (111320 * Math.cos(lat * Math.PI / 180)), out = [];
+  for (var i = -n; i <= n; i++) for (var j = -n; j <= n; j++) out.push({ lat: lat + i * dLat, lon: lon + j * dLon });
+  return out;
+}

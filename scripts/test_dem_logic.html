@@ -76,6 +76,14 @@ test('mergeRanges: Lücke, Höchstlänge, Reihenfolge', function () {
   eq(D.mergeRanges(r, 10, 150).length, 4);   // Höchstlänge verhindert das Zusammenfassen
 });
 
+test('gridAround: Anzahl, Mitte, Ausdehnung', function () {
+  var g = D.gridAround(47, 12, 100, 25);
+  eq(g.length, 81); eq(g[40], { lat: 47, lon: 12 });
+  var dLatM = (g[80].lat - g[0].lat) * 111320; near(dLatM, 200, 1e-6);
+  var dLonM = (g[80].lon - g[0].lon) * 111320 * Math.cos(47 * Math.PI / 180); near(dLonM, 200, 1e-6);
+  eq(D.gridAround(47, 12, 10, 30).length, 1);
+});
+
 var failed = results.filter(function (r) { return !r.ok; });
 document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
 </script>
