@@ -9,7 +9,9 @@ var SOURCES = [
   { id: 'avalanche', name: 'Lawinenlage', state: 'unavailable', text: 'wird beim Einblenden geladen' },
   { id: 'weather', name: 'Wetter', state: 'loading', text: 'wird geladen …' },
   // Die Route gibt es nur nach dem Laden einer GPX-Datei (js/route.js); ohne Route ist der Eintrag verborgen (Zustand 'none').
-  { id: 'route', name: 'Route', state: 'none', text: '' }
+  { id: 'route', name: 'Route', state: 'none', text: '' },
+  // Höhenmodell (js/dem.js): verborgen, bis die erste Höhe angefragt wurde.
+  { id: 'dem', name: 'Höhenmodell', state: 'none', text: '' }
 ];
 var STATE_WORD = { ok: 'geladen', limited: 'eingeschränkt', unavailable: 'nicht verfügbar', error: 'Fehler', loading: 'lädt' };
 var rows = {};

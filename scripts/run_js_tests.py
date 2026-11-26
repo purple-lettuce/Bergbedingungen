@@ -17,8 +17,8 @@ import threading
 import time
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html", "test_protected_areas.html", "test_status_bar_logic.html", "test_layout.html", "test_sheet_logic.html", "test_search_logic.html", "test_landing.html", "test_gpx.html", "test_route_model.html", "test_route_load.html", "test_route_stats.html", "test_profile.html", "test_route_store.html", "test_route_overlay.html", "test_route_context.html", "test_route_avalanche.html", "test_route_avalanche_logic.html", "test_route_weather.html", "test_route_weather_logic.html"]
-REALTIME_PAGES = {"test_route_store.html", "test_route_overlay.html", "test_route_avalanche.html", "test_route_weather.html"}   # brauchen echte Zeit (IndexedDB läuft in einem eigenen Thread); laufen über scripts/cdp_client.py
+PAGES = ["test_avalanche_logic.html", "test_avalanche_frontend.html", "test_protected_areas.html", "test_status_bar_logic.html", "test_layout.html", "test_sheet_logic.html", "test_search_logic.html", "test_landing.html", "test_gpx.html", "test_route_model.html", "test_route_load.html", "test_route_stats.html", "test_profile.html", "test_route_store.html", "test_route_overlay.html", "test_route_context.html", "test_route_avalanche.html", "test_route_avalanche_logic.html", "test_route_weather.html", "test_route_weather_logic.html", "test_dem_logic.html", "test_dem_tiff.html", "test_dem.html"]
+REALTIME_PAGES = {"test_route_store.html", "test_route_overlay.html", "test_route_avalanche.html", "test_route_weather.html", "test_dem_tiff.html", "test_dem.html"}   # brauchen echte Zeit (IndexedDB läuft in einem eigenen Thread); laufen über scripts/cdp_client.py
 CANDIDATES = [
     os.environ.get("BROWSER", ""),
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",

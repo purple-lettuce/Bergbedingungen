@@ -551,7 +551,7 @@ Einordnung (Schätzung, nicht gemessen): Eine Web-Kachel bei Zoom 13 deckt am Br
 
 Folgerung für E7: Der Copernicus-Direktabruf von AWS entfällt (CORS fehlt, bestätigt). **swissALTI3D ist aus dem Browser nutzbar** (gemessen). Für Copernicus ist die OpenTopography-Kopie aussichtsreich (CORS vorhanden, Pfad offen). BEV ist weiter ungemessen. Bis Copernicus über eine Kopie geklärt ist, ist **AWS Terrain Tiles die erste lauffähige Basis außerhalb der Schweiz** (Kacheln, ohne Backend, alpenweit), mit dem Vorbehalt, dass Quellen gemischt sind, Namensnennungen je Quelle nötig sind und der Betreiber den Bucket als „für EC2 gedacht“ beschreibt (Dauerbetrieb von GitHub Pages aus unsicher). BEV und swissALTI3D als bessere Region bleiben das Ziel, wenn ihre Kacheln aus dem Browser erreichbar sind.
 
-**Folgepakete:** RI12 ist frei (E7 bestätigt, siehe „Abschluss von RI11“); RI12 legt Provider-Schnittstelle, Zellgröße und E18 (Bibliothek oder eigener Code) fest und startet mit Copernicus von OpenTopography. RI13 bis RI15 arbeiten mit der Quelle je Abschnitt und zeigen Quelle und Auflösung an. RI15f und RI15g nutzen die Routenquelle, RI15h den Copernicus-Horizont und hängt an der gemessenen Datenmenge; Baumschatten kommen aus RI15a. RI15a (Land Cover) nutzt dieselbe Messseite für seine Quellen.
+**Folgepakete:** RI12 ist erledigt (E7 bestätigt, E18 entschieden, siehe „Umsetzung (RI12)“); es startete mit Copernicus von OpenTopography. RI13 bis RI15 arbeiten mit der Quelle je Abschnitt und zeigen Quelle und Auflösung an. RI15f und RI15g nutzen die Routenquelle, RI15h den Copernicus-Horizont und hängt an der gemessenen Datenmenge; Baumschatten kommen aus RI15a. RI15a (Land Cover) nutzt dieselbe Messseite für seine Quellen.
 
 **Recherche-Ergebnis (26.11.2026, ohne Messung):** Die Arbeitsumgebung erreicht die Hosts weiterhin nicht (DNS gesperrt, keine Umgehung); die Punkte stammen aus Anbieterseiten und Metadaten, nicht aus Messungen.
 
@@ -584,13 +584,22 @@ Folgerung für E7: Der Copernicus-Direktabruf von AWS entfällt (CORS fehlt, bes
 
 ### RI12 – DEM-Zugriff (Höhe an einem Punkt)
 
-Ebene 3 · Stufe 3.1. Status: Geplant (freigegeben, E7 bestätigt). Schicht: Datenzugriff.
+Ebene 3 · Stufe 3.1. Status: Erledigt (Ende November 2026). Schicht: Datenzugriff.
 
 **Ziel:** Modul, das für Koordinaten die Geländehöhe liefert.
 
 **Umfang:** `js/dem.js` mit `elevationAt(lat, lon)` und `elevationsAlong(points)`, bilineare Interpolation, Kachel-Zwischenspeicher, klare Fehler („Kachel nicht verfügbar“, „außerhalb der Abdeckung“); NoData wird „unbekannt“, nie 0. Statusmeldung in der Datenstatus-Leiste. Interpolation als getestete Logik; Vergleichsseite für Entwickler (GPX-Höhen gegen DEM an bekannten Gipfeln).
 
 **Nicht im Umfang:** Steigung, Exposition, Anzeige.
+
+**Umsetzung (RI12):**
+- `js/dem_logic.js` (rein): Fehlercodes, NoData-Bereinigung, bilineare Interpolation (am Rand geklemmt, Fehler höchstens ein halbes Pixel), Kachelname und -URL von Copernicus, Pixelposition aus der Georeferenz (Fläche oder Punkt), Terrarium-Kachel und -Dekodierung, Zusammenfassen von Bereichsabrufen.
+- `js/dem_tiff.js`: eigener GeoTIFF-Leser (**E18 entschieden: eigener Code, keine Bibliothek**, weil nur Höhenraster in Grad gelesen werden und das Projekt keine Abhängigkeiten außer Leaflet hat). Klassisches TIFF, beide Byte-Reihenfolgen, gekachelt oder gestreift, unkomprimiert oder Deflate, Predictor 1, 2 und 3, Float32 und Int16/UInt16; Kopf, Verzeichnis und einzelne Blöcke per Bereichsabruf. Nicht unterstützt (klarer Fehler, dann Ersatzquelle): BigTIFF, LZW und andere Kompressionen, mehrere Bänder.
+- `js/dem.js`: `elevationAt(lat, lon)` liefert `{ ele, source, kind }` (`ele` null = unbekannt) oder wirft `DemError`; `elevationsAlong(points)` liefert je Punkt ein Ergebnis oder `{ ele: null, error }`. Quellenkette: Copernicus GLO-30 (OpenTopography, `kind: 'surface'`), dann AWS Terrain Tiles (Zoom 12, etwa 26 m, `kind: 'mixed'`). Zwischenspeicher für Dateikopf, Blöcke und Bilder, kurzer Negativspeicher für fehlende Kacheln, höchstens 4 gleichzeitige Abrufe.
+- `js/dem_view.js`: Statusleiste („Höhenmodell“, erst nach der ersten Abfrage sichtbar) und Lizenzhinweis in der Fußzeile.
+- **Zellgröße:** keine Neuberechnung; die Quelle liefert etwa 30 m (Copernicus) und etwa 26 m (Terrain Tiles Zoom 12). Die Mittelung auf 5 bis 10 m für feinere Quellen bleibt RI13.
+- Getestet mit `scripts/test_dem_logic.html`, `test_dem_tiff.html` (GDAL- und tifffile-Dateien aus `scripts/make_dem_fixtures.py`, also unabhängig vom Leser) und `test_dem.html` (Netz ersetzt). Vergleichsseite `scripts/dem_compare.html` (Gipfel und GPX; braucht Netzzugang, Toleranz einstellbar, Vorgabe 40 m, weil ein 30-m-Oberflächenmodell Gipfelspitzen und Grate abschneidet).
+- **Grenzen:** Der Leser ist nur gegen die Fixtures geprüft; die echte OpenTopography-Datei (Kachelung, Kompression, Übersichtsstufen) ist im Browser noch nicht geprüft. Ist sie ungekachelt und unkomprimiert, wird sie in Streifen gelesen (viele Bereichsabrufe, aber funktionsfähig); ist sie LZW-komprimiert, springt die Ersatzquelle ein. Werte sind Oberflächenhöhen (Bäume, Gebäude), keine Gipfelhöhen. Schweiz (swissALTI3D, LV95) und Österreich (BEV, EPSG:3035) sind noch nicht angebunden (spätere Qualitätsstufe; Umrechnung dann nötig).
 
 **Voraussetzungen:** RI11.
 
@@ -1404,7 +1413,7 @@ Stand: 13.11.2026 (RI0). Statuswerte: **Bestätigt** (gilt verbindlich für die 
 | E15 | Land-Cover-Quelle und Klassenschema | Keine Entscheidung. Kandidaten: ESA WorldCover 2021 und CLC+ Backbone 2021 (je 10 m), Tree Cover Density als Ergänzung. Bedeckung wird nur beschreibend verwendet; Abruf nach Kachelkoordinate, nicht nach Routenverlauf; Klassen werden zu Gruppen zusammengefasst, nicht interpoliert | **Offen** (bewusst vertagt) | Lizenz, Abruf ohne Backend und Qualität in den Alpen sind ungeprüft; Spike in RI15a, möglichst gemeinsam mit RI11. Bis dahin wird kein Land-Cover-Code geschrieben | RI15a |
 | E16 | Sonnenstand: eigener Code oder Bibliothek, geforderte Genauigkeit | Eigener Code, keine Bibliothek (E14); SunCalc wird nicht eingebunden. Verfahren, Genauigkeit und Refraktion werden in RI15f festgelegt | **Bestätigt, vorläufig** (17.11.2026) | Volle Kontrolle, keine Abhängigkeit, kein Lizenz- oder Updateaufwand; Aufwand und Fehlerverantwortung liegen bei uns, daher Referenzwert-Tests in RI15f. Vorläufig, weil Genauigkeit und Verfahren erst dort festgelegt werden | RI15f |
 | E17 | Zeitbezug der Sonnenanalyse | Nutzer wählt Datum und Uhrzeit (bzw. Zeitfenster); keine Gehzeitprognose (Abschnitt 12). Zeiten aus der GPX-Datei für eine rückblickende Zuordnung bleiben optional und werden in RI15i geprüft | **Bestätigt** (17.11.2026) | Hält die Analyse beschreibend und vermeidet ein Zeitmodell; Zeitzone und Sommerzeit sind Teil der Eingabe | RI15f, RI15i |
-| E18 | GeoTIFF lesen und Koordinaten umrechnen (für BEV EPSG:3035, swissALTI3D LV95) | Keine Entscheidung | **Offen** (RI12) | Eigener Code oder Bibliothek; Maßstab wie E16 (Aufwand, Größe, Wartung); Grundlage ist die Messung aus RI11 | RI12 |
+| E18 | GeoTIFF lesen und Koordinaten umrechnen (für BEV EPSG:3035, swissALTI3D LV95) | Keine Entscheidung | **Entschieden (RI12): eigener Code** | `js/dem_tiff.js` für geografische Höhenraster (Copernicus); für LV95 und EPSG:3035 (swissALTI3D, BEV) wird bei Anbindung neu bewertet, ob die Umrechnung eigener Code oder Bibliothek wird | RI12 |
 
 ## Festlegungen für RI1 bis RI5
 

@@ -54,6 +54,11 @@ test('weatherStatus: Uhrzeit aus current.time, sonst ohne Zeit', function () {
   eq(S.weatherStatus(undefined), { state: 'ok', text: 'Geladen' }); eq(S.weatherStatus('x'), { state: 'ok', text: 'Geladen' });
 });
 
+test('demStatus: Copernicus, Ersatzquelle, Fehler', function () {
+  eq(S.demStatus('ok', 'copernicus').state, 'ok'); eq(S.demStatus('ok', 'terrain').state, 'limited');
+  eq(S.demStatus('unavailable'), { state: 'unavailable', text: 'Höhendaten nicht abrufbar' });
+});
+
 test('avalancheStatus: gültig, teilweise, abgelaufen, keine Berichte', function () {
   var valid = { status: 'valid', published: '2026-10-31T05:00:00Z' };
   eq(S.avalancheStatus([valid], 0, NOW), { state: 'ok', text: 'Bericht heute 06:00' });

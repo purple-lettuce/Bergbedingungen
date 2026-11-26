@@ -161,6 +161,7 @@ geladen und steht als globales `L` zur Verfügung.
 | `js/map.js` | Leaflet-Karte, Kachelebenen (OpenStreetMap, OpenTopoMap), Ebenengruppen, Warnhinweise sowie gemeinsame Hilfen (`el`, `esc`, `setStatus`) |
 | `js/closures.js` | Sperrungen und Hinweise: `data/closures.json` laden, filtern, auf der Karte und in der Liste darstellen, Popups, Sprung zu einem Eintrag |
 | `js/weather.js` | Wetterwidget mit Open-Meteo und Standortmarker |
+| `js/dem.js`, `js/dem_tiff.js`, `js/dem_logic.js`, `js/dem_view.js` | Höhenmodell (RI12, noch ohne Anzeige): `elevationAt` und `elevationsAlong` mit Copernicus GLO-30 (OpenTopography, eigener GeoTIFF-Leser mit Bereichsabrufen) und Terrain Tiles als Ersatz, Zwischenspeicher, NoData als „unbekannt“, Statuseintrag und Lizenzhinweis; getestet mit `scripts/test_dem_logic.html`, `test_dem_tiff.html`, `test_dem.html`; Entwicklerseite `scripts/dem_compare.html` |
 | `js/status_bar.js` | Datenstatus-Leiste unter dem Header: je Quelle Zustand und Text; Module melden mit `setSourceStatus()` |
 | `js/status_bar_logic.js` | reine Logik der Statusleiste: Zustand und Text aus echten Werten (Anzahl, Zeitstempel, Berichtsstatus), getestet mit `scripts/test_status_bar_logic.html` |
 | `js/protected_areas.js` | Schutzgebiete aus `data/protected_areas_alps.geojson` als Ebene, Farben nach Kategorie, bindet Popup, Legende und Filter an |

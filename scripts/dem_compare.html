@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>DEM-Vergleich (RI12, Entwicklerseite)</title>
+<style>body{font:14px system-ui,sans-serif;max-width:60rem;margin:1rem auto;padding:0 1rem}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:.25rem .5rem;text-align:right}td:first-child,th:first-child{text-align:left}.bad{background:#fdd}.ok{background:#dfd}</style>
+<h1>Höhenmodell gegen bekannte Gipfel und GPX</h1>
+<p>Entwicklerseite, nicht Teil der App. Sie liest über <code>js/dem.js</code> echte Daten (Copernicus über OpenTopography, sonst Terrain Tiles) und vergleicht sie mit den Gipfelhöhen der Karten.
+Das Modell ist ein Oberflächenmodell mit etwa 30 m Zellgröße: Auf Gipfeln liegt es meist einige Meter unter der Kartenhöhe (Spitze kleiner als eine Zelle), im Wald darüber.
+Toleranz für „ok“: <input id="tol" type="number" value="40" size="3"> m. Öffnen über <code>python3 -m http.server 8000</code> im Repository-Stamm und <code>http://localhost:8000/scripts/dem_compare.html</code>.</p>
+<button id="run">Messung starten</button>
+<table><thead><tr><th>Gipfel</th><th>Breite/Länge</th><th>Karte (m)</th><th>DEM (m)</th><th>Differenz</th><th>Quelle</th></tr></thead><tbody id="peaks"></tbody></table>
+<h2>GPX-Datei: Höhen der Datei gegen DEM</h2>
+<input type="file" id="gpx" accept=".gpx"> <pre id="gpxout"></pre>
+<script type="module">
+import { elevationAt, elevationsAlong } from '../js/dem.js';
+import { parseGpx } from '../js/gpx.js';
+import { createRoute } from '../js/route_model.js';
+
+var PEAKS = [
+  ['Großglockner', 47.0745, 12.6939, 3798], ['Zugspitze', 47.4211, 10.9853, 2962], ['Wildspitze', 46.8854, 10.8672, 3768],
+  ['Ortler', 46.5094, 10.5442, 3905], ['Matterhorn', 45.9766, 7.6586, 4478], ['Säntis', 47.2494, 9.3432, 2502],
+  ['Piz Bernina', 46.3825, 9.9087, 4049], ['Triglav', 46.3786, 13.8367, 2864]
+];
+var tol = document.getElementById('tol');
+document.getElementById('run').onclick = async function () {
+  var body = document.getElementById('peaks'); body.textContent = '';
+  for (var p of PEAKS) {
+    var tr = body.insertRow(), cells = [p[0], p[1] + ' / ' + p[2], p[3]], res, diff = null;
+    try { res = await elevationAt(p[1], p[2]); diff = res.ele == null ? null : res.ele - p[3]; cells.push(res.ele == null ? 'unbekannt' : res.ele.toFixed(1), diff == null ? '–' : (diff > 0 ? '+' : '') + diff.toFixed(1), res.source); }
+    catch (e) { cells.push('Fehler', e.message, ''); }
+    cells.forEach(function (c) { tr.insertCell().textContent = c; });
+    tr.className = diff != null && Math.abs(diff) <= +tol.value ? 'ok' : 'bad';
+  }
+};
+document.getElementById('gpx').onchange = async function (ev) {
+  var out = document.getElementById('gpxout'), file = ev.target.files[0];
+  if (!file) return;
+  var r = createRoute(parseGpx(await file.text()));
+  if (!r.ok) { out.textContent = r.error; return; }
+  var pts = r.route.points.filter(function (p) { return p.ele != null; });
+  var step = Math.max(1, Math.floor(pts.length / 200)), sample = pts.filter(function (_, i) { return i % step === 0; });
+  var dem = await elevationsAlong(sample), d = [], miss = 0;
+  sample.forEach(function (p, i) { if (dem[i].ele == null) miss++; else d.push(dem[i].ele - p.ele); });
+  d.sort(function (a, b) { return a - b; });
+  var q = function (f) { return d.length ? d[Math.min(d.length - 1, Math.floor(f * d.length))].toFixed(1) : '–'; };
+  out.textContent = sample.length + ' Punkte geprüft, ' + miss + ' ohne DEM-Wert.\nDifferenz DEM − GPX in m: Median ' + q(0.5) + ', 5 % ' + q(0.05) + ', 95 % ' + q(0.95) + '.';
+};
+</script>

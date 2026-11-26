@@ -239,7 +239,7 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 ### Phase 1 — Status: IN PROGRESS
 - [x] Schutzgebiete (Layer, Legende, Filter, Popup mit Regeln), Wildlife (Namen, Symbole), Sperrungen & Hinweise als Kartenebenen
 - [x] Wetter am Punkt (Open-Meteo, WEB-T1)
-- [ ] DEM-Integration (RI12 als Nächstes; RI11 erledigt: E7 bestätigt, Copernicus GLO-30 von OpenTopography alpenweit, swissALTI3D 2 m Schweiz, BEV nachrangig)
+- [x] DEM-Integration (RI12 erledigt: `elevationAt` und `elevationsAlong`, eigener GeoTIFF-Leser, Copernicus GLO-30 von OpenTopography mit Terrain Tiles als Ersatz; Schweiz und Österreich später; RI13 als Nächstes)
 - [ ] OSM Overpass API Integration
 - [x] GPX-Parser (RI1, reine Logik `js/gpx.js` mit Tests)
 - [x] Routenmodell und Geometrie (RI2, reine Logik js/route_model.js und js/geo.js mit Tests)
@@ -389,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.32 | 2026-11-26 | RI12 erledigt: DEM-Zugriff (`js/dem.js`, `js/dem_tiff.js`, `js/dem_logic.js`), E18 entschieden (eigener Code), Statuseintrag und Lizenzhinweis; RI13 als Nächstes |
 | 4.31 | 2026-11-26 | RI11 erledigt: Messlauf im Browser ausgewertet (OpenTopography-Kopie von Copernicus GLO-30 abrufbar, 57,4 MB je Kachel; swissALTI3D 2 m 177 KB je km²; BEV 8,09 GB je Kachel), E7 bestätigt; RI12 freigegeben |
 | 4.30 | 2026-11-26 | RI11: Recherche abgeschlossen (swissALTI3D-Lizenz OGD, BEV-Kachelschema und CC BY 4.0, OpenTopography-Bucket), Messseite sucht den OpenTopography-Dateipfad selbst, E7 als Entscheidungsvorlage mit Rückfallregel; Messlauf im Browser und Bestätigung offen |
 | 4.29 | 2026-11-17 | RI11: zweite Messung dokumentiert (swissALTI3D-Kachel aus dem Browser abrufbar, OpenTopography-Kopie mit CORS, Pfad offen); E7 weiter offen, BEV ungemessen |

@@ -1,0 +1,126 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tests dem.js</title>
+<pre id="result">läuft …</pre>
+<script type="module">
+// Läuft im Browser: python3 scripts/run_js_tests.py. Das Netzwerk ist ersetzt: Kacheln kommen aus scripts/fixtures/dem/ (GDAL-Dateien), Terrarium-Kacheln sind künstlich.
+import { DemError } from '../js/dem_logic.js';
+import { configure, clearCache, elevationAt, elevationsAlong, hasSucceeded } from '../js/dem.js';
+
+var results = [], chain = Promise.resolve();
+function test(name, fn) {   // nacheinander: der Zwischenspeicher ist gemeinsam
+  chain = chain.then(function () { clearCache(); return fn(); }).then(
+    function () { results.push({ name: name, ok: true }); },
+    function (e) { results.push({ name: name, ok: false, error: String(e.message || e) }); });
+}
+function eq(actual, expected) {
+  var a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error('erwartet ' + b + ', erhalten ' + a);
+}
+function near(actual, expected, tol) { if (actual == null || Math.abs(actual - expected) > tol) throw new Error('erwartet ' + expected + ', erhalten ' + actual); }
+function value(c, r) { return 1000 + 2 * c + 3 * r + ((7 * c + 13 * r) % 5); }
+var lon = function (c) { return 12 + (c + 0.5) / 64; }, lat = function (r) { return 48 - (r + 0.5) / 64; };   // Pixelmitte der Fixture-Kachel N47 E012
+
+var files = {};
+async function load(name) {
+  if (!files[name]) files[name] = new Uint8Array(await (await fetch('./fixtures/dem/' + name)).arrayBuffer());
+  return files[name];
+}
+var log;
+function setup(map, opts) {   // map: Teil der URL → Dateiname, sonst 404
+  log = { range: [], image: [], status: [] };
+  var terrainHeight = opts && opts.terrainHeight;
+  configure({
+    providers: (opts && opts.providers) || { copernicus: true, terrain: true },
+    fetchRange: async function (url, s, e) {
+      log.range.push(url);
+      var name = Object.keys(map).filter(function (k) { return url.indexOf(k) >= 0; }).map(function (k) { return map[k]; })[0];
+      if (!name) throw new DemError('tile-unavailable', url);
+      var b = await load(name);
+      return b.slice(s, Math.min(e + 1, b.length)).buffer;
+    },
+    fetchImage: async function (url) {
+      log.image.push(url);
+      if (terrainHeight == null) throw new DemError('tile-unavailable', url);
+      var d = new Uint8ClampedArray(256 * 256 * 4), v = terrainHeight + 32768, r = Math.floor(v / 256), g = Math.floor(v % 256), b = Math.round((v - Math.floor(v)) * 256);
+      for (var i = 0; i < 256 * 256; i++) { d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b; d[i * 4 + 3] = 255; }
+      return { data: d, width: 256, height: 256 };
+    },
+    onStatus: function (s, src) { log.status.push(s + ':' + (src || '')); }
+  });
+}
+var COP = { 'N47_00_E012_00': 'cog_float32_deflate_p3.tif' };
+
+test('Pixelmitte: exakter Rasterwert, Quelle Copernicus', async function () {
+  setup(COP);
+  var r = await elevationAt(lat(10), lon(20));
+  eq([r.ele, r.source, r.kind], [value(20, 10), 'copernicus', 'surface']);
+  eq(hasSucceeded(), true); eq(log.status[0], 'ok:copernicus');
+});
+
+test('zwischen Pixeln: bilinear aus vier Nachbarn', async function () {
+  setup(COP);
+  var c = 20, rr = 10, r = await elevationAt(lat(rr) - 0.25 / 64, lon(c) + 0.5 / 64);   // halbe Spalte, Viertel Zeile
+  var top = (value(c, rr) + value(c + 1, rr)) / 2, bot = (value(c, rr + 1) + value(c + 1, rr + 1)) / 2;
+  near(r.ele, top + (bot - top) * 0.25, 1e-3);
+});
+
+test('Block- und Kachelgrenze: Nachbarn aus verschiedenen Blöcken (16er-Kacheln)', async function () {
+  setup(COP);
+  var r = await elevationAt(lat(15) - 0.5 / 64, lon(15) + 0.5 / 64);   // genau zwischen vier Pixeln über vier Blöcke
+  near(r.ele, (value(15, 15) + value(16, 15) + value(15, 16) + value(16, 16)) / 4, 1e-3);
+});
+
+test('Gleiche Datei wieder: aus dem Zwischenspeicher, keine neuen Abrufe', async function () {
+  setup(COP);
+  await elevationAt(lat(10), lon(20));
+  var n = log.range.length;
+  await elevationAt(lat(10), lon(20));
+  eq(log.range.length, n);
+});
+
+test('NoData-Pixel: unbekannt (null), nie 0', async function () {
+  setup({ 'N47_00_E012_00': 'tiled_int16_deflate_p2_point.tif' }, { providers: { terrain: false } });
+  var r = await elevationAt(lat(5), lon(5));
+  eq(r.ele, null);
+});
+
+test('Kachel fehlt: Ersatzquelle Terrain Tiles; beide fehlen: Fehler "tile-unavailable"', async function () {
+  setup({}, { terrainHeight: 1234 });
+  var r = await elevationAt(47.5, 12.5);
+  near(r.ele, 1234, 0.01); eq([r.source, r.kind], ['terrain', 'mixed']);
+  clearCache(); setup({});
+  var code = null;
+  try { await elevationAt(47.5, 12.5); } catch (e) { code = e.code; }
+  eq(code, 'tile-unavailable'); eq(log.status.pop(), 'unavailable:');
+});
+
+test('fehlgeschlagene Kachel wird nicht sofort erneut abgefragt', async function () {
+  setup({}, { terrainHeight: 1000 });
+  await elevationAt(47.5, 12.5);
+  var n = log.range.length;
+  await elevationAt(47.6, 12.6);
+  eq(log.range.length, n);
+});
+
+test('ungültige Koordinate: Fehler "outside"', async function () {
+  setup(COP);
+  var code = null;
+  try { await elevationAt(95, 12); } catch (e) { code = e.code; }
+  eq(code, 'outside');
+  try { await elevationAt(NaN, 12); code = null; } catch (e) { code = e.code; }
+  eq(code, 'outside');
+});
+
+test('elevationsAlong: Reihenfolge bleibt, einzelne Fehler stören nicht', async function () {
+  setup(COP, { providers: { terrain: false } });
+  var res = await elevationsAlong([{ lat: lat(3), lon: lon(4) }, { lat: 10, lon: 10 }, { lat: lat(30), lon: lon(40) }]);
+  eq([res[0].ele, res[1].ele, res[1].error, res[2].ele], [value(4, 3), null, 'tile-unavailable', value(40, 30)]);
+  eq((await elevationsAlong([])).length, 0);
+});
+
+chain.then(function () {
+  var failed = results.filter(function (r) { return !r.ok; });
+  document.getElementById('result').textContent = JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results: results });
+});
+</script>
