@@ -29,8 +29,10 @@ var SOURCES = [
     url: 'https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N47_00_E012_00_DEM/Copernicus_DSM_COG_10_N47_00_E012_00_DEM.tif' },
   { id: 'copernicus-glo90', name: 'Copernicus GLO-90 (AWS, COG, 1°-Kachel)',
     url: 'https://copernicus-dem-90m.s3.amazonaws.com/Copernicus_DSM_COG_30_N47_00_E012_00_DEM/Copernicus_DSM_COG_30_N47_00_E012_00_DEM.tif' },
-  { id: 'copernicus-opentopography', name: 'Copernicus GLO-30 (OpenTopography, URL ungeprüft)',
+  { id: 'copernicus-opentopography', name: 'Copernicus GLO-30 (OpenTopography, geratener Pfad, 404 am 17.11.2026)',
     url: 'https://opentopography.s3.sdsc.edu/raster/COP30/COP30_hh/Copernicus_DSM_COG_10_N47_00_E012_00_DEM.tif' },
+  { id: 'bev-als-dtm', name: 'BEV ALS DTM 1 m (Kachel CRS3035RES50000mN2700000E4600000, Stichtag 15.09.2025, EPSG:3035)',
+    url: 'https://data.bev.gv.at/download/ALS/DTM/20250915/ALS_DTM_CRS3035RES50000mN2700000E4600000.tif' },
   { id: 'terrain-terrarium', name: 'AWS Terrain Tiles (terrarium PNG, z10)',
     url: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/10/545/359.png' },
   { id: 'terrain-geotiff', name: 'AWS Terrain Tiles (GeoTIFF, z10)',
@@ -78,9 +80,30 @@ async function run(full) {
   try {
     var it = await (await fetch('https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.swissalti3d/items?limit=1', { cache: 'no-store' })).json();
     var assets = it.features && it.features[0] && it.features[0].assets || {};
-    var key = Object.keys(assets).filter(function (k) { return /\.tif$/i.test(assets[k].href || k); })[0];
+    var tifs = Object.keys(assets).filter(function (k) { return /\.tif$/i.test(assets[k].href || k); });
+    var key = tifs.filter(function (k) { return /_2_/.test(k); })[0] || tifs[0];
+    // 2-m-Fassung (kleiner) bevorzugt, sonst erste Kachel; beide Größen stehen im Ergebnis, wenn sie vorhanden sind
+    if (tifs.length > 1) tifs.filter(function (k) { return k !== key; }).slice(0, 1).forEach(function (k) { list.push({ id: 'swissalti3d-kachel-alt', name: 'swissALTI3D Kachel (' + k + ')', url: assets[k].href }); });
     if (key) list.push({ id: 'swissalti3d-kachel', name: 'swissALTI3D Kachel (' + key + ')', url: assets[key].href });
   } catch (e) { rows.push({ id: 'swissalti3d-kachel', url: 'STAC items', plain: 'Fehler', range: '-', note: e.message }); }
+  // OpenTopography: S3-kompatibler Bucket "raster" (öffentlich listbar). Dateiname der Kachel aus der Liste ableiten, statt ihn zu raten.
+  try {
+    var base = 'https://opentopography.s3.sdsc.edu/raster';
+    var xml = function (t) { return new DOMParser().parseFromString(t, 'application/xml'); };
+    var top = xml(await (await fetch(base + '?list-type=2&prefix=COP30/&delimiter=/&max-keys=20', { cache: 'no-store' })).text());
+    var prefixes = [].map.call(top.getElementsByTagName('Prefix'), function (n) { return n.textContent; }).filter(function (x) { return x !== 'COP30/'; });
+    var keys = [];
+    for (var j = 0; j < prefixes.length && j < 3; j++) {
+      var sub = xml(await (await fetch(base + '?list-type=2&prefix=' + encodeURIComponent(prefixes[j]) + '&max-keys=5', { cache: 'no-store' })).text());
+      keys = keys.concat([].map.call(sub.getElementsByTagName('Key'), function (n) { return n.textContent; }));
+    }
+    rows.push({ id: 'opentopography-liste', url: base + '?list-type=2&prefix=COP30/', plain: 'Liste', range: '-', prefixes: prefixes, firstKeys: keys, note: 'Bucket-Liste (Präfixe und erste Dateinamen)' });
+    var k0 = keys.filter(function (k) { return /\.tif$/i.test(k); })[0];
+    if (k0) {
+      var guess = k0.replace(/N\d+_00_E\d+_00/, 'N47_00_E012_00');
+      list.push({ id: 'copernicus-opentopography-abgeleitet', name: 'Copernicus GLO-30 (OpenTopography, aus Liste abgeleitet)', url: base + '/' + guess });
+    }
+  } catch (e) { rows.push({ id: 'opentopography-liste', url: 'S3-Liste', plain: 'Fehler', range: '-', note: e.message + ' (Liste per CORS blockiert?)' }); }
   if (c) list.push({ id: 'custom', name: 'eigene URL', url: c });
   for (var i = 0; i < list.length; i++) {
     var r = await probe(list[i], full); rows.push(r); show(r, list[i].name);

@@ -239,7 +239,7 @@ Stand der Prüfung am 30.10.2026: Im Repository gibt es keinen Code für DEM, OS
 ### Phase 1 — Status: IN PROGRESS
 - [x] Schutzgebiete (Layer, Legende, Filter, Popup mit Regeln), Wildlife (Namen, Symbole), Sperrungen & Hinweise als Kartenebenen
 - [x] Wetter am Punkt (Open-Meteo, WEB-T1)
-- [ ] DEM-Integration (RI12; Quellenvorschlag und Messseite aus RI11 liegen vor, Entscheidung E7 nach Messung im Browser offen)
+- [ ] DEM-Integration (RI12; RI11: Quellenvorschlag E7 mit Rückfallregel liegt vor, Bestätigung nach einem Messlauf im Browser offen)
 - [ ] OSM Overpass API Integration
 - [x] GPX-Parser (RI1, reine Logik `js/gpx.js` mit Tests)
 - [x] Routenmodell und Geometrie (RI2, reine Logik js/route_model.js und js/geo.js mit Tests)
@@ -389,6 +389,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.30 | 2026-11-26 | RI11: Recherche abgeschlossen (swissALTI3D-Lizenz OGD, BEV-Kachelschema und CC BY 4.0, OpenTopography-Bucket), Messseite sucht den OpenTopography-Dateipfad selbst, E7 als Entscheidungsvorlage mit Rückfallregel; Messlauf im Browser und Bestätigung offen |
 | 4.29 | 2026-11-17 | RI11: zweite Messung dokumentiert (swissALTI3D-Kachel aus dem Browser abrufbar, OpenTopography-Kopie mit CORS, Pfad offen); E7 weiter offen, BEV ungemessen |
 | 4.28 | 2026-11-17 | RI11: erstes Messergebnis im Browser dokumentiert (Copernicus-Direktabruf von AWS scheitert wegen fehlendem CORS (bestätigt), AWS Terrain Tiles funktionieren), Messseite um swissALTI3D-Kachel und Direktlinks erweitert; E7 weiter offen |
 | 4.27 | 2026-11-17 | RI11: DEM-Quellenvergleich und Vorschlag für E7 (beste Auflösung je Region, Copernicus als Rückfall, Bewuchs aus Land Cover; E18 Bibliotheksfrage offen) im Route Intelligence Plan, DEM-Eintrag in DATENQUELLEN korrigiert (10 m / CC BY 4.0 nicht belegt), Messseite `scripts/spike_dem_cors.html` außerhalb der Anwendung; Messwerte (CORS, Range, Datenmenge) stehen aus |
