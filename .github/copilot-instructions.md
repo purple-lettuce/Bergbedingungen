@@ -8,7 +8,7 @@ The browser fetches committed files under `data/` for closures and protected are
 
 ## Commands
 
-There is no package manifest, build step, automated test suite, or configured linter. There is no single-test command.
+There is no package manifest, build step, or configured linter. Tests are browser test pages `scripts/test_*.html` (pure logic modules) and Python tests for the data pipeline, run with `python3 scripts/run_js_tests.py` (needs Chrome, Chromium or Edge) and `python3 scripts/test_*.py`. There is no single-test command; a single test page can be opened via the local server.
 
 Serve the site from the repository root so ES modules and data files load correctly:
 

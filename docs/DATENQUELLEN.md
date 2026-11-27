@@ -6,9 +6,9 @@ Bergbedingungen
 
 # 📚 Datenquellen — Mountain Radar / Alpine Risk Intelligence
 
-> Version: 2.0
+> Version: siehe Versionshistorie am Ende
 >
-> Letzte Aktualisierung: Oktober 2026
+> Letzte Aktualisierung: 27.11.2026
 >
 > Dieses Dokument dokumentiert alle aktuell verwendeten, in Arbeit befindlichen und zukünftig geplanten Datenquellen von Mountain Radar.
 >
@@ -20,14 +20,14 @@ Bergbedingungen
 
 | Datenquelle | Status | Verwendung | Priorität |
 |------------|------------|------------|------------|
-| Austrian DEM / DGM | 🟡 Geplant (noch kein Code) | Geländeanalyse | 🔴 Sehr hoch |
+| Austrian DEM / DGM (BEV) | 🟡 Nachrangige Qualitätsstufe (E7, 8,09 GB je Kachel, Teilabruf zu prüfen), noch nicht im Einsatz; im Einsatz ist Copernicus GLO-30 über OpenTopography (RI12) | Geländeanalyse | 🔴 Sehr hoch |
 | OpenStreetMap (OSM) | 🟡 Kartenkacheln im Einsatz, Overpass geplant | Infrastruktur | 🔴 Sehr hoch |
 | Digitize The Planet (DTP) | ✅ Produktiv | Schutzgebiete | 🔴 Sehr hoch |
 | Closures | ✅ Produktiv | Sperrungen | 🟡 Mittel |
 | GeoSphere Austria | 🟡 Geplant | Wetterrisiko | 🔴 Sehr hoch |
 | Meteostat | 🟡 Geplant | Historische Wetterdaten | 🟡 Mittel-Hoch |
-| ALBINA Euregio | 🟡 In Umsetzung | Lawinenlage | 🔴 Sehr hoch |
-| SLF Schweiz | 🟡 In Umsetzung | Lawinenlage | 🔴 Sehr hoch |
+| ALBINA Euregio | ✅ Umgesetzt (Test mit aktuellen Berichten ab Saisonstart offen) | Lawinenlage | 🔴 Sehr hoch |
+| SLF Schweiz | ✅ Umgesetzt (Test mit aktuellen Berichten ab Saisonstart offen) | Lawinenlage | 🔴 Sehr hoch |
 | SLF Forschungsdaten | 🔬 Geplant | Unfall-Hotspots | 🔴 Sehr hoch |
 | BMI Alpinpolizei | 🔬 Recherche | Unfallstatistiken | 🟠 Hoch |
 | Tirol Data Hub | 🔬 Recherche | Schutzgebiete, Wildlife | 🟡 Mittel |
@@ -113,9 +113,9 @@ Nicht dargestellt, weil keine belastbare Grundlage existiert:
 | **Priorität** | 🔴 Sehr hoch |
 | **Roadmap-Phase** | Phase 1 (Grundlagen) |
 | **Zugeordnete Module** | Geländeanalyse, GPX Analyse, Alpine Risk Engine |
-| **Status** | Geplant (noch kein Code im Repository) |
+| **Status** | BEV ist für Österreich als nachrangige Qualitätsstufe vorgesehen (E7), noch nicht im Einsatz; im Einsatz ist Copernicus GLO-30 über OpenTopography (RI12, `js/dem.js`) |
 | **Abhängigkeiten** | Keine (unabhängig) |
-| **Notizen** | Fundamentales Datenset für alle geometrischen Analysen. Quellenentscheidung (E7) steht als Vorschlag in `ROUTE_INTELLIGENCE_PLAN.md` (RI11); Messung von CORS, Range und Datenmenge steht aus |
+| **Notizen** | Fundamentales Datenset für alle geometrischen Analysen. Die Quellenentscheidung E7 (RI11) ist bestätigt und mit Messungen belegt; Begründung und Messwerte in `ROUTE_INTELLIGENCE_PLAN.md` |
 
 ### Weitere DEM-Kandidaten (RI11, nur Recherche, kein Code)
 
@@ -585,6 +585,7 @@ Alpine Risk Engine (Zielmodul)
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 2.9 | 2026-11-27 | Statusübersicht mit ROADMAP abgeglichen (DEM, ALBINA, SLF), Kopfzeile aktualisiert |
 | 2.8 | 2026-11-26 | RI12: Copernicus von OpenTopography im Einsatz, Lizenzhinweis in der Fußzeile, Terrain Tiles als Ersatzquelle (Zoom 12) |
 | 2.7 | 2026-11-26 | RI11: Messergebnis 26.11. eingetragen (OpenTopography-Kopie, BEV 8,09 GB je Kachel, swissALTI3D 2 m 177 KB), E7 bestätigt |
 | 2.6 | 2026-11-26 | RI11: swissALTI3D-Lizenz (OGD, Quellenangabe) belegt, BEV-Kachelschema und Lizenz belegt, OpenTopography-Bucket und Herkunft der Daten ergänzt |

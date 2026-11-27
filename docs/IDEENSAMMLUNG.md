@@ -1,20 +1,8 @@
-# Branding
-
-Produktname: Mountain Radar
-
-Claim: ALPINE RISK INTELLIGENCE
-
-Slogan: Know before you go.
-
-Status: Aktueller Favorit
-
-Repositoryname: Bergbedingungen
-
 # 💡 Ideensammlung
 
 > Version: 1.1
 >
-> Letzte Aktualisierung: Oktober 2026
+> Letzte Aktualisierung: 27.11.2026
 >
 > Dieses Dokument sammelt Ideen, Visionen und mögliche zukünftige Erweiterungen von Bergbedingungen.
 >
@@ -401,14 +389,7 @@ Status:
 
 Status:
 
-💡 Idee
-
-Automatische Erstellung von:
-
-- Distanz
-- Höhenmetern
-- Risiken
-- Schutzgebieten
+🟡 Teilweise umgesetzt: Distanz, Höhenmeter (RI4), Schutzgebiete und Sperrungen (RI8), Lawinenlage (RI9) und Wetter (RI10) entlang der Route sind in der Anwendung. Als Idee bleibt die automatische Zusammenfassung der **Risiken** als Befundliste (RI16, RI17 im ROUTE_INTELLIGENCE_PLAN).
 
 ---
 

@@ -1,6 +1,6 @@
 # Mountain Radar – Route Intelligence Plan
 
-> Status: Plan (kein Code geändert). Stand: 13.11.2026.
+> Status: Arbeitsplan. RI0 bis RI12 sind umgesetzt (Stand 27.11.2026), alles ab RI13 ist Plan. Der Gesamtstand steht in der Plattform-Landkarte der ROADMAP. Nach vollständiger Umsetzung wird dieser Plan gelöscht und Dauerhaftes (Entscheidungen E1 bis E18, Regeln) in ROADMAP und DATENQUELLEN übernommen.
 >
 > Ziel: Mountain Radar entwickelt sich in kleinen, einzeln mergebaren Schritten von der Kartenplattform zur Verarbeitung eigener Touren (Route Intelligence) und darauf aufbauend zur Alpine Risk Intelligence.
 >
@@ -92,11 +92,12 @@ Hinweis zur Reihenfolge: Die Befunde (Ebene 4) brauchen Terrain nicht zwingend. 
 | Tests | Reine Logikmodule mit Browser-Testseiten `scripts/test_*.html`, gesammelt in `scripts/run_js_tests.py`; Python-Tests für die Pipeline | Das Muster „reine Logik ohne DOM + Testseite“ gilt für jedes Paket. |
 | Risk-Engine-Konzept | `docs/ALPINE_RISK_ENGINE.md`: Module, Segmentierung, „Informieren statt entscheiden“, **kein Gesamtrisiko** | Die Prinzipien werden übernommen (Abschnitt 2). |
 
-## Was fehlt (laut ROADMAP offen)
+## Was fehlt (Stand 27.11.2026)
 
-GPX-Parser, Höhenprofil, DEM-Integration, OSM Overpass, Wegschwierigkeit, Toolbox-Werkzeuge WEB-T2 bis T6, Tourenwarnungen, jede Form von Routenobjekt oder Speicherung.
+Umgesetzt sind GPX-Parser, Routenmodell, Anzeige, Statistik, Höhenprofil, Routenverwaltung, Kontext entlang der Route (Schutzgebiete, Sperrungen, Lawinenlage, Wetter) und der DEM-Zugriff (RI1 bis RI12). Offen laut ROADMAP: OSM Overpass, Wegschwierigkeit, Toolbox-Werkzeuge WEB-T2 bis T6, Tourenwarnungen und alles ab RI13.
 
-Hinweis: `DATENQUELLEN.md` führt „Austrian DEM“ und „OSM Overpass“ mit Status „In Umsetzung“, die ROADMAP-Checkliste (Prüfung 30.10.2026) dagegen „kein Code vorhanden“. Es gibt keinen Code; die Angabe in `DATENQUELLEN.md` wird im ersten DEM-Paket (RI11) korrigiert.
+Hinweis: Die frühere Abweichung zwischen `DATENQUELLEN.md` („In Umsetzung“) und ROADMAP („kein Code“) ist mit RI11 und RI12 behoben; DATENQUELLEN führt den DEM-Status jetzt nach dem tatsächlichen Stand.
+
 
 ## Kommunikation nach außen (Landing)
 
@@ -1166,7 +1167,7 @@ Ebene 3 · Stufe 3.4. Status: Zurückgestellt. Schicht: Analyse-Logik.
 
 # 8. Ebene 4 – Alpine Risk Intelligence (Stufen 4.1 bis 4.4)
 
-Ziel: Die Ergebnisse der Einzelanalysen einheitlich als **Befunde** darstellen, ohne Gesamtnote. Erst hier wird aus Route Intelligence die Alpine Risk Engine (Beta, ROADMAP Phase 3).
+Ziel: Die Ergebnisse der Einzelanalysen einheitlich als **Befunde** darstellen, ohne Gesamtnote. Erst hier wird aus Route Intelligence die Alpine Risk Engine. Begriffe: „Alpha“ ist die interne Orchestrierung (RI18, ohne Oberfläche), „Beta“ (ROADMAP Phase 3) ist die Engine mit Befundliste für Nutzer.
 
 ### RI16 – Befundmodell (Schema, keine UI)
 
@@ -1209,7 +1210,7 @@ Ebene 4 · Stufe 4.1. Status: Geplant. Schicht: Anzeige.
 
 **Definition of Done:** Alle Befundtypen der ausgelieferten Pakete erscheinen; Screenshots Desktop/Mobil, hell/dunkel; Tastatur und Screenreader geprüft; PR gemerged.
 
-### RI18 – Engine-Orchestrierung (Alpine Risk Engine Alpha)
+### RI18 – Engine-Orchestrierung (interne Vorstufe „Alpha“, ohne Oberfläche)
 
 Ebene 4 · Stufe 4.2. Status: Geplant. Schicht: Orchestrierung.
 
