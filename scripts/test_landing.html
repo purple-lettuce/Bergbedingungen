@@ -218,6 +218,7 @@ async function appUnchanged() {
   ok('LP1b: Anwendung behält ihre sachliche Fläche (kühles Grau bzw. Dunkelblau)', win.getComputedStyle(d.body).backgroundColor === (dark ? 'rgb(14, 22, 32)' : 'rgb(245, 247, 246)'), win.getComputedStyle(d.body).backgroundColor);
 }
 
+var PUBLIC_BASE = 'https://purple-lettuce.github.io/Bergbedingungen/';   // belegte öffentliche Adresse (GitHub Pages), LP8b
 async function seo(page, title) {
   // LP8: Metadaten der Seite (Titel, Beschreibung, Open Graph, Twitter/X) und das Vorschaubild.
   var f = await openFrame('../' + page, 1024, 768), d = f.contentDocument, tag = 'LP8 ' + page + ': ';
@@ -228,7 +229,16 @@ async function seo(page, title) {
   ok(tag + 'Open Graph: type, site_name, title, description, image', meta('meta[property="og:type"]') === 'website' && meta('meta[property="og:site_name"]') === 'Mountain Radar' && meta('meta[property="og:title"]') === title && meta('meta[property="og:description"]') === desc && meta('meta[property="og:image"]') !== '');
   ok(tag + 'Open Graph: Bild mit Größe und Alternativtext', meta('meta[property="og:image:width"]') === '1200' && meta('meta[property="og:image:height"]') === '630' && meta('meta[property="og:image:alt"]').length > 10);
   ok(tag + 'Twitter/X: große Karte mit Titel, Beschreibung, Bild', meta('meta[name="twitter:card"]') === 'summary_large_image' && meta('meta[name="twitter:title"]') === title && meta('meta[name="twitter:description"]') === desc && meta('meta[name="twitter:image"]') === meta('meta[property="og:image"]') && meta('meta[name="twitter:image:alt"]') !== '');
-  var img = await new Promise(function (resolve) { var i = new Image(); i.onload = function () { resolve(i); }; i.onerror = function () { resolve(null); }; i.src = new URL(meta('meta[property="og:image"]'), f.contentWindow.location.href).href; });
+  // LP8b: canonical und og:url absolut, gleich und passend zur Seite; Bilder absolut
+  var canon = (d.querySelector('link[rel="canonical"]') || { getAttribute: function () { return ''; } }).getAttribute('href') || '';
+  var expected = PUBLIC_BASE + (page === 'index.html' ? '' : page);
+  ok(tag + 'LP8b canonical vorhanden, absolut und passend', canon === expected, canon);
+  ok(tag + 'LP8b og:url vorhanden und gleich canonical', meta('meta[property="og:url"]') === canon && canon !== '', meta('meta[property="og:url"]'));
+  ok(tag + 'LP8b og:image und twitter:image sind absolut (https)', /^https:\/\//.test(meta('meta[property="og:image"]')) && /^https:\/\//.test(meta('meta[name="twitter:image"]')), meta('meta[property="og:image"]'));
+  ok(tag + 'LP8b Bild-Adresse liegt unter der öffentlichen Adresse', meta('meta[property="og:image"]').indexOf(PUBLIC_BASE) === 0, meta('meta[property="og:image"]'));
+  // Vorschaubild lokal prüfen: die öffentliche Adresse wird auf den Dateipfad im Repository abgebildet (vor dem ersten Deploy ist das Bild öffentlich noch nicht erreichbar)
+  var rel = meta('meta[property="og:image"]').replace(PUBLIC_BASE, '../');
+  var img = await new Promise(function (resolve) { var i = new Image(); i.onload = function () { resolve(i); }; i.onerror = function () { resolve(null); }; i.src = new URL(rel, f.contentWindow.location.href).href; });
   ok(tag + 'Vorschaubild ist erreichbar und 1200 × 630', img && img.naturalWidth === 1200 && img.naturalHeight === 630, img ? img.naturalWidth + ' × ' + img.naturalHeight : 'nicht ladbar');
 }(async function () {
   try { await landing(); await small(390, 844); await small(320, 640); await lowWindow(); await appBackLink(); await whatIs(); await sources(); await vision(); await datasources(); await productVision(); await whatIsSmall(390); await whatIsSmall(320); await navigation(1440, 900); await navigation(390, 844); await navigation(320, 640); await navigationDark(); await heroVisual(1440, 900); await heroVisual(390, 844); await heroVisual(320, 640); await landingBackground(); await appUnchanged(); await seo('index.html', 'Mountain Radar – Alpine Risk Intelligence'); await seo('app.html', 'Karte – Mountain Radar'); }
