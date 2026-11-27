@@ -1,6 +1,6 @@
 # Mountain Radar – Landing Page Plan
 
-> Status: In Arbeit (LP1 bis LP8 und LP1b erledigt)
+> Status: In Arbeit (LP1 bis LP8, LP8b und LP1b erledigt)
 >
 > Ziel: Entwicklung einer modernen Produkt- und Einstiegsseite für Mountain Radar.
 >
@@ -342,8 +342,36 @@ Umsetzung (LP8):
 - Titel: Startseite „Mountain Radar – Alpine Risk Intelligence“, Karte „Karte – Mountain Radar“. Beschreibung (gleich für beide, ≈ 115 Zeichen): „Sperrungen, Hinweise, Schutzgebiete, Wetter und Lawinenlage für den Alpenraum auf einer Karte. Know before you go.“ Es steht nur darin, was die Karte tatsächlich zeigt; keine Keyword-Listen, keine Versprechen.
 - Social Preview: `docs/design/mountain-radar-social-preview.png` (1200 × 630, Verhältnis 1,91 : 1). Links das Emblem, rechts Name, Claim und Slogan auf dem Verlauf Deep Alpine Blue → Alpine Green, mit Inter. Quelle: `docs/design/social-preview.html` (Screenshot der Seite in Edge/Chrome headless bei 1200 × 630).
 - Sharing-Darstellung: große Karte mit Bild oben, darunter Titel und Beschreibung (Open Graph und Twitter/X gleich).
-- Bewusst nicht umgesetzt: strukturierte Daten (JSON-LD) und `canonical`/`og:url`. Es gibt noch keine feste öffentliche Adresse, und eine erfundene Adresse wäre falsch. Die Bild-Adressen sind deshalb relativ; viele Dienste verlangen für `og:image` eine absolute Adresse. **Sobald die Seite öffentlich erreichbar ist**, müssen `og:image` und `twitter:image` absolut gesetzt und `canonical`/`og:url` ergänzt werden. Strukturierte Daten bringen bei einer einzelnen Startseite ohne Suchfunktion nichts.
+- Bewusst nicht umgesetzt: strukturierte Daten (JSON-LD) und `canonical`/`og:url` (canonical, og:url und absolute Bildadressen: siehe LP8b). Es gibt noch keine feste öffentliche Adresse, und eine erfundene Adresse wäre falsch. Die Bild-Adressen sind deshalb relativ; viele Dienste verlangen für `og:image` eine absolute Adresse. **Sobald die Seite öffentlich erreichbar ist**, müssen `og:image` und `twitter:image` absolut gesetzt und `canonical`/`og:url` ergänzt werden. Strukturierte Daten bringen bei einer einzelnen Startseite ohne Suchfunktion nichts.
 - Keine Funktionsänderung: Es wurden nur Metadaten im `<head>` und ein Bild ergänzt. Test: `scripts/test_landing.html` (Titel, Beschreibung, Open Graph, Twitter/X, Bildgröße).
+---
+
+# LP8b – Produkt-Metadaten finalisieren
+
+Status: Erledigt (27.11.2026)
+
+Während LP8 fehlte die öffentliche Adresse. LP8b ergänzt die Metadaten, ohne Inhalte, Design oder Funktion zu ändern.
+
+**Öffentliche Adresse (belegt, nicht erfunden):** `https://purple-lettuce.github.io/Bergbedingungen/` (GitHub Pages des Repositorys). Die Adresse hat der Nutzer genannt (Karte: `.../Bergbedingungen/app.html`); der Messlauf zu RI11 hat bestätigt, dass die Website unter dieser Herkunft und diesem Pfad ausgeliefert wird und das Repository-Stammverzeichnis die Website-Wurzel ist. Die Startseite liegt daher unter dem Stamm, die Karte unter `app.html`. Aus der Arbeitsumgebung war die Seite nicht abrufbar (Zugriff gesperrt); geprüft wurde lokal.
+
+Umsetzung:
+
+| Seite | canonical | og:url | og:image und twitter:image |
+|---|---|---|---|
+| Startseite `index.html` | `https://purple-lettuce.github.io/Bergbedingungen/` | gleich canonical | `https://purple-lettuce.github.io/Bergbedingungen/docs/design/mountain-radar-social-preview.png` |
+| Karte `app.html` | `https://purple-lettuce.github.io/Bergbedingungen/app.html` | gleich canonical | gleiche absolute Bildadresse |
+
+- Titel, Beschreibung, `og:type` (website), `og:locale` (de_DE), `og:site_name`, Bildgröße, Alternativtexte und `twitter:card` (summary_large_image) sind aus LP8 unverändert und geprüft: Titel, Beschreibung und Bild stimmen zwischen Open Graph und Twitter/X überein; `<html lang="de">` passt zu `og:locale`.
+- Robots: keine `robots`-Meta und keine `robots.txt`; das Standardverhalten (indexieren, Links folgen) ist für die öffentliche Seite gewollt. Nur dokumentiert, nichts geändert.
+- Sitemap: keine vorhanden und nicht vorgesehen. Empfehlung: Für zwei Seiten nicht nötig; erst bei weiteren öffentlichen Unterseiten (LP9 oder später) sinnvoll.
+- Icons: nur `<link rel="icon">` mit SVG (`docs/design/mountain-radar-app-icon-m.svg`). Kein Apple Touch Icon, kein Web Manifest, kein PNG- oder ICO-Favicon. Nur dokumentiert; Empfehlung: bei Bedarf Apple Touch Icon und Manifest als eigenes Paket, weil dafür neue Grafiken nötig wären.
+- Test: `scripts/test_landing.html` prüft zusätzlich canonical (vorhanden, absolut, passend), og:url (gleich canonical) und absolute Bildadressen. Das Vorschaubild wird lokal geprüft, indem die öffentliche Adresse auf den Repository-Pfad abgebildet wird.
+
+Offen:
+- **Öffentliche Erreichbarkeit des Vorschaubilds** (`og:image`): erst nach dem Deploy dieses PR unter der absoluten Adresse abrufbar. Danach mit einem Sharing-Debugger (z. B. LinkedIn Post Inspector, Facebook Sharing Debugger) prüfen; lokal nicht prüfbar.
+- **Adresse ändern sich:** Bei einer eigenen Domain oder Umbenennung des Repositorys müssen canonical, og:url, og:image, twitter:image und `PUBLIC_BASE` im Test angepasst werden.
+- Strukturierte Daten (JSON-LD) bleiben bewusst weggelassen (siehe LP8).
+
 ---
 
 # Priorisierung
@@ -356,6 +384,7 @@ Umsetzung (LP8):
 6. LP6 – Produktvision
 7. LP7 – Navigation
 8. LP8 – SEO & Sharing
+9. LP8b – Produkt-Metadaten finalisieren
 
 ---
 
