@@ -100,23 +100,8 @@ Stand: 27.11.2026. Dies ist die einzige Stelle mit dem aktuellen Stand je Bereic
 | **Mountain Radar Toolbox** | Website: nur Wetter am Punkt; Mobile: Zukunft | Website-Werkzeuge WEB-T2 bis T6 (Phase 1), Mobile MOB-T1 bis T6 (Phase 4–5) | Abschnitt Toolbox, DATENQUELLEN |
 | **Design & Branding** | Design-Migration D1–D13 abgeschlossen (Branding, Tokens, Komponenten, Header, Statusleiste, Karten, Popups, Layout, mobil, Suche) | Weitere Design-Schritte nur mit neuem Arbeitspaket | STYLEGUIDE |
 | **Landing Experience** | LP1–LP8b erledigt: Startseite mit Erklärung, Quellen, Vision, Navigation, SEO, absolute Metadaten (öffentliche Adresse GitHub Pages) | Texte an ausgelieferte Funktionen anpassen (RI-L); Sharing-Vorschau mit Debugger prüfen | Abschnitt Landing Experience |
-| **Daten und Infrastruktur** | DTP, Closures, Euregio, SLF, Open-Meteo, OSM-Kacheln produktiv | OSM Overpass, Basemap.at, GeoSphere; Unfallanalyse, Digiway (Recherche, Phase 3) | DATENQUELLEN |
+| **Daten und Infrastruktur** | DTP, Closures, Euregio, SLF, Open-Meteo, OSM-Kacheln produktiv | OSM Overpass, Basemap.at, GeoSphere; Unfalllayer, Unfall-Heatmap, Digiway Absturzrisiko (Recherche und Konzept, Phase 3) | DATENQUELLEN |
 | **Mobile App, PWA, Offline** | Zukunft | Nach Phase 4 | – |
-
-------------|------------|------------|
-| 1 | Legende für Schutzgebiete | Erledigt |
-| 2 | Filter nach Schutzgebietstyp | Erledigt (Filter im Bedienfeld „Karten & Layer“, Symbole für Wildlife und Regeln im Popup) |
-| 3 | Lawinenlage | In Arbeit (Euregio und Schweiz umgesetzt, Test mit aktuellen Berichten ab Saisonstart 2026/27) |
-| 4 | Unfalllayer | Recherche (Phase 3) |
-| 5 | Unfall-Heatmap | Konzept (Phase 3) |
-| 6 | Digiway Absturzrisiko | Konzept (Phase 3) |
-| 7 | GPX Upload & Tourenanalyse | Geplant (Phase 1) |
-| 8 | Mountain Radar Toolbox | Website: Wetter am Punkt vorhanden, übrige Werkzeuge geplant (Phase 1), Weather Intelligence Popup geplant (niedrige Priorität, WEB-T7); Mobile: Zukunft (Phase 4-5) |
-| 9 | Alpine Risk Engine | Design (Beta Phase 3, GA Phase 5) |
-| 10 | Design & Branding | In Arbeit (Styleguide vorhanden, Branding in der Anwendung mit D1 umgesetzt, Design-Tokens und Inter mit D2, Komponenten-CSS mit D3, Header mit D4, Datenstatus-Leiste mit D5, Seitenleisten-Karten mit D6, Layer-Panel mit D7, Schutzgebiets-Popups mit D8a, Lawinenlage-Popups mit D8b, Sperrungen- und Hinweise-Popups mit D8c umgesetzt (alle Popups auf dem gemeinsamen System), Legendenkarte mit D9 umgesetzt, vollflächige Karte mit schwebenden Karten ab 1200 px mit D10, mobiles Layout mit Bottom Sheet bis 820 px mit D11, gedämpfte Kartenoptik mit D12, globale Suche Phase 1 mit D13 umgesetzt; Design-Migration D1–D13 abgeschlossen, weitere Design-Schritte nur mit neuem Arbeitspaket) |
-| 11 | PWA & Offline | Zukunft (nach Phase 4) |
-| 12 | Mobile App | Zukunft (Phase 4) |
-| 13 | Landing Experience | In Arbeit (LP1 Hero & Landing-Struktur, LP2 „Was ist Mountain Radar?“, LP3 „Aktuelle Informationsquellen“, LP4 „Alpine Risk Intelligence“, LP5 „Datenquellen & Transparenz“, LP6 „Produktvision“ LP7 „Navigation & Unterseiten“, LP8 „SEO & Sharing“, LP8b „Produkt-Metadaten finalisieren“ und LP1b „Hero Visual & Landing-Hintergrund“ erledigt: Startseite `index.html`, Karte unter `app.html`; weitere Pakete siehe docs/LANDINGPAGE_PLAN.md) |
 
 ---
 
