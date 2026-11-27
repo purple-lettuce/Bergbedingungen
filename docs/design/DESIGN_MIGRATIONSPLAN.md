@@ -1,6 +1,6 @@
 # Mountain Radar — Design-Migrationsplan
 
-> Status: Plan (kein Code geändert). Stand: 30.10.2026.
+> Status: Umgesetzt (D1 bis D13 erledigt, Stand 27.11.2026). Der Gesamtstand steht in der Plattform-Landkarte der ROADMAP; dieser Plan ist ein Arbeitsdokument.
 > Ziel: Die Oberfläche in kleinen, einzeln mergebaren PRs an die Design Vision annähern, ohne Rewrite.
 
 ## 1. Grundlagen und Einschränkungen
@@ -162,7 +162,7 @@ Wenn ein solches Feature entsteht, bringt es seine Oberfläche gleich im neuen S
 - Screenshots Desktop (1440) und Mobil (390), hell und dunkel, vorher/nachher.
 - Tastaturbedienung, Fokus-Sichtbarkeit, Kontrast AA, `prefers-reduced-motion` beachten.
 - Lawinen- und Warnfarben bleiben gemäß STYLEGUIDE unverändert.
-- Nach jedem PR prüfen: STYLEGUIDE.md und ROADMAP.md (Punkt 10 „Design & Branding“) aktualisieren.
+- Nach jedem PR prüfen: STYLEGUIDE.md und ROADMAP.md (Plattform-Landkarte, Zeile „Design & Branding“) aktualisieren.
 - Keine externen Ressourcen (Schriften, Icons) ohne Self-Hosting.
 
 ## 7. Offene Entscheidungen

@@ -342,11 +342,11 @@ Phase 1 (Grundlagen)
 
 ✅ Wildlife (Kartenebene)
 
-DEM Integration
+✅ DEM Integration (Höhe an einem Punkt, RI12; Steigung und Exposition folgen)
 
 OSM Risikodaten
 
-GPX Import
+✅ GPX Import (RI1 bis RI10: Route, Statistik, Profil, Kontext entlang der Route)
 
 ---
 

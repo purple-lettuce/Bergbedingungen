@@ -36,10 +36,10 @@ Ziel ist es, Entscheidungshilfe zu bieten, ohne dass Nutzer mehrere Websites, Ka
 
 **Geplant (Roadmap Phase 1-2):**
 
-- Website Toolbox: Koordinaten anzeigen, Höhe anzeigen, Entfernungsmessungen, Höhenprofil
-- GPX-Upload und Tourenanalyse
+- Website Toolbox: Koordinaten anzeigen, Höhe anzeigen, Entfernungsmessungen
+- Geländeanalyse entlang der Route (Steigung und Exposition aus dem Höhenmodell; der Höhenzugriff ist umgesetzt, die Anzeige folgt)
 - Wetterrisiko-Integration (GeoSphere)
-- Geländeanalyse-Engine (Hangneigung, Exposition, Absturzrisiko)
+- OSM Overpass (Wege, Infrastruktur)
 
 **Zukünftig (Roadmap Phase 3-5):**
 
@@ -67,7 +67,7 @@ Mountain Radar entwickelt sich schrittweise zu einer **Alpine Risk Intelligence 
 
 Die Entwicklung erfolgt in **5 technischen Phasen** (bis Q1 2028+):
 
-1. **Phase 1 — Grundlagen** (Q4 2026 - Q1 2027): DEM, OSM, Kartografie, Website Toolbox
+1. **Phase 1 — Grundlagen** (Q4 2026 - Q1 2027): GPX und DEM (umgesetzt), OSM, Kartografie, Website Toolbox
 2. **Phase 2 — Wetterintegration** (Q1 - Q2 2027): GeoSphere, ALBINA/SLF Lawinenlage, Wetterwarnungen
 3. **Phase 3 — Gefahrenmodellierung** (Q2 - Q3 2027): Unfallanalyse, Alpine Risk Engine (Beta)
 4. **Phase 4 — Mobile App & Internationale Expansion** (Q4 2027 - Q1 2028): Mobile Toolbox, Météo-France, AINEVA, ARSO
@@ -278,11 +278,11 @@ static.avalanche.report (CAAML v6)  aws.slf.ch (CAAML v6, V4)  eaws-regions (Pol
 
 Das Projekt befindet sich in der **Entwicklung zur Alpine Risk Intelligence Plattform**:
 
-- ✅ **Phase 1 (Grundlagen):** Schutzgebiete, Wildlife, Sperrungen und Wetter am Punkt umgesetzt; DEM, OSM Overpass, GPX und Website Toolbox offen
+- ✅ **Phase 1 (Grundlagen):** Schutzgebiete, Wildlife, Sperrungen, Wetter am Punkt, GPX-Route mit Statistik, Höhenprofil, Routenverwaltung und Kontext entlang der Route sowie der DEM-Zugriff umgesetzt; OSM Overpass, Steigung und Exposition (Anzeige) und Website Toolbox offen
 - 🟡 **Phase 2 (Wetterintegration):** Lawinenlage für Euregio und Schweiz umgesetzt (Test ab Saisonstart), GeoSphere geplant
 - 🔬 **Phase 3+ (Gefahrenmodellierung, Mobile App, Internationale Expansion):** In Planung
 
-Die Roadmap, Datenquellen und Entwicklungs-Workflows sind vollständig dokumentiert. Neue Arbeitspakete können direkt aus [docs/ROADMAP.md](docs/ROADMAP.md) und [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) abgeleitet werden.
+Die Roadmap (mit der Plattform-Landkarte als Gesamtstand), Datenquellen und Entwicklungs-Workflows sind vollständig dokumentiert. Neue Arbeitspakete können direkt aus [docs/ROADMAP.md](docs/ROADMAP.md) und [docs/DATENQUELLEN.md](docs/DATENQUELLEN.md) abgeleitet werden.
 
 Der Repository-Name ist weiterhin "Bergbedingungen", der öffentliche Produktname ist **Mountain Radar**.
 

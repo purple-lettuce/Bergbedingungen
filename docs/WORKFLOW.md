@@ -31,6 +31,8 @@ Falls ja:
 - Fortschritt aktualisieren
 - Checklisten abhaken
 - Status anpassen
+- **Die Zeile des betroffenen Bereichs in der „Plattform-Landkarte“ aktualisieren** (Stand heute und Als Nächstes). Die Landkarte ist die einzige Stelle mit dem Gesamtstand; ein neuer Bereich bekommt eine eigene Zeile.
+- Detailpläne (z. B. ROUTE_INTELLIGENCE_PLAN.md) sind Arbeitsdokumente: Ihren Status im selben PR nachziehen. Ist ein Plan vollständig umgesetzt, wird Dauerhaftes (Entscheidungen, Regeln, Quellen) in ROADMAP, DATENQUELLEN oder STYLEGUIDE übernommen und der Plan gelöscht.
 
 ---
 
@@ -81,6 +83,7 @@ Jede Änderung an:
 
 - `ROADMAP.md`
 - `DATENQUELLEN.md`
+- `IDEENSAMMLUNG.md`
 - `STYLEGUIDE.md`
 - `README.md`
 
