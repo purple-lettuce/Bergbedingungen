@@ -640,3 +640,28 @@ Regeln:
 # Zusammenfassung
 
 Mountain Radar verwendet ein hochwertiges, alpine, robuste und professionelle Farb- und Gestaltungssprache: Deep Alpine Blue als Kernfarbe, Mountain Green als sekundärer Akzent, zusammen mit klaren Warnfarben und einer stark funktional ausgerichteten Kartendarstellung. Ziel ist eine visuelle Sprache, die in kritischen Momenten schnell verständlich und verlässlich wirkt.
+
+---
+
+# Regeln für Design-Änderungen (aus dem Design-Migrationsplan D1–D13)
+
+Die Design-Migration (D1 bis D13) ist abgeschlossen; ihr Plan ist gelöscht. Diese Regeln gelten für jede weitere Design-Änderung.
+
+**Referenzmaterial in `docs/design/`:** `mountain-radar-desktop-mockup.svg` (Desktop-Mockup 1920 × 1080), `mountain-radar-app-icon-m.svg` (App-Icon), `mountain-radar-main-hauptlogo.svg` (Hauptlogo), `mountain-radar-emblem.svg`, `komponenten.html` (Komponentenübersicht). Die Design-Vision als PNG liegt nicht im Repository.
+
+**Umgang mit dem Mockup:**
+- Es zeigt erfundene Beispieldaten (Courmayeur, Steinadler, „Weather confidence 92 %“). Diese kommen nie in die Anwendung (Projektregel: keine Platzhalterdaten). Übernommen werden Struktur und Optik, nicht Inhalte.
+- Mikro-Labels im Mockup sind 10 bis 11 px und hellgrau; in der Anwendung gelten mindestens 12 px und WCAG-AA-Kontrast (4,5 : 1).
+- Das Mockup ist ein fester 1920-px-Entwurf; Mobile wird separat gestaltet.
+
+**Mockup-Elemente, die zuerst Funktionen brauchen** und bis dahin nicht angezeigt werden, auch nicht als Platzhalter: Route Planner und „Analyze Route“ (GPX, Routenzeichnung), Risk Insights und Risk Analysis (Alpine Risk Engine), Layer „Terrain Risk“ und „Infrastructure“ (DEM-Analyse, OSM), Saved Areas und Avatar (Konto, nicht geplant), Weather confidence und Gewitterrisiko (Modell, Phase 2), Weather Intelligence Popup (WEB-T7, nur bestehende Wetterdaten). Entsteht ein solches Feature, bringt es seine Oberfläche gleich im neuen Stil mit (Komponenten aus D3).
+
+**Querschnittsregeln für jeden Design-PR:**
+- Keine Funktionsänderung, keine neuen Datenquellen (Ausnahme: ausdrücklich genannte Mini-PRs).
+- Screenshots Desktop (1440) und Mobil (390), hell und dunkel, vorher und nachher.
+- Tastaturbedienung, Fokus-Sichtbarkeit, Kontrast AA und `prefers-reduced-motion` beachten.
+- Lawinen- und Warnfarben bleiben unverändert.
+- Keine externen Ressourcen (Schriften, Icons) ohne Self-Hosting.
+- Nach jedem PR STYLEGUIDE und ROADMAP (Plattform-Landkarte) prüfen.
+
+**Entscheidungen aus der Migration:** Schrift Inter (selbst gehostet), Farbwerte des Styleguides als Basis, Emblem im Header mit HTML-Text für Wortmarke und Claim, Navigation im Header nur auf der Startseite (LP7), Bottom Sheet mit drei Zuständen mobil (D11).

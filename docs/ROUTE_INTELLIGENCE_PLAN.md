@@ -1273,7 +1273,7 @@ ebenenübergreifend. Status: Geplant, erst wenn Funktionen nutzbar sind.
 
 **Abhängigkeiten:** jeweilige Funktionspakete.
 
-**Definition of Done:** Texte entsprechen exakt dem Stand, LANDINGPAGE_PLAN und ROADMAP aktualisiert, PR gemerged.
+**Definition of Done:** Texte entsprechen exakt dem Stand, STYLEGUIDE (Abschnitt Landing Page) und ROADMAP (Landing Experience) aktualisiert, PR gemerged.
 
 ---
 # 9. Zurückgestellt (Ausblick über alle Ebenen)
@@ -1463,4 +1463,4 @@ Nach docs/WORKFLOW.md bei jedem Paket prüfen und, falls betroffen, aktualisiere
 - **ALPINE_RISK_ENGINE.md:** Befundmodell (RI16), Modulstatus.
 - **IDEENSAMMLUNG.md:** umgesetzte Ideen (GPX Upload, GPX Statistik) entfernen oder verschieben.
 - **README.md:** sichtbare Funktionen, Dateiübersicht.
-- **Dieser Plan:** Status je Paket (Geplant, In Arbeit, Erledigt mit Datum) und Umsetzungshinweise, wie im Design-Migrationsplan.
+- **Dieser Plan:** Status je Paket (Geplant, In Arbeit, Erledigt mit Datum) und Umsetzungshinweise, wie in der Design-Migration (D1–D13).
