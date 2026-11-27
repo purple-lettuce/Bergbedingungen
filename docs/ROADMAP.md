@@ -23,7 +23,7 @@ Bergbedingungen
 
 - **Mountain Radar** ist der offizielle Produktname (Claim: ALPINE RISK INTELLIGENCE, Slogan: „Know before you go.“).
 - **Bergbedingungen** ist der technische Projektname (Repository). Das Rebranding ist in der Dokumentation vollzogen (README, ROADMAP, DATENQUELLEN, STYLEGUIDE).
-- In der Anwendung tritt der Produktname „Mountain Radar“ auf (Seitentitel, Meta-Beschreibung, Header, Favicon; Design-Migrationsplan D1 erledigt). Weitere Design-Schritte gehören zum Arbeitspaket „Design & Branding“ (siehe Plattform-Landkarte, Zeile „Design & Branding“). Der schrittweise Umsetzungsplan (kleine PRs D1–D13) steht in docs/design/DESIGN_MIGRATIONSPLAN.md.
+- In der Anwendung tritt der Produktname „Mountain Radar“ auf (Seitentitel, Meta-Beschreibung, Header, Favicon; Design-Migration D1 erledigt). Weitere Design-Schritte gehören zum Arbeitspaket „Design & Branding“ (siehe Plattform-Landkarte, Zeile „Design & Branding“). Die Design-Migration wurde in kleinen PRs (D1–D13) umgesetzt; der Plan ist abgeschlossen und gelöscht, die bleibenden Regeln stehen im STYLEGUIDE („Regeln für Design-Änderungen“).
 - Das visuelle Design System (Farben, Typografie, Komponenten) ist in STYLEGUIDE.md beschrieben. Die Umsetzung in der Oberfläche ist noch nicht abgeschlossen.
 
 ---
@@ -99,7 +99,7 @@ Stand: 27.11.2026. Dies ist die einzige Stelle mit dem aktuellen Stand je Bereic
 | **Route Intelligence, Ebene 4 / Alpine Risk Engine** | Konzept (Design) | Befundmodell und Befundliste (RI16, RI17), Orchestrierung (RI18, interne Vorstufe „Alpha“ ohne Oberfläche); erst mit Befundliste die Engine „Beta“ (Phase 3); GA Phase 5 | ROUTE_INTELLIGENCE_PLAN, ALPINE_RISK_ENGINE |
 | **Mountain Radar Toolbox** | Website: nur Wetter am Punkt; Mobile: Zukunft | Website-Werkzeuge WEB-T2 bis T6 (Phase 1), Mobile MOB-T1 bis T6 (Phase 4–5) | Abschnitt Toolbox, DATENQUELLEN |
 | **Design & Branding** | Design-Migration D1–D13 abgeschlossen (Branding, Tokens, Komponenten, Header, Statusleiste, Karten, Popups, Layout, mobil, Suche) | Weitere Design-Schritte nur mit neuem Arbeitspaket | STYLEGUIDE |
-| **Landing Experience** | LP1–LP8b erledigt: Startseite mit Erklärung, Quellen, Vision, Navigation, SEO, absolute Metadaten (öffentliche Adresse GitHub Pages) | Texte an ausgelieferte Funktionen anpassen (RI-L); Sharing-Vorschau mit Debugger prüfen | Abschnitt Landing Experience |
+| **Landing Experience** | LP1–LP8b erledigt: Startseite mit Erklärung, Quellen, Vision, Navigation, SEO, absolute Metadaten (öffentliche Adresse GitHub Pages) | Texte an ausgelieferte Funktionen anpassen (RI-L); Sharing-Vorschau mit Debugger prüfen | Checkliste, Abschnitt „Landing Experience“ |
 | **Daten und Infrastruktur** | DTP, Closures, Euregio, SLF, Open-Meteo, OSM-Kacheln produktiv | OSM Overpass, Basemap.at, GeoSphere; Unfalllayer, Unfall-Heatmap, Digiway Absturzrisiko (Recherche und Konzept, Phase 3) | DATENQUELLEN |
 | **Mobile App, PWA, Offline** | Zukunft | Nach Phase 4 | – |
 
@@ -295,11 +295,11 @@ Die Checkliste führt die einzelnen Arbeitspakete; den Stand je Bereich zeigt di
 - [x] Mobiles Layout und Bottom Sheet (D11, bis 820 px): Karte füllt den Bildschirm, Seitenleiste als Bottom Sheet (peek, half, full), „Karten & Layer“ als Sheet über der Karte, einzeilige Statusleiste, Popups begrenzt und scrollbar, Touch-Ziele mind. 44 px; Desktop unverändert
 - [x] Gedämpfte Kartenoptik (D12): Sättigungsfilter auf OSM und Topo (Hell und Dunkel), Overlays und Warnfarben unverändert, keine neue Kartenquelle
 - [x] Globale Suche Phase 1 (D13): Suchfeld im Header, gruppierte Treffer aus Schutzgebieten, Sperrungen und Hinweisen (nur vorhandene Daten, kein Geocoding, kein ⌘K), Tastaturbedienung, Sprung zur Karte mit vorhandenem Verhalten
-- [x] Umsetzung des Design Systems in der Oberfläche abgeschlossen (D1–D13 laut DESIGN_MIGRATIONSPLAN.md)
+- [x] Umsetzung des Design Systems in der Oberfläche abgeschlossen (D1–D13; Plan abgeschlossen, Regeln im STYLEGUIDE)
 - [ ] Globale Suche Phase 2: Orts-, Gipfel- und Adresssuche per Geocoding (eigenes Arbeitspaket, neue Datenquelle mit Lizenz- und Datenschutzentscheidung)
 - [x] Produktname „Mountain Radar“ in der Anwendung (D1: Titel, Meta-Beschreibung, Header, Favicon)
 
-### Landing Experience — Status: IN PROGRESS (phasenunabhängig, Plan: docs/LANDINGPAGE_PLAN.md)
+### Landing Experience — Status: LP1–LP8b erledigt (phasenunabhängig; Plan abgeschlossen und gelöscht, bleibende Regeln im folgenden Abschnitt)
 - [x] LP1 Hero & Landing-Struktur: Startseite `index.html` mit Marke, Claim, Slogan, kurzer Einleitung und genau einem Link „Zur Karte“; Kartenanwendung unter `app.html`, Rückweg über die Marke im Header
 - [x] LP2 Was ist Mountain Radar?: Abschnitt mit Kurzerklärung und fünf Infokarten (Wetter, Lawinenlage, Schutzgebiete, Wildlife, Sperrungen & Hinweise), Abschnitt „Für wen?“ mit den Zielgruppen und einem Satz „Warum Mountain Radar?“; nur heutige Funktionen, ohne JavaScript
 - [x] LP3 Aktuelle Informationsquellen: Abschnitt mit fünf Infokarten (Wetter, Lawinenlage, Schutzgebiete, Wildlife, Sperrungen & Hinweise), je Titel und kurze Beschreibung; nur reale Funktionen, bestehendes Designsystem, ohne JavaScript
@@ -310,6 +310,19 @@ Die Checkliste führt die einzelnen Arbeitspakete; den Stand je Bereich zeigt di
 - [x] LP8 SEO & Sharing: Titel, Beschreibung, Open Graph und Twitter/X-Karte in `index.html` und `app.html`; Vorschaubild `docs/design/mountain-radar-social-preview.png` (1200 × 630); keine Keyword-Listen, keine Funktionsänderung
 - [x] LP8b Produkt-Metadaten finalisieren: `canonical` und `og:url` in `index.html` und `app.html`, `og:image` und `twitter:image` mit absoluter Adresse (öffentliche Adresse: GitHub Pages `https://purple-lettuce.github.io/Bergbedingungen/`); Robots, Sitemap, Icons nur dokumentiert; keine neuen Inhalte, kein Design, keine Funktionsänderung; Vorschaubild öffentlich erst nach dem Deploy prüfbar
 - [x] LP1b Hero Visual & Landing-Hintergrund: Hero mit Foto (`docs/design/mountain-radar-hero.jpg`) und Overlay, wärmerer Sandton `#EFE5CF` als Fläche nur auf der Startseite, weiße Karten bleiben weiß; keine neuen Inhalte, Kartenanwendung unverändert
+
+#### Landing Experience: bleibende Regeln (aus dem Landing-Page-Plan)
+
+- **Grundsätze:** Produkt vor Karte (Besucher sollen zuerst verstehen, was Mountain Radar ist; die Karte ist ein Werkzeug). Realität vor Vision (vorhandene Funktionen vorn, Zukünftiges nur klar als Vision erkennbar, keine Fake-Features, keine Attrappen). Vertrauen durch Transparenz (Quellen, Aktualität und Herkunft offen nennen). Moderne Produktkommunikation (Vorbilder: Linear, Stripe, Arc, Mapbox, Komoot), nicht wie eine Behördenseite.
+- **Zielgruppen:** primär Wanderer, Bergsteiger, Skitourengeher, Trailrunner; sekundär Bergführer, Vereine, Rettungsorganisationen, Naturschutzakteure.
+- **Aufbau der Startseite:** Hero, Was ist Mountain Radar?, Aktuelle Informationsquellen, Alpine Risk Intelligence (als Vision gekennzeichnet), Datenquellen & Transparenz, Produktvision, Einstieg in die Karte. Gestaltung und Komponenten: STYLEGUIDE, Abschnitt „Landing Page“.
+- **Fertig, wenn** ein Besucher in wenigen Sekunden beantworten kann: Was ist Mountain Radar? Wer sollte es verwenden? Welche Informationen liefert es heute? Welche Vision verfolgt es?
+- **Metadaten (LP8, LP8b):** Titel Startseite „Mountain Radar – Alpine Risk Intelligence“, Karte „Karte – Mountain Radar“; Beschreibung (beide Seiten) „Sperrungen, Hinweise, Schutzgebiete, Wetter und Lawinenlage für den Alpenraum auf einer Karte. Know before you go.“ (nur, was die Karte tatsächlich zeigt, keine Keyword-Listen). Open Graph und Twitter/X (große Karte) wiederholen denselben Text. Vorschaubild `docs/design/mountain-radar-social-preview.png` (1200 × 630), Quelle `docs/design/social-preview.html` (neu erzeugen: Edge/Chrome headless, Fenster 1200 × 630, Screenshot).
+- **Öffentliche Adresse:** `https://purple-lettuce.github.io/Bergbedingungen/` (GitHub Pages); `canonical` und `og:url` je Seite, `og:image` und `twitter:image` absolut. Bei eigener Domain oder Umbenennung des Repositorys müssen diese vier Angaben und `PUBLIC_BASE` in `scripts/test_landing.html` angepasst werden.
+- **Bewusst nicht vorhanden:** strukturierte Daten (JSON-LD, bringt bei einer Startseite ohne Suche nichts), `robots`-Meta und `robots.txt` (Standardverhalten gewollt), Sitemap (für zwei Seiten nicht nötig; sinnvoll bei weiteren öffentlichen Unterseiten), Apple Touch Icon und Web Manifest (bräuchten neue Grafiken; eigenes Paket bei Bedarf).
+- **Offen:** Vorschaubild nach dem Deploy mit einem Sharing-Debugger (LinkedIn Post Inspector, Facebook Sharing Debugger) prüfen; Landing-Texte an neu ausgelieferte Funktionen anpassen (RI-L im ROUTE_INTELLIGENCE_PLAN: Texte entsprechen exakt dem Stand, keine Fake-Features).
+- **Test:** `scripts/test_landing.html` (in `scripts/run_js_tests.py`).
+
 ### Phase 4 — Status: FUTURE
 - [ ] Mobile App Framework
 - [ ] Smartphone Sensor Integration
@@ -390,6 +403,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.36 | 2026-11-27 | Dokumentation: Landing-Page-Plan und Design-Migrationsplan abgeschlossen und gelöscht; Dauerhaftes in ROADMAP (Landing Experience: bleibende Regeln) und STYLEGUIDE (Regeln für Design-Änderungen) übernommen |
 | 4.35 | 2026-11-27 | Dokumentation: Plattform-Landkarte statt vier Statussichten, veraltete Statusangaben in ROADMAP, README, DATENQUELLEN, Plänen und IDEENSAMMLUNG korrigiert, WORKFLOW-Regel zur Landkarte |
 | 4.34 | 2026-11-27 | Landing Experience: LP8b (Produkt-Metadaten finalisieren) umgesetzt: canonical, og:url, absolute Bildadressen |
 | 4.33 | 2026-11-26 | RI12: Vergleichsseite um Höchstwert in der Umgebung (±100 m) erweitert, erste Messung gegen die echte Copernicus-Datei eingetragen (Gipfel 14 bis 232 m unter der Karte, erwartbar bei 30 m) |
@@ -458,7 +472,6 @@ Diese Roadmap ist Teil eines größeren Dokumentationssystems:
 - **DATENQUELLEN.md** — Vollständiger Katalog aller Datenquellen (15+) mit URLs, Lizenzen und Phasen
 - **docs/WORKFLOW.md** — Entwicklungs-Workflow und Definition of Done
 - **docs/STYLEGUIDE.md** — Design System von Mountain Radar
-- **docs/LANDINGPAGE_PLAN.md** — Plan der Landing Experience (LP1–LP8b, umgesetzt; Arbeitsdokument)
 - **docs/ROUTE_INTELLIGENCE_PLAN.md** — Entwicklungsplan Route Intelligence: GPX, Höhenprofil, Kontext entlang der Route, DEM, Geländebedeckung (Land Cover, RI15a–RI15e), Sonne und Schatten (RI15f–RI15k), Befunde (RI1–RI12 umgesetzt, Rest Plan; Arbeitsdokument)
 - **docs/ALPINE_RISK_ENGINE.md** — Konzept der Alpine Risk Engine
 - **docs/IDEENSAMMLUNG.md** — Ideen, die noch nicht in der Roadmap stehen
