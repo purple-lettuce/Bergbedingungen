@@ -62,13 +62,13 @@ Status: Geplant. Schicht: Anzeige.
 **Umfang:**
 - Wetterkarte der Seitenleiste (Desktop und Mobil) per Knopf ein- und ausklappbar, Zustand per `aria-expanded`, Tastatur bedienbar. Muster wie bei den vorhandenen einklappbaren Elementen (Legendenkarte).
 - Wetterfenster deckend statt halbtransparent (Fläche aus den Tokens, Kontrast AA geprüft, Hell und Dunkel).
-- Suchfeld „Suchen, z. B. Steig, Forst“ in der Karte „Sperrungen und Hinweise“ entfernen; die globale Suche im Header deckt Sperrungen und Hinweise ab. Vorher prüfen, ob das Feld die Liste und die Kartenebene filtert; falls ja, ist der Verlust der Listenfilterung bewusst zu entscheiden (siehe Risiken).
+- Suchfeld „Suchen, z. B. Steig, Forst“ in der Karte „Sperrungen und Hinweise“ entfernen; die globale Suche im Header deckt Sperrungen und Hinweise ab. Bestätigt am Screenshot des Nutzers (27.11.2026): Es gibt zwei Suchfelder, die globale Suche im Header und „Suchen, z. B. Steig, Forst“ in der Karte „Sperrungen und Hinweise“. Vorher prüfen, ob das Feld nur die Liste oder auch die Kartenebene filtert; der Verlust der Listenfilterung ist bewusst zu entscheiden (siehe Risiken).
 
 **Nicht im Umfang:** neue Suchfunktionen, Geocoding (Suche Phase 2), Umbau der Wetterlogik.
 
 **Voraussetzungen:** UX1 (gleiche Dateien).
 
-**Risiken:** Die Suche im Feld filtert vermutlich die Sperrungsliste (`js/map.js`, Element `q`); mit Entfernen entfällt dieser Filter. Gegenmaßnahme: Verhalten der globalen Suche vorher prüfen und im PR benennen. Einklappbarer Zustand und Bottom Sheet (D11) dürfen sich nicht stören.
+**Risiken:** Das Feld filtert die Sperrungsliste (Anzeige „85 Einträge im Kartenausschnitt“) (`js/map.js`, Element `q`); mit Entfernen entfällt dieser Filter. Gegenmaßnahme: Verhalten der globalen Suche vorher prüfen und im PR benennen. Einklappbarer Zustand und Bottom Sheet (D11) dürfen sich nicht stören.
 
 **Abhängigkeiten:** D10/D11 (Layout), D13 (globale Suche).
 
