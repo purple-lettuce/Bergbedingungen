@@ -1,6 +1,6 @@
 # Mountain Radar – Arbeitsplan Bedienung und Karte
 
-> Status: Arbeitsplan (27.11.2026), nichts umgesetzt. Der Gesamtstand steht in der Plattform-Landkarte der ROADMAP (Zeile „Bedienung und Karte“). Dieses Dokument ist ein Arbeitsdokument: Nach vollständiger Umsetzung wird es gelöscht und Dauerhaftes in ROADMAP, DATENQUELLEN oder STYLEGUIDE übernommen.
+> Status: Arbeitsplan (27.11.2026), UX1 umgesetzt; UX2–UX10 geplant. Der Gesamtstand steht in der Plattform-Landkarte der ROADMAP (Zeile „Bedienung und Karte“). Dieses Dokument ist ein Arbeitsdokument: Nach vollständiger Umsetzung wird es gelöscht und Dauerhaftes in ROADMAP, DATENQUELLEN oder STYLEGUIDE übernommen.
 >
 > Herkunft: Beobachtungen des Nutzers bei der Verwendung des Produkts (Fehler und Änderungswünsche), thematisch sortiert und in Pakete geschnitten.
 
@@ -33,7 +33,7 @@ Empfohlene Reihenfolge: UX1 → UX2 → UX3a → UX3b; unabhängig davon UX5 →
 
 # UX1 – Fehlerkorrekturen Kartenmenü und Sperrungs-Popup
 
-Status: Geplant. Schicht: Anzeige (CSS/Markup), kein neues Verhalten.
+Status: Umgesetzt. Schicht: Anzeige (CSS/Markup), kein neues Verhalten.
 
 **Ziel:** Zwei sichtbare Fehler beheben.
 
@@ -48,6 +48,8 @@ Status: Geplant. Schicht: Anzeige (CSS/Markup), kein neues Verhalten.
 **Risiken:** Breitere Popups verdecken auf kleinen Bildschirmen mehr Karte; Lawinen- und Schutzgebiets-Popups dürfen sich nicht verändern.
 
 **Abhängigkeiten:** gemeinsames Popup-System (D8a bis D8c).
+
+**Umsetzung:** Das schwebende Desktop-Panel bekommt die Mindesthöhe nur im offenen Zustand; im geschlossenen Zustand bleibt die Höhe beim Kopf. Das gemeinsame Popup-Inhaltslimit beträgt 26 rem, Sperrungs-Popups können bis 420 px breit werden. Schutzgebiets-Popups behalten Leaflets 300-px-Maximum, Lawinen-Popups ihr eigenes 340-px-Maximum; auf Mobil bleibt die bisherige Begrenzung `calc(100vw - 58px)`.
 
 **Definition of Done:** Beide Fehler behoben, Screenshots vorher und nachher (Desktop, Mobil, hell, dunkel), andere Popups unverändert, vorhandene Tests grün, Tests für das Layout ergänzt, ROADMAP (Landkarte) aktualisiert, PR gemerged.
 

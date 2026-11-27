@@ -99,7 +99,7 @@ Stand: 27.11.2026. Dies ist die einzige Stelle mit dem aktuellen Stand je Bereic
 | **Route Intelligence, Ebene 4 / Alpine Risk Engine** | Konzept (Design) | Befundmodell und Befundliste (RI16, RI17), Orchestrierung (RI18, interne Vorstufe „Alpha“ ohne Oberfläche); erst mit Befundliste die Engine „Beta“ (Phase 3); GA Phase 5 | ROUTE_INTELLIGENCE_PLAN, ALPINE_RISK_ENGINE |
 | **Mountain Radar Toolbox** | Website: nur Wetter am Punkt; Mobile: Zukunft | Website-Werkzeuge WEB-T2 bis T6 (Phase 1), Mobile MOB-T1 bis T6 (Phase 4–5) | Abschnitt Toolbox, DATENQUELLEN |
 | **Design & Branding** | Design-Migration D1–D13 abgeschlossen (Branding, Tokens, Komponenten, Header, Statusleiste, Karten, Popups, Layout, mobil, Suche) | Weitere Design-Schritte nur mit neuem Arbeitspaket | STYLEGUIDE |
-| **Bedienung und Karte** | Beobachtungen aus der Nutzung gesammelt und in Pakete UX1–UX10 geschnitten, nichts umgesetzt | UX1 Fehler (Kartenmenü, Popup), UX2 Seitenleiste, UX3 Routenmenü unten, UX4 Punktinfo per Klick (Koordinaten, Höhe, Wetter), UX5–UX8 Karten und Maßstab, UX9 Piktogramme, UX10 GeoSphere | BEDIENUNG_PLAN |
+| **Bedienung und Karte** | UX1 umgesetzt: eingeklapptes Kartenmenü ohne Leerfläche, breiteres Sperrungs-Popup | UX2 Seitenleiste, UX3 Routenmenü unten, UX4 Punktinfo per Klick (Koordinaten, Höhe, Wetter), UX5–UX8 Karten und Maßstab, UX9 Piktogramme, UX10 GeoSphere | BEDIENUNG_PLAN |
 | **Landing Experience** | LP1–LP8b erledigt: Startseite mit Erklärung, Quellen, Vision, Navigation, SEO, absolute Metadaten (öffentliche Adresse GitHub Pages) | Texte an ausgelieferte Funktionen anpassen (RI-L); Sharing-Vorschau mit Debugger prüfen | Checkliste, Abschnitt „Landing Experience“ |
 | **Daten und Infrastruktur** | DTP, Closures, Euregio, SLF, Open-Meteo, OSM-Kacheln produktiv | OSM Overpass, Basemap.at, GeoSphere; Unfalllayer, Unfall-Heatmap, Digiway Absturzrisiko (Recherche und Konzept, Phase 3) | DATENQUELLEN |
 | **Mobile App, PWA, Offline** | Zukunft | Nach Phase 4 | – |
@@ -325,7 +325,7 @@ Die Checkliste führt die einzelnen Arbeitspakete; den Stand je Bereich zeigt di
 - **Test:** `scripts/test_landing.html` (in `scripts/run_js_tests.py`).
 
 ### Bedienung und Karte — Status: PLANNED (phasenunabhängig, Plan: docs/BEDIENUNG_PLAN.md)
-- [ ] UX1 Fehlerkorrekturen: weißes Feld unter dem eingeklappten Kartenmenü, schmales Sperrungs-Popup
+- [x] UX1 Fehlerkorrekturen: eingeklapptes Kartenmenü zeigt nur den Balken; Sperrungs-Popup verbreitert (gemeinsame Popup-Regel, Mobilbreite bleibt begrenzt); Browser-Test erfolgreich
 - [ ] UX2 Seitenleiste aufräumen: Wetterfenster einklappbar und deckend, Suchfeld der Seitenleiste entfernen
 - [ ] UX3a Routenmenü unten: GPX laden, andere GPX laden, Route entfernen, auf diesem Gerät speichern
 - [ ] UX3b Routenmenü: Höhenprofil, Statistik und Kontextblöcke ins neue Menü
@@ -418,6 +418,7 @@ Technische Grundlage aller aktuellen und künftigen Lawinenquellen. Details: [AV
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 4.38 | 2026-11-27 | UX1 umgesetzt: Leerfläche unter eingeklapptem Kartenmenü entfernt, gemeinsame Popup-Breite erweitert und Sperrungs-Popups auf 420 px Maximalbreite gesetzt; Layouttests ergänzt und erfolgreich |
 | 4.37 | 2026-11-27 | Bedienung und Karte: Arbeitsplan UX1–UX10 aus Nutzerbeobachtungen (Fehler, Seitenleiste, Routenmenü, Punktinfo, Karten, Maßstab, Piktogramme, GeoSphere); nur Dokumentation |
 | 4.36 | 2026-11-27 | Dokumentation: Landing-Page-Plan und Design-Migrationsplan abgeschlossen und gelöscht; Dauerhaftes in ROADMAP (Landing Experience: bleibende Regeln) und STYLEGUIDE (Regeln für Design-Änderungen) übernommen |
 | 4.35 | 2026-11-27 | Dokumentation: Plattform-Landkarte statt vier Statussichten, veraltete Statusangaben in ROADMAP, README, DATENQUELLEN, Plänen und IDEENSAMMLUNG korrigiert, WORKFLOW-Regel zur Landkarte |

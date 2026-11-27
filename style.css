@@ -297,7 +297,7 @@ footer a { color: var(--accent); }
    Nur Popups mit className `mr-popup`; die Popups der Sperrungen, Lawinenlage und Wetter-Pin bleiben bis D8b/D8c unverändert. */
 .mr-popup .leaflet-popup-content-wrapper, .mr-popup .leaflet-popup-tip { background: var(--mr-surface); color: var(--mr-text); }
 .mr-popup .leaflet-popup-content-wrapper { border-radius: var(--mr-radius-md); box-shadow: var(--mr-shadow-md); }
-.mr-popup .leaflet-popup-content { max-width: 20rem; margin: var(--mr-space-md); font-size: var(--mr-text-base); }
+.mr-popup .leaflet-popup-content { max-width: 26rem; margin: var(--mr-space-md); font-size: var(--mr-text-base); }
 .mr-popup a.leaflet-popup-close-button { color: var(--mr-text-muted); }
 .mr-popup a.leaflet-popup-close-button:hover { color: var(--mr-text); }
 .leaflet-popup-content .pa-pop h3, .leaflet-popup-content .pa-pop h4, .leaflet-popup-content .pa-pop p, .leaflet-popup-content .pa-pop ul { margin: 0; }
@@ -491,6 +491,7 @@ footer a { color: var(--accent); }
   /* Bedienfeld und Legendenkarte: gleiche Breite, gleiche Fläche, gleicher Kopf. Das Bedienfeld gibt bei Platzmangel nach (scrollt), die Legende bleibt sichtbar. */
   .mr-floating .kl-panel, .mr-floating .kl-card { width: 100%; flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; border-radius: var(--mr-radius-lg); box-shadow: var(--mr-shadow-md); }
   .mr-floating .kl-panel { min-height: calc(var(--mr-space-2xl) * 5); }
+  .mr-floating .kl-panel.is-collapsed { min-height: 0; }
   .mr-floating .kl-body { flex: 1 1 auto; min-height: 0; max-height: none; }
   .mr-floating .kl-head, .mr-floating .kl-card-head { flex: none; min-height: 40px; padding: 6px 10px; color: var(--mr-on-primary); background: var(--mr-primary); border-radius: calc(var(--mr-radius-lg) - 1px); font-family: var(--font-display); font-size: var(--mr-text-base); font-weight: 600; line-height: inherit; letter-spacing: var(--mr-tracking-label); text-transform: uppercase; }
   .mr-floating .kl-head:hover, .mr-floating .kl-card-head:hover { background: var(--mr-primary-hover); }

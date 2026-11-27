@@ -375,7 +375,7 @@ Nur Popups der Schutzgebiete; Inhalt, Reihenfolge und Texte sind unverändert (a
 
 | Bereich | Komponenten |
 |---|---|
-| Rahmen | `.mr-popup` (Fläche `--mr-surface`, Radius `md`, Schatten `--mr-shadow-md`), Inhalt `.pa-pop` + `.mr-stack` |
+| Rahmen | `.mr-popup` (Fläche `--mr-surface`, Radius `md`, Schatten `--mr-shadow-md`), Inhalt `.pa-pop` + `.mr-stack`; gemeinsames CSS-Maximum 26 rem, die Leaflet-Option `maxWidth` begrenzt die jeweilige Popup-Variante |
 | Kopf | Farbfeld der Kategorie (`.pa-sw`, wie in der Legende), Name als `h3`, Schutzgebietstyp als `.mr-label` |
 | Beschreibung | gedämpfter Text (`--mr-text-sm`) |
 | Abschnitte | `h4.mr-label` („Wildlife“, „Pflanzen und Lebensräume“, „Regeln“), getrennt durch eine Linie |
@@ -397,6 +397,8 @@ Gleiches Gerüst wie die Popups der Schutzgebiete (D8a) und der Lawinenlage (D8b
 | Angaben | `.mr-kv` (Zeitraum, Betrifft, Quelle) nur für vorhandene Felder |
 
 **Farben und Status** sind unverändert: dieselben Tokens und dieselbe Zuordnung wie vor D8c (das Schild trägt die Art, nicht den Status; ein geplanter Eintrag zeigt zusätzlich „Geplant“). Die Liste in der Seitenleiste nutzt dieselben Schilder. Die Zeile „Zeitraum“ hat jetzt eine Beschriftung, der Inhalt ist gleich.
+
+Seit UX1 können Sperrungs- und Hinweis-Popups bis 420 px breit werden, damit Zeiträume lesbar bleiben. Das gemeinsame CSS-Limit beträgt 26 rem; die bestehende Mobilregel `calc(100vw - 58px)` begrenzt die Breite auf kleinen Bildschirmen. Schutzgebiets-Popups bleiben bei Leaflets Standard-Maximum von 300 px, Lawinen-Popups bei ihrem expliziten Maximum von 340 px.
 
 # Lawinenlage-Popup (seit D8b)
 

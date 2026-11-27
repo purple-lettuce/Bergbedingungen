@@ -57,6 +57,14 @@ async function desktop() {
   ok('Desktop: Karten links und rechts überlappen sich nicht', cards.every(function (c) { return c.r <= dock.l && !overlap({ l: c.l, t: c.t, r: c.r, b: c.b }, panel); }));
   ok('Desktop: Zoom steht rechts neben der linken Spalte', zoom && cards.every(function (c) { return zoom.l >= c.r; }), fmt(zoom));
 
+  var panelHead = d.querySelector('.kl-head');
+  panelHead.click();
+  var collapsedPanel = rect(d, '.kl-panel'), collapsedHead = rect(d, '.kl-head');
+  // Das Panel behält seinen 1-px-Rahmen über und unter dem Kopf. Entscheidend ist, dass keine
+  // zusätzliche Fläche des ausgeblendeten Inhalts bestehen bleibt.
+  ok('Desktop: eingeklapptes Kartenmenü zeigt nur den Balken', d.getElementById('kl-body').hidden && d.querySelector('.kl-panel').classList.contains('is-collapsed') && collapsedPanel.h <= collapsedHead.h + 2, fmt(collapsedPanel));
+  panelHead.click();
+
   var z0 = map.getZoom();
   d.querySelector('.leaflet-control-zoom-in').click();
   await until(function () { return map.getZoom() === z0 + 1; });
@@ -77,11 +85,14 @@ async function desktop() {
   for (var side of ['links', 'rechts']) {
     map.setView([47.2, 11.4], 10, { animate: false });
     var pt = side === 'links' ? [160, 420] : [m.w - 120, 420];
-    var pop = w.L.popup({ className: 'mr-popup', maxWidth: 300 }).setLatLng(map.containerPointToLatLng(pt)).setContent('<div style="width:260px;height:120px">Test</div>').openOn(map);
+    var pop = w.L.popup({ className: 'mr-popup', maxWidth: 420 }).setLatLng(map.containerPointToLatLng(pt)).setContent('<div style="width:420px;height:120px">Test</div>').openOn(map);
     function blockedNow() { var p = pop.getElement().getBoundingClientRect(), q = { l: p.left, t: p.top, r: p.right, b: p.bottom }; return cards.some(function (c) { return overlap(q, c); }) || overlap(q, panel) || overlap(q, legend); }
     await until(function () { return !blockedNow(); });
     var p = pop.getElement().getBoundingClientRect(), blocked = blockedNow();
     ok('Desktop: Autopan hält das Popup (Ankerpunkt ' + side + ') frei von den schwebenden Karten', !blocked && p.top >= m.t && p.bottom <= m.b, 'Popup ' + [p.left, p.top, p.right, p.bottom].map(Math.round).join(','));
+    var popupContent = pop.getElement().querySelector('.leaflet-popup-content');
+    var popupMaxWidth = w.getComputedStyle(popupContent).maxWidth;
+    ok('Desktop: gemeinsames Popup-System erlaubt die UX1-Breite', pop.options.maxWidth === 420 && popupMaxWidth === '416px', popupMaxWidth);
     map.closePopup();
   }
   f.remove();
@@ -187,7 +198,16 @@ async function boundary() {   // 820 px ist die letzte mobile Breite, 821 px das
   ok('821 px: klassisches Layout (Seitenleiste im Fluss, kein Sheet)', cs(b) === 'static' && !b.contentDocument.querySelector('main').dataset.sheet && b.contentDocument.querySelector('footer').parentElement === b.contentDocument.body);
   a.remove(); b.remove();
 }
-(async function () {
+// file://-Seiten haben je Frame einen eigenen undurchsichtigen Ursprung. Der Test lädt app.html in
+// einem iframe und muss deshalb über den lokalen Webserver laufen; sonst wäre der angezeigte
+// Cross-Origin-Fehler irreführend.
+if (location.protocol === 'file:') {
+  document.getElementById('result').textContent = JSON.stringify({
+    passed: 0,
+    failed: 1,
+    results: [{ name: 'Testlauf', ok: false, error: 'Diese Testseite über den lokalen Webserver öffnen: python3 scripts/run_js_tests.py oder python3 -m http.server 8000 und http://localhost:8000/scripts/test_layout.html.' }]
+  });
+} else (async function () {
   try { await desktop(); await medium(); await boundary(); await mobile(390, 844); await mobile(320, 640); }
   catch (e) { results.push({ name: 'Testlauf', ok: false, error: String(e && e.message || e) }); }
   var failed = results.filter(function (r) { return !r.ok; });

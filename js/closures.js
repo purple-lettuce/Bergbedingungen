@@ -106,7 +106,7 @@ function publishRouteSource(rows) {
     features: usable.map(function (r) { return { type: 'Feature', properties: {}, geometry: r.geometry }; }),
     describe: function (i) {
       var r = usable[i];
-      return { key: r.uuid, title: titleOf(r), meta: [TYPE_LABEL[r.type] || 'Eintrag', statusOf(r) === 'upcoming' ? 'Geplant' : '', periodText(r)].filter(Boolean).join(' · '), popupHtml: popupHtml(r), popupOptions: { className: 'mr-popup' } };
+      return { key: r.uuid, title: titleOf(r), meta: [TYPE_LABEL[r.type] || 'Eintrag', statusOf(r) === 'upcoming' ? 'Geplant' : '', periodText(r)].filter(Boolean).join(' · '), popupHtml: popupHtml(r), popupOptions: { className: 'mr-popup', maxWidth: 420 } };
     }
   });
 }
@@ -204,7 +204,7 @@ export function render() {
       if (detailed) L.marker([c[1], c[0]], { icon: pinIcon(cls), title: titleOf(r) }).addTo(fg);
       else L.circleMarker([c[1], c[0]], { radius: 6, color: '#ffffff', weight: 2, fillColor: colorOf(cls), fillOpacity: 1 }).addTo(fg);
     }
-    fg.bindPopup(function () { return popupHtml(r); }, { className: 'mr-popup' });
+    fg.bindPopup(function () { return popupHtml(r); }, { className: 'mr-popup', maxWidth: 420 });
     // Das Popup ist höher als früher und löst beim Öffnen öfter einen Autopan aus; dessen moveend darf das Popup nicht
     // durch ein Neuzeichnen der Ebene wieder schließen (gleiche Schonfrist wie nach einem Klick in der Liste).
     fg.on('popupopen', function () { holdUntil = Date.now() + 700; setActive(r.uuid, true); });
@@ -262,7 +262,7 @@ function focusRecord(id) {
   render();
   var fg = layers.get(id);
   if (fg && c) fg.openPopup(L.latLng(c[1], c[0]));
-  else if (c) L.popup({ className: 'mr-popup' }).setLatLng(L.latLng(c[1], c[0])).setContent(popupHtml(r)).openOn(map);   // durch Filter oder Textfeld der Liste ausgeblendet (Sprung aus der globalen Suche)
+  else if (c) L.popup({ className: 'mr-popup', maxWidth: 420 }).setLatLng(L.latLng(c[1], c[0])).setContent(popupHtml(r)).openOn(map);   // durch Filter oder Textfeld der Liste ausgeblendet (Sprung aus der globalen Suche)
   if (c) loadWeather(c[1], c[0]);
 }
 

@@ -36,7 +36,10 @@ export function createLayerPanel(map) {
   box.appendChild(head);
   box.appendChild(body);
   var dock = make('div', 'kl-dock');   // Behälter im Kartenelement; mobil (D11) das Sheet über der Karte (Klasse `is-open`, Stil in style.css)
-  var setPanel = bindToggle(head, body, !isMobile(), function (show) { dock.classList.toggle('is-open', show); });   // am Handy zunächst zu, damit die Karte frei bleibt
+  var setPanel = bindToggle(head, body, !isMobile(), function (show) {
+    dock.classList.toggle('is-open', show);
+    box.classList.toggle('is-collapsed', !show);
+  });   // am Handy zunächst zu, damit die Karte frei bleibt
 
   // Ein einklappbarer Abschnitt; gibt den Inhaltsbereich zurück.
   function addSection(title, open) {
